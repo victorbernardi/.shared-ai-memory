@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SkillEntry",
+  "description": "Schema de uma entrada no registry do ecossistema Stout",
+  "type": "object",
+  "required": [
+    "name",
+    "path",
+    "tier",
+    "category",
+    "role",
+    "triggers",
+    "version",
+    "status",
+    "created_at",
+    "author"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^stout-[a-z][a-z0-9-]*$",
+      "description": "Nome kebab-case, prefixo 'stout-' obrigatório"
+    },
+    "path": {
+      "type": "string",
+      "description": "Caminho relativo da pasta da skill"
+    },
+    "tier": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4,
+      "description": "1=Utility, 2=Feature, 3=Platform, 4=Orchestrator"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "meta-governance",
+        "meta-factory",
+        "data-engineering",
+        "notebooklm",
+        "devops",
+        "writing",
+        "analysis",
+        "integration"
+      ]
+    },
+    "role": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 120,
+      "description": "Papel único em uma frase. DEVE ser distinto de todos os outros roles no registry."
+    },
+    "triggers": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": {
+        "type": "string"
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nomes de outras skills que devem existir antes desta"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "beta",
+        "deprecated"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "author": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

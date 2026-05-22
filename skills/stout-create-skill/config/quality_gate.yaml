@@ -1,0 +1,43 @@
+checklists:
+  mandatory_files:
+    - name: "SKILL.md"
+      required: true
+      description: "Arquivo raiz de instruções da skill"
+
+  governance:
+    frontmatter:
+      starts_with: "---"
+      strict_first_line: true
+      required_fields: ["name", "description", "tier", "category"]
+    description:
+      min_length: 60
+      max_length: 2048
+      starts_with: "Use quando"
+      semantic_density_check: true
+    sections:
+      examples: "## Examples"
+      constraints_caps: true
+
+  platform_adequacy:
+    engine: "gemini-cli"
+    forbidden_fields: ["triggers"] # In frontmatter only
+
+  technical_integrity:
+    scripts_path: "scripts/"
+    shebang: "#!/usr/bin/env python3"
+    check_executable: true
+
+  security:
+    blocked_patterns:
+      - "sk-[a-zA-Z0-9]{20,}"
+      - "AIza[a-zA-Z0-9]{35}"
+      - "Bearer [a-zA-Z0-9]{20,}"
+      - "password ="
+      - "token ="
+      - "secret ="
+
+  metadata:
+    version: "1.2.1"
+    last_updated: "2026-05-15"
+    author: "Victor"
+    patch_type: "Elite Fusion (Nacionalizado)"
