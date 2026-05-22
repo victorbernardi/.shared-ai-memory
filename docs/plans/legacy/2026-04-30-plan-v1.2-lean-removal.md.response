@@ -1,0 +1,19 @@
+# Plano de Implementação: Remoção de Detalhe Transacional & Otimização (v1.2)
+
+Este plano descreve as ações para remover a aba `DETALHE_TRANSACIONAL` do Motor M6 e ajustar o pipeline de auditoria para trabalhar com dados agregados.
+
+## Propostas Mudanças
+
+### [MODIFY] Wave4_Orquestrador_M6.py
+- Remover exportação da aba `DETALHE_TRANSACIONAL`.
+
+### [MODIFY] Wave8_Auditoria_Fonte_Verdade.py
+- Remover leitura da aba transacional.
+- Remover check de duplicatas.
+- Ajustar check de paridade para usar a aba de performance.
+
+### [MODIFY] Wave9_Deployment_OnePage.py
+- Ajustar logs de status.
+
+## Verificação
+- Rodar o pipeline completo e validar se o Excel está "lean" e a auditoria passa.

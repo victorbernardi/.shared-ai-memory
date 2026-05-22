@@ -1,0 +1,32 @@
+# Plano de Implementação: Estabilização do NotebookLM MCP
+
+Este plano visa resolver definitivamente o erro de encoding (`UnicodeEncodeError`) no Windows e garantir a persistência das configurações de compatibilidade do ChromeDriver.
+
+## User Review Required
+
+> [!IMPORTANT]
+> A solução envolve a modificação de um script de proxy global (`.cmd`) e a ativação do modo UTF-8 do Python via variável de ambiente. Isso afetará como o servidor NotebookLM processa a saída do console, garantindo que emojis e caracteres especiais não causem crashes.
+
+## Propostas de Mudança
+
+### Componente: Proxy de Inicialização
+
+#### [MODIFY] [notebooklm_proxy.cmd](file:///C:/Users/victor.bernardi/.gemini/antigravity/scripts/notebooklm_proxy.cmd)
+- Adicionar `set PYTHONUTF8=1` para forçar o modo UTF-8 no Python 3.7+.
+- Manter `set PYTHONIOENCODING=utf-8` como redundância.
+
+### Componente: Configuração MCP
+
+#### [VERIFY] [mcp_config.json](file:///C:/Users/victor.bernardi/.gemini/antigravity/mcp_config.json)
+- Validar se o comando de inicialização continua apontando para o script `.cmd` em vez do `.exe` direto.
+
+## Plano de Verificação
+
+### Testes Manuais
+1. Executar o script de proxy manualmente via terminal:
+   `C:\Users\victor.bernardi\.gemini\antigravity\scripts\notebooklm_proxy.cmd server`
+2. Observar se o crash de `UnicodeEncodeError` (relacionado ao emoji 🚀) ocorre.
+3. Verificar se o Antigravity consegue listar as ferramentas do NotebookLM após o restart do motor.
+
+### Verificação de Ambiente
+- Confirmar que o browser Chrome abre na versão correta (conforme o patch em `client.py`).

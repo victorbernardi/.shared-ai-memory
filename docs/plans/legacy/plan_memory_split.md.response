@@ -1,0 +1,43 @@
+# Plano: Dual-Memory (CLI vs Antigravity) — Fluxo Context-Agent
+
+Este plano operacionaliza a separação entre a memória do wrapper (Gemini CLI) e a "Bíblia de Contexto" do Antigravity, garantindo que toda a persistência inteligente siga rigorosamente o fluxo da skill `context-agent`.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Proibição do `save_memory`**: Para evitar a poluição do `GEMINI.md`, o agente está proibido de usar a ferramenta nativa `save_memory`. Toda e qualquer "memória" de aprendizado ou decisão deve ser salva via `context-agent` (`python scripts/context_manager.py save`), que alimenta o `MEMORY.md` universal.
+
+## Proposed Changes
+
+### 1. Reestruturação de Arquivos (Projeto Inova)
+#### [MODIFY] [ANTIGRAVITY.md](file:///c:/Projetos/Inova/ANTIGRAVITY.md) [NEW]
+- Renomear `c:\Projetos\Inova\GEMINI.md` para `c:\Projetos\Inova\ANTIGRAVITY.md`.
+- Este arquivo será a **Fonte de Verdade Estática** (Regras de Negócio, Arquitetura, Stack).
+- Adicionar no topo: "Para memória dinâmica e histórico de sessões, consulte o fluxo do `context-agent`."
+
+#### [NEW] [GEMINI.md](file:///c:/Projetos/Inova/GEMINI.md)
+- Criar um novo arquivo `GEMINI.md` (Placeholder para o CLI):
+```markdown
+# Gemini CLI Native Memory
+Este arquivo é reservado apenas para telemetria nativa do wrapper.
+**Não utilize este arquivo para regras de projeto.**
+Referência de Contexto: ANTIGRAVITY.md
+Gestão de Memória: Fluxo Context-Agent (MEMORY.md)
+```
+
+### 2. Integração com Context-Agent
+#### [MODIFY] [SKILL.md (context-agent)](file:///C:/Users/victor.bernardi/.gemini/antigravity/skills/context-agent/SKILL.md)
+- Garantir que as instruções de salvamento mencionem explicitamente o `MEMORY.md` universal como o destino de fatos aprendidos, desencorajando o uso do `GEMINI.md` para este fim.
+
+### 3. Atualização da Referência de Ferramentas
+#### [MODIFY] [gemini-tools.md](file:///c:/Motores-LLM/antigravity/skills/using-superantigravity/references/gemini-tools.md)
+- Atualizar a seção de "Gestão de Memória" para proibir o uso de `save_memory` e reforçar o uso do comando `context-agent save`.
+
+## Verification Plan
+
+### Automated Verification
+- Executar `python context_manager.py save` após a migração e verificar se o `MEMORY.md` foi atualizado corretamente sem afetar o `GEMINI.md`.
+
+### Manual Verification
+- Confirmar que o novo `ANTIGRAVITY.md` contém todas as regras originais do projeto.
+- Validar se o `GEMINI.md` permanece limpo de regras de negócio.

@@ -1,0 +1,36 @@
+# Plano: Consolidação Git e Hook de Sincronização no Context-Agent
+
+Este plano detalha a execução da estabilização do repositório Stout e a automação do fluxo de sincronização GitHub.
+
+## 1. Consolidação Geral (Estabilização)
+**Objetivo:** Zerar o backlog de 22 commits e rastrear as ~20 sessões órfãs.
+
+- [ ] Executar `git add -A` para capturar todas as renomeações de skills, deleções e as novas sessões (`session-012` a `session-033`).
+- [ ] Realizar commit de estabilização: `git commit -m "governance: estabilização do repositório e sincronização de sessões órfãs (012-033)"`.
+- [ ] Executar `git push origin master` para sincronizar os 22 commits antigos + o commit de estabilização.
+
+## 2. Implementação do Hook no Context-Agent
+**Objetivo:** Integrar a sincronização Git no comando `save`.
+
+### 2.1. Expansão de `governance.py`
+- [ ] Criar função `git_sync(session_id, topic)` que:
+    - Executa `git add .`
+    - Executa `git commit -m "session: {session_id} - {topic}"`
+    - Executa `git push`
+    - Captura e loga erros (não deve travar o processo de save se o push falhar).
+
+### 2.2. Modificação de `context_manager.py`
+- [ ] Importar a função de sincronização de `governance.py`.
+- [ ] Injetar a chamada da função ao final do método `save_context`.
+- [ ] Adicionar flag `--no-sync` para permitir saves locais quando necessário.
+
+### 2.3. Configuração
+- [ ] Adicionar flag `AUTO_GIT_SYNC = True` no `config.py`.
+
+## 3. Validação e Testes
+- [ ] Executar um `save` de teste (ex: `python context_manager.py save --topic "Teste de Sincronização"`).
+- [ ] Verificar se um novo arquivo de sessão foi criado, commitado e enviado ao GitHub automaticamente.
+- [ ] Verificar o status do Git após o comando (deve estar limpo).
+
+## 4. Rollback
+- Se o Git Hook causar instabilidade no `save`, as mudanças no `context_manager.py` serão revertidas.

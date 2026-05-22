@@ -1,0 +1,38 @@
+# Plano de Estratégia: Evolução da Skill Context-Agent (Argumentos Manuais)
+
+Este plano detalha as alterações técnicas para permitir overrides manuais no comando `save`, garantindo maior precisão na memória do sistema.
+
+## 1. Alterações Técnicas
+
+### 1.1. `context_manager.py`
+- **Tarefa:** Atualizar o `argparse` para o subcomando `save`.
+- **Argumentos a adicionar:**
+    - `--topic` (str)
+    - `--summary` (str)
+    - `--decisions` (str, aceita múltiplas linhas)
+    - `--tasks` (str, aceita múltiplas linhas)
+- **Logística:** Coletar esses valores em um dicionário `overrides` e passá-lo para a função `generate_summary`.
+
+### 1.2. `session_summary.py`
+- **Tarefa:** Modificar a função `generate_summary`.
+- **Lógica:** 
+    - Se `overrides.get('topic')` estiver presente, substituir a lista `summary.topics` pelo valor manual (ou adicioná-lo como prioritário).
+    - Se `overrides.get('summary')` estiver presente, adicioná-lo como um campo especial ou injetá-lo nas `key_findings`.
+    - Se `overrides.get('decisions')` estiver presente, estender a lista `summary.decisions`.
+    - Se `overrides.get('tasks')` estiver presente, processar como novas `PendingTask`.
+
+## 2. Estratégia de Validação (TDD)
+1. **Script de Teste:** Criar `scripts/test_context_overrides.py`.
+2. **Cenário:** Simular o salvamento de uma sessão fictícia passando `--topic "Arquitetura Hexagonal"`.
+3. **Asserção:** O arquivo `.md` gerado na pasta `sessions/` deve conter a string "Arquitetura Hexagonal" na seção de tópicos, independentemente do conteúdo do log.
+
+## 3. Procedimento de Rollback
+Em caso de falha crítica:
+1. Restaurar os arquivos `.bak` da pasta `C:\Users\victor.bernardi\.shared-ai-memory\docs_backup_20260430\`.
+2. Verificar a integridade do CLI com `python context_manager.py status`.
+
+## 4. Cronograma de Execução
+- **Passo 1:** Implementar mudanças no `context_manager.py`.
+- **Passo 2:** Implementar lógica de precedência no `session_summary.py`.
+- **Passo 3:** Executar teste de validação.
+- **Passo 4:** Solicitar feedback do usuário após uso em "campo".

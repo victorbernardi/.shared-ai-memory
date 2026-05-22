@@ -1,0 +1,35 @@
+# Plano de Implementação: Gemini CLI Builder (Resilient Architecture)
+
+## Contexto
+Após análise arquitetural crítica, identificamos que o plano original era vulnerável à função `save_memory` do Gemini CLI nativo, o que resultaria na exclusão das regras cognitivas do Builder. Além disso, salvar telemetria diretamente na pasta `C:\Motores-LLM` violaria o princípio de "Golden Copy".
+
+Este novo plano corrige essas falhas separando a inteligência (regras) do estado (telemetria).
+
+## User Review Required
+
+> [!WARNING]
+> **Mudança de Paradigma**
+> Em vez de um único arquivo `GEMINI.md`, usaremos dois arquivos complementares. O `GEMINI.md` existirá, mas será apenas um "molde vazio", enquanto a inteligência real do Builder viverá no `ANTIGRAVITY.md`.
+
+## Proposed Changes
+
+### Componente: Motor Gemini CLI (`C:\Motores-LLM\gemini-cli`)
+
+#### [NEW] [GEMINI.md](file:///C:/Motores-LLM/gemini-cli/GEMINI.md)
+Criar o arquivo de template de estado.
+- **Conteúdo:** Apenas títulos e placeholders. Nenhuma regra de execução.
+- **Propósito:** Ser sobrescrito pela telemetria de runtime e logs da sessão ativa sem perda de dados críticos.
+
+#### [NEW] [ANTIGRAVITY.md](file:///C:/Motores-LLM/gemini-cli/ANTIGRAVITY.md)
+Criar o manifesto oficial do Builder (Inteligência).
+- **Conteúdo:** 
+  - Regras de Soberania da Golden Copy (uso obrigatório de `canary-deployment`).
+  - Lógica de sincronização e validação de junctions (`Stout` -> `Golden Copy`).
+  - Instruções de uso do `context-agent` para memória persistente, desabilitando o salvamento manual no Golden Copy.
+- **Propósito:** Ditar as regras cognitivas de como o agente "constrói" o motor. Este arquivo é lido, mas nunca sobrescrito pelo CLI nativo.
+
+## Verification Plan
+
+### Verificação Manual
+1. Inspecionar visualmente os arquivos `GEMINI.md` e `ANTIGRAVITY.md` em `C:\Motores-LLM\gemini-cli` para garantir a separação de responsabilidades.
+2. Validar se o `ANTIGRAVITY.md` contém o protocolo correto de Gestão Cognitiva ("Na Inteligência").

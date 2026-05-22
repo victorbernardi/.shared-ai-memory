@@ -1,0 +1,68 @@
+# NotebookLM MCP Stability Fix Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Fix UnicodeEncodeError and MCP handshake corruption in notebooklm-mcp server.
+
+**Architecture:** Isolate informative logs from the MCP stdio channel by redirecting rich console to stderr and enforcing UTF-8 in the execution proxy.
+
+**Tech Stack:** Python, rich, MCP, Windows CMD.
+
+---
+
+### Task 1: Environment Stabilization (Proxy)
+
+**Files:**
+- Modify: `C:\Users\victor.bernardi\.gemini\antigravity\scripts\notebooklm_proxy.cmd`
+
+**Step 1: Add chcp 65001 to proxy script**
+
+```cmd
+@echo off
+chcp 65001 > nul
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
+C:\Users\victor.bernardi\AppData\Local\anaconda3\Scripts\notebooklm-mcp.exe server %*
+```
+
+**Step 2: Verify proxy execution manually**
+Run: `C:\Users\victor.bernardi\.gemini\antigravity\scripts\notebooklm_proxy.cmd server --help`
+Expected: Should show help without encoding errors.
+
+---
+
+### Task 2: Core Fix (Rich Console Redirection)
+
+**Files:**
+- Modify: `C:\Users\victor.bernardi\AppData\Local\anaconda3\Lib\site-packages\notebooklm_mcp\cli.py`
+
+**Step 1: Redirect rich console to stderr**
+Modify line 22:
+```python
+- console = Console()
++ console = Console(stderr=True)
+```
+
+**Step 2: Remove rocket emoji from title**
+Modify line 261:
+```python
+-             title="🚀 FastMCP Server Starting",
++             title="FastMCP Server Starting",
+```
+
+**Step 3: Verify fix by running server manually**
+Run: `$env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; C:\Users\victor.bernardi\AppData\Local\anaconda3\Scripts\notebooklm-mcp.exe server`
+Expected: Logs should appear in the console (which is now reading stderr), but they won't interfere with the stdout pipe if captured by Antigravity.
+
+---
+
+### Task 4: Final Integration Validation
+
+**Step 1: Restart Antigravity MCP**
+Tell the user to restart the agent or reload the MCP configuration.
+
+**Step 2: Verify tools registration**
+Check if `notebooklm` tools are listed in the IDE.
+
+---
+*Signed: Antigravity (Phase: Strategy)*

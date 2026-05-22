@@ -1,0 +1,68 @@
+# Motor CEVAP v4 - Integração Final e Modelo Híbrido
+
+> **For Gemini:** REQUIRED SUB-SKILL: Use `executing-plans` to implement this plan task-by-task.
+
+**Goal:** Implementar o Modelo Híbrido (Inatividade por Grupo, Ativação por Filial de maior faturamento) e integrar dados de Equipamentos e Orçamentos.
+
+**Architecture:** O motor passará a operar em duas fases de agregação: uma por Grupo (para inatividade e recursos) e outra para selecionar a filial de ativação (maior faturamento). Utilizaremos joins com fallbacks para equipamentos.
+
+**Tech Stack:** Python (Pandas), Parquet, Excel.
+
+---
+
+### Task 1: Preparação e Remoção de Bypass
+
+**Files:**
+- Modify: `scripts/consolidate_cevap.py`
+
+**Step 1: Reverter bypass do M3**
+Restaurar a leitura de `PATH_M3_RFM` e remover qualquer lógica que aponte para a base bruta se a oficial estiver corrigida.
+
+**Step 2: Validar carga de dados**
+Adicionar print de contagem de linhas após a carga de `df_rfm` para garantir que o arquivo não está vazio.
+
+---
+
+### Task 2: Lógica de Inatividade por Grupo e Seleção de Filial
+
+**Files:**
+- Modify: `scripts/consolidate_cevap.py`
+
+**Step 1: Identificar Inatividade do Grupo**
+Agrupar `df_rfm` por Raiz (8 dígitos) e calcular a `Ultima_Compra_Grupo`.
+
+**Step 2: Selecionar Filial de Ativação (Ranking de Faturamento)**
+Dentro do grupo inativo, identificar o CNPJ de 14 dígitos com o maior `VALOR_DO_PRODUTO` total nos últimos 12 meses.
+
+---
+
+### Task 3: Integração de Orçamentos (Filial)
+
+**Files:**
+- Modify: `scripts/consolidate_cevap.py`
+
+**Step 1: Contagem de Orçamentos por Filial**
+Ler `tabela_orçamentos_abertos.xlsx` e `tabela_orçamentos_cancelados.xlsx`, somar por CNPJ 14 e associar à filial selecionada.
+
+---
+
+### Task 4: Integração de Equipamentos (Fallback)
+
+**Files:**
+- Modify: `scripts/consolidate_cevap.py`
+
+**Step 1: Mapeamento de Equipamentos Filial -> Grupo**
+Tentar o join de `dataset_ouro_maquinas_v1.parquet` pelo CNPJ 14. Onde for nulo, realizar o join pelo CNPJ Raiz (8 dígitos).
+
+---
+
+### Task 5: Consolidação Final e Exportação
+
+**Files:**
+- Modify: `scripts/consolidate_cevap.py`
+
+**Step 1: Mapeamento de Colunas Inteligentes**
+Garantir que Seedz/Inovapay/Segmentação venham do Grupo, enquanto Contatos/Cidade/Orcamentos venham da Filial.
+
+**Step 2: Auditoria de Saída**
+Validar se não existem CNPJs Raiz duplicados na planilha final.

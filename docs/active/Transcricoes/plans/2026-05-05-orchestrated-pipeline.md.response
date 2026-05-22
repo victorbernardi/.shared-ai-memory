@@ -1,0 +1,50 @@
+# Pipeline de Orquestração Única Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Implementar o fluxo de Orquestração Única separando o Python (Transcrição) do Agente (Atas).
+
+**Architecture:** O script `transcribe.py` é simplificado para ser apenas um motor de transcrição. O agente monitora o log em background e gera as atas via skill `meeting-assistant`.
+
+**Tech Stack:** Python 3, Faster-Whisper, JSON Log, Gemini CLI Agent.
+
+---
+
+### Task 1: Refatoração do Script Python
+
+**Files:**
+- Modify: `C:\Users\victor.bernardi\.shared-ai-memory\.gemini\skills\audio-transcriber\scripts\transcribe.py`
+
+**Step 1: Remover lógica de IA**
+Remover a função `generate_ata_gemini` e toda a lógica de chamada ao Gemini CLI.
+
+**Step 2: Ajustar Workflow de Arquivamento**
+Garantir que o script gere apenas o FULL MD e PDF e registre no log.
+
+**Step 3: Validar via Lint/Grep**
+Garantir que não restam strings "gemini" ou "ata" dentro da lógica de processamento do Python.
+
+### Task 2: Implementação da Orquestração no Agente
+
+**Step 1: Script de Gatilho**
+Criar o comando de execução em background.
+
+**Step 2: Monitoramento de Log**
+Implementar a lógica de leitura do `transcription_log.json` para identificar novos sucessos.
+
+**Step 3: Geração de ATA via Skill**
+Implementar o loop que lê o FULL.md recém-gerado e invoca a skill `meeting-assistant`.
+
+### Task 3: Teste de Ponta a Ponta (End-to-End)
+
+**Step 1: Limpeza de Log**
+Remover entradas de hoje do log para forçar reprocessamento.
+
+**Step 2: Execução em Background**
+Disparar o pipeline e monitorar.
+
+**Step 3: Validação Final**
+Verificar se FULL.md, FULL.pdf e ATA.md foram gerados com sucesso e se o Log está consistente.
+
+---
+*Plano de execução detalhado em `./docs/plans/2026-05-05-orchestrated-pipeline.md`. Aguardando aprovação para iniciar a implementação.*

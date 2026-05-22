@@ -1,0 +1,51 @@
+# Plano de Implementação: Promoção Automática de Artefatos (Padrão Stout)
+
+Este plano descreve a automação da extração de artefatos internos do Antigravity para o diretório de documentação do projeto, seguindo a nomenclatura Stout: `YYYY-MM-DD-projeto-nome-tipo.md`.
+
+## User Review Required
+
+> [!IMPORTANT]
+> A implementação será testada localmente e depois promovida para a "Golden Copy" em `C:\Motores-LLM\gemini-cli\antigravity\skills\stout-init`. Isso afetará todos os novos projetos criados a partir de agora.
+
+## Proposta Técnica
+
+### 1. Script de Promoção (`scripts/stout_promote.py`)
+- **Descoberta:** O script buscará no diretório `%USERPROFILE%\.gemini\antigravity\brain` a pasta de sessão mais recente que contenha uma subpasta `artifacts`.
+- **Nomenclatura:** O nome do projeto será extraído do `GEMINI.md` local.
+- **Robustez:** Correção de encoding para evitar falhas no terminal Windows (substituição de símbolos Unicode por texto ASCII).
+- **Mapeamento:**
+    - `implementation_plan.md.resolved` -> `./docs/plans/`
+    - `walkthrough.md` -> `./docs/walkthroughs/`
+    - `task.md` -> `./docs/tasks/` (se existir)
+
+### 2. Governança (`GEMINI.md`)
+- Adição de diretriz explícita nas Regras Locais:
+    - *"O agente DEVE executar `python scripts/stout_promote.py` após a aprovação de planos e conclusão de tarefas."*
+
+### 3. Distribuição Global (`stout-init`)
+- Atualização do arquivo `install_stout_init.py` ou do diretório de templates da skill global para incluir o novo script e a regra de `GEMINI.md`.
+
+## Proposed Changes
+
+### [Component] Projeto Local
+
+#### [MODIFY] scripts/stout_promote.py
+- Corrigir bugs de encoding.
+- Garantir que não sobrescreva arquivos se o conteúdo for idêntico.
+
+#### [MODIFY] GEMINI.md
+- Formalizar a regra de automação.
+
+### [Component] Ecossistema Global
+
+#### [MODIFY] stout-init SKILL
+- Adicionar instrução para incluir o script no scaffolding.
+
+## Verification Plan
+
+### Automated Tests
+- `python scripts/stout_promote.py` -> Validar saída no terminal e criação de arquivos.
+
+### Manual Verification
+- Verificar se os arquivos gerados em `docs/plans/` abrem corretamente e possuem o conteúdo esperado.
+- Testar `stout-init` em pasta temporária.

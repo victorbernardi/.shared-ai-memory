@@ -1,0 +1,95 @@
+# Atualização do Motor M2 - Faturamento Unificado Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Atualizar o Motor M2 para consolidar faturamento histórico e atual (FR-001 a FR-004) e eliminar leitura estática de cache (FR-005).
+
+**Architecture:** Implementação de query SQL com `UNION ALL` no Fabric, integrando com a função nativa `get_safe_cache`.
+
+**Tech Stack:** Python (Pandas, PyArrow), Microsoft Fabric (T-SQL).
+
+---
+
+### Task 1: Preparação e Limpeza de Lixo Técnico [FR-005]
+
+**Files:**
+- Modify: `c:\Projetos\Inova\Potencial Clientes\02_Faturamento\motor_de_faturamento_v1.py`
+
+**Step 1: Remover o bypass hardcoded**
+- Remover a linha estática `df_vendas = pd.read_parquet(...)` (próxima à linha 129).
+
+**Step 2: Reativar camada de persistência**
+- Garantir que a variável `df_vendas` seja instanciada via `df_vendas = get_safe_cache(db, query_vendas, "vendas_unified")`.
+
+---
+
+### Task 2: Atualização da Query SQL (Unificação) [FR-001, FR-002, FR-003, FR-004]
+
+**Files:**
+- Modify: `c:\Projetos\Inova\Potencial Clientes\02_Faturamento\motor_de_faturamento_v1.py:102-117`
+
+**Step 1: Injetar a lógica de UNION ALL**
+- Substituir a `query_vendas` pela versão unificada, implementando Filtro de Filial (`0205`), data (`>= 2025`) e casting seguro.
+
+```python
+query_vendas = """
+    SELECT 
+        CAST(CPF_CNPJ_DO_CLIENTE AS VARCHAR(20)) as CPF_CNPJ_DO_CLIENTE,
+        CAST(NOME_DO_CLIENTE AS VARCHAR(100)) as NOME_DO_CLIENTE,
+        CAST(FILIAL AS VARCHAR(10)) as FILIAL,
+        TRY_CONVERT(DATE, DATA_EMISSAO_NF, 103) as DATA_EMISSAO_NF,
+        CAST(CODIGO_TES AS VARCHAR(10)) as CODIGO_TES,
+        CAST(DESCRICAO_CC AS VARCHAR(100)) as DESCRICAO_CC,
+        CAST(CENTRO_CUSTO AS VARCHAR(20)) as CENTRO_CUSTO,
+        CAST(COD_GRUPO AS VARCHAR(10)) as COD_GRUPO,
+        CAST(NUMERO_DA_NF AS VARCHAR(20)) as NUMERO_DA_NF,
+        CAST(NOME_VENDEDOR AS VARCHAR(100)) as NOME_VENDEDOR,
+        CAST(REPLACE(REPLACE(VALOR_DO_PRODUTO, '.', ''), ',', '.') AS FLOAT) as VALOR_DO_PRODUTO
+    FROM [dbo].[f_vendas_hist31102025]
+    WHERE (FILIAL LIKE '02%' OR FILIAL LIKE '2%') 
+      AND FILIAL <> '0205'
+      AND TRY_CONVERT(DATE, DATA_EMISSAO_NF, 103) >= '2025-01-01'
+
+    UNION ALL
+
+    SELECT 
+        CAST(CPF_CNPJ_DO_CLIENTE AS VARCHAR(20)) as CPF_CNPJ_DO_CLIENTE,
+        CAST(NOME_DO_CLIENTE AS VARCHAR(100)) as NOME_DO_CLIENTE,
+        CAST(FILIAL AS VARCHAR(10)) as FILIAL,
+        CAST(DATA_EMISSAO_NF AS DATE) as DATA_EMISSAO_NF,
+        CAST(CODIGO_TES AS VARCHAR(10)) as CODIGO_TES,
+        CAST(DESCRICAO_CC AS VARCHAR(100)) as DESCRICAO_CC,
+        CAST(CENTRO_CUSTO AS VARCHAR(20)) as CENTRO_CUSTO,
+        CAST(COD_GRUPO AS VARCHAR(10)) as COD_GRUPO,
+        CAST(NUMERO_DA_NF AS VARCHAR(20)) as NUMERO_DA_NF,
+        CAST(NOME_VENDEDOR AS VARCHAR(100)) as NOME_VENDEDOR,
+        CAST(VALOR_DO_PRODUTO AS FLOAT) as VALOR_DO_PRODUTO
+    FROM [dbo].[vw_VENDAS]
+    WHERE (FILIAL LIKE '02%' OR FILIAL LIKE '2%') 
+      AND FILIAL <> '0205'
+      AND DATA_EMISSAO_NF >= '2025-01-01'
+"""
+```
+
+---
+
+### Task 3: Validação de Carga Inicial (Hit Fabric) [T-001, T-002]
+
+**Step 1: Configurar Primeira Rodada**
+- No código (linha 57), forçar temporariamente: `USE_CACHE = False`.
+
+**Step 2: Executar**
+Run: `python "c:\Projetos\Inova\Potencial Clientes\02_Faturamento\motor_de_faturamento_v1.py"`
+Expected (T-001): O console deve exibir "Consultando Microsoft Fabric" e salvar o cache.
+Expected (T-002): O relatório técnico exibido no final deve cravar `(=) Saldo Líquido 2025: R$ 193.4M` (aproximadamente).
+
+---
+
+### Task 4: Validação NFR (Hot Cache) [T-003, NFR-001]
+
+**Step 1: Fixar Cache Mode**
+- No código, retornar a configuração de produção: `USE_CACHE = True`.
+
+**Step 2: Executar Novamente**
+Run: `python "c:\Projetos\Inova\Potencial Clientes\02_Faturamento\motor_de_faturamento_v1.py"`
+Expected (T-003): A execução deve demorar < 5 segundos e acusar `⚡ Cache V1 atingido (vendas_unified)`.
