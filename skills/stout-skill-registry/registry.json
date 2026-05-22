@@ -370,6 +370,27 @@
       "author": "Victor",
       "notes": "Skill não implementada — backlog V6.12.",
       "promoted_at": null
+    },
+    {
+      "name": "stout-promote-skill",
+      "path": ".shared-ai-memory/skills/stout-promote-skill",
+      "tier": 2,
+      "category": "meta-governance",
+      "role": "Promover skills do projeto CDD para o golden copy com auditoria e aprovação",
+      "triggers": [
+        "promover skill",
+        "promote skill",
+        "publicar skill",
+        "enviar para global"
+      ],
+      "dependencies": ["stout-skill-auditor"],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Nova skill promovida com sucesso."
     }
   ],
   "deprecated": [
