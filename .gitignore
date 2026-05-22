@@ -1,0 +1,41 @@
+# Pastas de Cache e Artefatos Temporários
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.tox/
+**/build/
+**/dist/
+html_artifacts/
+scratch/cache/
+
+# Dados de Sessão e Perfis de Browser (Sensíveis)
+antigravity-browser-profile/
+chrome_profile_notebooklm/
+scratch/chrome_profile_notebooklm/
+browser_recordings/
+context-agent/data/sessions/
+context-agent/data/logs/
+**/*.sqlite
+**/*.log
+
+# Configurações Sensíveis (Proteção)
+.env
+**/.env
+.gemini/*.json
+!projects.json
+!settings.json
+oauth_creds.json
+google_accounts.json
+
+# Extensões e Binários
+extensions/
+**/*.pyc
+**/*.db
+docs.rar
+context.db*
+*.pb
+
+# Logs e arquivos de sistema
+*.bak
+.DS_Store
+Thumbs.db

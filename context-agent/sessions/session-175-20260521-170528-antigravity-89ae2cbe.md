@@ -1,0 +1,22 @@
+# Sessão 175 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- <USER_REQUEST>
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-174](session-174.md)*

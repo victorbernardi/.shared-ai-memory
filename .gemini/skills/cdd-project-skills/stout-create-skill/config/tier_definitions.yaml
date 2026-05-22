@@ -1,0 +1,21 @@
+tiers:
+  - id: 1
+    name: "Utility (Simples)"
+    criteria: "Tarefa única, sem dependências externas, < 200 linhas de instrução."
+    scaffold: ["SKILL.md"]
+
+  - id: 2
+    name: "Feature (Média)"
+    criteria: "Múltiplas tarefas relacionadas, requer scripts auxiliares, 200-500 linhas."
+    scaffold: ["SKILL.md", "scripts/", "tests/"]
+
+  - id: 3
+    name: "Platform (Complexa)"
+    criteria: "Grande volume de dados, múltiplas integrações, > 500 linhas. Requer Context Wall."
+    scaffold: ["SKILL.md", "config/", "scripts/", "references/", "tests/"]
+    pattern: "5-File Pattern (README, API, Config, Patterns, Gotchas)"
+
+  - id: 4
+    name: "Orchestrator (Elite)"
+    criteria: "Gerencia outros agentes ou skills. Requer HITL e automação de alto nível."
+    scaffold: ["SKILL.md", "config/", "scripts/", "references/", "agents/"]

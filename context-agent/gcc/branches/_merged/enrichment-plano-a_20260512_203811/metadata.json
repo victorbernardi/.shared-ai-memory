@@ -1,0 +1,10 @@
+{
+  "name": "enrichment-plano-a",
+  "reason": "Integrar subgrupos e calcular tendência de vendas usando dados nativos do Excel",
+  "created_at": "2026-05-12T13:36:35.830857",
+  "status": "active",
+  "source_files": {
+    "ACTIVE_CONTEXT.md": "C:\\Users\\victor.bernardi\\.shared-ai-memory\\context-agent\\ACTIVE_CONTEXT.md",
+    "MEMORY.md": "C:\\Users\\victor.bernardi\\.shared-ai-memory\\memory\\MEMORY.md"
+  }
+}

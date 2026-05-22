@@ -1,0 +1,31 @@
+version: '1.0.0'
+rules:
+  - id: 'default_rule'
+    priority: 0
+    enabled: true
+    filter:
+      operator: 'exists'
+      field: 'query'
+    action:
+      type: 'activate_skill'
+      target: 'cdd_technical_skill'
+
+  - id: stout_unified_context_save
+    priority: 100
+    enabled: true
+    filter:
+      operator: regex
+      field: intent
+      value: save_context|salvar_contexto|fechar_sessao
+    pre_action:
+      - type: activate_skill
+        target: stout-session-learning
+    action:
+      type: execute_script
+      target: C:\Users\victor.bernardi\.shared-ai-memory\skills\process-context-agent\scripts\context_manager.py
+      params:
+        args:
+          - "save"
+    metadata:
+      owner: stout
+      description: 'PIPELINE UNIFICADO: Executa a destilação de aprendizados de sessão local (SQLite, Markdown, Bugs e Backlog) e em seguida atualiza o Context Agent global.'

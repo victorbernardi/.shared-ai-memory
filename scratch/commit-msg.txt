@@ -1,0 +1,18 @@
+fix(pipeline): Resolve 6 pendencias da sessao 2026-05-21
+
+Corrige falhas mapeadas no diagnostico da sessao anterior:
+
+- session_parser: loga warnings para linhas JSONL invalidas em vez de
+  silenciosamente ignora-las; descoberta de sessao agora usa timestamp
+  no nome do arquivo como chave primaria (fallback mtime)
+- search: reindex_all nao pula mais sessoes sem numero sequencial;
+  session_id unificado como string em index_session e SearchResult
+- ingest orchestrator: checkpoint atomico via hash SHA-256 contra
+  .manifest.json antes de processar _raw/, prevenindo double-processing
+- active_context: check_drift com merge reverso automatico para
+  edicoes manuais legitima no MEMORY.md
+- wiki_health_check.py (novo): 4 verificacoes pos-save (orfaos, links
+  quebrados, frontmatter faltante, stale content) integradas ao
+  wiki-stage.sh como passo 3
+
+Co-Authored-By: Claude <noreply@anthropic.com>

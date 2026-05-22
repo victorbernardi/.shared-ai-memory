@@ -1,0 +1,19 @@
+{
+  "default": true,
+  "MD001": true,
+  "MD003": { "style": "atx" },
+  "MD009": true,
+  "MD012": true,
+  "MD022": true,
+  "MD024": true,
+  "MD025": true,
+  "MD032": true,
+  "MD034": true,
+  "MD036": true,
+  "MD040": true,
+  "MD051": true,
+
+  "MD013": false,
+  "MD033": false,
+  "MD041": false
+}

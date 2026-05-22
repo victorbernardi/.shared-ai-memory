@@ -1,0 +1,11 @@
+version: '1.0.0'
+rules:
+  - id: 'default_rule'
+    priority: 0
+    enabled: true
+    filter:
+      operator: 'exists'
+      field: 'query'
+    action:
+      type: 'activate_skill'
+      target: 'cdd_technical_skill'

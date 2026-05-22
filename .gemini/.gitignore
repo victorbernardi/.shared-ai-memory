@@ -1,0 +1,30 @@
+# Antigravity Git Ignore
+
+# Core Engine & Extensions (Thousands of logs, binaries and extensions)
+antigravity/
+
+# Browser Profiles (Contains thousands of small files)
+antigravity-browser-profile/
+chrome_profile_notebooklm/
+
+
+# VS Code / IDE
+.vscode/
+.history/
+
+# Extensions & Dependencies
+antigravity/extensions/
+**/node_modules/
+**/__pycache__/
+**/*.pyd
+**/*.pyc
+
+# Temporary & Cache
+.pytest_cache/
+*.tmp
+*.log
+temp_status.txt
+
+# OS Files
+Thumbs.db
+Desktop.ini

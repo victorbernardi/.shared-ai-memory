@@ -14,6 +14,8 @@ Este documento centraliza e prioriza todas as sugestões de otimização agênti
 | **SUG-004** | 2026-05-21 | `sess-202` | timizar a performance do dashboard usando carregamento lazy-load das imagens."} | Otimização local e clareza de código | `Média` | `Planejado` |
 | **SUG-005** | 2026-05-21 | `sess-202` | a performance do dashboard usando carregamento lazy-load das imagens. | Melhoria de performance e eficiência | `Média` | `Planejado` |
 | **SUG-006** | 2026-05-21 | `sess-202` | a performance do dashboard usando carregamento lazy-load das imagens."} | Melhoria de performance e eficiência | `Média` | `Planejado` |
+| **SUG-007** | 2026-05-22 | `sess-202` | to tell the parent agent what happened instead if you cannot continue. | Otimização local e clareza de código | `Média` | `Planejado` |
+| **SUG-008** | 2026-05-22 | `sess-202` | articles, papers, or notes into their knowledge base, or says things like "add this to the wiki", | Alinhamento e modularidade de dependências | `Média` | `Planejado` |
 
 ---
 

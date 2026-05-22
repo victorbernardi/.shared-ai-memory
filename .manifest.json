@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "sources": {
+    "docs/business/BRD-20260506-motor-cevap.md": {
+      "ingested_at": "2026-05-16",
+      "size_bytes": 2522,
+      "modified_at": "2026-05-16",
+      "content_hash": "sha256:PLACEHOLDER",
+      "source_type": "document",
+      "project": "Motor CEVAP",
+      "pages_created": [
+        "docs/business/motor-cevap.md"
+      ],
+      "pages_updated": []
+    },
+    "docs/plans/active/2026-05-07-ecosystem-reorganization.md": {
+      "ingested_at": "2026-05-16",
+      "size_bytes": 17283,
+      "modified_at": "2026-05-16",
+      "content_hash": "sha256:PLACEHOLDER",
+      "source_type": "document",
+      "project": "Infraestrutura",
+      "pages_created": [
+        "docs/plans/ecosystem-reorganization.md"
+      ],
+      "pages_updated": []
+    },
+    "scratch/draft/plano_executivo_kpis_ia_pos_venda_v2_consolidado.md": {
+      "ingested_at": "2026-05-16",
+      "size_bytes": 21458,
+      "modified_at": "2026-05-16",
+      "content_hash": "sha256:PLACEHOLDER",
+      "source_type": "document",
+      "project": "Infraestrutura",
+      "pages_created": [
+        "docs/business/plano-executivo-kpis-ia.md"
+      ],
+      "pages_updated": []
+    },
+    "scratch/draft/Conversa.md": {
+      "ingested_at": "2026-05-16",
+      "size_bytes": 14845,
+      "modified_at": "2026-05-16",
+      "content_hash": "sha256:PLACEHOLDER",
+      "source_type": "document",
+      "project": "Infraestrutura",
+      "pages_created": [
+        "docs/business/plano-instalacao-stout-init.md"
+      ],
+      "pages_updated": []
+    },
+    "docs/plans/plan_v1_encoding_eradication.md": {
+      "ingested_at": "2026-05-16",
+      "size_bytes": 2241,
+      "modified_at": "2026-05-16",
+      "content_hash": "sha256:PLACEHOLDER",
+      "source_type": "document",
+      "project": "Infraestrutura",
+      "pages_created": [
+        "docs/plans/legacy/encoding-eradication.md"
+      ],
+      "pages_updated": []
+    },
+    "docs/active/inova-daily/plano-visao-centro-custos.md": {
+      "ingested_at": "2026-05-22",
+      "size_bytes": 4822,
+      "modified_at": "2026-05-22",
+      "content_hash": "sha256:PLACEHOLDER",
+      "source_type": "document",
+      "project": "Inova Daily",
+      "pages_created": [
+        "docs/business/visao_centro_custos.md"
+      ],
+      "pages_updated": []
+    },
+    "docs/active/inova-daily/plans/plan_v1_mineracao_insights.md": {
+      "ingested_at": "2026-05-22",
+      "size_bytes": 5487,
+      "modified_at": "2026-05-22",
+      "content_hash": "sha256:PLACEHOLDER",
+      "source_type": "document",
+      "project": "Inova Daily",
+      "pages_created": [
+        "docs/business/plano_mineracao_insights.md"
+      ],
+      "pages_updated": []
+    }
+  },
+  "stats": {
+    "total_sources_ingested": 8,
+    "total_pages": 8
+  }
+}

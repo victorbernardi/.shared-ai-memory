@@ -1,0 +1,296 @@
+{
+  "date": "2026-05-22",
+  "summary": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "results": [
+    {
+      "skill": "stout-adr",
+      "file": "skills\\stout-adr\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-brainstorming",
+      "file": "skills\\stout-brainstorming\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-cdd-orchestrator",
+      "file": "skills\\stout-cdd-orchestrator\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-commit",
+      "file": "skills\\stout-commit\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-create-skill",
+      "file": "skills\\stout-create-skill\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-data-analyze",
+      "file": "skills\\stout-data-analyze\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-data-sql-queries",
+      "file": "skills\\stout-data-sql-queries\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-data-write-query",
+      "file": "skills\\stout-data-write-query\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-dev-tdd",
+      "file": "skills\\stout-dev-tdd\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-executing-plans",
+      "file": "skills\\stout-executing-plans\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-finishing-a-development-branch",
+      "file": "skills\\stout-finishing-a-development-branch\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-immunity-gate",
+      "file": "skills\\stout-immunity-gate\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-improve-skill",
+      "file": "skills\\stout-improve-skill\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-init",
+      "file": "skills\\stout-init\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-promote-skill",
+      "file": "skills\\stout-promote-skill\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-session-learning",
+      "file": "skills\\stout-session-learning\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-skill-auditor",
+      "file": "skills\\stout-skill-auditor\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-skill-registry",
+      "file": "skills\\stout-skill-registry\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-spec-validation",
+      "file": "skills\\stout-spec-validation\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-subagent-driven-development",
+      "file": "skills\\stout-subagent-driven-development\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-systematic-debugging",
+      "file": "skills\\stout-systematic-debugging\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-writing-plans",
+      "file": "skills\\stout-writing-plans\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    }
+  ]
+}

@@ -1,0 +1,469 @@
+{
+  "$schema": "./schemas/skill_entry.schema.json",
+  "version": "1.3.0",
+  "last_updated": "2026-05-22",
+  "ecosystem": "stout-inova",
+  "skills": [
+    {
+      "name": "stout-skill-registry",
+      "path": "skills/stout-skill-registry",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Fonte da verdade e ledger de todas as skills do ecossistema",
+      "triggers": [
+        "registrar skill",
+        "remover skill",
+        "listar skills",
+        "consultar registry"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Padrão Ouro de Doc. Score: 98.8/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-skill-auditor",
+      "path": "skills/stout-skill-auditor",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Porteiro inteligente para evitar duplicidade de skills",
+      "triggers": [
+        "criar skill",
+        "nova skill",
+        "ambiguidade",
+        "overlap"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Padrão Ouro de Doc. Score: 98.5/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-improve-skill",
+      "path": "skills/stout-improve-skill",
+      "tier": 4,
+      "category": "meta-factory",
+      "role": "Auto-Healing e refatoração de skills",
+      "triggers": [
+        "melhorar skill",
+        "refatorar",
+        "auto-healing"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Integrada ao Sentinel Core. Score Doc: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-create-skill",
+      "path": "skills/stout-create-skill",
+      "tier": 4,
+      "category": "meta-factory",
+      "role": "Fábrica autônoma de skills de Tier 4",
+      "triggers": [
+        "criar skill",
+        "blueprint"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Padrão Ouro de Doc. Score: 92.8/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-immunity-gate",
+      "path": "skills/stout-immunity-gate",
+      "tier": 1,
+      "category": "governance",
+      "role": "Autoridade Máxima de Governança e Imunidade",
+      "triggers": [
+        "erro",
+        "failure",
+        "audit-gate",
+        "imutabilidade"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-14",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Integrada com Guardrail V2.0. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-dev-tdd",
+      "path": "skills/stout-dev-tdd",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Motor de implementação TDD local",
+      "triggers": [
+        "implementar",
+        "tdd",
+        "testes"
+      ],
+      "version": "1.4.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "TDD Elite com Simplicity/Surgical laws. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-brainstorming",
+      "path": "skills/stout-brainstorming",
+      "tier": 2,
+      "category": "design",
+      "role": "Processo de design e validação de ideias",
+      "triggers": [
+        "brainstorming",
+        "planejar",
+        "design"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Fidelidade total e fragmentação concluída. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-writing-plans",
+      "path": "skills/stout-writing-plans",
+      "tier": 2,
+      "category": "design",
+      "role": "Transformação de Specs em Planos Atômicos",
+      "triggers": [
+        "planejar execução",
+        "roteiro"
+      ],
+      "version": "1.4.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Planos Atômicos com Goal-Driven Execution. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-adr",
+      "path": "skills/stout-adr",
+      "tier": 2,
+      "category": "governance",
+      "role": "Gestão de Architecture Decision Records local",
+      "triggers": [
+        "adr",
+        "MADR"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Resgate integral de templates e scripts. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-systematic-debugging",
+      "path": "skills/stout-systematic-debugging",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Investigação científica de falhas técnicas",
+      "triggers": [
+        "debugging",
+        "bug",
+        "investigação"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Fragmentação de contexto em 316+ linhas originais. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-spec-validation",
+      "path": "skills/stout-spec-validation",
+      "tier": 2,
+      "category": "governance",
+      "role": "Validação de consistência SOW -> Spec -> Teste",
+      "triggers": [
+        "validar especificação",
+        "rastreabilidade"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Resgate integral de checklists técnicos. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-init",
+      "path": "skills/stout-init",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Inicialização modular de projetos com Addons",
+      "triggers": [
+        "inicializar projeto",
+        "novo projeto",
+        "scaffold"
+      ],
+      "version": "2.1.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Superior à V1: Resgate integral de infra + encoding fix. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-cdd-orchestrator",
+      "path": "skills/stout-cdd-orchestrator",
+      "tier": 1,
+      "category": "orchestrator",
+      "role": "Motor Mãe e Injetor Dinâmico CDD",
+      "triggers": [
+        "launch",
+        "init cdd"
+      ],
+      "dependencies": [],
+      "version": "1.1.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Motor Mãe com Karpathy Laws injetadas. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-commit",
+      "path": "skills/stout-commit",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Padrão Sentry de Commits",
+      "triggers": [
+        "commit",
+        "git commit"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Elite Upgrade V1.3.0",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-governance-orchestration-engine",
+      "path": "skills/stout-governance-orchestration-engine",
+      "tier": 1,
+      "category": "engineering-governance",
+      "role": "Orquestrador de governança, recência e higiene para motores analíticos",
+      "triggers": [
+        "governance",
+        "recency",
+        "pre-flight",
+        "hygiene",
+        "orchestration"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "inactive",
+      "created_at": "2026-05-19",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Skill não implementada — backlog V6.12.",
+      "promoted_at": null
+    },
+    {
+      "name": "stout-promote-skill",
+      "path": "skills/stout-promote-skill",
+      "tier": 2,
+      "category": "meta-governance",
+      "role": "Promover skills do projeto CDD para o golden copy com auditoria e aprovação",
+      "triggers": [
+        "promover skill",
+        "promote skill",
+        "publicar skill",
+        "enviar para global"
+      ],
+      "dependencies": [
+        "stout-skill-auditor"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Nova skill — pendente de primeira promoção."
+    },
+    {
+      "name": "stout-executing-plans",
+      "path": "skills/stout-executing-plans",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Execução de planos de implementação atômicos tarefa por tarefa em sessões dedicadas",
+      "triggers": [
+        "executar plano",
+        "iniciar build",
+        "rodar tasks",
+        "implementar projeto",
+        "fase de construção"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Arquiteto Stout"
+    },
+    {
+      "name": "stout-finishing-a-development-branch",
+      "path": "skills/stout-finishing-a-development-branch",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Processo de finalização e integração de branches de desenvolvimento no ecossistema Stout",
+      "triggers": [
+        "finalizar branch",
+        "merge",
+        "pull request",
+        "fechar tarefa",
+        "concluir build"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Arquiteto Stout"
+    },
+    {
+      "name": "stout-subagent-driven-development",
+      "path": "skills/stout-subagent-driven-development",
+      "tier": 4,
+      "category": "meta-factory",
+      "role": "Execução de planos de implementação via subagentes especialistas com revisão em dois estágios",
+      "triggers": [
+        "delegar",
+        "subagente",
+        "invocar agente",
+        "implementar via subagente",
+        "linha de montagem",
+        "assembly line"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Arquiteto Stout"
+    },
+    {
+      "name": "stout-session-learning",
+      "path": "skills/stout-session-learning",
+      "tier": 2,
+      "category": "governance",
+      "role": "Destilador de Cognição Local. Consolida aprendizados, erros e heurísticas via SQLite e exporta Markdown",
+      "triggers": [
+        "salvar contexto",
+        "fechar sessão",
+        "session learning",
+        "aprendizados"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "author": "Engenheiro Stout"
+    },
+    {
+      "name": "stout-data-analyze",
+      "path": "skills/stout-data-analyze",
+      "tier": 2,
+      "category": "data",
+      "role": "Data Analysis Specialist (Elite Stout Edition)",
+      "triggers": [
+        "analyze data",
+        "lookup metric",
+        "investigate trend",
+        "data report",
+        "analisar dados"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "author": "Victor"
+    },
+    {
+      "name": "stout-data-sql-queries",
+      "path": "skills/stout-data-sql-queries",
+      "tier": 2,
+      "category": "data",
+      "role": "SQL Specialist (Elite Stout Edition)",
+      "triggers": [
+        "write sql",
+        "fabric sql",
+        "t-sql",
+        "optimize query",
+        "translate sql"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "author": "Victor"
+    },
+    {
+      "name": "stout-data-write-query",
+      "path": "skills/stout-data-write-query",
+      "tier": 2,
+      "category": "data",
+      "role": "SQL Query Architect (Elite Stout Edition)",
+      "triggers": [
+        "write query",
+        "generate sql",
+        "create query",
+        "sql syntax"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "promoted_at": "2026-05-22",
+      "created_at": "2026-05-22",
+      "updated_at": "2026-05-22",
+      "author": "Victor"
+    }
+  ],
+  "deprecated": [
+    {
+      "name": "stout-sandbox-test",
+      "deprecated_at": "2026-05-15",
+      "reason": "Conclusão bem-sucedida da Auditoria End-to-End"
+    },
+    {
+      "name": "stout-superantigravity-v2",
+      "deprecated_at": "2026-05-15",
+      "reason": "Consolidada na stout-immunity-gate e deletada fisicamente"
+    }
+  ]
+}

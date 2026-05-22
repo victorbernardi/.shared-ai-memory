@@ -1,0 +1,10 @@
+{
+  "name": "dashboard-branding-jd",
+  "reason": "Aplicar branding John Deere e logos Inova ao dashboard",
+  "created_at": "2026-05-13T19:09:19.959757",
+  "status": "active",
+  "source_files": {
+    "ACTIVE_CONTEXT.md": "C:\\Users\\victor.bernardi\\.shared-ai-memory\\context-agent\\ACTIVE_CONTEXT.md",
+    "MEMORY.md": "C:\\Users\\victor.bernardi\\.shared-ai-memory\\memory\\MEMORY.md"
+  }
+}
