@@ -1,0 +1,387 @@
+{
+  "$schema": "./schemas/skill_entry.schema.json",
+  "version": "1.3.0",
+  "last_updated": "2026-05-22",
+  "ecosystem": "stout-inova",
+  "skills": [
+    {
+      "name": "stout-skill-registry",
+      "path": ".shared-ai-memory/skills/stout-skill-registry",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Fonte da verdade e ledger de todas as skills do ecossistema",
+      "triggers": [
+        "registrar skill",
+        "remover skill",
+        "listar skills",
+        "consultar registry"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Padrão Ouro de Doc. Score: 98.8/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-skill-auditor",
+      "path": ".shared-ai-memory/skills/stout-skill-auditor",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Porteiro inteligente para evitar duplicidade de skills",
+      "triggers": [
+        "criar skill",
+        "nova skill",
+        "ambiguidade",
+        "overlap"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Padrão Ouro de Doc. Score: 98.5/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-improve-skill",
+      "path": ".shared-ai-memory/skills/stout-improve-skill",
+      "tier": 4,
+      "category": "meta-factory",
+      "role": "Auto-Healing e refatoração de skills",
+      "triggers": [
+        "melhorar skill",
+        "refatorar",
+        "auto-healing"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Integrada ao Sentinel Core. Score Doc: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-create-skill",
+      "path": ".shared-ai-memory/skills/stout-create-skill",
+      "tier": 4,
+      "category": "meta-factory",
+      "role": "Fábrica autônoma de skills de Tier 4",
+      "triggers": [
+        "criar skill",
+        "blueprint"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-15",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Padrão Ouro de Doc. Score: 92.8/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-immunity-gate",
+      "path": ".shared-ai-memory/skills/stout-immunity-gate",
+      "tier": 1,
+      "category": "governance",
+      "role": "Autoridade Máxima de Governança e Imunidade",
+      "triggers": [
+        "erro",
+        "failure",
+        "audit-gate",
+        "imutabilidade"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-14",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Integrada com Guardrail V2.0. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-dev-tdd",
+      "path": ".shared-ai-memory/skills/stout-dev-tdd",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Motor de implementação TDD local",
+      "triggers": [
+        "implementar",
+        "tdd",
+        "testes"
+      ],
+      "version": "1.4.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "TDD Elite com Simplicity/Surgical laws. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-brainstorming",
+      "path": ".shared-ai-memory/skills/stout-brainstorming",
+      "tier": 2,
+      "category": "design",
+      "role": "Processo de design e validação de ideias",
+      "triggers": [
+        "brainstorming",
+        "planejar",
+        "design"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Fidelidade total e fragmentação concluída. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-writing-plans",
+      "path": ".shared-ai-memory/skills/stout-writing-plans",
+      "tier": 2,
+      "category": "design",
+      "role": "Transformação de Specs em Planos Atômicos",
+      "triggers": [
+        "planejar execução",
+        "roteiro"
+      ],
+      "version": "1.4.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Planos Atômicos com Goal-Driven Execution. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-adr",
+      "path": ".shared-ai-memory/skills/stout-adr",
+      "tier": 2,
+      "category": "governance",
+      "role": "Gestão de Architecture Decision Records local",
+      "triggers": [
+        "adr",
+        "MADR"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Resgate integral de templates e scripts. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-systematic-debugging",
+      "path": ".shared-ai-memory/skills/stout-systematic-debugging",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Investigação científica de falhas técnicas",
+      "triggers": [
+        "debugging",
+        "bug",
+        "investigação"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Fragmentação de contexto em 316+ linhas originais. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-spec-validation",
+      "path": ".shared-ai-memory/skills/stout-spec-validation",
+      "tier": 2,
+      "category": "governance",
+      "role": "Validação de consistência SOW -> Spec -> Teste",
+      "triggers": [
+        "validar especificação",
+        "rastreabilidade"
+      ],
+      "version": "1.3.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Resgate integral de checklists técnicos. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-init",
+      "path": ".shared-ai-memory/skills/stout-init",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Inicialização modular de projetos com Addons",
+      "triggers": [
+        "inicializar projeto",
+        "novo projeto",
+        "scaffold"
+      ],
+      "version": "2.1.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Superior à V1: Resgate integral de infra + encoding fix. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-cdd-orchestrator",
+      "path": ".shared-ai-memory/skills/stout-cdd-orchestrator",
+      "tier": 1,
+      "category": "orchestrator",
+      "role": "Motor Mãe e Injetor Dinâmico CDD",
+      "triggers": [
+        "launch",
+        "init cdd"
+      ],
+      "dependencies": [],
+      "version": "1.2.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Motor Mãe com Karpathy Laws injetadas. Score: 100/100",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-commit",
+      "path": ".shared-ai-memory/skills/stout-commit",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Padrão Sentry de Commits",
+      "triggers": [
+        "commit",
+        "git commit"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Elite Upgrade V1.3.0",
+      "promoted_at": "2026-05-22"
+    },
+    {
+      "name": "stout-knowledge-fallback",
+      "path": ".shared-ai-memory/skills/stout-knowledge-fallback",
+      "tier": 1,
+      "category": "knowledge",
+      "role": "Fallback de conhecimento órfão",
+      "triggers": [
+        "unknown",
+        "search",
+        "help"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "inactive",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Skill não implementada — backlog V6.12.",
+      "promoted_at": null
+    },
+    {
+      "name": "stout-cdd-technical",
+      "path": ".shared-ai-memory/skills/stout-cdd-technical",
+      "tier": 3,
+      "category": "core",
+      "role": "Motor técnico de regras CDD",
+      "triggers": [
+        "cdd",
+        "engine",
+        "rules"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "inactive",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Skill não implementada — backlog V6.12.",
+      "promoted_at": null
+    },
+    {
+      "name": "stout-self-healing",
+      "path": ".shared-ai-memory/skills/stout-self-healing",
+      "tier": 1,
+      "category": "governance",
+      "role": "Motor de auto-recuperação",
+      "triggers": [
+        "heal",
+        "fix",
+        "repair"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "inactive",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Skill não implementada — backlog V6.12.",
+      "promoted_at": null
+    },
+    {
+      "name": "stout-welcome",
+      "path": ".shared-ai-memory/skills/stout-welcome",
+      "tier": 1,
+      "category": "onboarding",
+      "role": "Habilidade de boas-vindas",
+      "triggers": [
+        "hello",
+        "hi",
+        "start"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "inactive",
+      "created_at": "2026-05-16",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Skill não implementada — backlog V6.12.",
+      "promoted_at": null
+    },
+    {
+      "name": "stout-governance-orchestration-engine",
+      "path": ".shared-ai-memory/skills/stout-governance-orchestration-engine",
+      "tier": 1,
+      "category": "engineering-governance",
+      "role": "Orquestrador de governança, recência e higiene para motores analíticos",
+      "triggers": [
+        "governance",
+        "recency",
+        "pre-flight",
+        "hygiene",
+        "orchestration"
+      ],
+      "dependencies": [],
+      "version": "1.0.0",
+      "status": "inactive",
+      "created_at": "2026-05-19",
+      "updated_at": "2026-05-22",
+      "author": "Victor",
+      "notes": "Skill não implementada — backlog V6.12.",
+      "promoted_at": null
+    }
+  ],
+  "deprecated": [
+    {
+      "name": "stout-sandbox-test",
+      "deprecated_at": "2026-05-15",
+      "reason": "Conclusão bem-sucedida da Auditoria End-to-End"
+    },
+    {
+      "name": "stout-superantigravity-v2",
+      "deprecated_at": "2026-05-15",
+      "reason": "Consolidada na stout-immunity-gate e deletada fisicamente"
+    }
+  ]
+}
