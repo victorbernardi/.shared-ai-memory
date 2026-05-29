@@ -1,4 +1,5 @@
-# Contexto Ativo — Atualizado em 2026-05-22 17:22
+# Contexto Ativo — Atualizado em 2026-05-29 16:11
+**Total de sessões registradas:** 226
 
 ## Projetos Ativos
 | Projeto | Status | Última Sessão | Próxima Ação |
@@ -34,25 +35,58 @@
 - [ ] Promover stout-promote-skill ao golden copy quando auditoria passar (desde session-188)
 - [ ] Nenhuma tarefa pendente (desde session-190)
 - [ ] Corrigir extract.py para incluir filiais 03XX. Verificar se há outras diferenças (TES, Centro Custo, VALOR_DO_PRODUTO vs Valor Líquido). Rodar M2 contra Fabric e comparar total com R75.2M. Investigar se VALOR_DO_PRODUTO no banco = Valor Bruto ou Valor Líquido. (desde session-191)
+- [ ] Concluído saneamento. (desde session-192)
+- [ ] Promover sandbox para produção: substituir extract.py com nova query via query_loader|Validar 2025 (-1.58%) e 2026 (+1.22%) — investigar resíduo se necessário|Atualizar run.py para usar VALOR_LIQUIDO ao invés de VALOR_DO_PRODUTO (desde session-193)
+- [ ] Promover sandbox para produção: reescrever extract.py com query_loader; Ajustar run.py para logar VALOR_LIQUIDO; Investigar resíduo +-1.5% por ano (fronteira out/nov 2025); Replicar .gitignore padrão nos outros stages do pipeline (desde session-194)
+- [ ] Consolidar as 10 copias do stout-memory-capture.py em uma unica source of truth com symlinks (desde session-197)
+- [ ] Verificar definição de vw_VENDAS (sp_helptext) para rastrear origem de COD_GRUPO; Solicitar snapshot corrigido com CBIT ao responsável do Fabric; Promover motor para produção após decisão sobre resíduo (desde session-198)
+- [ ] Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO; Solicitar reprocessamento do snapshot com CBIT ao responsável Fabric; Promover motor para produção (desde session-199)
+- [ ] Investigar NULL DESCRICAO_CC: R5.8M no motor sem CC correspondente no BI — query Fabric para identificar filiais/origem. Investigar anomalia LEIC: R.4M no motor vs R/usr/bin/bash.016M no BI — verificar se é classificação correta ou ruído. Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO e verificar se existe fonte histórica para CBIT. Solicitar ao responsável do Fabric reprocessamento do snapshot com dados CBIT de Jan-Oct 2025. (desde session-200)
+- [ ] Nenhuma pendencia tecnica restou no pipeline de Faturamento. (desde session-201)
+- [ ] Aguardar ~24h ativação app ML no DevCenter e testar OAuth com: python scripts/02-pesquisa/adaptadores/ml_auth.py. Após ML funcionar: rodar scraper.py com lista_pecas.csv completa. Limpar qa_test_ml_api.py da raiz após validação. (desde session-202)
+- [ ] Estudar CronCreate vs Windows Task Scheduler para polling horário do ML API. Quando /sites/MLB retornar 200, executar ml_auth.py e rodar scraper completo. Comando de teste manual: python qa_test_ml_api.py (esperar status 200 no endpoint sites/MLB). (desde session-203)
+- [ ] Próxima sessão: construir monitoramento de outros concorrentes (tblagro, mfrural, agrofy)|Quando ML liberar (notificação Toast), executar ml_auth.py manualmente para completar OAuth (desde session-204)
+- [ ] Investigar JDPC -R$3.77M (imposto filial 203). Investigar EPRC +R$0.68M. Investigar BI grupos NaN R$1.74M. Investigar Balcao delta +/-1.9%. Deploy query para producao apos resolucao das pendencias. (desde session-205)
+- [ ] Avançar no planejamento da fase V5.0 Distributed CDD com foco na priorização de estabilidade do ecossistema ao invés de sincronização prematura assíncrona. (desde session-206)
+- [ ] Buscar tabela original do Protheus (nao vw_VENDAS) para obter dados completos dos CNPJs 0212 (desde session-207)
+- [ ] Investigar imposto filial 203 e TES/devolucoes (desde session-207)
+- [ ] Resolver filial 0302 (R$0.74M no BI, R$0 no motor) (desde session-207)
+- [ ] Investigar classificacao da filial 0211 (padrao de split 0201 vs 0211) (desde session-207)
+- [ ] Sessão 02_Faturamento: renomear branch fix/stout-promote-antigravity-brain-path (commits faturamento já em feat/02-faturamento-filtros-whitelist); revisar branch-policy.yaml gerados se needed; wiki-ingest para sincronizar vault (desde session-208)
+- [ ] Sessão 02_Faturamento: decidir o que fazer com fix/stout-promote-antigravity-brain-path (branch que contém 3 commits de faturamento na história — responsabilidade da sessão de faturamento, não desta) (desde session-209)
+- [ ] Implementar extract_protheus.py com query SD2010 + JOIN SA1010/SA2010 filtrando 3 CNPJs + CCs CSN + D2_TP='ME' + periodo 2022+|Integrar no run.py entre extract e filtros|Remover f_vendas_hist31102025 da query SQL (substituir pelo SD2010)|Atualizar testes|Solicitar a TI replicacao das tabelas faltantes do Protheus para o Fabric (desde session-210)
+- [ ] Solicitar a TI replicacao completa das tabelas Protheus (SD2010/SF2010) para o Fabric | Apos replicacao: criar extract_protheus.py com query SD2010+SA1010 | Apos replicacao: substituir f_vendas_hist por SD2010 em vendas_pecas_construcao.sql | Apos replicacao: integrar no run.py e atualizar testes (desde session-211)
+- [ ] Reativar INOVA_DAILY_EMAIL após validar correção do M2: Enable-ScheduledTask -TaskName INOVA_DAILY_EMAIL (desde session-212)
+- [ ] Investigar branch fix/stout-promote-antigravity-brain-path com 3 commits do 02_Faturamento (responsabilidade da sessão 02_Faturamento) (desde session-213)
+- [ ] **[M3-AUDITORIA] Inclusão do Audit M3/M0:** Incluir o script de auditoria `audit_m3_m0_granularity.py` na validação contínua e no runner principal do motor M3 para auditoria automática da tabela e prevenção de desvios de granularidade. (desde session-214)
+- [ ] **[GOVERNANÇA-DADOS] Central Data Schema Guardrail (`data_validator.py`):** Desenvolver um validador de contratos de dados centralizado em `shared/data_validator.py` consumido por todos os motores (M0 a M5) durante o `extract`. Ele deve validar schemas de entrada, barrar e limpar automaticamente colunas duplicadas ou colidentes inesperadas e monitorar taxas de nulos em chaves de merge para fail-fast na origem. (desde session-214)
+- [ ] Concluído o download e transcrição diarizada; Concluído o enriquecimento cognitivo Stout-Aware da ata executiva; Concluída a movimentação física dos arquivos para C:\Projetos\Inova\projects\lead-csc-pops\Transcricao (desde session-214)
+- [ ] Autenticar Mercado Livre: python scripts/02-pesquisa/adaptadores/mercadolivre.py --headed; Rodar ML + GHT Shop na lista completa do BD Inova (filtros RE/AT/DZ/AM); Gerar data/lista_pecas_producao.csv com filtros da lista real; Construir tabela cross-reference JD→fabricante em data/crossref_jd_fabricante.csv (desde session-215)
+- [ ] Merge do branch feat/pricewatch-concorrentes-scraping-v2 ao master do Inova (contém upgrade do pricewatch-jd). Implementar group_related_facts (backlog v2) em sessão futura. (desde session-216)
+- [ ] Nenhuma pendencia desta sessao (desde session-218)
+- [ ] Investigar NFs LEIC e EPRC que sobraram no motor — verificar se o BI as classifica sob outro grupo/CC. Validar filial 0302 (R$625K no BI vs R$0 no motor). Validar filial 201 (-18.1%). Validar imposto filial 203. Investigar grupo NAN (-R$768K no BI). (desde session-219)
+- [ ] Migrar Inova-Daily para ICM quando db_utils.py for restaurado. Criar REFERENCES.md e .GCC/ no dominio Inova. Testar pipeline do Skill-Folder-Pattern com uma sessao real. Criar thin wrappers em .gemini/skills/ e .agents/skills/. Migrar proximo projeto Stout usando stout-icm-migrate. (desde session-222)
+- [ ] Investigar NAN SERVICOS IRRIGACAO. Investigar filial 302. Investigar gap de imposto global (filial 203, TES). (desde session-223)
+- [ ] Testar stout-skill-manager end-to-end com skillfish real. Promover stout-skill-manager para golden copy via stout-promote-skill. Atualizar SKILL.md do stout-create-skill para referenciar novo fluxo com stout-skill-manager antes de fabricar. (desde session-226)
 
 ## Decisões Recentes
-- [session-181] Threshold de cancelamentos mantido em R$ 50K|Formatação: M para milhões, K para milhares, vírgula como separador decimal, % sem casas decimais|Template sem emojis em nenhuma camada (generator, snapshot, auditor)|Quebras de linha com backslash no bloco RECAP e no bloco de acumulado/meta/ritmo
-- [session-183] win32com em vez de SMTP/Graph API — Outlook já autenticado, zero config|Seg-Sex 08:20 para e-mail (não Ter-Sab) — Segunda pega relatório da Sexta automaticamente|StartWhenAvailable=true via XML — roda ao ligar se passou do horário|Título padronizado em português: 'Diário Inova' em assunto e corpo|Footer: 'Gerado automaticamente pelo agente Diário Inova' sem horário
-- [session-187] CEVAP usa BUP como fonte unica — nao mais pipeline proprio
-- [session-187] Dias_Inativo e Data_Ultima_Compra derivados do SF2010 ao vivo (qualquer consultor, sem filtro de data)
-- [session-187] Valor_12m permanece do cache M3 — migracao para SF2010 rejeitada por complexidade do TES
-- [session-187] Task CEVAP agendada 17:40 Seg-Sex com StartWhenAvailable para recuperar execucoes perdidas
-- [session-187] BUP tem repositorio git proprio dentro do monorepo Inova — commits separados
-- [session-188] preflight.py verifica dependencias de primeiro nivel antes de lancar qualquer skill via orchestrator / campo promoted_at adicionado a todos os registries (null=nunca promovida, ISO date=ultima promocao) / promote_runner.py exibe skills pendentes ao final e oferece continuar promovendo / docs_archiver ativo-para-legado abandonado pois move diretorios que sao alvos de junctions dos projetos / stout-promote-skill tem dependencies:[stout-skill-auditor] no registry
-- [session-190] Remoção automática de zeros padding para busca de CPFs de 11 caracteres no banco Fabric
-- [session-191] Valor alvo = Valor Líquido (não Valor Bruto). Targets: 2025=R99.8M, 2026=R5.4M, combinado=R75.2M (dentro de 0,045% do PowerBI R75.367M). Correção principal no extract.py: incluir OR FILIAL LIKE 03% no WHERE.
+- [session-212] Desativar INOVA_DAILY_EMAIL até correção do mapeamento SD2010 no Motor 02 Faturamento
+- [session-213] Hook pre-commit usa python (não python3) para compatibilidade Windows; Stout valida apenas nome da branch (cross-project por natureza); Inova valida por staged files vs prefixo de branch; Propagação via stout-init CDD addon v1.3.0; stout-commit atualizado para v1.1.0 como Camada 3 de validação antecipada
+- [session-214] Usar pipeline local Stout-Aware (sync_engine.py) com AssemblyAI e Pyannote para alta fidelidade e biometria vocal.
+- [session-215] Filtro de relevância obrigatório em todos os adaptadores: peca.upper() in titulo.upper() or peca.upper() in url.upper(); GHT Shop via JSON-LD (Schema.org) é o método preferencial; Mercado Livre requer autenticação manual --headed uma vez por máquina; Sites sem preço público (BBX, Canaparts, EG Peças) mantidos como modo ia; Cross-reference JD→Donaldson/Fleetguard/WIX/Mann pendente para próxima sessão
+- [session-216] Item 7 (group_related_facts com shingle similarity) excluído do escopo atual — backlog v2. Novo branch fix/stout-memory-capture-noise criado no Inova em vez de usar fix/stout-promote-antigravity-brain-path. pricewatch-jd atualizado de versão primitiva (137 linhas, sem OfflineDistiller) para versão moderna completa.
+- [session-218] Incluir Forecasted Machine Hours em cols_chassi de build_exports no transform.py do 03_Potencial
+- [session-219] 1. Manter views (f_vendas_hist + vw_VENDAS) como fonte primaria — SD2010 descartada apos validacao. 2. CNPJ 038282487000204 e erro de digitacao (15 digitos) — removido da lista. 3. Implementar remapeamento de filial por raiz de CNPJ (8 digitos) em vez de CNPJ exato. 4. Implementar reclassificacao CBPC→CBIT para produtos Wirtgen.
+- [session-222] SKILL.md fino aponta para GEMINI.md/CLAUDE.md reais, nao para SYSTEM.md inexistente. Workspaces sao os diretorios de projeto em Projetos/, nao uma pasta workspaces/ separada. 00_research e cold storage com carregamento sob demanda. Templates sao assets do estagio que os consome. Scanners de anomalia vao para Extrair, nao Auditar. GATE e FORCAR_VALIDACAO documentados como padrao no pipeline.
+- [session-223] Subgrupo: coluna existe no Fabric, adicionada na query. CC NULL->BALCAO: normalizacao aplicada no transform.py. Leica: kits GNSS/GPS removidos do Motor (BI nao os tem). CNPJ: BI Excel lido como string para evitar perda de leading zero. TES 502 = isencao fiscal na filial 203.
+- [session-226] Fonte da verdade unica em .shared-ai-memory/skills com junctions para .claude, .commandcode, .gemini/antigravity-cli. Estrategia A+B: escrita sempre pelo path canonico + junction_guard.py. stout-skill-manager orquestra 5 fases: busca local -> skillfish -> auditor -> install -> sentinel. stout-create-skill agora gera SKILL.md multi-plataforma com blocos @if e skill.config.json. audit-skill-manager deprecado.
 
 ## Bloqueadores Ativos
 - Nenhum
 
 ## Últimas Sessões
-- session-187: Motor CEVAP: BUP como fonte unica + task scheduler
-- session-188: Orchestrator Preflight + promoted_at + stout-promote-skill
-- session-189: <USER_REQUEST>
-- session-190: Consulta Cadastral e de Faturamento do BUP
-- session-191: M2 Faturamento - Reverse Engineering da Query PowerBI
+- session-222: Implementacao ICM - Transformacao do ecossistema Stout
+- session-223: Sessao 219: Subgrupo, CC normalization, Leica kit removal, CNPJ fix
+- session-224: <USER_REQUEST>
+- session-225: <USER_REQUEST>
+- session-226: skillfish + stout-skill-manager + junctions multi-plataforma
