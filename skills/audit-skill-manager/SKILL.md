@@ -7,7 +7,12 @@ metadata:
   triggers: install skill, update skills, list skills, add-habilidade, skillfish
 ---
 
-# Skill Manager
+# [DEPRECADO] Skill Manager
+
+> **Esta skill foi substituída por `stout-skill-manager` em 2026-05-29.**
+> Use `/stout-skill-manager` para buscar, instalar e gerenciar skills com pipeline completo
+> de auditoria, validação e controle de qualidade.
+> Este arquivo será removido em 30 dias (2026-06-28).
 
 ## Overview
 
@@ -20,12 +25,13 @@ Interface para gerenciamento do ecossistema de habilidades do agente Antigravity
 - Quando é necessário listar as capacidades atuais do agente.
 
 **NÃO usar para:**
+
 - Modificar o código interno de uma skill existente (use `writing-skills`).
 - Deletar arquivos de sistema do Antigravity.
 
 ## Step-by-Step
 
-1. **Adicionar Skill:** 
+1. **Adicionar Skill:**
    - Execute `skillfish add [usuario/repositorio] --project`.
    - Se os arquivos forem baixados para `.claude/skills`, mova-os para a pasta `./skills/` do seu workspace atual para mantê-los visíveis ao Antigravity.
 2. **Atualizar Skills:** Execute `skillfish update`.
@@ -46,6 +52,7 @@ Interface para gerenciamento do ecossistema de habilidades do agente Antigravity
 ## Instalação
 
 Esta habilidade depende do binário global `skillfish`.
+
 ```bash
 npm i -g skillfish
 ```
