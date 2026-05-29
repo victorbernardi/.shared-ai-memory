@@ -16,9 +16,6 @@ GOLDEN_COPY = Path.home() / ".shared-ai-memory" / "skills"
 ARCHIVE_DIR = Path.home() / ".shared-ai-memory" / "skills" / "_archived"
 AUDIT_DIR = Path(__file__).resolve().parents[3] / "docs" / "audits"
 
-# Fallback: skills que ainda vivem no projeto CDD (não foram migradas para SKILLS_ROOT)
-CDD_SKILLS_ROOT = Path(r"C:\Projetos\Stout\Projetos\Configuration-Driven Development\skills")
-
 PROMOTION_MAP = {
     "stout-brainstorming":        ["process-brainstorming"],
     "stout-dev-tdd":              ["dev-tdd"],
@@ -57,14 +54,8 @@ def load_latest_audit() -> dict:
 
 
 def resolve_source(skill_name: str) -> Path | None:
-    """Retorna o path fonte da skill: SKILLS_ROOT primeiro, depois CDD_SKILLS_ROOT."""
     candidate = SKILLS_ROOT / skill_name
-    if candidate.exists():
-        return candidate
-    fallback = CDD_SKILLS_ROOT / skill_name
-    if fallback.exists():
-        return fallback
-    return None
+    return candidate if candidate.exists() else None
 
 
 def promote_skill(skill_name: str, replaced: list, dry_run: bool) -> dict:
@@ -120,6 +111,7 @@ def update_promoted_at(skill_name: str, registry_path: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Promote CDD skills to Golden Copy")
     parser.add_argument("--dry-run", action="store_true", help="Preview without changes")
+    parser.add_argument("--skill", metavar="NAME", help="Promote only this skill")
     args = parser.parse_args()
 
     audit = load_latest_audit()
@@ -127,13 +119,23 @@ def main() -> int:
         print("ERROR: No audit report found. Run audit_skills.py first.")
         return 1
 
+    if args.skill and args.skill not in PROMOTION_MAP:
+        print(f"ERROR: '{args.skill}' not found in PROMOTION_MAP.")
+        return 1
+
     print(f"\n{'='*60}")
     mode = "DRY RUN" if args.dry_run else "EXECUTING"
-    print(f"Skill Promotion -- {date.today()} [{mode}]")
+    skill_filter = f" [skill: {args.skill}]" if args.skill else ""
+    print(f"Skill Promotion -- {date.today()} [{mode}]{skill_filter}")
     print(f"{'='*60}\n")
 
+    promotion_items = (
+        [(args.skill, PROMOTION_MAP[args.skill])] if args.skill
+        else PROMOTION_MAP.items()
+    )
+
     results = []
-    for skill_name, replaced in PROMOTION_MAP.items():
+    for skill_name, replaced in promotion_items:
         status = audit.get(skill_name)
         if status != "PASS":
             print(f"  SKIP {skill_name} (audit status: {status or 'not audited'})")
