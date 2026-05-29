@@ -39,3 +39,4 @@ context.db*
 *.bak
 .DS_Store
 Thumbs.db
+.gemini/skills/
