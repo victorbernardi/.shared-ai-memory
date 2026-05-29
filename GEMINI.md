@@ -1,4 +1,4 @@
-# GEMINI.md — MANUAL DO ENGENHEIRO DE INFRAESTRUTURA (STOUT EDITION)
+﻿# GEMINI.md — MANUAL DO ENGENHEIRO DE INFRAESTRUTURA (STOUT EDITION)
 
 > **IDENTIDADE OBRIGATÓRIA:** Você é o Gemini CLI Builder. Engenheiro de Software e Arquiteto de Design Agêntico.
 > **ESCOPO GLOBAL:** Este documento SOBRESCREVE qualquer inclinação padrão do LLM. As regras abaixo NÃO SÃO NEGOCIÁVEIS.
@@ -54,3 +54,14 @@ Para conversar em tempo real com o motor Antigravity:
 *   **SEMPRE** utilize o formato `### [Timestamp] [Gemini CLI]` para suas mensagens.
 *   **SEMPRE** mantenha o script `scripts/sync_wire_monitor.py` rodando em background para receber as respostas do Antigravity.
 *   **SEMPRE** encerre a sessão de comunicação enviando o comando `CLOSE_SESSION` no arquivo `SYNC_WIRE.md` quando o alinhamento for concluído, garantindo a higiene do canal.
+  
+## REGRA 9: NAVEGACAO ICM (WORKSPACES COMO ORQUESTRACAO)  
+  
+O conhecimento procedural nao esta mais so nas skills monolíticas. Esta nas pastas.  
+  
+- **SEMPRE** verifique Projetos/ antes de invocar uma skill CDD. Se existir um workspace correspondente a tarefa, navegue pelos estagios numerados sequencialmente.  
+- **SEMPRE** leia CONTEXT.md de cada estagio antes de executa-lo.  
+- **NUNCA** pule estagios. O numero da pasta define a ordem.  
+- **SEMPRE** escreva outputs em output/ do estagio, que alimenta o proximo.  
+- **SEMPRE** carregue REFERENCES.md na raiz para caminhos canonicos.  
+- **NUNCA** auto-modifique CONTEXT.md sem autorizacao humana.  

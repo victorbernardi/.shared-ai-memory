@@ -15,22 +15,27 @@ author: Victor
 # PLACEHOLDER_NAME
 
 ## Objetivo
+
 PLACEHOLDER_OBJETIVO.
 
 ## Inputs esperados
+
 - PLACEHOLDER_INPUT_1: descrição
 - PLACEHOLDER_INPUT_2: descrição
 
 ## Scripts disponíveis (opcionais)
+
 - `scripts/PLACEHOLDER_SCRIPT.py` — PLACEHOLDER_SCRIPT_DESC
 
 ## Fluxo
+
 1. PLACEHOLDER_PASSO_1
 2. PLACEHOLDER_PASSO_2
 3. Se necessário: `python scripts/PLACEHOLDER_SCRIPT.py --arg <valor>`
 4. PLACEHOLDER_PASSO_4
 
 ## Constraints
+
 - NUNCA PLACEHOLDER_RESTRICAO_1
 - SEMPRE PLACEHOLDER_RESTRICAO_2
 - NÃO PLACEHOLDER_RESTRICAO_3

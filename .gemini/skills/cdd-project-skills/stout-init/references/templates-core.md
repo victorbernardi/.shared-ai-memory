@@ -1,6 +1,7 @@
 # Templates de Inicialização Stout (Core)
 
 ## 1. Modelo GEMINI.md (Manual do Engenheiro)
+
 ```markdown
 # 📂 GEMINI.md — PROJETO: [Nome do Projeto]
 
@@ -27,9 +28,10 @@
 
 ## 4. ESTADO ATUAL
 - Phase: Research ⏳
-```
+```text
 
 ## 2. Modelo ANTIGRAVITY.md (Kernel Operacional)
+
 ```markdown
 # 🧠 ANTIGRAVITY.md — Kernel Agêntico
 
@@ -41,9 +43,10 @@
 
 ## 2. FRAMEWORK STOUT
 1. Research -> 2. Strategy -> 3. Execution -> 4. Validation
-```
+```text
 
 ## 3. Modelo known_issues.md (Bugs Conhecidos)
+
 ```markdown
 # 🐛 Lista de Bugs Conhecidos & Workarounds
 
@@ -58,9 +61,10 @@ Este documento registra de forma viva, imutável e estruturada todos os bugs de 
 
 > [!NOTE]
 > Este arquivo é atualizado de forma dinâmica e programática pela skill `stout-session-learning` ao final de cada sessão.
-```
+```text
 
 ## 4. Modelo evolution_backlog.md (Evolução Técnica)
+
 ```markdown
 # 🚀 Backlog de Evolução Técnica & Estética
 
@@ -77,4 +81,4 @@ Este documento centraliza e prioriza todas as sugestões de otimização agênti
 
 > [!NOTE]
 > Novas propostas identificadas são compiladas e integradas aqui pela skill `stout-session-learning` de forma autônoma.
-```
+```text

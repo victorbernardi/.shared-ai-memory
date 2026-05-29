@@ -1,4 +1,5 @@
 # E2E Test Implementation Plan
+
 > **For Claude:** REQUIRED SUB-SKILL: Use executing-plans to implement this plan task-by-task.
 **Goal:** Implementar o script hello_stout.py com cobertura TDD para validar a orquestração.
 **Architecture:** Função pura isolada para fácil validação via pytest.
@@ -6,7 +7,9 @@
 ---
 
 ### Task 1: Core Functionality
+
 **Files:**
+
 - Create: `src/tools/hello_stout.py`
 - Create: `tests/test_hello_stout.py`
 

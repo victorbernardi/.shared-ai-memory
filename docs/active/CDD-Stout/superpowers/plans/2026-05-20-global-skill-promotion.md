@@ -105,7 +105,6 @@ CHECKLIST = {
 MIN_LENGTH = 200
 BANNED_TOKENS = ["todo", "tbd"]
 
-
 def find_main_file(skill_dir: Path) -> Path | None:
     """Find the primary Markdown file for a skill."""
     for name in MAIN_FILENAMES:
@@ -114,7 +113,6 @@ def find_main_file(skill_dir: Path) -> Path | None:
             return candidate
     md_files = list(skill_dir.glob("*.md"))
     return md_files[0] if md_files else None
-
 
 def audit_skill(skill_dir: Path) -> dict:
     """Evaluate one skill directory against the governance checklist."""
@@ -170,7 +168,6 @@ def audit_skill(skill_dir: Path) -> dict:
         "fail_reasons": fail_reasons,
     }
 
-
 def main() -> int:
     if not SKILLS_ROOT.exists():
         print(f"ERROR: Skills root not found: {SKILLS_ROOT}")
@@ -216,17 +213,16 @@ def main() -> int:
     print(f"\nReport saved to: {output_path}")
     return 0
 
-
 if __name__ == "__main__":
     sys.exit(main())
-```
+```text
 
 - [ ] **Step 2: Run the script to confirm it works**
 
 ```bash
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 python scripts/audit_skills.py
-```
+```text
 
 Expected: Console table with PASS/FAIL per skill + JSON report at `docs/audits/skill-audit-YYYY-MM-DD.json`. No errors.
 
@@ -235,7 +231,7 @@ Expected: Console table with PASS/FAIL per skill + JSON report at `docs/audits/s
 ```bash
 git add scripts/audit_skills.py
 git commit -m "feat: add skill governance audit script"
-```
+```text
 
 ---
 
@@ -251,7 +247,7 @@ git commit -m "feat: add skill governance audit script"
 ```bash
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 python scripts/audit_skills.py
-```
+```text
 
 - [ ] **Step 2: Read the JSON report**
 
@@ -263,7 +259,7 @@ data = json.loads(reports[-1].read_text(encoding='utf-8'))
 print(f\"PASS ({data['summary']['passed']}): {[r['skill'] for r in data['results'] if r['status']=='PASS']}\")
 print(f\"FAIL ({data['summary']['failed']}): {[r['skill'] for r in data['results'] if r['status']!='PASS']}\")
 "
-```
+```text
 
 - [ ] **Step 3: Create fix tasks for FAILing skills**
 
@@ -283,7 +279,7 @@ For each to DISCARD, note it in the report — do not promote.
 
 ```bash
 python scripts/audit_skills.py
-```
+```text
 
 Expected: All skills intended for global promotion show PASS.
 
@@ -292,7 +288,7 @@ Expected: All skills intended for global promotion show PASS.
 ```bash
 git add skills/
 git commit -m "fix: add missing governance sections to skills for promotion"
-```
+```text
 
 ---
 
@@ -351,14 +347,12 @@ PROMOTION_MAP = {
     "stout-data-write-query":     ["data-write-query"],
 }
 
-
 def load_latest_audit() -> dict:
     reports = sorted(AUDIT_DIR.glob("skill-audit-*.json"))
     if not reports:
         return {}
     data = json.loads(reports[-1].read_text(encoding="utf-8"))
     return {r["skill"]: r["status"] for r in data["results"]}
-
 
 def promote_skill(skill_name: str, replaced: list, dry_run: bool) -> dict:
     src = SKILLS_ROOT / skill_name
@@ -388,7 +382,6 @@ def promote_skill(skill_name: str, replaced: list, dry_run: bool) -> dict:
         shutil.copytree(src, dst)
 
     return {"skill": skill_name, "status": "PROMOTED", "actions": actions}
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Promote CDD skills to Golden Copy")
@@ -423,17 +416,16 @@ def main() -> int:
         print("(dry-run: no files changed)")
     return 0
 
-
 if __name__ == "__main__":
     sys.exit(main())
-```
+```text
 
 - [ ] **Step 2: Run dry-run to preview**
 
 ```bash
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 python scripts/promote_skills.py --dry-run
-```
+```text
 
 Expected: Console shows each skill that would be promoted and what would be archived. No file changes.
 
@@ -451,7 +443,7 @@ If any target skill shows SKIP, go back to Task 2 and fix its governance.
 
 ```bash
 python scripts/promote_skills.py
-```
+```text
 
 Expected: All target skills promoted, replaced generics archived to `~/.shared-ai-memory/skills/_archived/`.
 
@@ -465,7 +457,7 @@ stout_skills = [d.name for d in golden.iterdir() if d.is_dir() and d.name.starts
 print('stout-* skills in Golden Copy:')
 for s in sorted(stout_skills): print(f'  {s}')
 "
-```
+```text
 
 Expected: All promoted `stout-*` skills visible in Golden Copy.
 
@@ -474,7 +466,7 @@ Expected: All promoted `stout-*` skills visible in Golden Copy.
 ```bash
 git add scripts/promote_skills.py
 git commit -m "feat: add skill promotion script with archive support"
-```
+```text
 
 ---
 
@@ -504,7 +496,7 @@ if survivors:
 else:
     print('OK: All replaced skills have been archived.')
 "
-```
+```text
 
 Expected: `OK: All replaced skills have been archived.`
 
@@ -528,7 +520,7 @@ if missing:
 else:
     print('OK: All expected skills present in Golden Copy.')
 "
-```
+```text
 
 Expected: `OK: All expected skills present in Golden Copy.`
 
@@ -560,7 +552,7 @@ for m in modules:
     status = '✅' if p.exists() else '❌ MISSING'
     print(f'{status} {m}')
 "
-```
+```text
 
 Expected: All 5 show ✅.
 
@@ -587,7 +579,7 @@ for m in modules:
     else:
         print(f'  MISSING: {m.name}')
 "
-```
+```text
 
 Expected: 5 files copied, no MISSING.
 
@@ -601,7 +593,7 @@ files = sorted(template_dir.glob('*.py'))
 print('Scripts in template dir:')
 for f in files: print(f'  {f.name}')
 "
-```
+```text
 
 Expected: `guardrail.py`, `sandbox.py`, `preflight.py`, `git_guard.py`, `skill_tool.py`, `stout_promote.py` all present.
 
@@ -614,7 +606,7 @@ Expected: `guardrail.py`, `sandbox.py`, `preflight.py`, `git_guard.py`, `skill_t
 ```bash
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 python -m pytest tests/test_stout_promote_v3.py -q
-```
+```text
 
 Expected: 34 passed.
 
@@ -629,7 +621,7 @@ print(f'Total skills in Golden Copy: {len(dirs)}')
 stout = [d.name for d in dirs if d.name.startswith('stout')]
 print(f'stout-* skills: {len(stout)}')
 "
-```
+```text
 
 - [ ] **Step 3: Commit audit artifacts**
 
@@ -637,7 +629,7 @@ print(f'stout-* skills: {len(stout)}')
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 git add docs/audits/ scripts/
 git commit -m "docs: add skill audit report and promotion scripts"
-```
+```text
 
 ---
 

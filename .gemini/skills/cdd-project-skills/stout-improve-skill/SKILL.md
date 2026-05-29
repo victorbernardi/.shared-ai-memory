@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-improve-skill
 description: "Orquestrador de refatoração e Auto-Healing de Tier 4. Diagnostica gaps de qualidade e governança baseando-se no Sentinel e aplica patches automáticos ou assistidos. Triggers de ativação: melhorar skill, refatorar skill, atualizar skill, otimizar, auto-healing, tuning ecossistema."
 version: 1.1.0
@@ -41,7 +43,7 @@ python scripts/diag_runner.py --target "stout-nome-da-skill"
 
 # Aplicar patches automáticos em documentação
 python scripts/apply_patch.py --target "stout-nome-da-skill" --auto
-```
+```text
 
 ## 📚 Referências
 

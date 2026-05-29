@@ -6,8 +6,6 @@ Agente local de destilação e persistência de Session-Learning para o ecossist
 """
 
 import os
-import sys
-import io
 import re
 import json
 import sqlite3
@@ -15,11 +13,6 @@ import hashlib
 import argparse
 from pathlib import Path
 from datetime import datetime, timezone
-
-if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, asdict
 
@@ -495,6 +488,8 @@ class SessionLearningDB:
         # Tenta conectar com timeout transacional de 30s
         global_db = str(GLOBAL_DB_PATH)
         if global_db and global_db != self.db_path:
+            g_db = None
+            g_conn = None
             try:
                 # Inicializa ou conecta ao Golden DB global
                 g_db = SessionLearningDB(global_db, self.cfg)
@@ -540,6 +535,16 @@ class SessionLearningDB:
                 g_db.close()
                 print(f"[stout-memory] Persistência Central: Sessão {session.session_id} espelhada com sucesso.")
             except Exception as e:
+                if g_conn:
+                    try:
+                        g_conn.rollback()
+                    except Exception:
+                        pass
+                if g_db:
+                    try:
+                        g_db.close()
+                    except Exception:
+                        pass
                 _log_failure(f"Falha ao espelhar no banco de dados central: {e}")
 
         # 3. Escrita Dupla Central de Markdowns na Wiki central
@@ -1283,10 +1288,21 @@ def run_retrofit(projetos_root: str, global_db_path: str):
     # 2. Ingestão de bancos SQLite locais
     facts_imported = 0
     for sq_path in sqlite_paths:
+        local_conn = None
         try:
             print(f"[stout-retrofit] Ingerindo banco: {sq_path}")
             local_conn = sqlite3.connect(str(sq_path), isolation_level=None)
             local_conn.row_factory = sqlite3.Row
+            
+            # Verifica se as tabelas existem no banco local antes de consultar (RF3)
+            tables = [r[0] for r in local_conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+            if "session_learnings" not in tables or "learning_facts" not in tables:
+                print(f"[stout-retrofit] Aviso: Banco local {sq_path} não possui o schema necessário. Pulando.")
+                local_conn.close()
+                continue
+
+            # Abre transação explícita na conexão global (RF2)
+            global_db.conn.execute("BEGIN IMMEDIATE TRANSACTION")
             
             # Lê learnings
             learnings = local_conn.execute("SELECT * FROM session_learnings").fetchall()
@@ -1322,6 +1338,15 @@ def run_retrofit(projetos_root: str, global_db_path: str):
             local_conn.close()
             global_db.conn.commit()
         except Exception as e:
+            if local_conn:
+                try:
+                    local_conn.close()
+                except Exception:
+                    pass
+            try:
+                global_db.conn.rollback()
+            except Exception:
+                pass
             _log_failure(f"Erro ao processar retrofit do banco {sq_path}: {e}")
 
     # 3. Ingestão e processamento lexical offline de markdowns avulsos

@@ -5,6 +5,7 @@
 > **Versão:** 1.2.0
 
 ## 1. Estratégia de Transição
+
 Este plano foca na materialização física dos ativos que garantem a qualidade e governança da Fábrica.
 
 ## 2. Fases de Execução (Ciclo Build)
@@ -31,6 +32,7 @@ Garantir que falhas de validação limpem o disco automaticamente.
 Criar `tests/test_factory_quality.py` para simular falhas e validar a limpeza.
 
 ## 3. Human-in-the-Loop
+
 A aprovação do plano pelo Victor é obrigatória antes da escrita dos arquivos físicos.
 
 ---

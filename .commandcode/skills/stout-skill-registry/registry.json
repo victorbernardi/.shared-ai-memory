@@ -22,7 +22,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Padrão Ouro de Doc. Score: 98.8/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-skill-auditor",
@@ -42,7 +42,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Padrão Ouro de Doc. Score: 98.5/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-improve-skill",
@@ -61,7 +61,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Integrada ao Sentinel Core. Score Doc: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-create-skill",
@@ -79,7 +79,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Padrão Ouro de Doc. Score: 92.8/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-immunity-gate",
@@ -99,7 +99,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Integrada com Guardrail V2.0. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-dev-tdd",
@@ -118,7 +118,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "TDD Elite com Simplicity/Surgical laws. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-brainstorming",
@@ -155,7 +155,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Planos Atômicos com Goal-Driven Execution. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-adr",
@@ -173,7 +173,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Resgate integral de templates e scripts. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-systematic-debugging",
@@ -192,7 +192,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Fragmentação de contexto em 316+ lines originais. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-spec-validation",
@@ -210,7 +210,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Resgate integral de checklists técnicos. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-init",
@@ -229,7 +229,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Superior à V1: Resgate integral de infra + encoding fix. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-cdd-orchestrator",
@@ -248,7 +248,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Motor Mãe com Karpathy Laws injetadas. Score: 100/100",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-commit",
@@ -267,7 +267,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Elite Upgrade V1.3.0",
-      "promoted_at": "2026-05-22"
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-governance-orchestration-engine",
@@ -308,7 +308,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": null,
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "author": "Victor",
@@ -329,7 +329,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-22",
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-16",
       "updated_at": "2026-05-22",
       "author": "Arquiteto Stout"
@@ -349,7 +349,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-22",
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-16",
       "updated_at": "2026-05-22",
       "author": "Arquiteto Stout"
@@ -370,7 +370,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-22",
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-16",
       "updated_at": "2026-05-22",
       "author": "Arquiteto Stout"
@@ -389,7 +389,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": null,
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "author": "Engenheiro Stout"
@@ -409,7 +409,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-22",
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "author": "Victor"
@@ -429,7 +429,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-22",
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "author": "Victor"
@@ -448,7 +448,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-22",
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "author": "Victor"
@@ -468,7 +468,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": null,
+      "promoted_at": "2026-05-29",
       "created_at": "2026-05-23",
       "updated_at": "2026-05-23",
       "author": "Victor",
@@ -492,7 +492,8 @@
       "created_at": "2026-05-29",
       "updated_at": "2026-05-29",
       "author": "Victor",
-      "notes": "Skill de descoberta e instalacao via skillfish CLI. Path canonico: .shared-ai-memory/skills/"
+      "notes": "Skill de descoberta e instalacao via skillfish CLI. Path canonico: .shared-ai-memory/skills/",
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-skill-manager",
@@ -512,7 +513,8 @@
       "created_at": "2026-05-29",
       "updated_at": "2026-05-29",
       "author": "Victor",
-      "notes": "Orquestrador das 5 fases: busca local -> skillfish -> auditor -> install -> sentinel"
+      "notes": "Orquestrador das 5 fases: busca local -> skillfish -> auditor -> install -> sentinel",
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "audit-skill-manager",

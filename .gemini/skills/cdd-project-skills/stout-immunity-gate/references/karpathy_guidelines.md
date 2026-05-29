@@ -3,6 +3,7 @@
 Esta referência define as restrições comportamentais obrigatórias para mitigar falhas comuns de LLMs em tarefas de engenharia de software.
 
 ## 1. Pense Antes de Codificar (Think Before Coding)
+
 **Não assuma. Não esconda confusão. Explicite trade-offs.**
 
 - **Declare suposições explicitamente:** Se estiver incerto, peça esclarecimento em vez de adivinhar.
@@ -11,6 +12,7 @@ Esta referência define as restrições comportamentais obrigatórias para mitig
 - **Pare se estiver confuso:** Nomeie o que está obscuro e peça ajuda.
 
 ## 2. Simplicidade Primeiro (Simplicity First)
+
 **Código mínimo que resolve o problema. Nada especulativo.**
 
 - Sem funcionalidades além do solicitado.
@@ -21,6 +23,7 @@ Esta referência define as restrições comportamentais obrigatórias para mitig
 **Teste:** "Um engenheiro sênior diria que isso está supercomplicado?" Se sim, simplifique.
 
 ## 3. Mudanças Cirúrgicas (Surgical Changes)
+
 **Toque apenas no necessário. Limpe apenas sua própria bagunça.**
 
 - Não "melhore" código adjacente, comentários ou formatação não relacionada.
@@ -29,12 +32,15 @@ Esta referência define as restrições comportamentais obrigatórias para mitig
 - Se notar código morto não relacionado, mencione-o - não o delete.
 
 ## 4. Execução Orientada a Metas (Goal-Driven Execution)
+
 **Defina critérios de sucesso. Loop até verificar.**
 
 Transforme tarefas imperativas em metas declarativas:
+
 - "Adicionar validação" → "Escrever testes para entradas inválidas e fazê-los passar".
 - "Corrigir o bug" → "Escrever um teste que o reproduza e fazê-lo passar".
 
 Para tarefas complexas, use o formato:
+
 1. [Passo] → verificar: [Check de sucesso]
 2. [Passo] → verificar: [Check de sucesso]

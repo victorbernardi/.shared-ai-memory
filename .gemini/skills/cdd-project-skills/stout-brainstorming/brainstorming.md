@@ -26,6 +26,7 @@ A fase de brainstorming só é considerada encerrada quando você gerar ou atual
 `./docs/spec.md`
 
 A Spec deve conter:
+
 1. **Objetivo:** O que estamos resolvendo.
 2. **Requisitos:** Funcionais e não-funcionais.
 3. **Arquitetura:** Mudanças estruturais propostas.

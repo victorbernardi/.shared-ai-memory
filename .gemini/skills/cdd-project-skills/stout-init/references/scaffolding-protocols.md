@@ -24,7 +24,7 @@ import io
 if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-```
+```text
 
 ---
 
@@ -49,7 +49,7 @@ $projeto = "[NomeProjeto]"
 $destino = "$HOME\.shared-ai-memory\docs\active\$projeto"
 New-Item -ItemType Directory -Force -Path $destino | Out-Null
 mklink /J "$raizProjeto\docs" $destino
-```
+```text
 
 Consulte `infra-logic.md` para o padrão completo com verificação pós-criação.
 
@@ -65,7 +65,9 @@ Para cada addon selecionado, leia o `ADDON.md` e execute as instruções de inst
 ### Phase 4: Finalization & Quality
 
 1. **Sanitização:** Execute obrigatoriamente o script de auto-fix:
+
    `python C:\Users\victor.bernardi\.shared-ai-memory\scripts\markdown_auto_fixer_v1.py .`
+
 2. **Manifesto:** Gere um `stout-manifest.json` com os metadados.
 
 ---

@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-systematic-debugging
 description: "Processo científico para investigação de causa raiz e resolução de falhas técnicas no ecossistema Stout. Triggers: debugging, erro, falha, bug, investigação, causa raiz, troubleshooting, consertar, quebrou."
 version: 1.2.0
@@ -40,7 +42,7 @@ Para ativar via orquestrador local:
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-systematic-debugging
-```
+```text
 
 ## 🛡️ Governanca
 

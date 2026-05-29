@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-adr
 description: "Gestão de Architecture Decision Records (ADR) seguindo o padrão MADR v4 local. Triggers: adr, arquitetura, decisão técnica, documentação, MADR, decision record, design data, infraestrutura."
 version: 1.2.0
@@ -51,12 +53,12 @@ Para ativar via orquestrador local:
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-adr
-```
+```text
 
 ## 🛡️ Governanca
 
 - Decisões aceitas são imutáveis.
-- Exige validação via `validate-adr.sh` antes da oficialização.
+- Exige validação via `validate_adr.py` antes da oficialização.
 
 ## When to Use
 

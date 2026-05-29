@@ -23,7 +23,7 @@ Place under `## More Information` as `### {topic}`.
 
 ## Example
 
-````markdown
+```text`markdown
 ---
 status: "accepted"
 date: 2026-01-13
@@ -105,4 +105,4 @@ Revert package.json to v6 and restore changed API calls.
 
 * If TanStack Router reaches 1.0 stable, evaluate type-safe routing alternatives
 * If React Router v7 introduces breaking changes in a minor release
-````
+```text`

@@ -3,6 +3,7 @@
 Abordagens para Implementar o Guardrail
 
 1. Interceptação via Wrapper de Tool (Mais Robusto)
+
 A abordagem mais confiável é criar um middleware/wrapper que intercepta a chamada de write_to_file antes de executá-la:
 
 python
@@ -26,6 +27,7 @@ def write_to_file_guarded(path: str, content: str) -> str:
 Registre esse wrapper no lugar da tool original no seu toolchain.
 
 1. Regra na System Prompt / GEMINI.md (Camada Cognitiva)
+
 Adicione uma regra explícita no arquivo GEMINI.md ou na system prompt do agente. Modelos seguem restrições bem formatadas com mais consistência quando estão no contexto de instrução fixa:
 
 text
@@ -50,6 +52,7 @@ text
 2. Se existir → usar `replace_file_content`
 3. Se não existir → usar `write_to_file`
 4. Hook de Pré-Execução via run_command (Camada de Shell)
+
 Se o Gemini CLI executa tools via scripts, você pode adicionar um check em PowerShell:
 
 powershell
@@ -65,7 +68,9 @@ if (Test-Path $FilePath) {
 
 Set-Content -Path $FilePath -Value $Content -Encoding UTF8
 Write-Output "Arquivo criado com sucesso: $FilePath"
+
 4. Validação via Schema de Tool (Camada de API)
+
 Se o Gemini CLI suporta definição de tools com JSON Schema, adicione um campo de validação semântica na descrição da tool para guiar o modelo:
 
 json

@@ -19,7 +19,7 @@
     }
   }
 }
-```
+```text
 
 ## 🛠️ Lógica de Junctions (Windows)
 
@@ -33,14 +33,14 @@ $projeto = "[NomeProjeto]"
 $destino = "$HOME\.shared-ai-memory\docs\active\$projeto"
 New-Item -ItemType Directory -Force -Path $destino | Out-Null
 mklink /J "C:\Projetos\[Caminho]\docs" $destino
-```
+```text
 
 **Verificação pós-criação:**
 
 ```powershell
 (Get-Item "C:\Projetos\[Caminho]\docs").LinkType  # deve retornar "Junction"
 (Get-Item "C:\Projetos\[Caminho]\docs").Target     # deve apontar para active\[NomeProjeto]
-```
+```text
 
 ## 🛠️ Detecção de Ferramentas por Ambiente
 

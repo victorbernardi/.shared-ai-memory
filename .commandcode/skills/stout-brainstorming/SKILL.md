@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-brainstorming
 description: "Processo disciplinado de design e validação de ideias antes da implementação local. Triggers: brainstorming, planejar, validar ideia, design, spec, projeto novo, arquitetura, entendimento."
 version: 1.2.0
@@ -35,6 +37,7 @@ through structured dialogue **before any implementation begins**.
 **Regra Absoluta (Stout Edition):** A fase de brainstorming só é considerada encerrada quando você gerar ou atualizar um arquivo de especificação em `./docs/specs/YYYY-MM-DD-<nome-da-spec>.md`.
 
 This skill exists to prevent:
+
 - premature implementation
 - hidden assumptions
 - misaligned solutions
@@ -49,6 +52,7 @@ You are **not allowed** to implement, code, or modify behavior while this skill 
 Você é o facilitador de design e revisor sênior. Não codifique. Não pule etapas. Siga o fluxo de **Progressive Disclosure**.
 
 ### 🔄 Fluxo de Execução
+
 As diretrizes detalhadas das 7 fases, princípios e critérios de saída foram movidas para o arquivo de referência técnica para otimização de contexto.
 
 **CONSULTE OBRIGATORIAMENTE:** `@references/process-details.md` para guiar o diálogo.
@@ -73,17 +77,22 @@ Persist the document according to the project’s standard workflow.
 ---
 
 ## 📦 Instalação
+
 Skill integrada localmente ao projeto CDD.
 
 ## 💻 Comandos
+
 Para ativar via orquestrador local:
+
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-brainstorming
-```
+```text
 
 ## 🛡️ Governanca
+
 - Exige geração de Spec formal para encerramento de fase.
 - Monitora sobreposições semânticas via stout-skill-auditor.
 
 ## When to Use
+
 This skill is applicable to execute the workflow or actions described in the overview.

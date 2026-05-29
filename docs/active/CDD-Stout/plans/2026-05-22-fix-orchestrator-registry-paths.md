@@ -49,14 +49,11 @@ LAUNCHER = PROJECT_ROOT / "skills" / "stout-cdd-orchestrator" / "scripts" / "lau
 REGISTRY = PROJECT_ROOT / "skills" / "stout-skill-registry" / "registry.json"
 SKILLS_DIR = PROJECT_ROOT / "skills"
 
-
 def _load_registry() -> dict:
     return json.loads(REGISTRY.read_text(encoding="utf-8"))
 
-
 def test_registry_exists():
     assert REGISTRY.exists(), f"registry.json não encontrado em {REGISTRY}"
-
 
 def test_all_registry_paths_exist():
     data = _load_registry()
@@ -66,7 +63,6 @@ def test_all_registry_paths_exist():
         if not skill_md.exists():
             missing.append(f"{skill['name']} -> {skill['path']}")
     assert not missing, "Skills com path inválido no registry:\n" + "\n".join(missing)
-
 
 def test_launcher_resolves_skills_dir(monkeypatch, tmp_path):
     """Garante que CDD_PROJECT_SKILLS_DIR aponta para skills/ do projeto."""
@@ -83,7 +79,6 @@ def test_launcher_resolves_skills_dir(monkeypatch, tmp_path):
     )
     assert Path(str(registry_via_launcher)).exists()
 
-
 def test_launcher_skill_base_path_finds_skill_md(monkeypatch):
     """Garante que skill_base_path leva ao SKILL.md de uma skill existente."""
     monkeypatch.delenv("STOUT_GLOBAL_SKILLS_PATH", raising=False)
@@ -98,14 +93,14 @@ def test_launcher_skill_base_path_finds_skill_md(monkeypatch):
     # O path no registry após correção será "skills/X", então:
     skill_md = SKILLS_DIR / first_skill["path"] / "SKILL.md"
     assert skill_md.exists(), f"SKILL.md não encontrado via path do registry: {skill_md}"
-```
+```text
 
 - [ ] **Step 2: Rodar os testes — esperar falha**
 
 ```bash
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 python -m pytest tests/test_orchestrator_paths.py -v
-```
+```text
 
 Saída esperada: `FAILED test_all_registry_paths_exist` e `FAILED test_launcher_skill_base_path_finds_skill_md` (paths legados)
 
@@ -149,7 +144,7 @@ Também atualizar `"last_updated": "2026-05-22"`.
 
 ```bash
 python -m pytest tests/test_orchestrator_paths.py::test_registry_exists tests/test_orchestrator_paths.py::test_all_registry_paths_exist -v
-```
+```text
 
 Saída esperada: ambos `PASSED`
 
@@ -176,13 +171,13 @@ Alterar a linha 52 de:
 
 ```python
 skill_base_path = Path(os.getenv("STOUT_GLOBAL_SKILLS_PATH", str(CDD_PROJECT_SKILLS_DIR.parent.parent)))
-```
+```text
 
 Para:
 
 ```python
 skill_base_path = Path(os.getenv("STOUT_GLOBAL_SKILLS_PATH", str(CDD_PROJECT_SKILLS_DIR.parent)))
-```
+```text
 
 Isso faz `skill_base_path` = raiz do projeto CDD. Com `skill['path']` = `"skills/stout-init"`, o path final será:
 `project_root / skills / stout-init / SKILL.md` ✅
@@ -191,7 +186,7 @@ Isso faz `skill_base_path` = raiz do projeto CDD. Com `skill['path']` = `"skills
 
 ```bash
 python -m pytest tests/test_orchestrator_paths.py -v
-```
+```text
 
 Saída esperada: todos `PASSED`
 
@@ -199,7 +194,7 @@ Saída esperada: todos `PASSED`
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-init
-```
+```text
 
 Saída esperada: sem `[AVISO] SKILL.md não encontrado`, exibição das instruções do `stout-init`.
 
@@ -208,7 +203,7 @@ Saída esperada: sem `[AVISO] SKILL.md não encontrado`, exibição das instruç
 ```bash
 git add skills/stout-skill-registry/registry.json skills/stout-cdd-orchestrator/scripts/launcher.py tests/test_orchestrator_paths.py
 git commit -m "fix: corrige paths legados no registry e launcher do orchestrator (projeto CDD)"
-```
+```text
 
 ---
 
@@ -265,7 +260,7 @@ print('MISS:', missing or 'nenhum')
 ok = [(s['name']) for s in data['skills'] if s.get('status') != 'inactive' and (home / s['path'] / 'SKILL.md').exists()]
 print('OK:', ok)
 "
-```
+```text
 
 Saída esperada: `MISS: nenhum` e lista de skills ativas.
 
@@ -311,14 +306,12 @@ KARPATHY_LAWS = """
 4. Execução Orientada a Metas: Defina critérios de sucesso e loops (TDD).
 """
 
-
 def load_registry() -> dict:
     if not REGISTRY_PATH.exists():
         print(f"[ERRO] Registro CDD não encontrado em: {REGISTRY_PATH}")
         sys.exit(1)
     with open(REGISTRY_PATH, 'r', encoding='utf-8') as f:
         return json.load(f)
-
 
 def launch_skill(skill_name: str) -> None:
     data = load_registry()
@@ -354,19 +347,18 @@ def launch_skill(skill_name: str) -> None:
 
     print(f"\n[OK] Skill '{skill_name}' orquestrada com sucesso.")
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--skill", required=True, help="Nome da skill a ser ativada")
     args = parser.parse_args()
     launch_skill(args.skill)
-```
+```text
 
 - [ ] **Step 2: Teste de smoke manual**
 
 ```bash
 python C:\Users\victor.bernardi\.shared-ai-memory\skills\stout-cdd-orchestrator\scripts\launcher.py --skill stout-init
-```
+```text
 
 Saída esperada: exibição das instruções do `stout-init` sem `[AVISO]`.
 
@@ -374,7 +366,7 @@ Saída esperada: exibição das instruções do `stout-init` sem `[AVISO]`.
 
 ```bash
 python C:\Users\victor.bernardi\.shared-ai-memory\skills\stout-cdd-orchestrator\scripts\launcher.py --skill stout-welcome
-```
+```text
 
 Saída esperada: `[AVISO] SKILL.md não encontrado` — sem crash, exit 0.
 

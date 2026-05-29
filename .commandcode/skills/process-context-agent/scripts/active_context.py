@@ -29,6 +29,12 @@ def load_active_context() -> ActiveContext:
     for line in text.splitlines():
         if line.startswith("# Contexto Ativo"):
             continue
+        if line.startswith("**Total de sess"):
+            try:
+                ctx.total_sessions = int(line.split(":**")[-1].strip())
+            except (ValueError, IndexError):
+                pass
+            continue
         if line.startswith("## "):
             current_section = line[3:].strip().lower()
             continue
@@ -118,6 +124,7 @@ def save_active_context(ctx: ActiveContext, projects: list[ProjectInfo] = None):
 
     lines = [
         f"# Contexto Ativo — Atualizado em {now}",
+        f"**Total de sessões registradas:** {ctx.total_sessions}",
         "",
     ]
 

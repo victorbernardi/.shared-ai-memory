@@ -10,12 +10,13 @@ Este documento centraliza e prioriza todas as sugestões de otimização agênti
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **SUG-001** | 2026-05-20 | `7dab8b40` | Galeria de imagens rápida (`galeria_motores.md`) para inspeção de assets de IA antes da injeção no código. | Evitar insatisfação com assets gerados incorretamente e poupar tempo de runtime. | `Alta` | `Planejado` |
 | **SUG-002** | 2026-05-21 | `a7dbcc9d` | Criação de infraestrutura "Session-Learning" baseada em SQLite local e deduplicação offline. | Redução drástica de custo de tokens e retenção duradoura de tribal knowledge. | `Crítica` | `Em Execução` |
-| **SUG-003** | 2026-05-21 | `sess-202` | timizar a performance do dashboard usando carregamento lazy-load das imagens. | Otimização local e clareza de código | `Média` | `Planejado` |
-| **SUG-004** | 2026-05-21 | `sess-202` | timizar a performance do dashboard usando carregamento lazy-load das imagens."} | Otimização local e clareza de código | `Média` | `Planejado` |
-| **SUG-005** | 2026-05-21 | `sess-202` | a performance do dashboard usando carregamento lazy-load das imagens. | Melhoria de performance e eficiência | `Média` | `Planejado` |
-| **SUG-006** | 2026-05-21 | `sess-202` | a performance do dashboard usando carregamento lazy-load das imagens."} | Melhoria de performance e eficiência | `Média` | `Planejado` |
-| **SUG-007** | 2026-05-22 | `sess-202` | to tell the parent agent what happened instead if you cannot continue. | Otimização local e clareza de código | `Média` | `Planejado` |
-| **SUG-008** | 2026-05-22 | `sess-202` | articles, papers, or notes into their knowledge base, or says things like "add this to the wiki", | Alinhamento e modularidade de dependências | `Média` | `Planejado` |
+| **SUG-003** | 2026-05-26 | `sess-202` | timizar a performance do dashboard usando carregamento lazy-load das imagens."} | Otimização local e clareza de código | `Média` | `Planejado` |
+| **SUG-004** | 2026-05-26 | `sess-202` | a performance do dashboard usando carregamento lazy-load das imagens."} | Melhoria de performance e eficiência | `Média` | `Planejado` |
+| **SUG-005** | 2026-05-28 | `sess-202` | ificada e nenhum script Bash legado foi removido ainda.   Aguardamos o seu veredito e aprovação humana explícita deste plano de portabilidade de ADRs | Otimização local e clareza de código | `Média` | `Planejado` |
+| **SUG-006** | 2026-05-28 | `sess-202` | a execução em Python. *   **Tarefa 6:** Remover os scripts legados obsoletos em Bash (`.sh`) para limpar a árvore de arquivos. *   **Tarefa 7:** Criar | Otimização local e clareza de código | `Média` | `Planejado` |
+| **SUG-007** | 2026-05-28 | `sess-202` | ificada e nenhum script Bash legado foi removido ainda.   Aguardamos o seu veredito e aprovação humana explícita deste plano de portabilidade de ADRs  | Otimização local e clareza de código | `Média` | `Planejado` |
+| **SUG-008** | 2026-05-28 | `sess-202` | a execução em Python. *   **Tarefa 6:** Remover os scripts legados obsoletos em Bash (`.sh`) para limpar a árvore de arquivos. *   **Tarefa 7:** Criar | Otimização local e clareza de código | `Média` | `Planejado` |
+| **SUG-009** | 2026-05-28 | `sess-202` | as seja pautada em conhecimento técnico validado e melhores práticas da indústria. 9:  10: ## 2. PROCEDIMENTO (SEARCH-BEFORE-CODE) 11:  12: Toda vez q | Otimização local e clareza de código | `Média` | `Planejado` |
 
 ---
 

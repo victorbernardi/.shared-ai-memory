@@ -158,6 +158,7 @@ Strict converge 不成立. しかし advisor cut-off 判定に該当: critical 1
 ## Final Decision: Cut-off (not strict Converged)
 
 iter 4 で stop. iter 5 は実施しない. 理由:
+
 1. critical 100% 安定達成
 2. Template ambiguity (cluster A) 完全解消
 3. Brevity oscillation (iter 3 regression) は monotonic trim に正常化

@@ -71,7 +71,6 @@ import pytest
 # Make src/tools importable
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "tools"))
 
-
 class TestSlugify:
     def test_converts_slashes_to_hyphens(self):
         from stout_promote import slugify
@@ -100,7 +99,7 @@ class TestSlugify:
     def test_preserves_underscores(self):
         from stout_promote import slugify
         assert slugify("fix/feature_name") == "fix-feature_name"
-```
+```text
 
 - [ ] **Step 2: Run — expect failure**
 
@@ -133,7 +132,6 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
-
 def slugify(text: str, max_len: int = 60) -> str:
     """Sanitize a git branch name to a filesystem-safe slug."""
     text = text.lower()
@@ -141,7 +139,7 @@ def slugify(text: str, max_len: int = 60) -> str:
     text = re.sub(r"[^a-z0-9\-_]", "", text)
     text = re.sub(r"-{2,}", "-", text)
     return text[:max_len].strip("-")
-```
+```text
 
 - [ ] **Step 4: Run — expect pass**
 
@@ -153,7 +151,7 @@ Expected: `7 passed`
 ```bash
 git add tests/test_stout_promote_v3.py src/tools/stout_promote.py
 git commit -m "feat: stout_promote v3.0 skeleton with slugify()"
-```
+```text
 
 ---
 
@@ -215,7 +213,7 @@ class TestDetectType:
         f = tmp_path / "doc.md"
         f.write_text("TIPO: SPEC\n\nContent", encoding="utf-8")
         assert detect_type(f) == "spec"
-```
+```text
 
 - [ ] **Step 2: Run — expect failure**
 
@@ -239,7 +237,6 @@ FILENAME_HINTS = {
     "walkthrough": "walkthrough",
 }
 
-
 def detect_type(filepath: Path) -> str:
     """Classify an artifact: content markers (first 5 lines) → filename → 'concept'."""
     try:
@@ -256,7 +253,7 @@ def detect_type(filepath: Path) -> str:
         if hint in name:
             return hint_type
     return "concept"
-```
+```text
 
 - [ ] **Step 4: Run — expect pass**
 
@@ -268,7 +265,7 @@ Expected: `7 passed`
 ```bash
 git add tests/test_stout_promote_v3.py src/tools/stout_promote.py
 git commit -m "feat: detect_type() classifies by first 5 lines then filename"
-```
+```text
 
 ---
 
@@ -308,7 +305,7 @@ class TestLogAndHash:
         save_promote_log(tmp_path, log)
         assert load_promote_log(tmp_path) == log
         assert (tmp_path / "docs" / ".promote_log.json").exists()
-```
+```text
 
 - [ ] **Step 2: Run — expect failure**
 
@@ -327,10 +324,8 @@ def file_sha256(filepath: Path) -> str:
             h.update(chunk)
     return h.hexdigest()
 
-
 def _log_path(project_root: Path) -> Path:
     return project_root / "docs" / ".promote_log.json"
-
 
 def load_promote_log(project_root: Path) -> dict:
     path = _log_path(project_root)
@@ -339,13 +334,12 @@ def load_promote_log(project_root: Path) -> dict:
             return json.load(fh)
     return {"promotions": [], "content_hashes": {}}
 
-
 def save_promote_log(project_root: Path, log: dict) -> None:
     path = _log_path(project_root)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(log, fh, indent=2, ensure_ascii=False)
-```
+```text
 
 - [ ] **Step 4: Run — expect pass**
 
@@ -357,7 +351,7 @@ Expected: `4 passed`
 ```bash
 git add tests/test_stout_promote_v3.py src/tools/stout_promote.py
 git commit -m "feat: add file_sha256 and promote-log persistence"
-```
+```text
 
 ---
 
@@ -404,7 +398,6 @@ class TestSessionFilter:
         (logs / "overview.txt").write_text("totally different project Beta", encoding="utf-8")
         assert is_session_for_current_project(session, project_root) is False
 
-
 class TestDiscoverSessions:
     def test_scans_antigravity_cli_root_layout(self, tmp_path, monkeypatch):
         """antigravity-cli brain sessions expose artifacts at session root (§2.1)."""
@@ -437,7 +430,7 @@ class TestDiscoverSessions:
         found = discover_sessions(project_root)
         assert all("antigravity\\brain" not in str(src) and "antigravity/brain" not in str(src)
                    for src, _ in found)
-```
+```text
 
 - [ ] **Step 2: Run — expect failure**
 
@@ -476,7 +469,6 @@ def is_session_for_current_project(session_dir: Path, project_root: Path) -> boo
                 return True
     return False
 
-
 def discover_sessions(project_root: Path) -> list:
     """Return [(src_dir, origin), ...] for the current project, per spec §2.1.
 
@@ -511,7 +503,7 @@ def discover_sessions(project_root: Path) -> list:
         found.append((claude_dir, "claude"))
 
     return found
-```
+```text
 
 - [ ] **Step 4: Run — expect pass**
 
@@ -529,7 +521,6 @@ def encode_claude_path(path_str: str) -> str:
     return (path_str.replace(":\\", "--").replace("\\", "-")
             .replace(":", "--").replace("/", "-"))
 
-
 def get_claude_memory_dir(project_root: Path):
     root = Path.home() / ".claude" / "projects"
     if not root.exists():
@@ -544,14 +535,14 @@ def get_claude_memory_dir(project_root: Path):
             if mem.exists():
                 return mem
     return None
-```
+```text
 
 - [ ] **Step 6: Commit**
 
 ```bash
 git add tests/test_stout_promote_v3.py src/tools/stout_promote.py
 git commit -m "feat: brain-path session discovery and project filter (core fix)"
-```
+```text
 
 ---
 
@@ -586,7 +577,7 @@ class TestNaming:
         (dest / f"plan_2026-01-01_{slug}_v1.md").write_text("old", encoding="utf-8")
         (dest / f"plan_2026-02-02_{slug}_v2.md").write_text("older", encoding="utf-8")
         assert next_version(dest, "plan", slug) == 3
-```
+```text
 
 - [ ] **Step 2: Run — expect failure**
 
@@ -609,13 +600,12 @@ def next_version(dest_dir: Path, artifact_type: str, slug: str) -> int:
                 highest = max(highest, int(m.group(1)))
     return highest + 1
 
-
 def get_promoted_filename(filepath: Path, branch: str, version: int = 1) -> str:
     """{tipo}_{YYYY-MM-DD(mtime)}_{branch-slug}_v{N}.md"""
     artifact_type = detect_type(filepath)
     date_str = datetime.fromtimestamp(filepath.stat().st_mtime).strftime("%Y-%m-%d")
     return f"{artifact_type}_{date_str}_{slugify(branch)}_v{version}.md"
-```
+```text
 
 - [ ] **Step 4: Run — expect pass**
 
@@ -627,7 +617,7 @@ Expected: `2 passed`
 ```bash
 git add tests/test_stout_promote_v3.py src/tools/stout_promote.py
 git commit -m "feat: deterministic naming with date-agnostic version resolution"
-```
+```text
 
 ---
 
@@ -645,7 +635,6 @@ Append:
 ```python
 DEST_SUBDIR = {"plan": "plans", "spec": "specs", "walkthrough": "walkthroughs", "concept": "concepts"}
 
-
 def _make_brain_session(tmp_path, project_root, files: dict):
     """Create an antigravity-cli-style session whose overview names the project."""
     sess = tmp_path / "brain" / "sess1"
@@ -654,7 +643,6 @@ def _make_brain_session(tmp_path, project_root, files: dict):
     for fname, content in files.items():
         (sess / fname).write_text(content, encoding="utf-8")
     return sess
-
 
 class TestPromoteArtifacts:
     def test_promotes_and_is_idempotent(self, tmp_path):
@@ -722,7 +710,7 @@ class TestPromoteArtifacts:
         assert count == 1  # would-promote count
         assert not (project_root / "docs" / "plans").exists()
         assert not (project_root / "docs" / ".promote_log.json").exists()
-```
+```text
 
 - [ ] **Step 2: Run — expect failure**
 
@@ -737,7 +725,6 @@ Append to `src/tools/stout_promote.py`:
 IGNORED_NAMES = {"task.md", "implementation_plan.md.resolved"}
 DEST_SUBDIR = {"plan": "plans", "spec": "specs", "walkthrough": "walkthroughs", "concept": "concepts"}
 
-
 def get_current_branch(project_root: Path) -> str:
     try:
         out = subprocess.run(["git", "branch", "--show-current"],
@@ -748,7 +735,6 @@ def get_current_branch(project_root: Path) -> str:
     except (OSError, subprocess.SubprocessError):
         pass
     return project_root.name
-
 
 def promote_artifacts(project_root=None, branch=None, session_dirs=None, dry_run=False) -> int:
     """Promote artifacts from all project sessions. Returns count promoted (or would-promote).
@@ -801,12 +787,11 @@ def promote_artifacts(project_root=None, branch=None, session_dirs=None, dry_run
         save_promote_log(project_root, log)
     return promoted
 
-
 if __name__ == "__main__":
     print("--- Stout Artifact Promoter v3.0 ---")
     n = promote_artifacts()
     print(f"\nResumo: {n} artefatos sincronizados.")
-```
+```text
 
 - [ ] **Step 4: Run — expect pass**
 
@@ -823,7 +808,7 @@ Expected: all green (≈31 tests)
 ```bash
 git add tests/test_stout_promote_v3.py src/tools/stout_promote.py
 git commit -m "feat: promote_artifacts orchestration with dedup, dry-run, zero-arg main"
-```
+```text
 
 ---
 
@@ -881,7 +866,7 @@ class TestPostApprove:
         log = subprocess.run(["git", "log", "--oneline"], cwd=project_root,
                              capture_output=True, text=True)
         assert "Promote" not in log.stdout
-```
+```text
 
 - [ ] **Step 2: Run — expect failure**
 
@@ -907,7 +892,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stout_promote import promote_artifacts, get_current_branch  # noqa: E402
 
-
 def run(project_root=None, session_dirs=None, dry_run=False) -> int:
     project_root = Path(project_root) if project_root else Path.cwd()
     branch = get_current_branch(project_root)
@@ -929,7 +913,6 @@ def run(project_root=None, session_dirs=None, dry_run=False) -> int:
     print(f"OK: {count} artefato(s) promovido(s) e commitado(s). Branch: {branch}")
     return 0
 
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Promote artifacts after plan approval")
     parser.add_argument("--dry-run", action="store_true",
@@ -937,10 +920,9 @@ def main() -> int:
     args = parser.parse_args()
     return run(dry_run=args.dry_run)
 
-
 if __name__ == "__main__":
     sys.exit(main())
-```
+```text
 
 - [ ] **Step 4: Run — expect pass**
 
@@ -952,7 +934,7 @@ Expected: `2 passed`
 ```bash
 git add src/tools/post_approve.py tests/test_stout_promote_v3.py
 git commit -m "feat: post_approve.py reuses promote_artifacts for run and dry-run"
-```
+```text
 
 ---
 
@@ -981,14 +963,14 @@ Após aprovar um plano:
    - Nomeia de forma determinística: `{tipo}_{YYYY-MM-DD}_{branch-slug}_v{N}.md`.
    - Faz `git add docs/` e commita.
 2. Prévia sem efeitos: `python src/tools/post_approve.py --dry-run`.
-```
+```text
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add GEMINI.md
 git commit -m "docs: document stout_promote v3.0 post-approval workflow"
-```
+```text
 
 ---
 

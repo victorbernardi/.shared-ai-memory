@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-init
 description: "Inicialização modular de projetos Stout com arquitetura de Addons. Triggers: inicializar projeto, novo projeto, scaffold, stout-init, projeto modular."
 version: 2.1.0
@@ -44,7 +46,7 @@ Para ativar via orquestrador local:
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-init
-```
+```text
 
 ## 🛡️ Governanca
 

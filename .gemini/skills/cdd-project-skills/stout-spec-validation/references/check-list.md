@@ -138,7 +138,7 @@ Markdown appended to reviewer findings:
 ## Consistency Findings
 
 | CON-001 | P0/P1/P2 | check name | sow.md:section / spec.md:section | What CC will do when it reads this | Concrete rewrite, not "clarify this" |
-```
+```text
 
 Finding format and Gate contribution follow the `reviewer-spec` agent.
 
@@ -151,9 +151,10 @@ Finding format and Gate contribution follow the `reviewer-spec` agent.
 ## Instalação
 
 Habilidade baseada em regras de análise estática de documentos Markdown.
+
 ```bash
 # Instalado via skill-manager no ambiente Stout
-```
+```text
 
 ## Comandos
 

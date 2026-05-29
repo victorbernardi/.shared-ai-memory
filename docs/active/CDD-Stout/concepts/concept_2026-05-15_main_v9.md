@@ -1,6 +1,7 @@
 # Reconnaissance Plan - PowerEmbedded
 
 ## Goals
+
 1. Navigate to the base folder URL.
 2. Identify CSS selectors for Folders.
 3. Identify CSS selectors for Reports/Dashboards.
@@ -8,6 +9,7 @@
 5. Take screenshots and document findings.
 
 ## Tasks
+
 - [x] Open the browser and navigate to the target URL.
 - [x] Confirm if the session is active (already logged in).
 - [x] Inspect the DOM for folders and reports.
@@ -19,6 +21,7 @@
 - [x] Summarize findings for the main agent.
 
 ## Findings Summary
+
 1. **Authentication**: Session is valid and persistent.
 2. **Folders**: 
    - Selector (Main View): `.folder`

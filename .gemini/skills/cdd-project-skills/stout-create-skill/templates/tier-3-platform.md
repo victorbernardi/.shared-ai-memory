@@ -15,9 +15,11 @@ author: Victor
 # PLACEHOLDER_NAME
 
 ## Objetivo
+
 PLACEHOLDER_OBJETIVO com suporte a múltiplos cenários e configuração externa.
 
 ## Estrutura de suporte
+
 - `config/PLACEHOLDER_CONFIG.yaml` — configurações da skill
 - `scripts/PLACEHOLDER_SCRIPT_1.py` — PLACEHOLDER_DESC_1
 - `scripts/PLACEHOLDER_SCRIPT_2.py` — PLACEHOLDER_DESC_2
@@ -26,22 +28,26 @@ PLACEHOLDER_OBJETIVO com suporte a múltiplos cenários e configuração externa
 ## Operações disponíveis
 
 ### Operação 1 — PLACEHOLDER_OP_1
+
 ```bash
 python scripts/PLACEHOLDER_SCRIPT_1.py --arg <valor>
-```
+```text
 
 ### Operação 2 — PLACEHOLDER_OP_2
+
 ```bash
 python scripts/PLACEHOLDER_SCRIPT_2.py --arg <valor>
-```
+```text
 
 ## Fluxo principal
+
 1. Carregar config: `config/PLACEHOLDER_CONFIG.yaml`
 2. Validar inputs
 3. Executar operação correspondente
 4. Reportar resultado
 
 ## Constraints
+
 - NUNCA PLACEHOLDER_RESTRICAO_1
 - NUNCA PLACEHOLDER_RESTRICAO_2
 - SEMPRE PLACEHOLDER_RESTRICAO_3

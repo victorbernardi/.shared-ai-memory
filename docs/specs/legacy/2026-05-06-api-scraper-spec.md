@@ -1,11 +1,11 @@
 # Spec: John Deere API Scraper
 
 ## 1. Objetivo
-... pipeline para extração ...
+... pipeline para extraÃ§Ã£o ...
 
 ## 2. Requisitos Funcionais
-- **Orquestração:** Implementar master_dispatcher.py para gerenciamento de sessões por domínio.
+- **OrquestraÃ§Ã£o:** Implementar master_dispatcher.py para gerenciamento de sessÃµes por domÃ­nio.
 ...
 
-## 4. Validação (DoD)
+## 4. ValidaÃ§Ã£o (DoD)
 - [ ] Implementar Hash SHA-256 de Manifesto (manifest.json) para rastreabilidade.

@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-skill-registry
 description: "Fonte única de verdade e Ledger de todas as skills do ecossistema Stout. Gerencia inventário, metadados, versões e dependências. Triggers de ativação: registrar skill, remover skill, listar skills, consultar registry, skill já existe, ledger, inventário, metadados, dependencies."
 version: 1.2.0
@@ -36,7 +38,7 @@ A skill já vem pré-instalada no núcleo do ecossistema Stout. Não requer depe
 
 ```bash
 python scripts/register_skill.py --name "stout-<nome>" --path "skills/stout-<nome>" --tier <1|2|3|4> --category "<categoria>" --role "<papel único>" --triggers "<t1,t2>"
-```
+```text
 
 ### Consultar skills existentes
 
@@ -44,13 +46,13 @@ python scripts/register_skill.py --name "stout-<nome>" --path "skills/stout-<nom
 python scripts/query_registry.py --status active
 python scripts/query_registry.py --category "meta-governance"
 python scripts/query_registry.py --impact "stout-<nome>"
-```
+```text
 
 ### Deprecar skill obsoleta
 
 ```bash
 python scripts/deregister_skill.py --name "stout-<nome>" --reason "<motivo>"
-```
+```text
 
 ## Regras de governança
 
@@ -70,7 +72,7 @@ python scripts/deregister_skill.py --name "stout-<nome>" --reason "<motivo>"
 stout-skill-auditor  ──lê──▶  registry.json
 stout-create-skill   ──grava▶  registry.json
 stout-improve-skill  ──grava▶  registry.json (bump-version)
-```
+```text
 
 ## Escopo
 

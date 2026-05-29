@@ -9,6 +9,7 @@
 ## 1. Statement of Work (SOW)
 
 ### 1.1 Visão Geral
+
 Este patch visa fechar as lacunas físicas e de governança identificadas na Fábrica (`stout-create-skill`). O objetivo é garantir que a geração de novas skills não dependa apenas da inteligência do subagente (generativo), mas que utilize âncoras físicas (Templates) e um porteiro de qualidade automatizado (Validator) para assegurar o Selo Stout.
 
 ### 1.2 In Scope
@@ -22,6 +23,7 @@ Este patch visa fechar as lacunas físicas e de governança identificadas na Fá
 | **Validação TDD** | Scripts de teste em `tests/` validando o comportamento pós-deploy da Fábrica |
 
 ### 1.3 Out of Scope
+
 - Alteração no `stout-skill-registry` ou `stout-skill-auditor`. *Why not:* O foco deste patch é a completude interna da Fábrica.
 
 ### 1.4 Acceptance Criteria (AC)

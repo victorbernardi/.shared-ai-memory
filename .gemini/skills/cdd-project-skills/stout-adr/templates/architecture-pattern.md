@@ -24,7 +24,7 @@ Place under `## More Information` as `### {topic}`.
 
 ## Example
 
-`````markdown
+```text``markdown
 ---
 status: "accepted"
 date: 2026-01-08
@@ -85,10 +85,12 @@ Each command contains all required knowledge inline.
 ### Architecture Diagram
 
 ```mermaid
+
 graph TD
     CMD[commands/] --> SKILL[skills/]
     SKILL --> REF[references/]
-```
+
+```text
 
 ### Quality Attributes
 
@@ -104,4 +106,4 @@ More files in exchange for clear single-responsibility per file.
 ### Reassessment Triggers
 
 * If command count exceeds 30 and skill dependency graph becomes tangled
-`````
+```text``

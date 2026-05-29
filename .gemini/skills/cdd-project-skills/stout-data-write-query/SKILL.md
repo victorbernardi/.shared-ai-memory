@@ -9,8 +9,10 @@ date_added: "2026-05-17"
 metadata:
   category: data-intelligence
   triggers: 
+
     - write query, generate sql, create query, sql syntax, write t-sql, convert to sql
     - escrever query, gerar sql, criar consulta, sintaxe sql, escrever t-sql, converter para sql
+
 ---
 
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace

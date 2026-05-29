@@ -2,7 +2,7 @@
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
 name: stout-commit
 description: "Padrão Sentry de Commits para o ecossistema Stout. Garante mensagens estruturadas, rastreabilidade de issues e segurança de branch. Triggers: commit, git commit, salvar mudanças, enviar código, mensagem de commit, fechar issue."
-version: 1.0.0
+version: 1.1.0
 author: Arquiteto Stout
 tier: 2
 source: custom
@@ -15,6 +15,7 @@ category: engineering
 Follow these conventions when creating commits for Sentry projects.
 
 ## When to Use
+
 - The user asks to commit code, prepare a commit message, or save changes in git.
 - You need Sentry-style commit formatting with conventional commit structure and issue references.
 - The task requires enforcing branch safety before committing, especially avoiding direct commits on `main` or `master`.
@@ -36,6 +37,24 @@ git branch --show-current
 ```
 
 If still on `main` or `master` (e.g., the user aborted branch creation), stop — do not commit.
+
+## Branch Policy Validation (Ecossistema Stout)
+
+After confirming the branch is not `main`/`master`, validate that the active branch belongs to the project being committed.
+
+Run the validator if present in the repo:
+
+```bash
+python src/branch_policy_validator.py
+```
+
+If the script exits with code 1:
+
+- **STOP** — do not proceed with the commit
+- Show the error message and branch suggestion to the user
+- Ask the user to switch to the suggested branch before continuing
+
+If `src/branch_policy_validator.py` does not exist in the repo, skip this step silently.
 
 ## Format
 
@@ -168,15 +187,19 @@ Reason: Caused performance regression in production.
 - The repository should be in a working state after each commit
 
 ## 📦 Instalação
+
 Skill integrada localmente ao projeto CDD.
 
 ## 💻 Comandos
+
 Para ativar via orquestrador local:
+
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-commit
 ```
 
 ## 🛡️ Governanca
+
 - Assegura o uso do padrão Sentry para rastreabilidade de KPIs.
 - Bloqueia commits diretos na `main` via check de branch obrigatório.
 
@@ -185,6 +208,7 @@ python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-commit
 - [Sentry Commit Messages](https://develop.sentry.dev/engineering-practices/commit-messages/)
 
 ## Limitations
+
 - Use this skill only when the task clearly matches the scope described above.
 - Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
 - Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

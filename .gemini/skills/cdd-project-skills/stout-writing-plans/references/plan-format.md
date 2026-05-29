@@ -56,7 +56,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Tech Stack:** [Key technologies/libraries]
 
 ---
-```
+```text
 
 ## Task Structure
 
@@ -71,10 +71,12 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Step 1: Write the failing test**
 
 ```python
+
 def test_specific_behavior():
     result = function(input)
     assert result == expected
-```
+
+```text
 
 **Step 2: Run test to verify it fails**
 
@@ -84,9 +86,11 @@ Expected: FAIL with "function not defined"
 **Step 3: Write minimal implementation**
 
 ```python
+
 def function(input):
     return expected
-```
+
+```text
 
 **Step 4: Run test to verify it passes**
 
@@ -96,13 +100,16 @@ Expected: PASS
 **Step 5: Commit**
 
 ```bash
+
 git add tests/path/test.py src/path/file.py
 git commit -m "feat: add specific feature"
-```
 
-```
+```text
+
+```text
 
 ## Remember
+
 - Exact file paths always
 - Complete code in plan (not "add validation")
 - Exact commands with expected output
@@ -116,7 +123,9 @@ Ao finalizar o plano, você deve seguir este protocolo rigoroso:
 1. **Gravação:** Salve o plano completo na pasta `./docs/plans/` com um nome descritivo (ex: `./docs/plans/plan_feature_name.md`). Nunca sobrescreva planos anteriores.
 2. **Registro Nativo:** Invoque a ferramenta `write_todos` com a lista de tarefas atômicas para que apareçam no `Ctrl+T`.
 3. **Mensagem de Gatilho:** Informe ao usuário o caminho exato do plano gerado para encerrar o turno:
+
    *"Plano de execução detalhado em `./docs/plans/plan_nome_da_task.md` e tarefas populadas no `Ctrl+T`. Aguardando aprovação para iniciar a implementação."*
+
 4. **Imobilidade:** Você NÃO deve realizar nenhuma alteração em arquivos de código fonte (.py, .js, .sql, etc.) após esta mensagem sem o comando explícito `/build`.
 
 ---
@@ -135,13 +144,16 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use subagent-driven-development
 - Stay in this session
 - Fresh subagent per task + code review
 
 **If Parallel Session chosen:**
+
 - Guide them to open new session in worktree
 - **REQUIRED SUB-SKILL:** New session uses executing-plans
 
 ## When to Use
+
 This skill is applicable to execute the workflow or actions described in the overview.

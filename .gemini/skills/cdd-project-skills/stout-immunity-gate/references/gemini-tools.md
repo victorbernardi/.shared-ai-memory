@@ -20,22 +20,26 @@ Caso encontre referências a ferramentas do Claude Code nas skills legadas, util
 | `WebFetch`                  | `read_url_content` |
 
 ## Ausência de Subagentes Genéricos
+
 O ecossistema Antigravity **não possui suporte** nativo à delegação genérica de subagentes (como a tool `Task` do Claude ou subagentes como `codebase_investigator` ou `generalist`). 
 Skills que dependam de despacho para subagentes devem fazer **fallback para execução em sessão única** através do sistema de planejamento (`/plan`). A única exceção é o `browser_subagent` para navegação visual web automatizada.
 
 ## Catálogo de Ferramentas e Regras de Ouro
 
 ### 1. Pesquisa e Navegação (Context Efficiency)
+
 - `list_dir`: Lista arquivos e subpastas de um diretório absoluto.
 - `grep_search`: Busca de texto super rápida e otimizada (via ripgrep). Suporta regex. **Sempre prefira isso no lugar de `view_file` para buscar onde uma variável é usada.**
 
 ### 2. Leitura e Edição (Cirúrgica)
+
 - `view_file`: Lê conteúdo de arquivos.
 - `write_to_file`: Sobrescreve ou cria arquivos completos. (Melhor para arquivos novos, curtos, ou criação de artefatos).
 - `replace_file_content`: Substituição estrita exigindo bloco único idêntico. Use para manter a integridade de arquivos grandes sem reescrevê-los.
 - `multi_replace_file_content`: Permite substituir múltiplos blocos não adjacentes em uma única chamada.
 
 ### 3. Execução de Comandos
+
 - `run_command`: Executa scripts no Powershell.
   - **Regra de ouro:** Sempre utilize flags silenciosas (`--silent`, `-q`, `--no-pager`).
   - Retorna um background job ID se parametrizado com delay.

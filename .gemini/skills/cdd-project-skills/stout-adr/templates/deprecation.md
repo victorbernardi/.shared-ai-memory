@@ -26,7 +26,7 @@ Deprecation ADRs need stronger structure than other templates. Include all of th
 
 ## Example
 
-````markdown
+```text`markdown
 ---
 status: "accepted"
 date: 2026-01-15
@@ -126,4 +126,4 @@ Steps.
 
 * If date-fns introduces a breaking change that affects locale handling
 * If moment.js is revived with tree-shaking support
-````
+```text`

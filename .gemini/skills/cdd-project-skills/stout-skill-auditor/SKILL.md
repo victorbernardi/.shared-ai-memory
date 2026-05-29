@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-skill-auditor
 description: "Porteiro e Auditor de Elite do ecossistema Stout. Avalia intenções e papéis (roles) para detectar ambiguidade, redundância ou sobreposição semântica com habilidades existentes. Triggers de ativação: criar skill, nova skill, precisamos de, falta uma skill, ambiguidade, overlap, duplicidade, conflito semântico."
 version: 1.1.0
@@ -37,13 +39,13 @@ Solicite ao usuário: Nome proposto, Papel (role), Triggers e Descrição.
 
 ```bash
 python ../stout-skill-registry/scripts/query_registry.py --status active
-```
+```text
 
 ### Passo 3 — Calcular sobreposição semântica
 
 ```bash
 python scripts/semantic_overlap.py --proposed-name "<nome>" --proposed-role "<papel>" --proposed-triggers "<t1,t2>"
-```
+```text
 
 ### Passo 4 — Emitir veredicto
 

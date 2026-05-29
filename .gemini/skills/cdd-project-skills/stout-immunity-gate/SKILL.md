@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-immunity-gate
 description: "Autoridade Máxima de Governança Técnica e Protocolo de Imunidade. Monitora erros de execução, falhas de preflight e violações de integridade de arquivos."
 version: 1.2.0

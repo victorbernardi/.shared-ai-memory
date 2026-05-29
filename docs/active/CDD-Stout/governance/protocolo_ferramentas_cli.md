@@ -12,6 +12,7 @@ Este documento é a **Fonte de Verdade Única** para o uso de ferramentas no eco
 A integridade do código e a eficiência de tokens dependem do cumprimento rigoroso do fluxo **Check-Read-Edit**.
 
 ### 🔄 Fluxo Obrigatório Antes de Qualquer Ação
+
 1.  **Verificação de Existência:** Executar `list_dir` (Antigravity) ou `list_directory` (Gemini CLI) para validar o estado do arquivo.
 2.  **Aquisição de Contexto (Obrigatório se existir):** Executar `view_file` (Antigravity) ou `read_file` (Gemini CLI).
     -   **Regra de Eficiência (200 Linhas):** Para arquivos com mais de 200 linhas, é OBRIGATÓRIO o uso de leitura cirúrgica (`start_line`, `end_line`).

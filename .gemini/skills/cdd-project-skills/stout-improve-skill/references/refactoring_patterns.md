@@ -17,7 +17,7 @@ def atomic_write(path: Path, data: dict):
         temp_file = path.with_suffix(".tmp")
         temp_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
         temp_file.replace(path)
-```
+```text
 
 ## 2. Versionamento Semântico Robusto
 
@@ -28,7 +28,7 @@ from packaging import version
 
 def is_upgrade_valid(current: str, proposed: str) -> bool:
     return version.parse(proposed) > version.parse(current)
-```
+```text
 
 ## 3. Otimização de Busca O(1)
 
@@ -42,7 +42,7 @@ skill = next((s for s in registry["skills"] if s["name"] == name), None)
 # Mantenha um mapeamento durante o load_registry
 skills_map = {s["name"]: s for s in registry["skills"]}
 skill = skills_map.get(name)
-```
+```text
 
 ## 4. Tratamento de Erros Resiliente
 
@@ -55,7 +55,7 @@ except PermissionError:
     print(f"[ERRO] Sem permissão para ler {filepath.name}")
 except FileNotFoundError:
     print(f"[ERRO] Arquivo não encontrado: {filepath.name}")
-```
+```text
 
 ## 5. Frontmatter Ouro (SKILL.md)
 

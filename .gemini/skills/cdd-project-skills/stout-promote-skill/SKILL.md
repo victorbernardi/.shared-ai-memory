@@ -30,7 +30,7 @@ Promover skills do projeto CDD ao golden copy com auditoria, rastreabilidade e a
 
 ```bash
 python skills/stout-promote-skill/scripts/promote_runner.py
-```
+```text
 
 ## Fluxo
 

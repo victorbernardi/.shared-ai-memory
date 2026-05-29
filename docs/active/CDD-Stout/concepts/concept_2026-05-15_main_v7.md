@@ -6,7 +6,7 @@
 
 ## O PROMPT
 
-```
+```text
 Preciso construir um sistema de "Daily Executive Intelligence Report" enviado por e-mail para um diretor de pós-venda de uma concessionária John Deere (máquinas de construção pesada). O relatório será 100% textual (Markdown renderizado em e-mail), sem dashboards ou links externos.
 
 O público é um executivo que:
@@ -132,7 +132,7 @@ Para cada bloco, me entregue:
 4. **Fontes e referências** para aprofundamento
 
 Priorize profundidade e aplicabilidade prática sobre generalidades.
-```
+```text
 
 ---
 

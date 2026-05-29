@@ -1,3 +1,5 @@
+[ARQUIVADA: workspace ICM - 2026-05-27]
+
 ---
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
 name: stout-session-learning

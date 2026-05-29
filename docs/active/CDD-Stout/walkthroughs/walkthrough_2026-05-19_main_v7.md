@@ -18,12 +18,16 @@ Este documento consolida as evidências empíricas da promoção da skill `stout
 ## O que foi Testado e Resultados de Validação
 
 ### 1. Teste de Integridade de Sintaxe do Roteador (Sem Regressão)
+
 Executamos o carregamento de todo o ecossistema de habilidades do projeto para garantir que o Roteador (`src/router.py`) continua funcionando com integridade absoluta:
+
 *   **Comando:** `python src/tools/skill_tool.py list`
 *   **Resultado:** **DONE (Sucesso)**. O sistema carregou as 104 habilidades ativas no ecossistema sem nenhuma quebra de sintaxe ou erro de parsing YAML.
 
 ### 2. Teste de Detalhamento de Metadados (Local vs. Global Overlay)
+
 Validamos o funcionamento da skill local em sobreposição, garantindo que o carregamento de metadados se manteve resiliente e priorizando o local (isolado) conforme as diretrizes CDD:
+
 *   **Comando:** `python src/tools/skill_tool.py info stout-cdd-orchestrator`
 *   **Resultado:** **DONE (Sucesso)**. Os metadados foram exibidos com sucesso e o roteador mapeou o caminho local da pasta `./skills` do projeto corretamente.
 

@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-spec-validation
 description: "Validação de consistência entre SOW e Especificações Técnicas no ecossistema Stout. Garante rastreabilidade total (AC -> FR -> Teste). Triggers: validar especificação, consistência, rastreabilidade, validação de requisitos, spec validation, consistency check."
 version: 1.2.0
@@ -40,7 +42,7 @@ Para ativar via orquestrador local:
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-spec-validation
-```
+```text
 
 ## 🛡️ Governanca
 

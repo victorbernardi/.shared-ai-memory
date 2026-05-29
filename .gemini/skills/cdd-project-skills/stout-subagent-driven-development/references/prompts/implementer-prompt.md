@@ -2,7 +2,7 @@
 
 Use this template when dispatching an implementer subagent.
 
-```
+```text
 Task tool (general-purpose):
   description: "Implement Task N: [task name]"
   prompt: |
@@ -75,4 +75,4 @@ Task tool (general-purpose):
     - Files changed
     - Self-review findings (if any)
     - Any issues or concerns
-```
+```text

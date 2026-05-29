@@ -9,8 +9,10 @@ date_added: "2026-05-17"
 metadata:
   category: data-intelligence
   triggers: 
+
     - analyze data, lookup metric, investigate trend, data report, analytics
     - analisar dados, buscar métrica, investigar tendência, relatório de dados, análise de dados
+
 ---
 
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace

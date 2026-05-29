@@ -9,6 +9,7 @@
 | Spec | AS-NNN | - |
 
 ## Prioridades
+
 - **P0:** Erro bloqueante. Rastreabilidade quebrada ou requisito órfão.
 - **P1:** Inconsistência de terminologia ou ambiguidade.
 - **P2:** Falta de campos opcionais ou má formatação.

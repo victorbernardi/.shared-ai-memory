@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-subagent-driven-development
 description: "Execução de planos de implementação via subagentes especialistas com revisão em dois estágios. Triggers: delegar, subagente, invocar agente, implementar via subagente, linha de montagem, assembly line."
 version: 1.0.0
@@ -43,7 +45,7 @@ Para ativar via orquestrador local:
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-subagent-driven-development
-```
+```text
 
 ## 🛡️ Governanca
 

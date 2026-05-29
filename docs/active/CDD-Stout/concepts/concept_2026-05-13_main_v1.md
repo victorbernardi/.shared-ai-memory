@@ -7,6 +7,7 @@
 - [x] Summarize the visual appearance of the dashboard
 
 ## Findings
+
 - Successfully opened `C:\Projetos\Inova\projects\Historico-de-Vendas\docs\dashboard\sales_performance.html`.
 - Dashboard features a Dark Mode "Glassmorphism" theme.
 - Key Metrics:
@@ -16,6 +17,7 @@
 - Visual: 20 subgroups are clearly visible in a horizontal bar chart with color-coded safras (23/24, 24/25, 25/26). No overlaps.
 
 ## Findings
+
 - `file:///` URLs are blocked in the browser.
 - `view_file` is restricted to the browser brain folder.
 - Attempting alternative methods to load the local file.

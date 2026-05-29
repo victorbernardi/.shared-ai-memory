@@ -22,16 +22,17 @@ Guide completion of development work by presenting clear options and handling ch
 ```bash
 # Run project's test suite
 npm test / cargo test / pytest / go test ./...
-```
+```text
 
 **If tests fail:**
-```
+
+```text
 Tests failing (<N> failures). Must fix before completing:
 
 [Show failures]
 
 Cannot proceed with merge/PR until tests pass.
-```
+```text
 
 Stop. Don't proceed to Step 2.
 
@@ -44,7 +45,7 @@ Stop. Don't proceed to Step 2.
 ```bash
 GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
 GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
-```
+```text
 
 This determines which menu to show and how cleanup works:
 
@@ -59,7 +60,7 @@ This determines which menu to show and how cleanup works:
 ```bash
 # Try common base branches
 git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
-```
+```text
 
 Or ask: "This branch split from main - is that correct?"
 
@@ -67,7 +68,7 @@ Or ask: "This branch split from main - is that correct?"
 
 **Normal repo and named-branch worktree — present exactly these 4 options:**
 
-```
+```text
 Implementation complete. What would you like to do?
 
 1. Merge back to <base-branch> locally
@@ -76,11 +77,11 @@ Implementation complete. What would you like to do?
 4. Discard this work
 
 Which option?
-```
+```text
 
 **Detached HEAD — present exactly these 3 options:**
 
-```
+```text
 Implementation complete. You're on a detached HEAD (externally managed workspace).
 
 1. Push as new branch and create a Pull Request
@@ -88,7 +89,7 @@ Implementation complete. You're on a detached HEAD (externally managed workspace
 3. Discard this work
 
 Which option?
-```
+```text
 
 **Don't add explanation** - keep options concise.
 
@@ -110,13 +111,13 @@ git merge <feature-branch>
 <test command>
 
 # Only after merge succeeds: cleanup worktree (Step 6), then delete branch
-```
+```text
 
 Then: Cleanup worktree (Step 6), then delete branch:
 
 ```bash
 git branch -d <feature-branch>
-```
+```text
 
 #### Option 2: Push and Create PR
 
@@ -133,7 +134,7 @@ gh pr create --title "<title>" --body "$(cat <<'EOF'
 - [ ] <verification steps>
 EOF
 )"
-```
+```text
 
 **Do NOT clean up worktree** — user needs it alive to iterate on PR feedback.
 
@@ -146,27 +147,30 @@ Report: "Keeping branch <name>. Worktree preserved at <path>."
 #### Option 4: Discard
 
 **Confirm first:**
-```
+
+```text
 This will permanently delete:
 - Branch <name>
 - All commits: <commit-list>
 - Worktree at <path>
 
 Type 'discard' to confirm.
-```
+```text
 
 Wait for exact confirmation.
 
 If confirmed:
+
 ```bash
 MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
 cd "$MAIN_ROOT"
-```
+```text
 
 Then: Cleanup worktree (Step 6), then force-delete branch:
+
 ```bash
 git branch -D <feature-branch>
-```
+```text
 
 ### Step 6: Cleanup Workspace
 
@@ -176,7 +180,7 @@ git branch -D <feature-branch>
 GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
 GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
 WORKTREE_PATH=$(git rev-parse --show-toplevel)
-```
+```text
 
 **If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
 
@@ -187,7 +191,7 @@ MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-tople
 cd "$MAIN_ROOT"
 git worktree remove "$WORKTREE_PATH"
 git worktree prune  # Self-healing: clean up any stale registrations
-```
+```text
 
 **Otherwise:** The host environment (harness) owns this workspace. Do NOT remove it. If your platform provides a workspace-exit tool, use it. Otherwise, leave the workspace in place.
 
@@ -203,36 +207,44 @@ git worktree prune  # Self-healing: clean up any stale registrations
 ## Common Mistakes
 
 **Skipping test verification**
+
 - **Problem:** Merge broken code, create failing PR
 - **Fix:** Always verify tests before offering options
 
 **Open-ended questions**
+
 - **Problem:** "What should I do next?" is ambiguous
 - **Fix:** Present exactly 4 structured options (or 3 for detached HEAD)
 
 **Cleaning up worktree for Option 2**
+
 - **Problem:** Remove worktree user needs for PR iteration
 - **Fix:** Only cleanup for Options 1 and 4
 
 **Deleting branch before removing worktree**
+
 - **Problem:** `git branch -d` fails because worktree still references the branch
 - **Fix:** Merge first, remove worktree, then delete branch
 
 **Running git worktree remove from inside the worktree**
+
 - **Problem:** Command fails silently when CWD is inside the worktree being removed
 - **Fix:** Always `cd` to main repo root before `git worktree remove`
 
 **Cleaning up harness-owned worktrees**
+
 - **Problem:** Removing a worktree the harness created causes phantom state
 - **Fix:** Only clean up worktrees under `.worktrees/`, `worktrees/`, or `~/.config/superpowers/worktrees/`
 
 **No confirmation for discard**
+
 - **Problem:** Accidentally delete work
 - **Fix:** Require typed "discard" confirmation
 
 ## Red Flags
 
 **Never:**
+
 - Proceed with failing tests
 - Merge without verifying tests on result
 - Delete work without confirmation
@@ -242,6 +254,7 @@ git worktree prune  # Self-healing: clean up any stale registrations
 - Run `git worktree remove` from inside the worktree
 
 **Always:**
+
 - Verify tests before offering options
 - Detect environment before presenting menu
 - Present exactly 4 options (or 3 for detached HEAD)

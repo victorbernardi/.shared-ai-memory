@@ -7,6 +7,7 @@ Este documento apresenta a conclusão das etapas de atualização de dados fresc
 ## 🛠️ Alterações Físicas no Repositório
 
 ### 1. Ingestão de Dados Local (`seo_ge_ingest_fabric.py`)
+
 *   **Arquivo Criado:** [seo_ge_ingest_fabric.py](file:///c:/Projetos/Inova/pipelines/potencial-clientes/00_Motor_Identidade/scripts/seo_ge_ingest_fabric.py)
 *   **Função:** Puxa dados em tempo real sem cache (`use_cache=False`) das 3 tabelas Protheus no Microsoft Fabric e valida os schemas (`Fail-Fast`) antes de exportar fisicamente em formato parquet.
 *   **Volumetria Ingerida e Salva:**
@@ -17,6 +18,7 @@ Este documento apresenta a conclusão das etapas de atualização de dados fresc
 ---
 
 ### 2. Pipeline de Orquestração PowerShell (`seo_ge_update_pipeline.ps1`)
+
 *   **Arquivo Criado:** [seo_ge_update_pipeline.ps1](file:///c:/Projetos/Inova/pipelines/potencial-clientes/00_Motor_Identidade/scripts/seo_ge_update_pipeline.ps1)
 *   **Função:** Encadeia sequencialmente as 3 fases do projeto (Extração ➔ Unificação ➔ Recência) em PowerShell com forçamento de encoding em UTF-8 no terminal Windows, controle rígido de exit codes e gravação física de logs em `logs/seo_ge_update.log`.
 
@@ -25,7 +27,9 @@ Este documento apresenta a conclusão das etapas de atualização de dados fresc
 ## 🧪 Validação dos Resultados
 
 ### 1. Execução End-to-End do Pipeline
+
 Rodamos o orquestrador PowerShell de ponta a ponta. O log físico consolidado em `logs/seo_ge_update.log` comprova a conclusão sem falhas:
+
 ```text
 [2026-05-19 10:44:57] [INFO] ============================================================
 [2026-05-19 10:44:57] [INFO] INICIANDO PIPELINE ORQUESTRADO DO MOTOR IDENTIDADE (M0)
@@ -39,10 +43,12 @@ Rodamos o orquestrador PowerShell de ponta a ponta. O log físico consolidado em
 [2026-05-19 10:44:57] [INFO] ============================================================
 [2026-05-19 10:44:57] [INFO] PIPELINE ORQUESTRADO CONCLUIDO COM SUCESSO ABSOLUTO
 [2026-05-19 10:44:57] [INFO] ============================================================
-```
+```text
 
 ### 2. Status de Integridade e Governança (`recency_status.md`)
+
 O arquivo central [recency_status.md](file:///C:/Projetos/Inova/shared/recency_status.md) reflete as novas datas físicas reais do dia de hoje:
+
 *   `M0 (Identidade)` ➔ 🟢 **Atualizado Hoje** | `2026-05-19 10:44`
 *   `Cadastro Clientes` ➔ 🟢 **Atualizado Hoje** | `2026-05-19 10:41`
 

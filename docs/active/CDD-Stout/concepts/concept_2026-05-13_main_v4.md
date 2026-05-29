@@ -1,6 +1,7 @@
 # Task: Interact with Sales Performance Dashboard
 
 ## Checklist
+
 - [x] Open dashboard in browser.
 - [x] Open dashboard in browser.
 - [x] Interact with dashboard (apply filter, search).
@@ -12,6 +13,7 @@
 - [x] Provide final summary.
 
 ## Findings
+
 - Dashboard opened successfully at `sales_performance.html`.
 - Initial KPIs are visible (Giro Total: R$ 126.5M).
 - Chart.js is used for the bar chart.

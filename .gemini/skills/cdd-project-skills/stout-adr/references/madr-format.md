@@ -85,7 +85,7 @@ Override the script output when it does not match the decision's intent. Note th
         ├── README.md   # Auto-generated index
         ├── 0001-*.md   # Sequential numbering (MADR nnnn-title)
         └── 0002-*.md   # (next)
-```
+```text
 
 ## Rules
 
@@ -106,7 +106,7 @@ decision-makers: list of names or roles
 consulted: subject-matter experts (two-way)
 informed: stakeholders kept up-to-date (one-way)
 ---
-```
+```text
 
 | Field           | Required | Notes                                                           |
 | --------------- | -------- | --------------------------------------------------------------- |
@@ -152,9 +152,10 @@ Only `status` and `date` change in the old ADR. Decision content stays as-is.
 ## Instalação
 
 Esta habilidade requer Git para resolução de diretórios e scripts Bash/PowerShell.
+
 ```bash
 # Instalado via skill-manager para o ambiente Stout
-```
+```text
 
 ## Comandos
 
@@ -169,5 +170,6 @@ Esta habilidade requer Git para resolução de diretórios e scripts Bash/PowerS
 - **Segurança:** Scripts de validação garantem que os ADRs sigam o padrão MADR v4.
 
 ## Related Skills
+
 - **spec-validation**: After a decision is made, validate the technical specification.
 - **doc-workflow-orchestrator**: Master guide for the documentation lifecycle.

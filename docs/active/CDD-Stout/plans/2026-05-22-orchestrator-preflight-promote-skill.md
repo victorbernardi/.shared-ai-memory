@@ -54,12 +54,10 @@ PROJECT_ROOT = Path(__file__).parent.parent
 SKILLS_DIR = PROJECT_ROOT / "skills"
 REGISTRY = SKILLS_DIR / "stout-skill-registry" / "registry.json"
 
-
 def _write_tmp_registry(tmp_path: Path, skills: list) -> Path:
     r = tmp_path / "registry.json"
     r.write_text(json.dumps({"skills": skills}), encoding="utf-8")
     return r
-
 
 def test_no_dependencies_passes(tmp_path):
     registry = _write_tmp_registry(tmp_path, [
@@ -71,14 +69,14 @@ def test_no_dependencies_passes(tmp_path):
     from skills.stout_cdd_orchestrator.scripts.preflight import check_dependencies
     missing = check_dependencies("stout-commit", registry, skills_dir)
     assert missing == []
-```
+```text
 
 - [ ] **Step 2: Rodar — esperar ImportError**
 
 ```bash
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 python -m pytest tests/test_preflight.py::test_no_dependencies_passes -v
-```
+```text
 
 Esperado: `ImportError` ou `ModuleNotFoundError`
 
@@ -89,7 +87,6 @@ Esperado: `ImportError` ou `ModuleNotFoundError`
 import json
 import sys
 from pathlib import Path
-
 
 def check_dependencies(skill_name: str, registry_path: Path, skills_dir: Path) -> list[str]:
     """Return list of missing first-level dependency names. Empty = all present."""
@@ -103,7 +100,6 @@ def check_dependencies(skill_name: str, registry_path: Path, skills_dir: Path) -
             missing.append(dep)
     return missing
 
-
 def run_preflight(skill_name: str, registry_path: Path, skills_dir: Path) -> bool:
     """Print missing dependencies and return False if any are missing."""
     missing = check_dependencies(skill_name, registry_path, skills_dir)
@@ -114,7 +110,7 @@ def run_preflight(skill_name: str, registry_path: Path, skills_dir: Path) -> boo
         print(f"  - {dep}  (instale em skills/{dep}/)")
     print("\nInstale as skills ausentes antes de continuar.")
     return False
-```
+```text
 
 - [ ] **Step 4: Ajustar import no teste e rodar**
 
@@ -133,13 +129,13 @@ def _load_preflight():
     return mod
 
 preflight = _load_preflight()
-```
+```text
 
 Substituir `from skills.stout_cdd_orchestrator...` por `preflight.check_dependencies(...)` no teste.
 
 ```bash
 python -m pytest tests/test_preflight.py::test_no_dependencies_passes -v
-```
+```text
 
 Esperado: `PASSED`
 
@@ -156,13 +152,13 @@ def test_dependency_present_passes(tmp_path):
     preflight = _load_preflight()
     missing = preflight.check_dependencies("stout-promote-skill", registry, skills_dir)
     assert missing == []
-```
+```text
 
 - [ ] **Step 6: Rodar — esperar PASSED**
 
 ```bash
 python -m pytest tests/test_preflight.py::test_dependency_present_passes -v
-```
+```text
 
 - [ ] **Step 7: Escrever teste — dependência ausente retorna nome**
 
@@ -178,13 +174,13 @@ def test_missing_dependency_returned(tmp_path):
     preflight = _load_preflight()
     missing = preflight.check_dependencies("stout-promote-skill", registry, skills_dir)
     assert missing == ["stout-skill-auditor"]
-```
+```text
 
 - [ ] **Step 8: Rodar — esperar PASSED**
 
 ```bash
 python -m pytest tests/test_preflight.py -v
-```
+```text
 
 Esperado: 3 PASSED
 
@@ -193,7 +189,7 @@ Esperado: 3 PASSED
 ```bash
 git add skills/stout-cdd-orchestrator/scripts/preflight.py tests/test_preflight.py
 git commit -m "feat: adiciona preflight.py ao orchestrator para verificação de dependências"
-```
+```text
 
 ---
 
@@ -209,7 +205,7 @@ Adicionar após as constantes de path (linha 14, após `REGISTRY_PATH = ...`):
 
 ```python
 SCRIPTS_DIR_LOCAL = Path(__file__).parent
-```
+```text
 
 Substituir a função `launch_skill` para chamar preflight antes de continuar:
 
@@ -251,7 +247,7 @@ def launch_skill(skill_name: str) -> None:
             print(f"  - {trigger}")
 
     print(f"\n[OK] Skill '{skill_name}' orquestrada com sucesso.")
-```
+```text
 
 **Nota:** O import `from preflight import run_preflight` funciona porque `launcher.py` e `preflight.py` estão no mesmo diretório `scripts/`. Adicionar `sys.path.insert(0, str(Path(__file__).parent))` no topo do launcher para garantir isso.
 
@@ -260,7 +256,7 @@ def launch_skill(skill_name: str) -> None:
 ```bash
 cd "C:\Projetos\Stout\Projetos\Configuration-Driven Development"
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-init 2>&1 | head -5
-```
+```text
 
 Esperado: `STOUT CDD ORCHESTRATOR V1.3.0 - Ativando: stout-init`
 
@@ -270,18 +266,18 @@ Adicionar temporariamente uma dependência inexistente ao `stout-commit` no regi
 
 ```json
 "dependencies": ["skill-que-nao-existe"]
-```
+```text
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-commit
-```
+```text
 
 Esperado:
 
-```
+```text
 [PREFLIGHT FAIL] Skill 'stout-commit' requer dependências não instaladas:
   - skill-que-nao-existe  (instale em skills/skill-que-nao-existe/)
-```
+```text
 
 Reverter a dependência temporária no registry após o teste.
 
@@ -291,7 +287,7 @@ Copiar `preflight.py` para o golden copy:
 
 ```bash
 copy "skills\stout-cdd-orchestrator\scripts\preflight.py" "C:\Users\victor.bernardi\.shared-ai-memory\skills\stout-cdd-orchestrator\scripts\preflight.py"
-```
+```text
 
 Aplicar as mesmas alterações em `C:\Users\victor.bernardi\.shared-ai-memory\skills\stout-cdd-orchestrator\scripts\launcher.py`:
 
@@ -305,7 +301,7 @@ Aplicar as mesmas alterações em `C:\Users\victor.bernardi\.shared-ai-memory\sk
 ```bash
 git add skills/stout-cdd-orchestrator/scripts/launcher.py
 git commit -m "feat: integra preflight no launcher do orchestrator"
-```
+```text
 
 ---
 
@@ -338,7 +334,7 @@ for s in data['skills']:
     exists = (golden / s['name']).exists()
     print(f'{\"EXISTS\" if exists else \"ABSENT\"} | {s[\"name\"]}')
 "
-```
+```text
 
 Adicionar `"promoted_at": "2026-05-22"` às skills que existem no golden copy, `"promoted_at": null` às ausentes.
 
@@ -363,7 +359,7 @@ for path in [
     missing_field = [s['name'] for s in data['skills'] if 'promoted_at' not in s]
     print(f'{path}: missing_field={missing_field or \"nenhum\"}')
 "
-```
+```text
 
 Esperado: `missing_field=nenhum` para ambos.
 
@@ -371,7 +367,7 @@ Esperado: `missing_field=nenhum` para ambos.
 
 ```bash
 python -m pytest tests/test_orchestrator_paths.py -v
-```
+```text
 
 Esperado: 4 PASSED
 
@@ -380,7 +376,7 @@ Esperado: 4 PASSED
 ```bash
 git add skills/stout-skill-registry/registry.json
 git commit -m "feat: adiciona campo promoted_at ao registry para rastreabilidade de promoções"
-```
+```text
 
 ---
 
@@ -407,7 +403,7 @@ def update_promoted_at(skill_name: str, registry_path: Path) -> None:
     registry_path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-```
+```text
 
 - [ ] **Step 2: Chamar update_promoted_at após promoção bem-sucedida**
 
@@ -423,13 +419,13 @@ Substituir o bloco `if not dry_run: shutil.copytree(...)` na função `promote_s
         update_promoted_at(skill_name, registry_path)
 
     return {"skill": skill_name, "status": "PROMOTED", "actions": actions}
-```
+```text
 
 - [ ] **Step 3: Smoke test manual em dry-run (sem alteração real)**
 
 ```bash
 python scripts/promote_skills.py --dry-run 2>&1 | head -20
-```
+```text
 
 Esperado: lista de skills com `PROMOTED (dry-run)`, sem erros.
 
@@ -438,7 +434,7 @@ Esperado: lista de skills com `PROMOTED (dry-run)`, sem erros.
 ```bash
 git add scripts/promote_skills.py
 git commit -m "feat: promote_skills.py atualiza promoted_at no registry após promoção"
-```
+```text
 
 ---
 
@@ -461,7 +457,6 @@ from datetime import date
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
-
 def _load_runner():
     spec = importlib.util.spec_from_file_location(
         "promote_runner",
@@ -470,7 +465,6 @@ def _load_runner():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
-
 
 def test_detects_never_promoted_skill(tmp_path):
     registry = tmp_path / "registry.json"
@@ -481,7 +475,6 @@ def test_detects_never_promoted_skill(tmp_path):
     pending = runner.get_pending_promotions(registry)
     assert "stout-init" in pending
 
-
 def test_ignores_already_promoted_skill(tmp_path):
     registry = tmp_path / "registry.json"
     registry.write_text(json.dumps({"skills": [
@@ -491,7 +484,6 @@ def test_ignores_already_promoted_skill(tmp_path):
     pending = runner.get_pending_promotions(registry)
     assert "stout-init" not in pending
 
-
 def test_ignores_inactive_skill(tmp_path):
     registry = tmp_path / "registry.json"
     registry.write_text(json.dumps({"skills": [
@@ -500,13 +492,13 @@ def test_ignores_inactive_skill(tmp_path):
     runner = _load_runner()
     pending = runner.get_pending_promotions(registry)
     assert "stout-welcome" not in pending
-```
+```text
 
 - [ ] **Step 2: Rodar — esperar ImportError**
 
 ```bash
 python -m pytest tests/test_promote_runner.py -v
-```
+```text
 
 Esperado: `ModuleNotFoundError`
 
@@ -515,7 +507,7 @@ Esperado: `ModuleNotFoundError`
 ```bash
 mkdir "skills\stout-promote-skill"
 mkdir "skills\stout-promote-skill\scripts"
-```
+```text
 
 - [ ] **Step 4: Criar promote_runner.py**
 
@@ -532,7 +524,6 @@ REGISTRY_PATH = PROJECT_ROOT / "skills" / "stout-skill-registry" / "registry.jso
 AUDIT_SCRIPT = PROJECT_ROOT / "scripts" / "audit_skills.py"
 PROMOTE_SCRIPT = PROJECT_ROOT / "scripts" / "promote_skills.py"
 
-
 def get_pending_promotions(registry_path: Path) -> list[str]:
     """Return names of active skills with promoted_at == null."""
     data = json.loads(registry_path.read_text(encoding="utf-8"))
@@ -541,7 +532,6 @@ def get_pending_promotions(registry_path: Path) -> list[str]:
         for s in data["skills"]
         if s.get("status") == "active" and s.get("promoted_at") is None
     ]
-
 
 def run_audit() -> dict[str, str]:
     """Run audit_skills.py and return {skill_name: status} from latest report."""
@@ -563,7 +553,6 @@ def run_audit() -> dict[str, str]:
         sys.exit(1)
     data = json.loads(reports[-1].read_text(encoding="utf-8"))
     return {r["skill"]: r["status"] for r in data["results"]}
-
 
 def main() -> None:
     print("\n=== STOUT PROMOTE SKILL ===\n")
@@ -639,16 +628,15 @@ def main() -> None:
 
     print("\n[OK] Promoção concluída. Campo promoted_at atualizado no registry.")
 
-
 if __name__ == "__main__":
     main()
-```
+```text
 
 - [ ] **Step 5: Rodar testes**
 
 ```bash
 python -m pytest tests/test_promote_runner.py -v
-```
+```text
 
 Esperado: 3 PASSED
 
@@ -686,8 +674,10 @@ Promover skills do projeto CDD ao golden copy com auditoria, rastreabilidade e a
 ## Como Usar
 
 ```bash
+
 python skills/stout-promote-skill/scripts/promote_runner.py
-```
+
+```text
 
 ## Fluxo
 
@@ -706,7 +696,7 @@ Aplica-se apenas ao projeto CDD e projetos que sigam o padrão Stout com `regist
 
 A skill é concluída quando `promote_runner.py` encerra com código 0 e o campo `promoted_at` da skill promovida está atualizado no `registry.json`.
 
-```
+```text
 
 - [ ] **Step 7: Registrar skill no registry do projeto**
 
@@ -729,13 +719,13 @@ Adicionar ao array `skills` em `skills/stout-skill-registry/registry.json`:
   "author": "Victor",
   "notes": "Nova skill — pendente de primeira promoção."
 }
-```
+```text
 
 - [ ] **Step 8: Rodar todos os testes**
 
 ```bash
 python -m pytest tests/ -v
-```
+```text
 
 Esperado: todos PASSED
 
@@ -744,7 +734,7 @@ Esperado: todos PASSED
 ```bash
 git add skills/stout-promote-skill/ skills/stout-skill-registry/registry.json tests/test_promote_runner.py
 git commit -m "feat: cria stout-promote-skill com runner interativo e gate de aprovação"
-```
+```text
 
 ---
 

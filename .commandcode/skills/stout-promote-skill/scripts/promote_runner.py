@@ -1,5 +1,6 @@
-"""Runner interativo para promoção de skills CDD ao golden copy."""
+"""Runner interativo e autônomo para promoção de skills CDD ao golden copy."""
 import json
+import argparse
 import subprocess
 import sys
 from pathlib import Path
@@ -41,6 +42,11 @@ def run_audit() -> dict[str, str]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Runner para promoção de skills CDD ao golden copy")
+    parser.add_argument("--skill", help="Especifica a skill a ser promovida diretamente")
+    parser.add_argument("--yes", "-y", action="store_true", help="Pula a confirmação de promoção (modo autônomo)")
+    args = parser.parse_args()
+
     print("\n=== STOUT PROMOTE SKILL ===\n")
 
     if not AUDIT_SCRIPT.exists():
@@ -71,8 +77,13 @@ def main() -> None:
         print("\nNenhuma skill pronta para promoção.")
         sys.exit(0)
 
-    print("\nDigite o nome da skill a promover (ou 'todas' para promover todas prontas):")
-    choice = input("> ").strip()
+    # Novo: obter a skill a partir dos argumentos CLI
+    choice = args.skill
+    if not choice:
+        print("\nDigite o nome da skill a promover (ou 'todas' para promover todas prontas):")
+        choice = input("> ").strip()
+    else:
+        print(f"\nSkill selecionada via CLI: {choice}")
 
     if choice == "todas":
         to_promote = ready
@@ -89,8 +100,14 @@ def main() -> None:
     )
     print(result.stdout)
 
-    print("\n[3/4] Confirmar promoção? (s/N)")
-    confirm = input("> ").strip().lower()
+    # Novo: pular a confirmação interativa se --yes for informado
+    if not args.yes:
+        print("\n[3/4] Confirmar promoção? (s/N)")
+        confirm = input("> ").strip().lower()
+    else:
+        print("\n[3/4] Confirmando promoção automaticamente (--yes / -y)...")
+        confirm = "s"
+
     if confirm != "s":
         print("Promoção cancelada.")
         sys.exit(0)
@@ -107,18 +124,19 @@ def main() -> None:
 
     print("\n[OK] Promoção concluída. Campo promoted_at atualizado no registry.")
 
-    # Verificar se ainda há outras skills pendentes
-    remaining = [s for s in get_pending_promotions(REGISTRY_PATH) if s not in to_promote]
-    if remaining:
-        print(f"\nAinda há {len(remaining)} skill(s) pendente(s) de promoção:")
-        for s in remaining:
-            status = audit.get(s, "não auditada")
-            marker = "[OK]" if status == "PASS" else "[--]"
-            print(f"  {marker} {s}  (audit: {status})")
-        print("\nDeseja promover alguma delas agora? (s/N)")
-        again = input("> ").strip().lower()
-        if again == "s":
-            main()
+    # Apenas executa loop iterativo se não estiver em modo CLI silencioso
+    if not args.skill:
+        remaining = [s for s in get_pending_promotions(REGISTRY_PATH) if s not in to_promote]
+        if remaining:
+            print(f"\nAinda há {len(remaining)} skill(s) pendente(s) de promoção:")
+            for s in remaining:
+                status = audit.get(s, "não auditada")
+                marker = "[OK]" if status == "PASS" else "[--]"
+                print(f"  {marker} {s}  (audit: {status})")
+            print("\nDeseja promover alguma delas agora? (s/N)")
+            again = input("> ").strip().lower()
+            if again == "s":
+                main()
 
 
 if __name__ == "__main__":

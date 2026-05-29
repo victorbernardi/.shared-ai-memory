@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-create-skill
 description: "Fábrica autônoma de skills de Tier 4. Implementa manufatura agêntica baseada em blueprints e orquestração de subagentes. Triggers de ativação: criar skill, nova skill, gerar skill, manufatura agêntica, scaffolding, blueprinting. EXIGE VEREDITO DO AUDITOR."
 version: 1.1.0

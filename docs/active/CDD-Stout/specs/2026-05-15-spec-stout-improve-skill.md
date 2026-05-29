@@ -9,6 +9,7 @@
 ## 1. Statement of Work (SOW)
 
 ### 1.1 Visão Geral
+
 Este upgrade transforma o `stout-improve-skill` em um **Melhorador de Elite**. Ele deixa de realizar apenas diagnósticos estruturais básicos e passa a incorporar as 7 dimensões da `skill-sentinel` e a profundidade arquitetural da `code-review-ai-ai-review`. O objetivo é que o Melhorador consiga identificar e corrigir falhas de concorrência, performance e padrões de código avançados de forma autônoma.
 
 ### 1.2 In Scope
@@ -21,6 +22,7 @@ Este upgrade transforma o `stout-improve-skill` em um **Melhorador de Elite**. E
 | **Integração de Laudos** | Consolidação de achados internos e externos em um plano de refatoração único |
 
 ### 1.3 Out of Scope
+
 - Auditoria de custos (Token ROI). *Why not:* Manter foco em integridade técnica e governança.
 
 ### 1.4 Acceptance Criteria (AC)

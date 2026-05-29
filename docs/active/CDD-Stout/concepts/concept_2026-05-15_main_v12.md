@@ -1,6 +1,7 @@
 # Task: Extract pages from Estoque Peças report
 
 ## Checklist
+
 - [x] Open report URL and wait for cards
 - [x] Extract "RESUMO ESTOQUE" (Page 01)
 - [ ] Extract "ANÁLISE FILIAL" (Page 02)
@@ -8,6 +9,7 @@
 - [x] Extract "CLASSE ABC" (Page 05)
 
 ## Progress Notes
+
 - Initializing task...
 - Report loaded. Cards are in an iframe (cross-origin).
 - Page 01 (RESUMO ESTOQUE) captured and saved.

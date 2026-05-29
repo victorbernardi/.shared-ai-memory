@@ -1,4 +1,4 @@
-# 🛡️ Global Stout Standard (Antigravity)
+﻿# 🛡️ Global Stout Standard (Antigravity)
 
 Este documento é a "Constituição" do ambiente. Define quem eu sou, como opero e como protejo a integridade do projeto.
 
@@ -52,3 +52,13 @@ Operação sob o **Manifesto Estratégico Antigravity** (`./GEMINI.md`).
 
 ---
 *Assinado: Analista de Inteligência & Bibliotecário (Stout Edition)*
+  
+## 4. Navegacao ICM (Workspaces)  
+  
+O ecossistema Stout adota ICM. Cada projeto em Projetos/ e um workspace ICM com estagios numerados.  
+  
+- Verificar Projetos/ antes de skills CDD. Navegar estagios sequencialmente.  
+- Ler CONTEXT.md de cada estagio antes de executar.  
+- REFERENCES.md na raiz contem caminhos canonicos.  
+- Proibido auto-modificar CONTEXT.md sem autorizacao humana.  
+- Nunca pular estagios. O numero da pasta define a ordem.  

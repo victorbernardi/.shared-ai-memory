@@ -9,8 +9,10 @@ date_added: "2026-05-17"
 metadata:
   category: data-intelligence
   triggers: 
+
     - write sql, fabric sql, t-sql, optimize query, translate sql, snowflake syntax, bigquery sql, postgresql help
     - escrever sql, sql fabric, t-sql, otimizar consulta, traduzir sql, sintaxe snowflake, sql bigquery, ajuda postgres
+
 ---
 
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace

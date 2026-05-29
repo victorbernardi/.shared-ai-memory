@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-writing-plans
 description: "Transformação de especificações técnicas em planos de execução atômicos e rastreáveis para o ecossistema Stout. Triggers: planejar execução, implementar plano, roteiro de tarefas, atomicidade, plano de execução, roadmap técnico."
 version: 1.2.0
@@ -26,6 +28,7 @@ Esta skill é responsável por transformar uma especificação técnica (Spec) e
 ---
 
 ## 🔄 Fluxo de Trabalho
+
 As diretrizes detalhadas de cabeçalho, estrutura de tarefas e modo de espera foram movidas para o arquivo de referência técnica para otimização de contexto.
 
 **CONSULTE OBRIGATORIAMENTE:** `@references/plan-format.md` para gerar o plano.
@@ -33,17 +36,22 @@ As diretrizes detalhadas de cabeçalho, estrutura de tarefas e modo de espera fo
 ---
 
 ## 📦 Instalação
+
 Skill integrada localmente ao projeto CDD.
 
 ## 💻 Comandos
+
 Para ativar via orquestrador local:
+
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-writing-plans
-```
+```text
 
 ## 🛡️ Governanca
+
 - Nenhum plano deve ser gerado sem Spec prévia aprovada.
 - Exige o "Modo de Espera" (Standby) após a geração do plano.
 
 ## When to Use
+
 This skill is applicable to execute the workflow or actions described in the overview.

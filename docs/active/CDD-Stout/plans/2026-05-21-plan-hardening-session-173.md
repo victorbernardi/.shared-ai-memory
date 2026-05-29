@@ -15,31 +15,35 @@
 ### Task 1: Adicionar skipif condicional em test_guardrail_v2.py
 
 **Files:**
+
 - Modify: `tests/test_guardrail_v2.py:1-10` (adicionar import + flag)
 - Modify: `tests/test_guardrail_v2.py:40-50` (decorar test_powershell_guard_blocks_existing)
 
 **Step 1: Adicionar shutil.which e flag no topo**
 
 Adicionar após `import subprocess`:
+
 ```python
 import shutil
 
 _HAS_POWERSHELL = shutil.which("powershell.exe") is not None
-```
+```text
 
 **Step 2: Decorar o único teste que depende de powershell.exe**
 
 No `test_powershell_guard_blocks_existing`, adicionar decorator:
+
 ```python
 @pytest.mark.skipif(not _HAS_POWERSHELL, reason="powershell.exe não disponível no PATH")
 def test_powershell_guard_blocks_existing(temp_file):
-```
+```text
 
 **Step 3: Rodar testes**
 
 ```bash
 pytest tests/test_guardrail_v2.py -v
-```
+```text
+
 Expected: 6 passed, 1 skipped (se powershell indisponível) ou 7 passed.
 
 **Step 4: Commit**
@@ -47,13 +51,14 @@ Expected: 6 passed, 1 skipped (se powershell indisponível) ou 7 passed.
 ```bash
 git add tests/test_guardrail_v2.py
 git commit -m "test: add skipif for powershell dependency in test_guardrail_v2"
-```
+```text
 
 ---
 
 ### Task 2: Adicionar skipif condicional em test_e2e_integration.py
 
 **Files:**
+
 - Modify: `tests/test_e2e_integration.py:1-10`
 
 **Step 1: Verificar dependências externas**
@@ -64,7 +69,8 @@ O arquivo faz patch de GitGuard e usa mocks — nenhuma dependência de binário
 
 ```bash
 pytest tests/test_e2e_integration.py -v
-```
+```text
+
 Expected: 7 passed.
 
 **Step 3: Commit**
@@ -72,13 +78,14 @@ Expected: 7 passed.
 ```bash
 git add tests/test_e2e_integration.py
 git commit -m "test: verify no external deps needed in test_e2e_integration"
-```
+```text
 
 ---
 
 ### Task 3: Corrigir path frágil no launcher.py
 
 **Files:**
+
 - Modify: `skills/stout-cdd-orchestrator/scripts/launcher.py:8-11` (constantes de path)
 - Modify: `skills/stout-cdd-orchestrator/scripts/launcher.py:51` (uso do path frágil)
 
@@ -88,32 +95,33 @@ git commit -m "test: verify no external deps needed in test_e2e_integration"
 
 ```python
 CDD_PROJECT_SKILLS_DIR = Path(os.getenv("STOUT_SKILLS_PATH", STOUT_ORCHESTRATOR_DIR.parent))
-```
+```text
 
 **Step 3: Substituir o path frágil na linha 51**
 
 ```python
 skill_base_path = Path(os.getenv("STOUT_GLOBAL_SKILLS_PATH", str(CDD_PROJECT_SKILLS_DIR.parent.parent)))
-```
+```text
 
 **Step 4: Testar o launcher**
 
 ```bash
 python skills/stout-cdd-orchestrator/scripts/launcher.py --skill stout-immunity-gate
-```
+```text
 
 **Step 5: Commit**
 
 ```bash
 git add skills/stout-cdd-orchestrator/scripts/launcher.py
 git commit -m "fix: replace brittle path with env var fallback in launcher"
-```
+```text
 
 ---
 
 ### Task 4: Remover 4 skills casca vazia + limpar referências no rules.yaml e registry.json
 
 **Files:**
+
 - Remove: `skills/cdd_technical_skill/`
 - Remove: `skills/self_healing_skill/`
 - Remove: `skills/stout_knowledge_fallback/`
@@ -129,7 +137,7 @@ cmd /c "rmdir /s /q skills\cdd_technical_skill"
 cmd /c "rmdir /s /q skills\self_healing_skill"
 cmd /c "rmdir /s /q skills\stout_knowledge_fallback"
 cmd /c "rmdir /s /q skills\welcome_skill"
-```
+```text
 
 **Step 2: Remover as 4 regras órfãs do rules.yaml**
 
@@ -147,7 +155,8 @@ Rodar `python scripts/audit_skills.py` e adicionar skills faltantes (as 6 restan
 
 ```bash
 python scripts/audit_skills.py
-```
+```text
+
 Expected: 20 skills no diretório, 20 no catálogo, 0 diffs.
 
 **Step 6: Commit**
@@ -155,13 +164,14 @@ Expected: 20 skills no diretório, 20 no catálogo, 0 diffs.
 ```bash
 git add skills/ data/config/rules.yaml skills/stout-skill-registry/registry.json data/config/skills_catalog.yaml
 git commit -m "chore: remove 4 empty shell skills and orphan references"
-```
+```text
 
 ---
 
 ### Task 5: Sincronizar skills_catalog.yaml com skills/
 
 **Files:**
+
 - Modify: `data/config/skills_catalog.yaml`
 
 **Step 1: Rodar auditoria**
@@ -175,6 +185,7 @@ git commit -m "chore: remove 4 empty shell skills and orphan references"
 ### Task 6: Adicionar import guard nas ferramentas de governança
 
 **Files:**
+
 - Modify: `src/tools/sentinel_agent.py:1-8`
 - Modify: `src/tools/rule_simulator.py:1-20`
 
@@ -185,7 +196,7 @@ try:
     import yaml
 except ImportError:
     sys.exit("ERRO: PyYAML não instalado. Execute: pip install pyyaml")
-```
+```text
 
 **Step 2: gcc_analytics.py — já tem guard para plotly/jinja2. OK.**
 
@@ -198,13 +209,14 @@ except ImportError:
 ```bash
 git add src/tools/sentinel_agent.py
 git commit -m "fix: add import guard for PyYAML in sentinel_agent"
-```
+```text
 
 ---
 
 ### Task 7: Sincronizar stout_promote.py e post_approve.py com templates stout-init
 
 **Files:**
+
 - Overwrite local: `skills/stout-init/addons/cdd/templates/tools/stout_promote.py`
 - Overwrite local: `skills/stout-init/addons/cdd/templates/tools/post_approve.py`
 - Overwrite global: `%USERPROFILE%\.shared-ai-memory\skills\stout-init\addons\cdd\templates\tools\*.py`
@@ -213,7 +225,7 @@ git commit -m "fix: add import guard for PyYAML in sentinel_agent"
 
 ```powershell
 cmd /c "fc /b src\tools\stout_promote.py skills\stout-init\addons\cdd\templates\tools\stout_promote.py"
-```
+```text
 
 **Step 2: Copiar src/tools → templates locais**
 
@@ -226,7 +238,7 @@ cmd /c "fc /b src\tools\stout_promote.py skills\stout-init\addons\cdd\templates\
 ```bash
 git add skills/stout-init/addons/cdd/templates/tools/
 git commit -m "fix: sync stout_promote and post_approve with stout-init templates"
-```
+```text
 
 ---
 
@@ -242,6 +254,6 @@ git commit -m "fix: sync stout_promote and post_approve with stout-init template
 
 ```bash
 pytest tests/ -v
-```
+```text
 
 Expected: 0 failures, skips apenas para dependências externas indisponíveis.

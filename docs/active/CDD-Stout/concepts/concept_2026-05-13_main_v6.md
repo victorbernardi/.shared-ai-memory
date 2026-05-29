@@ -6,6 +6,7 @@
 ## 📍 Current State (Local Project)
 
 The project is in the **Research** phase, transitioning to **Strategy**. 
+
 - **Core Engine:** `scripts/consolidate_bup.py` (cloned from CEVAP).
 - **Primary Goal:** 100% integral customer list (zero filters) with autonomous consultant attribution.
 - **Key Artifacts:** 5 specs already generated in `docs/specs/`.

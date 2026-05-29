@@ -18,9 +18,14 @@ Esta é a ferramenta oficial de manufatura do ecossistema Stout Inova. Ela opera
 
 ## 🚀 Quando Usar
 
+- Quando o `stout-skill-manager` (Fase 2) determina que nenhuma skill externa satisfaz a necessidade e o usuário escolhe **"criar nova skill"**.
 - Para criar uma nova Agent Skill do zero após aprovação do `stout-skill-auditor`.
 - Quando precisar de uma estrutura padrão Stout (Scaffolding) gerada automaticamente.
 - Para garantir que novas skills nasçam com metadados e governança nota 10.
+
+> **Fluxo recomendado:** use sempre `stout-skill-manager` como ponto de entrada.
+> Ele executa busca local → skillfish → auditor → e então invoca esta skill automaticamente se necessário.
+> Invocar `stout-create-skill` diretamente é permitido apenas se o auditor já rodou e gerou `audit_result.json`.
 
 ## 📦 Instalação
 
@@ -31,10 +36,12 @@ Skill de manufatura pré-instalada. Requer permissões de escrita no diretório 
 **NUNCA utilize esta skill para criar algo sem antes ter passado pelo `stout-skill-auditor`.**
 A Fábrica exige a presença de um arquivo `audit_result.json` válido com o veredito `"APPROVED"`. Se o veredito for "REJECTED" ou "QUESTIONED", o processo será abortado deterministicamente.
 
+Quando invocada via `stout-skill-manager`, o auditor já rodou na Fase 3 — o `audit_result.json` estará presente.
+
 ## Como Usar (Comandos)
 
-1. **Validar Auditoria:** `python scripts/create_pipeline.py --check-audit`
-2. **Disparar Pipeline:** Siga as instruções do orquestrador após a validação.
+1. **Via stout-skill-manager (recomendado):** o manager invoca esta skill automaticamente na Fase 2.
+2. **Direto:** `python scripts/create_pipeline.py --check-audit` → valida auditoria e dispara pipeline.
 
 ## 📚 Referências
 

@@ -25,6 +25,7 @@
 | "Checar ambiguidade entre skills" | stout-skill-auditor | 91% | Papel duplicado |
 
 ## Regra prática
+
 Se você consegue descrever a proposta usando o nome da skill existente sem perder o significado da ação, é REJEIÇÃO.
 > "Quero criar uma skill que **registre skills no ecossistema**"
 > → stout-skill-registry já faz isso → REJEIÇÃO

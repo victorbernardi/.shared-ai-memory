@@ -24,7 +24,7 @@ Place under `## More Information` as `### {topic}`.
 
 ## Example
 
-````markdown
+```text`markdown
 ---
 status: "accepted"
 date: 2026-01-28
@@ -97,4 +97,4 @@ Keep all templates in placeholder format.
 ### Reassessment Triggers
 
 * If template usage rate drops below 50% in new ADRs
-````
+```text`

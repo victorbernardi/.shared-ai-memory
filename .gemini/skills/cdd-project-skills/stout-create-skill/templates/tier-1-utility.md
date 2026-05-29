@@ -15,23 +15,29 @@ author: Victor
 # PLACEHOLDER_NAME
 
 ## Objetivo
+
 PLACEHOLDER_OBJETIVO em uma frase.
 
 ## Quando usar
+
 - PLACEHOLDER_CASO_1
 - PLACEHOLDER_CASO_2
 
 ## Como usar
+
 Descreva a tarefa diretamente. Exemplos:
+
 - "PLACEHOLDER_EXEMPLO_1"
 - "PLACEHOLDER_EXEMPLO_2"
 
 ## Instruções
+
 1. PLACEHOLDER_PASSO_1
 2. PLACEHOLDER_PASSO_2
 3. PLACEHOLDER_PASSO_3
 
 ## Constraints
+
 - NUNCA PLACEHOLDER_RESTRICAO_1
 - SEMPRE PLACEHOLDER_RESTRICAO_2
 
