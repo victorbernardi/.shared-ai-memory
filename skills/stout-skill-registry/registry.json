@@ -270,28 +270,6 @@
       "promoted_at": "2026-05-29"
     },
     {
-      "name": "stout-governance-orchestration-engine",
-      "path": "skills/stout-governance-orchestration-engine",
-      "tier": 1,
-      "category": "engineering-governance",
-      "role": "Orquestrador de governança, recência e higiene para motores analíticos",
-      "triggers": [
-        "governance",
-        "recency",
-        "pre-flight",
-        "hygiene",
-        "orchestration"
-      ],
-      "dependencies": [],
-      "version": "1.0.0",
-      "status": "inactive",
-      "created_at": "2026-05-19",
-      "updated_at": "2026-05-22",
-      "author": "Victor",
-      "notes": "Skill não implementada — backlog V6.12.",
-      "promoted_at": null
-    },
-    {
       "name": "stout-promote-skill",
       "path": "skills/stout-promote-skill",
       "tier": 2,
@@ -536,6 +514,11 @@
     }
   ],
   "deprecated": [
+    {
+      "name": "stout-governance-orchestration-engine",
+      "deprecated_at": "2026-05-29",
+      "reason": "Skill nunca implementada — backlog V6.12 abandonado."
+    },
     {
       "name": "stout-sandbox-test",
       "deprecated_at": "2026-05-15",
