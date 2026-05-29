@@ -17,6 +17,13 @@ O ecossistema Stout possui skills distribuídas em múltiplas plataformas (Claud
 
 **Decisão arquitetural concluída:** fonte da verdade única em `C:\Users\victor.bernardi\.shared-ai-memory\skills`, com junctions das 3 plataformas apontando para esse diretório. Setup já executado.
 
+**Junctions ativas:**
+
+- `.claude\skills` → `.shared-ai-memory\skills`
+- `.commandcode\skills` → `.shared-ai-memory\skills`
+- `.gemini\antigravity-cli\skills` → `.shared-ai-memory\skills` ← path correto do Antigravity CLI
+- `.gemini\config\skills` → `.antigravity\skills` → `.shared-ai-memory\skills` (Gemini shared)
+
 ---
 
 ## 2. Objetivo
@@ -53,12 +60,15 @@ Criar `stout-skill-manager` (Tier 1 — Orchestrator) como **portão único de e
 ### 4.1 Fonte da Verdade
 
 ```
-C:\Users\victor.bernardi\.shared-ai-memory\skills\   ← diretório real
-  ↑ junction
-C:\Users\victor.bernardi\.claude\skills
-C:\Users\victor.bernardi\.commandcode\skills
-C:\Users\victor.bernardi\.gemini\config\skills  (via .antigravity\skills)
+C:\Users\victor.bernardi\.shared-ai-memory\skills\        ← diretório real (canonical)
+  ├── junction ← .claude\skills
+  ├── junction ← .commandcode\skills
+  ├── junction ← .gemini\antigravity-cli\skills            ← Antigravity CLI (path correto)
+  └── junction ← .antigravity\skills ← .gemini\config\skills  (Gemini shared, double junction)
 ```
+
+**Regra de escrita:** toda instalação usa o path canônico `.shared-ai-memory\skills\` diretamente.
+As junctions são **somente para leitura pelos CLIs** — nunca são o destino de escrita.
 
 ### 4.2 Fluxo Completo
 
@@ -190,7 +200,138 @@ Os scripts `search.py` e `install.py` atuais chamam a API do npm diretamente. De
 
 ---
 
-## 7. Deprecação do audit-skill-manager
+## 7. Proteção das Junctions (Estratégia A + B)
+
+### 7.1 Regra A — Escrita sempre pela path canônica
+
+O `stout-skill-manager` e o `skillfish` **nunca** usam os paths de junction como destino de escrita. Toda instalação usa:
+
+```
+C:\Users\victor.bernardi\.shared-ai-memory\skills\<nome-da-skill>
+```
+
+O `orchestrator.py` passa `--output` explícito ao `skillfish add`:
+
+```bash
+skillfish add <owner/repo> --output "C:\Users\victor.bernardi\.shared-ai-memory\skills"
+```
+
+### 7.2 Regra B — Junction Guard
+
+Script `scripts/junction_guard.py` executado **antes de qualquer operação de escrita** pelo `stout-skill-manager`. Verifica se todas as junctions estão intactas e as recria se necessário.
+
+```python
+JUNCTIONS = {
+    r"C:\Users\victor.bernardi\.claude\skills":
+        r"C:\Users\victor.bernardi\.shared-ai-memory\skills",
+    r"C:\Users\victor.bernardi\.commandcode\skills":
+        r"C:\Users\victor.bernardi\.shared-ai-memory\skills",
+    r"C:\Users\victor.bernardi\.gemini\antigravity-cli\skills":
+        r"C:\Users\victor.bernardi\.shared-ai-memory\skills",
+}
+# Para cada path: verifica LinkType == "Junction", recria se for diretório real
+```
+
+Também executado como **hook pós-instalação** — se um CLI desfizer uma junction durante `skillfish update`, o guard detecta e restaura antes da próxima sessão.
+
+---
+
+## 8. stout-create-skill — Modularidade Multi-plataforma
+
+### 8.1 Template Engine (universal-skill-kit)
+
+Todas as skills geradas pelo `stout-create-skill` usam sintaxe de compilação condicional:
+
+```markdown
+<!-- @if platform=claude -->
+...conteúdo rico, sem limite de tamanho, Tool use, MCP references...
+<!-- @endif -->
+
+<!-- @if platform=antigravity,commandcode -->
+...versão concisa, instruções diretas...
+<!-- @endif -->
+
+<!-- @unless platform=codex -->
+...aparece em todas exceto Codex...
+<!-- @endunless -->
+```
+
+Variáveis disponíveis: `{{name}}`, `{{version}}`, `{{tier}}`, `{{author}}`.
+
+### 8.2 skill.config.json gerado automaticamente
+
+O `blueprint_engine.py` gera `skill.config.json` junto com o SKILL.md:
+
+```json
+{
+  "name": "<nome>",
+  "platforms": {
+    "claude":       { "enabled": true, "output": ".claude/skills" },
+    "antigravity":  { "enabled": true, "output": ".gemini/antigravity-cli/skills" },
+    "commandcode":  { "enabled": true, "output": ".commandcode/skills" }
+  },
+  "description": {
+    "full":  "<descrição completa para Claude>",
+    "short": "<descrição ≤ 120 chars para outros CLIs>"
+  }
+}
+```
+
+### 8.3 Arquivos de referência no stout-create-skill
+
+O `code_drafter_agent.md` instrui o agente a consultar `references/` antes de gerar qualquer SKILL.md:
+
+```
+stout-create-skill\references\
+  platform-claude.md        ← Claude Code: Tool use, MCP, sem limite de tamanho
+  platform-antigravity.md   ← Antigravity CLI: dir ~/.gemini/antigravity-cli/skills/, Jinja2
+  platform-commandcode.md   ← CommandCode: frontmatter conciso, triggers obrigatórios
+  template-engine.md        ← sintaxe @if/@unless/{{var}} do universal-skill-kit
+  skill-anatomy.md          ← frontmatter obrigatório/opcional por plataforma
+```
+
+---
+
+## 9. Estrutura de Arquivos (atualizada)
+
+```
+.shared-ai-memory\skills\
+  stout-skill-manager\
+    SKILL.md
+    scripts\
+      orchestrator.py        ← orquestra as 5 fases
+      local_search.py        ← busca semântica no registry.json
+      install_validator.py   ← valida SKILL.md pós-download
+      junction_guard.py      ← verifica e restaura junctions (A+B)
+    config\
+      thresholds.yaml        ← score mínimo sentinel (default: 70)
+      junction_map.yaml      ← mapa canônico de junctions esperadas
+
+  stout-create-skill\        ← modificado
+    templates\
+      tier-*.md              ← adicionados blocos @if por plataforma
+    scripts\
+      blueprint_engine.py    ← gera skill.config.json + targets_platforms[]
+      scaffold_printer.py    ← cria estrutura + skill.config.json
+    references\              ← NOVO
+      platform-claude.md
+      platform-antigravity.md
+      platform-commandcode.md
+      template-engine.md
+      skill-anatomy.md
+    agents\
+      code_drafter_agent.md  ← atualizado: consulta references/ antes de gerar
+
+  skillfish\
+    SKILL.md                 ← frontmatter universal + blocos @if por plataforma
+    scripts\
+      search.py              ← wraps skillfish CLI + fallback API npm
+      install.py             ← --output canônico, nunca via junction
+```
+
+---
+
+## 10. Deprecação do audit-skill-manager
 
 Após `stout-skill-manager` estar ativo:
 
@@ -200,13 +341,18 @@ Após `stout-skill-manager` estar ativo:
 
 ---
 
-## 8. Critérios de Aceitação
+## 11. Critérios de Aceitação
 
 - [ ] `stout-skill-manager` invocado por "busque skills para esse projeto" executa as 5 fases
-- [ ] Skill externa instalada aparece no `.claude\skills`, `.commandcode\skills` e `.gemini\config\skills` sem ação adicional
+- [ ] Toda instalação usa path canônico `.shared-ai-memory\skills\`, nunca junction como destino
+- [ ] `junction_guard.py` detecta junction destruída e a recria antes de prosseguir
+- [ ] Skill instalada aparece automaticamente nos 4 paths de junction sem ação adicional
 - [ ] `stout-create-skill` invoca `stout-skill-manager` antes de fabricar
+- [ ] Skills geradas contêm blocos `<!-- @if platform=X -->` para Claude, Antigravity e CommandCode
+- [ ] `blueprint_engine.py` gera `skill.config.json` com `description.full` e `description.short`
+- [ ] `code_drafter_agent.md` referencia `references/` antes de gerar SKILL.md
 - [ ] QUESTIONED dispara HITL e aguarda decisão antes de prosseguir
 - [ ] REJECTED aborta com sugestão de alternativa local
 - [ ] Score < 70 no sentinel aciona `stout-improve-skill` (máx 2 ciclos)
-- [ ] `skillfish/SKILL.md` contém `tools: [claude-code, antigravity, commandcode, gemini-cli]`
+- [ ] `skillfish/SKILL.md` usa frontmatter universal + blocos `@if` por plataforma
 - [ ] `audit-skill-manager` marcado como deprecated no registry
