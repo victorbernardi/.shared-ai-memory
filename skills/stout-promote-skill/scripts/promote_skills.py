@@ -39,6 +39,8 @@ PROMOTION_MAP = {
     "stout-data-write-query":     ["data-write-query"],
     "stout-promote-skill":        [],
     "stout-session-learning":     [],
+    "stout-retrofit":             [],
+    "stout-skill-manager":        [],
 }
 
 
@@ -69,11 +71,17 @@ def promote_skill(skill_name: str, replaced: list, dry_run: bool) -> dict:
                     shutil.rmtree(archive_path)
                 shutil.move(str(old_path), str(archive_path))
 
-    actions.append(f"COPY {skill_name} -> Golden Copy")
+    if src.resolve() == dst.resolve():
+        # Skill já está no golden copy (source of truth unificada)
+        actions.append(f"ALREADY IN PLACE {skill_name} (source == golden copy)")
+    else:
+        actions.append(f"COPY {skill_name} -> Golden Copy")
+        if not dry_run:
+            if dst.exists():
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst)
+
     if not dry_run:
-        if dst.exists():
-            shutil.rmtree(dst)
-        shutil.copytree(src, dst)
         registry_path = SKILLS_ROOT / "stout-skill-registry" / "registry.json"
         update_promoted_at(skill_name, registry_path)
 

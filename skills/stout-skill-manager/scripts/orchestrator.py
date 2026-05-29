@@ -8,6 +8,7 @@ Uso:
 """
 import sys
 import json
+import shutil
 import argparse
 import subprocess
 from pathlib import Path
@@ -52,10 +53,19 @@ def run_local_search(query: str, threshold: int) -> list[dict]:
         return []
 
 
+def _skillfish_exe() -> str:
+    """Resolve o executável skillfish no Windows (pode ser .cmd) ou Linux."""
+    exe = shutil.which("skillfish") or shutil.which("skillfish.cmd")
+    if not exe:
+        raise FileNotFoundError("skillfish não encontrado no PATH")
+    return exe
+
+
 def run_skillfish_search(query: str) -> str:
     result = subprocess.run(
-        ["skillfish", "search", query],
-        capture_output=True, text=True, encoding="utf-8", errors="replace"
+        [_skillfish_exe(), "search", query],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+        shell=False
     )
     return result.stdout.strip() if result.returncode == 0 else ""
 
@@ -79,7 +89,7 @@ def run_auditor(name: str, role: str, triggers: str, tier: int = 2) -> str:
 
 def run_skillfish_install(repo: str) -> bool:
     result = subprocess.run(
-        ["skillfish", "add", repo,
+        [_skillfish_exe(), "add", repo,
          "--output", str(CANONICAL_PATH)],
         capture_output=False
     )

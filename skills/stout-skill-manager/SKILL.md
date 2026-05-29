@@ -120,3 +120,14 @@ python skill-sentinel/scripts/run_audit.py --skill <nome>
 - `scripts/junction_guard.py` — protege as junctions
 - `config/thresholds.yaml` — limiares configuráveis
 - `config/junction_map.yaml` — mapa canônico de junctions
+
+## Critérios de Conclusão
+
+A skill é concluída (done) quando:
+
+1. `junction_guard.py` encerra com 0 erros
+2. A skill escolhida passou pela auditoria (APPROVED ou QUESTIONED+confirmado)
+3. `skillfish add` instalou a skill no path canônico
+4. `install_validator.py` retornou `[OK]`
+5. `skill-sentinel` deu score >= 70 ou status `quarantine` registrado com ciência do usuário
+6. Entrada criada/atualizada em `stout-skill-registry/registry.json`

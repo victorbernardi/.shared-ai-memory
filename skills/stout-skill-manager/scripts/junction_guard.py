@@ -4,6 +4,7 @@ Junction Guard — verifica e restaura junctions do ecossistema Stout.
 Executar antes de qualquer operação de escrita de skills.
 """
 import os
+import stat
 import sys
 import subprocess
 import yaml
@@ -22,20 +23,25 @@ def resolve_path(raw: str) -> Path:
 
 
 def is_junction(path: Path) -> bool:
-    if not path.exists():
+    """Verifica se path é uma junction usando Python nativo (sem subprocess)."""
+    if not path.exists() and not path.is_symlink():
         return False
-    result = subprocess.run(
-        ["powershell", "-NonInteractive", "-Command",
-         f"(Get-Item -LiteralPath '{path}' -ErrorAction SilentlyContinue).LinkType"],
-        capture_output=True, text=True, timeout=10
-    )
-    return result.stdout.strip() == "Junction"
+    # Python 3.12+ tem Path.is_junction()
+    if hasattr(path, "is_junction"):
+        return path.is_junction()
+    # Fallback: FILE_ATTRIBUTE_REPARSE_POINT (0x400) via os.lstat
+    try:
+        st = os.lstat(path)
+        FILE_ATTRIBUTE_REPARSE_POINT = 0x400
+        return bool(getattr(st, "st_file_attributes", 0) & FILE_ATTRIBUTE_REPARSE_POINT)
+    except OSError:
+        return False
 
 
 def create_junction(junction: Path, target: Path) -> bool:
+    """Cria junction via cmd /c mklink /J (mais rápido que PowerShell)."""
     result = subprocess.run(
-        ["powershell", "-Command",
-         f"New-Item -ItemType Junction -Path '{junction}' -Target '{target}' -Force"],
+        ["cmd", "/c", "mklink", "/J", str(junction), str(target)],
         capture_output=True, text=True
     )
     return result.returncode == 0
