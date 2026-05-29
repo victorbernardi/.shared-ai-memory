@@ -1,5 +1,7 @@
 ---
+
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+
 name: stout-cdd-orchestrator
 description: "Motor Mãe do ecossistema local. Orquestra a injeção dinâmica de instruções baseada no catálogo CDD (skills_catalog.yaml). Triggers: launch, init cdd, orquestrar skills, cdd core."
 version: 1.0.0
@@ -29,7 +31,7 @@ Para ativar qualquer skill local seguindo o padrão CDD:
 
 ```bash
 python scripts/launcher.py --skill stout-immunity-gate
-```
+```text
 
 ## 📦 Instalação
 

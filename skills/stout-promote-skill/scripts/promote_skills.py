@@ -16,6 +16,9 @@ GOLDEN_COPY = Path.home() / ".shared-ai-memory" / "skills"
 ARCHIVE_DIR = Path.home() / ".shared-ai-memory" / "skills" / "_archived"
 AUDIT_DIR = Path(__file__).resolve().parents[3] / "docs" / "audits"
 
+# Fallback: skills que ainda vivem no projeto CDD (não foram migradas para SKILLS_ROOT)
+CDD_SKILLS_ROOT = Path(r"C:\Projetos\Stout\Projetos\Configuration-Driven Development\skills")
+
 PROMOTION_MAP = {
     "stout-brainstorming":        ["process-brainstorming"],
     "stout-dev-tdd":              ["dev-tdd"],
@@ -41,6 +44,7 @@ PROMOTION_MAP = {
     "stout-session-learning":     [],
     "stout-retrofit":             [],
     "stout-skill-manager":        [],
+    "skillfish":                  [],
 }
 
 
@@ -52,12 +56,23 @@ def load_latest_audit() -> dict:
     return {r["skill"]: r["status"] for r in data["results"]}
 
 
+def resolve_source(skill_name: str) -> Path | None:
+    """Retorna o path fonte da skill: SKILLS_ROOT primeiro, depois CDD_SKILLS_ROOT."""
+    candidate = SKILLS_ROOT / skill_name
+    if candidate.exists():
+        return candidate
+    fallback = CDD_SKILLS_ROOT / skill_name
+    if fallback.exists():
+        return fallback
+    return None
+
+
 def promote_skill(skill_name: str, replaced: list, dry_run: bool) -> dict:
-    src = SKILLS_ROOT / skill_name
+    src = resolve_source(skill_name)
     dst = GOLDEN_COPY / skill_name
     actions = []
 
-    if not src.exists():
+    if src is None:
         return {"skill": skill_name, "status": "SOURCE_MISSING", "actions": []}
 
     for old_name in replaced:

@@ -50,6 +50,7 @@ Verificar qualidade antes de recomendar: preferir skills com 1K+ installs e font
 ```bash
 python scripts/install.py --package <owner/repo> --skill-name <nome>
 ```
+
 1. O script roda `junction_guard.py` antes de qualquer escrita
 2. Valida presença de `SKILL.md` e frontmatter (`name`, `version`) pós-download
 3. Informa sucesso ou falha com detalhes acionáveis
@@ -98,3 +99,12 @@ Output: Skill instalada em `.shared-ai-memory/skills/tdd/` — disponível nas 3
 
 - `scripts/search.py` — busca no npm registry via API + filtra compatibilidade Stout
 - `scripts/install.py` — instala via skillfish CLI com path canônico + validação Stout
+
+## Critérios de Conclusão
+
+A skill é concluída (done) quando:
+
+1. `skillfish search` retornou resultados e o usuário escolheu uma skill
+2. Usuário confirmou a instalação (HITL)
+3. `scripts/install.py` encerrou com sucesso e validação Stout passou
+4. Skill disponível em `.shared-ai-memory/skills/<nome>/` com `SKILL.md` válido

@@ -31,6 +31,7 @@ through structured dialogue **before any implementation begins**.
 **Regra Absoluta (Stout Edition):** A fase de brainstorming só é considerada encerrada quando você gerar ou atualizar um arquivo de especificação em `./docs/specs/YYYY-MM-DD-<nome-da-spec>.md`.
 
 This skill exists to prevent:
+
 - premature implementation
 - hidden assumptions
 - misaligned solutions
@@ -114,7 +115,9 @@ If the user is unsure:
 Before proposing **any design**, you MUST pause and do the following:
 
 #### Understanding Summary
+
 Provide a concise summary (5–7 bullets) covering:
+
 - What is being built  
 - Why it exists  
 - Who it is for  
@@ -122,9 +125,11 @@ Provide a concise summary (5–7 bullets) covering:
 - Explicit non-goals  
 
 #### Assumptions
+
 List all assumptions explicitly.
 
 #### Open Questions
+
 List unresolved questions, if any.
 
 Then ask:
@@ -178,6 +183,7 @@ Cover, as relevant:
 Maintain a running **Decision Log** throughout the design discussion.
 
 For each decision:
+
 - What was decided  
 - Alternatives considered  
 - Why this option was chosen  
@@ -210,6 +216,7 @@ Only after documentation is complete, ask:
 > “Ready to set up for implementation?”
 
 If yes:
+
 - Create an explicit implementation plan
 - Isolate work if the workflow supports it
 - Proceed incrementally
@@ -221,6 +228,7 @@ If yes:
 A fase de brainstorming só é considerada encerrada quando você gerar ou atualizar o arquivo de especificação na pasta: `./docs/specs/`.
 
 A Spec deve conter:
+
 1. **Objetivo:** O que estamos resolvendo.
 2. **Requisitos:** Funcionais e não-funcionais.
 3. **Arquitetura:** Mudanças estruturais propostas.
@@ -236,6 +244,7 @@ You may exit brainstorming mode **only when all of the following are true**:
 - Decision Log is complete  
 
 If any criterion is unmet:
+
 - Continue refinement  
 - **Do NOT proceed to implementation**
 
@@ -255,4 +264,5 @@ If any criterion is unmet:
 If the design is high-impact, high-risk, or requires elevated confidence, you MUST hand off the finalized design and Decision Log to the `multi-agent-brainstorming` skill before implementation.
 
 ## When to Use
+
 This skill is applicable to execute the workflow or actions described in the overview.

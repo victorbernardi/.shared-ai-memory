@@ -16,6 +16,9 @@ from pathlib import Path
 SKILLS_ROOT = Path(__file__).resolve().parents[3] / "skills"
 OUTPUT_DIR = Path(__file__).resolve().parents[3] / "docs" / "audits"
 
+# Skills ainda no projeto CDD que ainda não foram migradas para SKILLS_ROOT
+CDD_SKILLS_ROOT = Path(r"C:\Projetos\Stout\Projetos\Configuration-Driven Development\skills")
+
 MAIN_FILENAMES = ["SKILL.md", "main.md", "README.md", "skill.md"]
 
 CHECKLIST = {
@@ -79,9 +82,13 @@ def audit_skill(skill_dir: Path) -> dict:
         fail_reasons.append("Contains TODO/TBD placeholders")
 
     passed = all(checks.values())
+    try:
+        rel_file = str(main_file.relative_to(SKILLS_ROOT.parent))
+    except ValueError:
+        rel_file = str(main_file)
     return {
         "skill": skill_dir.name,
-        "file": str(main_file.relative_to(SKILLS_ROOT.parent)),
+        "file": rel_file,
         "status": "PASS" if passed else "FAIL",
         "checks": checks,
         "fail_reasons": fail_reasons,
@@ -97,6 +104,13 @@ def main() -> int:
         [d for d in SKILLS_ROOT.iterdir() if d.is_dir()],
         key=lambda d: d.name,
     )
+
+    # Inclui skills do CDD que não existem em SKILLS_ROOT
+    audited_names = {d.name for d in skill_dirs}
+    if CDD_SKILLS_ROOT.exists():
+        for d in sorted(CDD_SKILLS_ROOT.iterdir()):
+            if d.is_dir() and d.name not in audited_names:
+                skill_dirs.append(d)
 
     results = [audit_skill(d) for d in skill_dirs]
     passed = [r for r in results if r["status"] == "PASS"]

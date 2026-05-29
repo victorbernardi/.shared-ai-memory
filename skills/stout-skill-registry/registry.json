@@ -492,7 +492,8 @@
       "created_at": "2026-05-29",
       "updated_at": "2026-05-29",
       "author": "Victor",
-      "notes": "Skill de descoberta e instalacao via skillfish CLI. Path canonico: .shared-ai-memory/skills/"
+      "notes": "Skill de descoberta e instalacao via skillfish CLI. Path canonico: .shared-ai-memory/skills/",
+      "promoted_at": "2026-05-29"
     },
     {
       "name": "stout-skill-manager",
