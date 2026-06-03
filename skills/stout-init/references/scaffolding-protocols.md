@@ -1,5 +1,5 @@
 ---
-id: 'stout-init-v2'
+id: 'stout-init'
 name: 'stout-init V2.0 (Modular Scaffolding)'
 description: 'Inicializa projetos com arquitetura modular, permitindo a injeção de addons (como CDD) e governança Stout.'
 level: 3
