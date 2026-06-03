@@ -42,6 +42,25 @@ Crie a estrutura base física: `src/`, `data/`, `tests/`, `notes/`.
 
 Arquivos Base: `GEMINI.md`, `ANTIGRAVITY.md`, `README.md`, `.env.example`, `.gitignore`.
 
+**Bootstrap Python/uv (obrigatório para projetos Python):**
+
+1. Criar `requirements.txt` com as dependências do projeto (ou `pyproject.toml` se build system).
+2. Criar `.venv` isolado:
+
+```powershell
+cd <raiz-do-projeto>
+uv venv --python 3.12
+uv pip install -r requirements.txt
+```
+
+3. Validar:
+
+```powershell
+uv run python -c "import sys; print(f'Python {sys.version[:5]} OK')"
+```
+
+**NÃO assumir** que o Anaconda está disponível. Todo projeto nasce com `uv` como runtime.
+
 **Junction obrigatória para `docs/`:**
 
 ```powershell
@@ -65,7 +84,9 @@ Para cada addon selecionado, leia o `ADDON.md` e execute as instruções de inst
 ### Phase 4: Finalization & Quality
 
 1. **Sanitização:** Execute obrigatoriamente o script de auto-fix:
+
    `python C:\Users\victor.bernardi\.shared-ai-memory\scripts\markdown_auto_fixer_v1.py .`
+
 2. **Manifesto:** Gere um `stout-manifest.json` com os metadados.
 
 ---
