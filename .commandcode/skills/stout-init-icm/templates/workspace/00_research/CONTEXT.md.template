@@ -1,0 +1,40 @@
+---
+stage: 00_research
+layer: 2
+role: stage_contract
+inputs_from: [operator_curation]
+outputs_to: [todos_os_estagios]
+---
+
+# CONTEXT.md — Estágio 00: Research (Cold Storage)
+
+## 1. Propósito do Estágio
+Fornecer fundamentação teórica e referências para os estágios operacionais. Cold storage — nunca carregado automaticamente.
+
+## 2. Insumos (Inputs)
+- **Pesquisas curadas:** `references/*.md`
+
+## 3. Tarefa e Processo
+### 3.1 Organização
+- Agrupar pesquisas por tema em `references/`
+
+### 3.2 Disponibilização
+- Estágios operacionais referenciam arquivos específicos sob demanda
+
+## 4. Restrições
+- **NUNCA** carregar todo o conteúdo deste diretório de uma vez
+- **SEMPRE** referenciar arquivos individuais sob demanda
+
+## 5. Artefatos de Saída
+| Artefato | Localização | Formato | Critério de Aceitação |
+|----------|-------------|---------|----------------------|
+| Referências organizadas | `references/` | Markdown | Arquivos indexados por nome descritivo |
+
+## 6. Critérios de Conclusão
+1. Pesquisas organizadas em `references/`
+
+## 7. Handoff
+- Estágios operacionais consomem arquivos específicos sob demanda
+
+## 8. Em Caso de Falha
+- Se arquivo referenciado não existe: sinalizar ao operador

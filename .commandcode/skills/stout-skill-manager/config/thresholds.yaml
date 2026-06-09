@@ -1,0 +1,5 @@
+local_match_threshold: 60       # score mínimo (0-100) para considerar skill local suficiente
+sentinel_min_score: 70          # score mínimo do skill-sentinel para ativar skill
+improve_max_cycles: 2           # máx de ciclos stout-improve-skill antes de quarantine
+auditor_rejection_threshold: 80 # score de overlap que dispara REJECTED
+auditor_question_threshold: 40  # score de overlap que dispara QUESTIONED
