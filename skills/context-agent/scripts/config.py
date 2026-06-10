@@ -38,15 +38,17 @@ DB_PATH               = DATA_DIR / "context.db"
 SESSION_ORIGIN = os.getenv("CONTEXT_AGENT_ORIGIN", "antigravity")
 
 # ── Fontes de leitura ────────────────────────────────────────────────
-# Padrão: brain do Antigravity.
-# Claude Code sobrescreve via CONTEXT_AGENT_ORIGIN=claude (definido em settings.json).
 AGENT_ROOT = USER_PROFILE / ".gemini" / "antigravity"
 BRAIN_DIR  = AGENT_ROOT / "brain"
 
-# Brain do Antigravity: <uuid>/.system_generated/logs/overview.txt (NDJSON nested)
-# Claude Code:          ~/.claude/projects/<encoded-cwd>/<uuid>.jsonl (nested)
-# O session_parser._discover_session_files() detecta o formato automaticamente.
-if SESSION_ORIGIN == "claude":
+COMMANDCODE_SESSION_DIR = _env_path(
+    "COMMANDCODE_SESSION_DIR",
+    USER_PROFILE / ".commandcode" / "projects",
+)
+
+if SESSION_ORIGIN == "commandcode":
+    CLAUDE_SESSION_DIR = _env_path("CLAUDE_SESSION_DIR", COMMANDCODE_SESSION_DIR)
+elif SESSION_ORIGIN == "claude":
     CLAUDE_SESSION_DIR = _env_path("CLAUDE_SESSION_DIR", USER_PROFILE / ".claude" / "projects")
 else:
     CLAUDE_SESSION_DIR = _env_path("CLAUDE_SESSION_DIR", BRAIN_DIR)
