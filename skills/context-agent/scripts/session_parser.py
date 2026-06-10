@@ -214,11 +214,17 @@ def _discover_session_files() -> list[Path]:
     """
     if not CLAUDE_SESSION_DIR.exists():
         return []
+    # Flat: files directly in session dir
     flat = list(CLAUDE_SESSION_DIR.glob("*.jsonl"))
     if flat:
         return sorted(flat, key=lambda p: p.stat().st_mtime, reverse=True)
-    nested = list(CLAUDE_SESSION_DIR.glob("*/.system_generated/logs/overview.txt"))
-    return sorted(nested, key=lambda p: p.stat().st_mtime, reverse=True)
+    # Nested Claude Code: ~/.claude/projects/<encoded-project>/<uuid>.jsonl
+    nested_claude = list(CLAUDE_SESSION_DIR.glob("*/*.jsonl"))
+    if nested_claude:
+        return sorted(nested_claude, key=lambda p: p.stat().st_mtime, reverse=True)
+    # Nested Antigravity/Gemini: <uuid>/.system_generated/logs/overview.txt
+    nested_ag = list(CLAUDE_SESSION_DIR.glob("*/.system_generated/logs/overview.txt"))
+    return sorted(nested_ag, key=lambda p: p.stat().st_mtime, reverse=True)
 
 
 def get_latest_session_file() -> Optional[Path]:
