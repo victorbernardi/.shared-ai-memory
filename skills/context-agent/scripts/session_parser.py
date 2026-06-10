@@ -14,6 +14,9 @@ from models import SessionEntry
 
 def parse_session_file(path: Path) -> list[SessionEntry]:
     """Lê um arquivo JSONL e retorna lista de SessionEntry."""
+    session_id = path.stem
+    mtime_ts = datetime.fromtimestamp(path.stat().st_mtime).isoformat()
+
     entries = []
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         for line in f:
@@ -24,10 +27,57 @@ def parse_session_file(path: Path) -> list[SessionEntry]:
                 raw = json.loads(line)
                 entry = _parse_raw_entry(raw)
                 if entry:
+                    if not entry.session_id:
+                        entry.session_id = session_id
+                    if not entry.timestamp:
+                        entry.timestamp = mtime_ts
                     entries.append(entry)
             except json.JSONDecodeError:
                 continue
     return entries
+
+
+def _parse_commandcode_entry(raw: dict) -> Optional[SessionEntry]:
+    """Parseia uma entrada no formato Anthropic Messages API (Command Code)."""
+    role = raw["role"]
+    if role == "system":
+        return None
+    content_raw = raw.get("content", "")
+    text_parts: list[str] = []
+    tool_calls: list[dict] = []
+    files_modified: list[dict] = []
+    if isinstance(content_raw, str):
+        text_parts.append(content_raw)
+    elif isinstance(content_raw, list):
+        for block in content_raw:
+            if not isinstance(block, dict):
+                continue
+            btype = block.get("type", "")
+            if btype == "text":
+                text_parts.append(block.get("text", ""))
+            elif btype == "tool_use":
+                tc = {"name": block.get("name", ""), "input": block.get("input", {})}
+                tool_calls.append(tc)
+                if tc["name"] in FILE_MODIFYING_TOOLS:
+                    fp = tc["input"].get("file_path", tc["input"].get("path", ""))
+                    if fp:
+                        files_modified.append({"path": fp, "action": "edit"})
+            elif btype == "tool_result":
+                rc = block.get("content", "")
+                if isinstance(rc, str):
+                    text_parts.append(rc)
+                elif isinstance(rc, list):
+                    for rb in rc:
+                        if isinstance(rb, dict) and rb.get("type") == "text":
+                            text_parts.append(rb.get("text", ""))
+    return SessionEntry(
+        type=role,
+        timestamp="",
+        session_id="",
+        content="\n".join(text_parts),
+        tool_calls=tool_calls,
+        files_modified=files_modified,
+    )
 
 
 def _parse_raw_entry(raw: dict) -> Optional[SessionEntry]:
@@ -41,6 +91,10 @@ def _parse_raw_entry(raw: dict) -> Optional[SessionEntry]:
             session_id=raw.get("sessionId", ""),
             content=raw.get("content", ""),
         )
+
+    # Formato Command Code (Anthropic Messages API) — role sem type
+    if "role" in raw and "type" not in raw:
+        return _parse_commandcode_entry(raw)
 
     if entry_type not in ("user", "assistant", "USER_INPUT", "PLANNER_RESPONSE"):
         return None
@@ -214,17 +268,11 @@ def _discover_session_files() -> list[Path]:
     """
     if not CLAUDE_SESSION_DIR.exists():
         return []
-    # Flat: files directly in session dir
     flat = list(CLAUDE_SESSION_DIR.glob("*.jsonl"))
     if flat:
         return sorted(flat, key=lambda p: p.stat().st_mtime, reverse=True)
-    # Nested Claude Code: ~/.claude/projects/<encoded-project>/<uuid>.jsonl
-    nested_claude = list(CLAUDE_SESSION_DIR.glob("*/*.jsonl"))
-    if nested_claude:
-        return sorted(nested_claude, key=lambda p: p.stat().st_mtime, reverse=True)
-    # Nested Antigravity/Gemini: <uuid>/.system_generated/logs/overview.txt
-    nested_ag = list(CLAUDE_SESSION_DIR.glob("*/.system_generated/logs/overview.txt"))
-    return sorted(nested_ag, key=lambda p: p.stat().st_mtime, reverse=True)
+    nested = list(CLAUDE_SESSION_DIR.glob("*/.system_generated/logs/overview.txt"))
+    return sorted(nested, key=lambda p: p.stat().st_mtime, reverse=True)
 
 
 def get_latest_session_file() -> Optional[Path]:
