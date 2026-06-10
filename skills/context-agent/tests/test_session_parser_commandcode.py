@@ -2,12 +2,13 @@ import sys
 import os
 import json
 import tempfile
+import pytest
 from pathlib import Path
 from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from session_parser import parse_session_file, _parse_raw_entry
+from session_parser import parse_session_file, _parse_raw_entry, get_session_metadata
 
 
 # ── Task 2: Parse de entradas simples ──────────────────────────────────────
@@ -114,3 +115,47 @@ def test_parse_session_file_injects_session_id_and_timestamp():
             assert entry.timestamp != "", "timestamp não deve ser vazio"
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+# ── Task 5: Teste de integração com JSONL real ─────────────────────────────
+
+
+_CC_PROJECT_DIR = (
+    Path.home()
+    / ".commandcode"
+    / "projects"
+    / "c-projetos-stout-projetos-configuration-driven-development"
+)
+
+
+def _find_real_jsonl() -> Path | None:
+    if not _CC_PROJECT_DIR.exists():
+        return None
+    files = sorted(
+        [p for p in _CC_PROJECT_DIR.glob("*.jsonl") if ".checkpoints" not in p.name],
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    return files[0] if files else None
+
+
+@pytest.mark.skipif(
+    _find_real_jsonl() is None,
+    reason="Nenhum arquivo JSONL do Command Code encontrado em ~/.commandcode/projects/",
+)
+def test_save_commandcode_session_generates_summary():
+    """Parse de JSONL real do Command Code deve retornar entries > 0 e metadata populado."""
+    jsonl_path = _find_real_jsonl()
+    assert jsonl_path is not None
+
+    entries = parse_session_file(jsonl_path)
+    assert len(entries) > 0, f"Esperado entries > 0, obtido 0 para {jsonl_path.name}"
+
+    metadata = get_session_metadata(entries)
+    assert metadata.get("message_count", 0) > 0, "message_count deve ser > 0"
+
+    tool_calls = [tc for e in entries for tc in e.tool_calls]
+    files_modified = [f for e in entries for f in e.files_modified]
+    assert len(tool_calls) > 0 or len(files_modified) > 0, (
+        "Esperado ao menos uma tool_call ou arquivo modificado"
+    )

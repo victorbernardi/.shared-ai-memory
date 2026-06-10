@@ -38,14 +38,18 @@ def parse_session_file(path: Path) -> list[SessionEntry]:
 
 
 def _parse_commandcode_entry(raw: dict) -> Optional[SessionEntry]:
-    """Parseia uma entrada no formato Anthropic Messages API (Command Code)."""
+    """Parseia uma entrada no formato Command Code (Anthropic Messages API variante)."""
     role = raw["role"]
     if role == "system":
         return None
+
+    timestamp = raw.get("timestamp", "")
+    session_id = raw.get("sessionId", "")
     content_raw = raw.get("content", "")
     text_parts: list[str] = []
     tool_calls: list[dict] = []
     files_modified: list[dict] = []
+
     if isinstance(content_raw, str):
         text_parts.append(content_raw)
     elif isinstance(content_raw, list):
@@ -53,27 +57,41 @@ def _parse_commandcode_entry(raw: dict) -> Optional[SessionEntry]:
             if not isinstance(block, dict):
                 continue
             btype = block.get("type", "")
-            if btype == "text":
-                text_parts.append(block.get("text", ""))
-            elif btype == "tool_use":
-                tc = {"name": block.get("name", ""), "input": block.get("input", {})}
+            if btype in ("text", "reasoning"):
+                text = block.get("text", "")
+                if text:
+                    text_parts.append(text)
+            elif btype in ("tool_use", "tool-call"):
+                # tool_use: name + input  |  tool-call: toolName + input
+                tool_name = block.get("name") or block.get("toolName", "")
+                tool_input = block.get("input", {})
+                tc = {"name": tool_name, "input": tool_input}
                 tool_calls.append(tc)
-                if tc["name"] in FILE_MODIFYING_TOOLS:
-                    fp = tc["input"].get("file_path", tc["input"].get("path", ""))
+                if tool_name in FILE_MODIFYING_TOOLS:
+                    fp = (
+                        tool_input.get("file_path")
+                        or tool_input.get("filePath")
+                        or tool_input.get("path", "")
+                    )
                     if fp:
-                        files_modified.append({"path": fp, "action": "edit"})
-            elif btype == "tool_result":
-                rc = block.get("content", "")
+                        files_modified.append({"path": fp, "action": tool_name})
+            elif btype in ("tool_result", "tool-result"):
+                # tool_result: content field  |  tool-result: output field
+                rc = block.get("content") or block.get("output", "")
                 if isinstance(rc, str):
                     text_parts.append(rc)
+                elif isinstance(rc, dict) and rc.get("type") == "text":
+                    text_parts.append(rc.get("value", rc.get("text", "")))
                 elif isinstance(rc, list):
                     for rb in rc:
                         if isinstance(rb, dict) and rb.get("type") == "text":
                             text_parts.append(rb.get("text", ""))
+
     return SessionEntry(
         type=role,
-        timestamp="",
-        session_id="",
+        role=role,
+        timestamp=timestamp,
+        session_id=session_id,
         content="\n".join(text_parts),
         tool_calls=tool_calls,
         files_modified=files_modified,

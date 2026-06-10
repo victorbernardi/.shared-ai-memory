@@ -84,7 +84,15 @@ PENDING_MARKERS = [
 ]
 
 # Ferramentas que modificam arquivos
-FILE_MODIFYING_TOOLS = {"Edit", "Write", "NotebookEdit", "write_to_file", "replace_file_content", "multi_replace_file_content", "create_or_update_file", "push_files"}
+FILE_MODIFYING_TOOLS = {
+    # Claude Code
+    "Edit", "Write", "NotebookEdit",
+    # Antigravity / Gemini
+    "write_to_file", "replace_file_content", "multi_replace_file_content",
+    "create_or_update_file", "push_files",
+    # Command Code
+    "edit_file", "write_file",
+}
 FILE_READING_TOOLS = {"Read", "Glob", "Grep", "view_file", "list_dir", "grep_search", "get_file_contents"}
 
 # ── Projetos conhecidos ────────────────────────────────────────────
