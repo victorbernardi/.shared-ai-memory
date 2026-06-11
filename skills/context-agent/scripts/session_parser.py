@@ -14,9 +14,6 @@ from models import SessionEntry
 
 def parse_session_file(path: Path) -> list[SessionEntry]:
     """Lê um arquivo JSONL e retorna lista de SessionEntry."""
-    session_id = path.stem
-    mtime_ts = datetime.fromtimestamp(path.stat().st_mtime).isoformat()
-
     entries = []
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         for line in f:
@@ -27,75 +24,10 @@ def parse_session_file(path: Path) -> list[SessionEntry]:
                 raw = json.loads(line)
                 entry = _parse_raw_entry(raw)
                 if entry:
-                    if not entry.session_id:
-                        entry.session_id = session_id
-                    if not entry.timestamp:
-                        entry.timestamp = mtime_ts
                     entries.append(entry)
             except json.JSONDecodeError:
                 continue
     return entries
-
-
-def _parse_commandcode_entry(raw: dict) -> Optional[SessionEntry]:
-    """Parseia uma entrada no formato Command Code (Anthropic Messages API variante)."""
-    role = raw["role"]
-    if role == "system":
-        return None
-
-    timestamp = raw.get("timestamp", "")
-    session_id = raw.get("sessionId", "")
-    content_raw = raw.get("content", "")
-    text_parts: list[str] = []
-    tool_calls: list[dict] = []
-    files_modified: list[dict] = []
-
-    if isinstance(content_raw, str):
-        text_parts.append(content_raw)
-    elif isinstance(content_raw, list):
-        for block in content_raw:
-            if not isinstance(block, dict):
-                continue
-            btype = block.get("type", "")
-            if btype in ("text", "reasoning"):
-                text = block.get("text", "")
-                if text:
-                    text_parts.append(text)
-            elif btype in ("tool_use", "tool-call"):
-                # tool_use: name + input  |  tool-call: toolName + input
-                tool_name = block.get("name") or block.get("toolName", "")
-                tool_input = block.get("input", {})
-                tc = {"name": tool_name, "input": tool_input}
-                tool_calls.append(tc)
-                if tool_name in FILE_MODIFYING_TOOLS:
-                    fp = (
-                        tool_input.get("file_path")
-                        or tool_input.get("filePath")
-                        or tool_input.get("path", "")
-                    )
-                    if fp:
-                        files_modified.append({"path": fp, "action": tool_name})
-            elif btype in ("tool_result", "tool-result"):
-                # tool_result: content field  |  tool-result: output field
-                rc = block.get("content") or block.get("output", "")
-                if isinstance(rc, str):
-                    text_parts.append(rc)
-                elif isinstance(rc, dict) and rc.get("type") == "text":
-                    text_parts.append(rc.get("value", rc.get("text", "")))
-                elif isinstance(rc, list):
-                    for rb in rc:
-                        if isinstance(rb, dict) and rb.get("type") == "text":
-                            text_parts.append(rb.get("text", ""))
-
-    return SessionEntry(
-        type=role,
-        role=role,
-        timestamp=timestamp,
-        session_id=session_id,
-        content="\n".join(text_parts),
-        tool_calls=tool_calls,
-        files_modified=files_modified,
-    )
 
 
 def _parse_raw_entry(raw: dict) -> Optional[SessionEntry]:
@@ -109,10 +41,6 @@ def _parse_raw_entry(raw: dict) -> Optional[SessionEntry]:
             session_id=raw.get("sessionId", ""),
             content=raw.get("content", ""),
         )
-
-    # Formato Command Code (Anthropic Messages API) — role sem type
-    if "role" in raw and "type" not in raw:
-        return _parse_commandcode_entry(raw)
 
     if entry_type not in ("user", "assistant", "USER_INPUT", "PLANNER_RESPONSE"):
         return None

@@ -38,20 +38,15 @@ DB_PATH               = DATA_DIR / "context.db"
 SESSION_ORIGIN = os.getenv("CONTEXT_AGENT_ORIGIN", "antigravity")
 
 # ── Fontes de leitura ────────────────────────────────────────────────
+# Padrão: brain do Antigravity.
+# Claude Code sobrescreve via CLAUDE_SESSION_DIR (definido em settings.json ou pelo save_hook).
 AGENT_ROOT = USER_PROFILE / ".gemini" / "antigravity"
 BRAIN_DIR  = AGENT_ROOT / "brain"
 
-COMMANDCODE_SESSION_DIR = _env_path(
-    "COMMANDCODE_SESSION_DIR",
-    USER_PROFILE / ".commandcode" / "projects",
-)
-
-if SESSION_ORIGIN == "commandcode":
-    CLAUDE_SESSION_DIR = _env_path("CLAUDE_SESSION_DIR", COMMANDCODE_SESSION_DIR)
-elif SESSION_ORIGIN == "claude":
-    CLAUDE_SESSION_DIR = _env_path("CLAUDE_SESSION_DIR", USER_PROFILE / ".claude" / "projects")
-else:
-    CLAUDE_SESSION_DIR = _env_path("CLAUDE_SESSION_DIR", BRAIN_DIR)
+# Brain do Antigravity: <uuid>/.system_generated/logs/overview.txt (NDJSON nested)
+# Claude Code:          ~/.claude/projects/<encoded-cwd>/<uuid>.jsonl (flat)
+# O session_parser._discover_session_files() detecta o formato automaticamente.
+CLAUDE_SESSION_DIR = _env_path("CLAUDE_SESSION_DIR", BRAIN_DIR)
 
 MEMORY_DIR     = USER_PROFILE / ".shared-ai-memory" / "memory"
 MEMORY_MD_PATH = MEMORY_DIR / "MEMORY.md"
@@ -84,15 +79,7 @@ PENDING_MARKERS = [
 ]
 
 # Ferramentas que modificam arquivos
-FILE_MODIFYING_TOOLS = {
-    # Claude Code
-    "Edit", "Write", "NotebookEdit",
-    # Antigravity / Gemini
-    "write_to_file", "replace_file_content", "multi_replace_file_content",
-    "create_or_update_file", "push_files",
-    # Command Code
-    "edit_file", "write_file",
-}
+FILE_MODIFYING_TOOLS = {"Edit", "Write", "NotebookEdit", "write_to_file", "replace_file_content", "multi_replace_file_content", "create_or_update_file", "push_files"}
 FILE_READING_TOOLS = {"Read", "Glob", "Grep", "view_file", "list_dir", "grep_search", "get_file_contents"}
 
 # ── Projetos conhecidos ────────────────────────────────────────────

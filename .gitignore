@@ -40,3 +40,20 @@ context.db*
 .DS_Store
 Thumbs.db
 .gemini/skills/
+  
+# docs - binary and temp files  
+docs/~$*  
+docs/*.pdf  
+docs/*.docx  
+docs/*.pptx  
+docs/*.xlsx  
+docs/*.png  
+docs/*.jpg  
+docs/*.jpeg  
+docs/*.gif  
+docs/*.webp  
+docs/*.svg  
+docs/*.rar  
+docs/*.zip  
+docs/__pycache__/  
+docs/*.pyc 

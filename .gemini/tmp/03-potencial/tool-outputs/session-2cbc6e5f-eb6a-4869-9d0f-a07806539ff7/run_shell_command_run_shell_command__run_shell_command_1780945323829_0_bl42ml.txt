@@ -1,0 +1,3 @@
+{
+  "output": "Output: C:\\Projetos\\Inova\\pipelines\\potencial-clientes\\04_Estrategia\\transform.py:265:    \r\ncols_carteira += ['Valor_Devolucao_Pecas', 'Total_Liquido_Pecas', 'Horimetro_Medio']\nProcess Group PGID: 30356"
+}

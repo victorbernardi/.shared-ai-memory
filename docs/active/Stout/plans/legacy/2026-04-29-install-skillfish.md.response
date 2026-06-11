@@ -1,0 +1,81 @@
+# Integração Skillfish (Stout Edition) Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Instalar o Skillfish e criar a skill-manager para gerenciar o ecossistema Stout.
+
+**Architecture:** Camada de execução CLI (Skillfish) encapsulada em uma Habilidade Antigravity (Skill) com validação via Sentinel.
+
+**Tech Stack:** Node.js, NPM, Skillfish, Markdown.
+
+---
+
+### Task 1: Environment Readiness
+**Files:** 
+- Execute: Terminal
+
+**Step 1: Check Node.js/NPM**
+Run: `npm -v`
+Expected: Version string (e.g., 10.x.x)
+
+**Step 2: Global Installation**
+Run: `npm i -g skillfish`
+Expected: Success message from NPM.
+
+**Step 3: Verification**
+Run: `skillfish --version`
+Expected: Skillfish version output.
+
+---
+
+### Task 2: Skill Skeleton Creation (@writing-skills)
+**Files:**
+- [NEW] `C:\Projetos\Stout\antigravity\skills\skill-manager\SKILL.md`
+
+**Step 1: Create Directory**
+Run: `mkdir C:\Projetos\Stout\antigravity\skills\skill-manager`
+
+**Step 2: Generate Tier 1 Template**
+Use `@writing-skills` to generate a standard YAML frontmatter.
+```yaml
+---
+name: skill-manager
+description: Use when you need to install, update, or list Antigravity skills.
+metadata:
+  category: operation
+  triggers: install skill, update skills, list skills, add-habilidade
+---
+```
+
+**Step 3: Save initial SKILL.md**
+Write the content to the path above.
+
+---
+
+### Task 3: Command Mapping and Discipline
+**Files:**
+- [MODIFY] `C:\Projetos\Stout\antigravity\skills\skill-manager\SKILL.md`
+
+**Step 1: Add implementation details**
+Map the commands explicitly:
+- `skillfish add <repo> --dir C:\Projetos\Stout\antigravity\skills`
+- `skillfish update --dir C:\Projetos\Stout\antigravity\skills`
+
+**Step 2: Add Anti-Rationalization Clause**
+Insert: "IMPORTANT: After adding any new skill, you MUST invoke @skill-sentinel to audit the new files."
+
+---
+
+### Task 4: Final Validation
+**Files:**
+- N/A
+
+**Step 1: Test Listing**
+Run command via Antigravity: "Liste minhas skills usando a skill-manager"
+Expected: Output from `skillfish list`.
+
+**Step 2: Audit Check**
+Invoke `@skill-sentinel` manually to ensure it recognizes the new `skill-manager`.
+
+---
+*Assinado: Antigravity (Phase: Strategy)*

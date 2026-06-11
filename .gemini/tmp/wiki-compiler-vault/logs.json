@@ -1,0 +1,72 @@
+[
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 0,
+    "type": "user",
+    "message": "/wiki-ingest precisamos fazer a ingestão dos arquivos em /_raw.\nLembrando que para não ter retrabalho, oq já foi feita a ingest deve ser ignorado e excluido do raw. Vc deve ler apenas os arquivos que ainda não passram pelo _raw",
+    "timestamp": "2026-06-09T21:06:27.283Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 1,
+    "type": "user",
+    "message": "/model",
+    "timestamp": "2026-06-09T21:12:53.552Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 2,
+    "type": "user",
+    "message": "pode seguir",
+    "timestamp": "2026-06-09T21:13:10.471Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 3,
+    "type": "user",
+    "message": "é possivel aplicar bypass nessa sessao",
+    "timestamp": "2026-06-09T21:16:12.408Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 4,
+    "type": "user",
+    "message": "o bypass é eu não precisar ficar aprovando as modificações. vc tem total autonomia para fazer as ingestões ou delete da pasta raw",
+    "timestamp": "2026-06-09T21:17:22.116Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 5,
+    "type": "user",
+    "message": "vc deve fazer no maximo 20 arquivos por lotes.",
+    "timestamp": "2026-06-09T21:19:19.863Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 6,
+    "type": "user",
+    "message": "pq vc esta pausando?",
+    "timestamp": "2026-06-09T21:23:23.682Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 7,
+    "type": "user",
+    "message": "pode seguir sem pausa",
+    "timestamp": "2026-06-09T21:28:32.879Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 8,
+    "type": "user",
+    "message": "os 300 ainda estão na pasta raw. vc validou se todos esses arquivos já não foram ingerids pela wiki?",
+    "timestamp": "2026-06-09T21:38:28.950Z"
+  },
+  {
+    "sessionId": "24080194-c578-4680-94d9-6818a2bf2cf5",
+    "messageId": 9,
+    "type": "user",
+    "message": "ainda temos 83 na pasta",
+    "timestamp": "2026-06-09T22:15:18.909Z"
+  }
+]

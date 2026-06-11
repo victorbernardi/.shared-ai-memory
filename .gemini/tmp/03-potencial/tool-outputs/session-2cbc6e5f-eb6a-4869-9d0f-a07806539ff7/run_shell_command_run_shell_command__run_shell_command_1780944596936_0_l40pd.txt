@@ -1,0 +1,3 @@
+{
+  "output": "Output: No linha:32 caractere:9\r\n+         FROM VO1010\r\n+         ~~~~\r\nA palavra-chave 'from' não tem suporte nesta versão da linguagem.\r\n    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException\r\n    + FullyQualifiedErrorId : ReservedKeywordNotAllowed\nExit Code: 1\nProcess Group PGID: 13280"
+}

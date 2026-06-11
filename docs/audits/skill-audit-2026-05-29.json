@@ -1,0 +1,2044 @@
+{
+  "date": "2026-05-29",
+  "summary": {
+    "total": 140,
+    "passed": 40,
+    "failed": 100
+  },
+  "results": [
+    {
+      "skill": "_archived",
+      "file": null,
+      "status": "NO_FILE",
+      "checks": {},
+      "fail_reasons": [
+        "No Markdown file found"
+      ]
+    },
+    {
+      "skill": "audio-transcriber",
+      "file": "skills\\audio-transcriber\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "audit-canary-deployment",
+      "file": "skills\\audit-canary-deployment\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "audit-context-guardian",
+      "file": "skills\\audit-context-guardian\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "audit-logging-system",
+      "file": "skills\\audit-logging-system\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "audit-skill-manager",
+      "file": "skills\\audit-skill-manager\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "audit-skill-sentinel",
+      "file": "skills\\audit-skill-sentinel\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "audit-verification",
+      "file": "skills\\audit-verification\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "audit-webapp-testing",
+      "file": "skills\\audit-webapp-testing\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "caveman",
+      "file": "skills\\caveman\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "caveman-commit",
+      "file": "skills\\caveman-commit\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "cdd-governance",
+      "file": "skills\\cdd-governance\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "code-documentation-code-explain",
+      "file": "skills\\code-documentation-code-explain\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "code-documentation-doc-generate",
+      "file": "skills\\code-documentation-doc-generate\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "code-refactoring-context-restore",
+      "file": "skills\\code-refactoring-context-restore\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "code-refactoring-refactor-clean",
+      "file": "skills\\code-refactoring-refactor-clean\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "code-refactoring-tech-debt",
+      "file": "skills\\code-refactoring-tech-debt\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "code-review-ai-ai-review",
+      "file": "skills\\code-review-ai-ai-review\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "code-review-checklist",
+      "file": "skills\\code-review-checklist\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "code-review-excellence",
+      "file": "skills\\code-review-excellence\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "code-reviewer",
+      "file": "skills\\code-reviewer\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "code-simplifier",
+      "file": "skills\\code-simplifier\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "context-agent",
+      "file": "skills\\context-agent\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "context-degradation",
+      "file": "skills\\context-degradation\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "context-driven-development",
+      "file": "skills\\context-driven-development\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "context-fundamentals",
+      "file": "skills\\context-fundamentals\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "context-guardian",
+      "file": "skills\\context-guardian\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "context-management",
+      "file": null,
+      "status": "NO_FILE",
+      "checks": {},
+      "fail_reasons": [
+        "No Markdown file found"
+      ]
+    },
+    {
+      "skill": "context-management-context-save",
+      "file": null,
+      "status": "NO_FILE",
+      "checks": {},
+      "fail_reasons": [
+        "No Markdown file found"
+      ]
+    },
+    {
+      "skill": "context-manager",
+      "file": "skills\\context-manager\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "context-optimization",
+      "file": "skills\\context-optimization\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "control-manual",
+      "file": null,
+      "status": "NO_FILE",
+      "checks": {},
+      "fail_reasons": [
+        "No Markdown file found"
+      ]
+    },
+    {
+      "skill": "data-build-dashboard",
+      "file": "skills\\data-build-dashboard\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-context-extractor",
+      "file": "skills\\data-context-extractor\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-create-viz",
+      "file": "skills\\data-create-viz\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-explore-code",
+      "file": "skills\\data-explore-code\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-explore-data",
+      "file": "skills\\data-explore-data\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-insight-reporter",
+      "file": "skills\\data-insight-reporter\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-statistical-analysis",
+      "file": "skills\\data-statistical-analysis\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-storytelling",
+      "file": "skills\\data-storytelling\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-validate-data",
+      "file": "skills\\data-validate-data\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-validation",
+      "file": "skills\\data-validation\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "data-visualization",
+      "file": "skills\\data-visualization\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "deep-research",
+      "file": "skills\\deep-research\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "dependency-management",
+      "file": null,
+      "status": "NO_FILE",
+      "checks": {},
+      "fail_reasons": [
+        "No Markdown file found"
+      ]
+    },
+    {
+      "skill": "design-antigravity-expert",
+      "file": "skills\\design-antigravity-expert\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "design-high-end-visual",
+      "file": "skills\\design-high-end-visual\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "design-industrial-brutalist",
+      "file": "skills\\design-industrial-brutalist\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "design-kpi-dashboard",
+      "file": "skills\\design-kpi-dashboard\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "design-liquid-glass",
+      "file": "skills\\design-liquid-glass\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "diagnose",
+      "file": "skills\\diagnose\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "find-skills",
+      "file": "skills\\find-skills\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "grill-me",
+      "file": "skills\\grill-me\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "grill-with-docs",
+      "file": "skills\\grill-with-docs\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "handoff",
+      "file": "skills\\handoff\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "improve-codebase-architecture",
+      "file": "skills\\improve-codebase-architecture\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "inova-bup",
+      "file": "skills\\inova-bup\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "inova-daily",
+      "file": "skills\\inova-daily\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "inova-potencial-clientes",
+      "file": "skills\\inova-potencial-clientes\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "internal-comms",
+      "file": "skills\\internal-comms\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "process-brd-generator",
+      "file": "skills\\process-brd-generator\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "process-context-agent",
+      "file": "skills\\process-context-agent\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "process-context-compression",
+      "file": "skills\\process-context-compression\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "process-context-degradation",
+      "file": "skills\\process-context-degradation\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "process-context-driven-development",
+      "file": "skills\\process-context-driven-development\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition"
+      ]
+    },
+    {
+      "skill": "process-context-fundamentals",
+      "file": "skills\\process-context-fundamentals\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "process-context-management",
+      "file": null,
+      "status": "NO_FILE",
+      "checks": {},
+      "fail_reasons": [
+        "No Markdown file found"
+      ]
+    },
+    {
+      "skill": "process-context-manager",
+      "file": "skills\\process-context-manager\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "process-context-optimization",
+      "file": "skills\\process-context-optimization\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "process-context-restore",
+      "file": "skills\\process-context-restore\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "process-context-save",
+      "file": "skills\\process-context-save\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "process-control-manual",
+      "file": null,
+      "status": "NO_FILE",
+      "checks": {},
+      "fail_reasons": [
+        "No Markdown file found"
+      ]
+    },
+    {
+      "skill": "process-deep-research",
+      "file": "skills\\process-deep-research\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "process-doc-orchestrator",
+      "file": "skills\\process-doc-orchestrator\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "process-internal-comms",
+      "file": "skills\\process-internal-comms\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "process-meeting-assistant",
+      "file": "skills\\process-meeting-assistant\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "process-superantigravity",
+      "file": "skills\\process-superantigravity\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "process-user-story",
+      "file": "skills\\process-user-story\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "process-writing-skills",
+      "file": "skills\\process-writing-skills\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "prototype",
+      "file": "skills\\prototype\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "setup-matt-pocock-skills",
+      "file": "skills\\setup-matt-pocock-skills\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "skill-sentinel",
+      "file": "skills\\skill-sentinel\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "skillfish",
+      "file": "skills\\skillfish\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-adr",
+      "file": "skills\\stout-adr\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-brainstorming",
+      "file": "skills\\stout-brainstorming\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-cdd-orchestrator",
+      "file": "skills\\stout-cdd-orchestrator\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-commit",
+      "file": "skills\\stout-commit\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-create-skill",
+      "file": "skills\\stout-create-skill\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-data-analyze",
+      "file": "skills\\stout-data-analyze\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-data-sql-queries",
+      "file": "skills\\stout-data-sql-queries\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-data-write-query",
+      "file": "skills\\stout-data-write-query\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-dev-tdd",
+      "file": "skills\\stout-dev-tdd\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-executing-plans",
+      "file": "skills\\stout-executing-plans\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-finishing-a-development-branch",
+      "file": "skills\\stout-finishing-a-development-branch\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-icm-migrate",
+      "file": "skills\\stout-icm-migrate\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-immunity-gate",
+      "file": "skills\\stout-immunity-gate\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-improve-skill",
+      "file": "skills\\stout-improve-skill\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-init",
+      "file": "skills\\stout-init\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-init-icm",
+      "file": "skills\\stout-init-icm\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-promote-skill",
+      "file": "skills\\stout-promote-skill\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-retrofit",
+      "file": "skills\\stout-retrofit\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-session-learning",
+      "file": "skills\\stout-session-learning\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-skill-auditor",
+      "file": "skills\\stout-skill-auditor\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-skill-manager",
+      "file": "skills\\stout-skill-manager\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-skill-registry",
+      "file": "skills\\stout-skill-registry\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-spec-validation",
+      "file": "skills\\stout-spec-validation\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-subagent-driven-development",
+      "file": "skills\\stout-subagent-driven-development\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-systematic-debugging",
+      "file": "skills\\stout-systematic-debugging\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "stout-writing-plans",
+      "file": "skills\\stout-writing-plans\\SKILL.md",
+      "status": "PASS",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": []
+    },
+    {
+      "skill": "sync-wire",
+      "file": "skills\\sync-wire\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "systematic-debugging",
+      "file": "skills\\systematic-debugging\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "tag-taxonomy",
+      "file": "skills\\tag-taxonomy\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "tdd",
+      "file": "skills\\tdd\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "to-issues",
+      "file": "skills\\to-issues\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "to-prd",
+      "file": "skills\\to-prd\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "triage",
+      "file": "skills\\triage\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "universal-skill",
+      "file": "skills\\universal-skill\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "using-matt",
+      "file": "skills\\using-matt\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "uv",
+      "file": "skills\\uv\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki - claude-history-ingest",
+      "file": "skills\\wiki - claude-history-ingest\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "wiki - data - ingest",
+      "file": "skills\\wiki - data - ingest\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki - graph-colorize",
+      "file": "skills\\wiki - graph-colorize\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki - ingest-url",
+      "file": "skills\\wiki - ingest-url\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki - llm-wiki",
+      "file": "skills\\wiki - llm-wiki\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki -cross-linker",
+      "file": "skills\\wiki -cross-linker\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-capture",
+      "file": "skills\\wiki-capture\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-dashboard",
+      "file": "skills\\wiki-dashboard\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-export",
+      "file": "skills\\wiki-export\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "wiki-history-ingest",
+      "file": "skills\\wiki-history-ingest\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-ingest",
+      "file": "skills\\wiki-ingest\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-lint",
+      "file": "skills\\wiki-lint\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-query",
+      "file": "skills\\wiki-query\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-rebuild",
+      "file": "skills\\wiki-rebuild\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-research",
+      "file": "skills\\wiki-research\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-setup",
+      "file": "skills\\wiki-setup\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-status",
+      "file": "skills\\wiki-status\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": true,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section"
+      ]
+    },
+    {
+      "skill": "wiki-synthesize",
+      "file": "skills\\wiki-synthesize\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "wiki-update",
+      "file": "skills\\wiki-update\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": false,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing trigger definition",
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "write-a-skill",
+      "file": "skills\\write-a-skill\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": true,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing exit criteria / done definition"
+      ]
+    },
+    {
+      "skill": "zoom-out",
+      "file": "skills\\zoom-out\\SKILL.md",
+      "status": "FAIL",
+      "checks": {
+        "has_trigger": true,
+        "has_description": true,
+        "has_scope": false,
+        "has_exit_criteria": false,
+        "no_todos": true
+      },
+      "fail_reasons": [
+        "Missing scope/objective section",
+        "Missing exit criteria / done definition"
+      ]
+    }
+  ]
+}

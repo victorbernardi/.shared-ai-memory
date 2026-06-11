@@ -1,0 +1,1999 @@
+SLIDE SIZE: 13.3299" x 7.5"
+TOTAL SLIDES: 10
+
+================================================================================
+
+================================================================================
+SLIDE 1
+================================================================================
+
+  [0] PICTURE
+       name='Picture 3'
+       pos=(5.9084", 1.6118") size=(7.4214" x 5.7722")
+       PICTURE: Picture 3
+
+  [1] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [2] PICTURE
+       name='Picture 2'
+       pos=(4.8649", 4.3473") size=(1.8" x 0.5")
+       PICTURE: Picture 2
+
+  [3] PICTURE
+       name='Picture 3'
+       pos=(7.3948", 4.2527") size=(1.0" x 0.6")
+       PICTURE: Picture 3
+
+  [4] TEXT_BOX
+       name='TextBox 4'
+       pos=(2.2953", 2.2") size=(8.7094" x 1.2398")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'LEADS PREVENTIVOS – CSC - PEÇAS'
+          RUN: font=None size=None bold=None color=None text='LEADS PREVENTIVOS'
+          RUN: font=None size=None bold=None color=None text=' – CSC -'
+          RUN: font=None size=None bold=None color=None text=' PEÇAS'
+        [PARA 1] align=CENTER (2) space_before=14pt
+          TEXT: 'FPS & Material Rodante — Inova Máquinas'
+          RUN: font=None size=None bold=None color=None text='FPS & Material '
+          RUN: font=None size=None bold=None color=None text='Rodante'
+          RUN: font=None size=None bold=None color=None text=' — Inova '
+          RUN: font=None size=None bold=None color=None text='Máquinas'
+
+  [5] AUTO_SHAPE
+       name='Rectangle 5'
+       pos=(3.566", 3.5894") size=(6.3" x 0.05")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [6] TEXT_BOX
+       name='TextBox 6'
+       pos=(3.0867", 3.6863") size=(7.2585" x 0.3198")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Motor de geração de leads CSC com base em horímetros de máquinas Pops-John Deere'
+          RUN: font=None size=None bold=None color=None text='Motor de '
+          RUN: font=None size=None bold=None color=None text='geração'
+          RUN: font=None size=None bold=None color=None text=' de leads '
+          RUN: font=None size=None bold=None color=None text='CSC '
+          RUN: font=None size=None bold=None color=None text='com base '
+          RUN: font=None size=None bold=None color=None text='em'
+          RUN: font=None size=None bold=None color=None text=' '
+          RUN: font=None size=None bold=None color=None text='horímetros'
+          RUN: font=None size=None bold=None color=None text=' de '
+          RUN: font=None size=None bold=None color=None text='máquinas'
+          RUN: font=None size=None bold=None color=None text=' '
+          RUN: font=None size=None bold=None color=None text='Pops-'
+          RUN: font=None size=None bold=None color=None text='John Deere'
+
+================================================================================
+SLIDE 2
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [4] PICTURE
+       name='Picture 5'
+       pos=(11.9479", 0.03") size=(0.7043" x 0.34")
+       PICTURE: Picture 5
+
+  [5] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'DIAGNÓSTICO COMERCIAL // PEÇAS'
+          RUN: font=None size=None bold=None color=None text='DIAGNÓSTICO COMERCIAL // PEÇAS'
+
+  [6] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'O CUSTO DO PROCESSO REATIVO'
+          RUN: font=None size=None bold=None color=None text='O CUSTO DO PROCESSO REATIVO'
+
+  [7] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(0.8", 1.5") size=(5.6" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [8] TEXT_BOX
+       name='TextBox 9'
+       pos=(1.0", 1.65") size=(5.2" x 4.1513")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'SITUAÇÃO ATUAL'
+          RUN: font=None size=16.0pt bold=None color=None text='SITUAÇÃO ATUAL'
+        [PARA 1] align=None space_before=8pt
+          TEXT: 'O cliente liga quando a peça quebra, ou não liga e vai direto no concorrente.'
+          RUN: font=None size=14.0pt bold=None color=None text='O '
+          RUN: font=None size=14.0pt bold=None color=None text='cliente'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='liga'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='quando'
+          RUN: font=None size=14.0pt bold=None color=None text=' a '
+          RUN: font=None size=14.0pt bold=None color=None text='peça'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='quebra'
+          RUN: font=None size=14.0pt bold=None color=None text=', '
+          RUN: font=None size=14.0pt bold=None color=None text='ou'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='não'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='liga'
+          RUN: font=None size=14.0pt bold=None color=None text=' e '
+          RUN: font=None size=14.0pt bold=None color=None text='vai'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='direto no'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='concorrente'
+          RUN: font=None size=14.0pt bold=None color=None text='.'
+        [PARA 2] align=None space_before=10pt
+          TEXT: '• Nenhum consultor recebe alerta automático de desgaste'
+          RUN: font=None size=14.0pt bold=None color=None text='• '
+          RUN: font=None size=14.0pt bold=None color=None text='Nenhum'
+          RUN: font=None size=14.0pt bold=None color=None text=' consultor '
+          RUN: font=None size=14.0pt bold=None color=None text='recebe'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='alerta'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='automático'
+          RUN: font=None size=14.0pt bold=None color=None text=' de '
+          RUN: font=None size=14.0pt bold=None color=None text='desgaste'
+        [PARA 3] align=None space_before=6pt
+          TEXT: '• O contato depende da memória do vendedor ou do cliente'
+          RUN: font=None size=14.0pt bold=None color=None text='• O '
+          RUN: font=None size=14.0pt bold=None color=None text='contato'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='depende'
+          RUN: font=None size=14.0pt bold=None color=None text=' da '
+          RUN: font=None size=14.0pt bold=None color=None text='memória'
+          RUN: font=None size=14.0pt bold=None color=None text=' do '
+          RUN: font=None size=14.0pt bold=None color=None text='vendedor'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='ou'
+          RUN: font=None size=14.0pt bold=None color=None text=' do '
+          RUN: font=None size=14.0pt bold=None color=None text='cliente'
+        [PARA 4] align=None space_before=6pt
+          TEXT: '• Peças compradas em emergência vão para o fornecedor mais rápido'
+          RUN: font=None size=14.0pt bold=None color=None text='• '
+          RUN: font=None size=14.0pt bold=None color=None text='Peças'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='compradas'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='em'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='emergência'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='vão'
+          RUN: font=None size=14.0pt bold=None color=None text=' para o '
+          RUN: font=None size=14.0pt bold=None color=None text='fornecedor'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='mais'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='rápido'
+        [PARA 5] align=None space_before=6pt
+          TEXT: '• Não há como auditar se o contato foi feito e gerou proposta'
+          RUN: font=None size=14.0pt bold=None color=None text='• '
+          RUN: font=None size=14.0pt bold=None color=None text='Não'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='há'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='como'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='auditar'
+          RUN: font=None size=14.0pt bold=None color=None text=' se o '
+          RUN: font=None size=14.0pt bold=None color=None text='contato'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='foi'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='feito'
+          RUN: font=None size=14.0pt bold=None color=None text=' e '
+          RUN: font=None size=14.0pt bold=None color=None text='gerou'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='proposta'
+        [PARA 6] align=None space_before=14pt
+          TEXT: 'IMPACTO DIRETO'
+          RUN: font=None size=16.0pt bold=None color=None text='IMPACTO DIRETO'
+        [PARA 7] align=None space_before=6pt
+          TEXT: 'Perda de timing = perda de venda'
+          RUN: font=None size=22.0pt bold=None color=None text='Perda'
+          RUN: font=None size=22.0pt bold=None color=None text=' de timing = '
+          RUN: font=None size=22.0pt bold=None color=None text='perda'
+          RUN: font=None size=22.0pt bold=None color=None text=' de '
+          RUN: font=None size=22.0pt bold=None color=None text='venda'
+
+  [9] AUTO_SHAPE
+       name='Rectangle 10'
+       pos=(6.8", 1.5") size=(5.7" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [10] TEXT_BOX
+       name='TextBox 11'
+       pos=(7.0", 1.65") size=(5.3" x 4.2747")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'OPORTUNIDADE IDENTIFICADA'
+          RUN: font=None size=16.0pt bold=None color=None text='OPORTUNIDADE IDENTIFICADA'
+        [PARA 1] align=None space_before=10pt
+          TEXT: 'FPS — Ferramentas de Penetração de Solo'
+          RUN: font=None size=14.0pt bold=None color=None text='FPS — Ferramentas de '
+          RUN: font=None size=14.0pt bold=None color=None text='Penetração'
+          RUN: font=None size=14.0pt bold=None color=None text=' de Solo'
+        [PARA 2] align=None space_before=4pt
+          TEXT: 'Desgaste a cada 200h · 4 a 6 compras/ano por máquina'
+          RUN: font=None size=14.0pt bold=None color=None text='Desgaste'
+          RUN: font=None size=14.0pt bold=None color=None text=' a '
+          RUN: font=None size=14.0pt bold=None color=None text='cada'
+          RUN: font=None size=14.0pt bold=None color=None text=' 200h · 4 a 6 '
+          RUN: font=None size=14.0pt bold=None color=None text='compras'
+          RUN: font=None size=14.0pt bold=None color=None text='/'
+          RUN: font=None size=14.0pt bold=None color=None text='ano'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='por'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='máquina'
+        [PARA 3] align=None space_before=12pt
+          TEXT: 'Material Rodante — Tratores de Esteira'
+          RUN: font=None size=14.0pt bold=None color=None text='Material '
+          RUN: font=None size=14.0pt bold=None color=None text='Rodante'
+          RUN: font=None size=14.0pt bold=None color=None text=' — '
+          RUN: font=None size=14.0pt bold=None color=None text='Tratores'
+          RUN: font=None size=14.0pt bold=None color=None text=' de '
+          RUN: font=None size=14.0pt bold=None color=None text='Esteira'
+        [PARA 4] align=None space_before=4pt
+          TEXT: 'Desgaste a cada 1.500h · ~1 vez a cada 18 meses'
+          RUN: font=None size=14.0pt bold=None color=None text='Desgaste'
+          RUN: font=None size=14.0pt bold=None color=None text=' a '
+          RUN: font=None size=14.0pt bold=None color=None text='cada'
+          RUN: font=None size=14.0pt bold=None color=None text=' 1.500h · ~1 '
+          RUN: font=None size=14.0pt bold=None color=None text='vez'
+          RUN: font=None size=14.0pt bold=None color=None text=' a '
+          RUN: font=None size=14.0pt bold=None color=None text='cada'
+          RUN: font=None size=14.0pt bold=None color=None text=' 18 meses'
+        [PARA 5] align=None space_before=12pt
+          TEXT: 'Material Rodante — Escavadeiras'
+          RUN: font=None size=14.0pt bold=None color=None text='Material '
+          RUN: font=None size=14.0pt bold=None color=None text='Rodante'
+          RUN: font=None size=14.0pt bold=None color=None text=' — '
+          RUN: font=None size=14.0pt bold=None color=None text='Escavadeiras'
+        [PARA 6] align=None space_before=4pt
+          TEXT: 'Desgaste a cada 3.000h · ~1 vez a cada 3 anos'
+          RUN: font=None size=14.0pt bold=None color=None text='Desgaste'
+          RUN: font=None size=14.0pt bold=None color=None text=' a '
+          RUN: font=None size=14.0pt bold=None color=None text='cada'
+          RUN: font=None size=14.0pt bold=None color=None text=' 3.000h · ~1 '
+          RUN: font=None size=14.0pt bold=None color=None text='vez'
+          RUN: font=None size=14.0pt bold=None color=None text=' a '
+          RUN: font=None size=14.0pt bold=None color=None text='cada'
+          RUN: font=None size=14.0pt bold=None color=None text=' 3 '
+          RUN: font=None size=14.0pt bold=None color=None text='anos'
+        [PARA 9] align=None space_before=4pt
+          TEXT: 'IMPACTO DIRETO'
+          RUN: font=None size=16.0pt bold=True color=#9CA3AF text='IMPACTO DIRETO'
+        [PARA 10] align=None space_before=14pt
+          TEXT: 'Padrão previsível = oportunidade estruturada'
+          RUN: font=None size=22.0pt bold=None color=None text='Padrão previsível = oportunidade estruturada'
+
+  [11] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [12] TEXT_BOX
+       name='TextBox 13'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6378")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[INSIGHT] Cada hora sem contato é uma janela aberta para a concorrência. O desgaste é previsível — o processo comercial '
+          RUN: font=None size=16.0pt bold=None color=None text='[INSIGHT] Cada hora '
+          RUN: font=None size=16.0pt bold=None color=None text='sem'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='contato'
+          RUN: font=None size=16.0pt bold=None color=None text=' é '
+          RUN: font=None size=16.0pt bold=None color=None text='uma'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='janela'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='aberta'
+          RUN: font=None size=16.0pt bold=None color=None text=' para a '
+          RUN: font=None size=16.0pt bold=None color=None text='concorrência'
+          RUN: font=None size=16.0pt bold=None color=None text='. O '
+          RUN: font=None size=16.0pt bold=None color=None text='desgaste'
+          RUN: font=None size=16.0pt bold=None color=None text=' é '
+          RUN: font=None size=16.0pt bold=None color=None text='previsível'
+          RUN: font=None size=16.0pt bold=None color=None text=' — o '
+          RUN: font=None size=16.0pt bold=None color=None text='processo'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='comercial'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='também'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='pode'
+          RUN: font=None size=16.0pt bold=None color=None text=' ser.'
+
+================================================================================
+SLIDE 3
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [4] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [5] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [6] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'MOTOR DE LEADS // VISÃO GERAL'
+          RUN: font=None size=None bold=None color=None text='MOTOR DE LEADS // VISÃO GERAL'
+
+  [7] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(8.1875" x 0.5722")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'MOTOR DE GERAÇÃO DE LEADS CSC - Pops'
+          RUN: font=None size=None bold=None color=None text='MOTOR DE GERAÇÃO DE LEADS'
+          RUN: font=None size=None bold=None color=None text=' CSC - Pops'
+
+  [8] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(0.6936", 1.548") size=(3.0315" x 2.2944")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [9] TEXT_BOX
+       name='TextBox 9'
+       pos=(0.8433", 1.5766") size=(2.7213" x 0.9")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: '01'
+          RUN: font=None size=None bold=None color=None text='01'
+
+  [10] TEXT_BOX
+       name='TextBox 10'
+       pos=(0.6855", 2.3754") size=(3.0477" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'MONITORAMENTO\x0bDIÁRIO'
+          RUN: font=None size=16.0pt bold=None color=None text='MONITORAMENTO'
+          RUN: font=None size=16.0pt bold=None color=None text='DIÁRIO'
+
+  [11] TEXT_BOX
+       name='TextBox 11'
+       pos=(0.7126", 3.0883") size=(2.9935" x 0.5049")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Horímetros de toda a frota lidos e processados todo dia'
+          RUN: font=None size=12.0pt bold=None color=None text='Horímetros'
+          RUN: font=None size=12.0pt bold=None color=None text=' de '
+          RUN: font=None size=12.0pt bold=None color=None text='toda'
+          RUN: font=None size=12.0pt bold=None color=None text=' a '
+          RUN: font=None size=12.0pt bold=None color=None text='frota'
+          RUN: font=None size=12.0pt bold=None color=None text=' lidos e '
+          RUN: font=None size=12.0pt bold=None color=None text='processados'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='todo'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='dia'
+
+  [12] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(5.078", 1.5357") size=(3.0315" x 2.2944")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [13] TEXT_BOX
+       name='TextBox 13'
+       pos=(5.2149", 1.5766") size=(2.7702" x 0.9")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: '02'
+          RUN: font=None size=None bold=None color=None text='02'
+
+  [14] TEXT_BOX
+       name='TextBox 14'
+       pos=(5.9573", 2.3631") size=(1.2696" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'ALERTA\x0bSEMANAL'
+          RUN: font=None size=16.0pt bold=None color=None text='ALERTA'
+          RUN: font=None size=16.0pt bold=None color=None text='SEMANAL'
+
+  [15] TEXT_BOX
+       name='TextBox 15'
+       pos=(5.0702", 3.0883") size=(3.0472" x 0.5049")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Toda segunda-feira os leads do ciclo são publicados na planilha OneDrive'
+          RUN: font=None size=12.0pt bold=None color=None text='Toda '
+          RUN: font=None size=12.0pt bold=None color=None text='segunda-feira'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='os'
+          RUN: font=None size=12.0pt bold=None color=None text=' leads do '
+          RUN: font=None size=12.0pt bold=None color=None text='ciclo'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='são'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='publicados'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='na'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='planilha'
+          RUN: font=None size=12.0pt bold=None color=None text=' OneDrive'
+
+  [16] AUTO_SHAPE
+       name='Rectangle 16'
+       pos=(9.6371", 1.5113") size=(3.0315" x 2.2953")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [17] TEXT_BOX
+       name='TextBox 17'
+       pos=(9.7677", 1.5766") size=(2.7702" x 0.9")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: '03'
+          RUN: font=None size=None bold=None color=None text='03'
+
+  [18] TEXT_BOX
+       name='TextBox 18'
+       pos=(10.5261", 2.3392") size=(1.2377" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'CONTATO\x0bATIVO'
+          RUN: font=None size=16.0pt bold=None color=None text='CONTATO'
+          RUN: font=None size=16.0pt bold=None color=None text='ATIVO'
+
+  [19] TEXT_BOX
+       name='TextBox 19'
+       pos=(9.6292", 3.0883") size=(3.0472" x 0.5049")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Consultor/CSA registra status: Venda, Venda Perdida ou Sem Contato'
+          RUN: font=None size=12.0pt bold=None color=None text='Consultor/CSA '
+          RUN: font=None size=12.0pt bold=None color=None text='registra'
+          RUN: font=None size=12.0pt bold=None color=None text=' status: Venda, Venda Perdida '
+          RUN: font=None size=12.0pt bold=None color=None text='ou'
+          RUN: font=None size=12.0pt bold=None color=None text=' Sem Contato'
+
+  [20] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(2.7186", 4.0014") size=(3.0315" x 2.2619")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [21] TEXT_BOX
+       name='TextBox 21'
+       pos=(3.8219", 4.0298") size=(0.784" x 0.7068")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: '04'
+          RUN: font=None size=None bold=None color=#FFC20E text='04'
+
+  [22] TEXT_BOX
+       name='TextBox 22'
+       pos=(3.4342", 4.9071") size=(1.6003" x 0.3745")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'DAILY REPORT'
+          RUN: font=None size=16.0pt bold=None color=None text='DAILY'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='REPORT'
+
+  [23] TEXT_BOX
+       name='TextBox 23'
+       pos=(2.7951", 5.6367") size=(2.8377" x 0.5107")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Gerentes recebem diariamente os 5 KPIs da campanha por e-mail'
+          RUN: font=None size=12.0pt bold=None color=None text='Gerentes'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='recebem'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='diariamente'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='os'
+          RUN: font=None size=12.0pt bold=None color=None text=' 5 KPIs da '
+          RUN: font=None size=12.0pt bold=None color=None text='campanha'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='por'
+          RUN: font=None size=12.0pt bold=None color=None text=' e-mail'
+
+  [24] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(7.3039", 4.0014") size=(3.0315" x 2.2478")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [25] TEXT_BOX
+       name='TextBox 25'
+       pos=(7.4142", 4.0298") size=(2.7559" x 0.9046")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: '05'
+          RUN: font=None size=None bold=None color=None text='05'
+
+  [26] TEXT_BOX
+       name='TextBox 26'
+       pos=(8.3112", 4.7729") size=(1.0169" x 0.6428")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'AUDITORIA\x0bPROTHEUS'
+          RUN: font=None size=16.0pt bold=None color=None text='AUDITORIA'
+          RUN: font=None size=16.0pt bold=None color=None text='PROTHEUS'
+
+  [27] TEXT_BOX
+       name='TextBox 27'
+       pos=(7.4496", 5.6425") size=(2.7008" x 0.5049")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: "Toda 'Venda' declarada é cruzada com proposta real no ERP"
+          RUN: font=None size=12.0pt bold=None color=None text="Toda 'Venda' "
+          RUN: font=None size=12.0pt bold=None color=None text='declarada'
+          RUN: font=None size=12.0pt bold=None color=None text=' é '
+          RUN: font=None size=12.0pt bold=None color=None text='cruzada'
+          RUN: font=None size=12.0pt bold=None color=None text=' com '
+          RUN: font=None size=12.0pt bold=None color=None text='proposta'
+          RUN: font=None size=12.0pt bold=None color=None text=' real no ERP'
+
+  [28] TEXT_BOX
+       name='TextBox 29'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[RESULTADO] Processo reativo → processo previsível e auditável. Nenhuma máquina da base ativa some do radar comercial.'
+          RUN: font=None size=16.0pt bold=None color=None text='[RESULTADO] '
+          RUN: font=None size=16.0pt bold=None color=None text='Processo'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='reativo'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='→ '
+          RUN: font=None size=16.0pt bold=None color=None text='processo'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='previsível'
+          RUN: font=None size=16.0pt bold=None color=None text=' e '
+          RUN: font=None size=16.0pt bold=None color=None text='auditável'
+          RUN: font=None size=16.0pt bold=None color=None text='. '
+          RUN: font=None size=16.0pt bold=None color=None text='Nenhuma'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='máquina'
+          RUN: font=None size=16.0pt bold=None color=None text=' da base '
+          RUN: font=None size=16.0pt bold=None color=None text='ativa'
+          RUN: font=None size=16.0pt bold=None color=None text=' some do radar '
+          RUN: font=None size=16.0pt bold=None color=None text='comercial'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+
+  [29] AUTO_SHAPE
+       name='Seta: para a Direita 42'
+       pos=(3.847", 2.3715") size=(1.0417" x 0.7153")
+       fill_type=GRADIENT (3) fore_color=N/A
+       line_color=#FFFF00 line_width=?pt
+       HAS TEXT:
+
+  [30] AUTO_SHAPE
+       name='Seta: para a Direita 43'
+       pos=(8.3628", 2.3715") size=(1.0417" x 0.7153")
+       fill_type=GRADIENT (3) fore_color=N/A
+       line_color=#FFFF00 line_width=?pt
+       HAS TEXT:
+
+  [31] AUTO_SHAPE
+       name='Seta: para a Direita 45'
+       pos=(6.0068", 4.7456") size=(1.0417" x 0.7153")
+       fill_type=GRADIENT (3) fore_color=N/A
+       line_color=#FFFF00 line_width=?pt
+       HAS TEXT:
+
+================================================================================
+SLIDE 4
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [4] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [5] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [6] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'RÉGUA DE ALERTAS // HORÍMETROS'
+          RUN: font=None size=None bold=None color=None text='RÉGUA DE ALERTAS // HORÍMETROS'
+
+  [7] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'QUANDO O SISTEMA DISPARA O ALERTA'
+          RUN: font=None size=None bold=None color=None text='QUANDO O SISTEMA DISPARA O ALERTA'
+
+  [8] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(0.8", 1.5") size=(7.2" x 3.8732")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [9] TABLE
+       name='Table 9'
+       pos=(0.9", 1.65") size=(7.0" x 3.6265")
+       TABLE: 4 rows x 3 cols
+         [0,0] bg=#0A0A0A text='Tipo de Peça'
+         [0,1] bg=#0A0A0A text='Equipamento'
+         [0,2] bg=#0A0A0A text='Gatilho'
+         [1,0] bg=#1F2937 text='FPS (dentes, lâminas, pontas)'
+         [1,1] bg=#1F2937 text='Toda a frota ativa'
+         [1,2] bg=#1F2937 text='A cada +200h de operação'
+         [2,0] bg=#1F2937 text='Material Rodante'
+         [2,1] bg=#1F2937 text='Tratores de Esteira\n(700J, 750J, 850J, 1050K)'
+         [2,2] bg=#1F2937 text='A cada +1.500h de operação'
+         [3,0] bg=#1F2937 text='Material Rodante'
+         [3,1] bg=#1F2937 text='Escavadeiras\n(130G, 160G, 200G, 210G, 350G…)'
+         [3,2] bg=#1F2937 text='A cada +3.000h de operação'
+
+  [10] AUTO_SHAPE
+       name='Rectangle 10'
+       pos=(8.2", 1.5") size=(4.7" x 4.8")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [11] TEXT_BOX
+       name='TextBox 11'
+       pos=(8.4", 1.65") size=(4.3" x 2.7264")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'CICLO DE VIDA DO LEAD'
+          RUN: font=None size=22.0pt bold=None color=None text='CICLO DE VIDA DO LEAD'
+        [PARA 1] align=CENTER (2) space_before=10pt
+          TEXT: 'Máquina atinge o limiar de horas'
+          RUN: font=None size=12.0pt bold=None color=None text='Máquina'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='atinge'
+          RUN: font=None size=12.0pt bold=None color=None text=' o '
+          RUN: font=None size=12.0pt bold=None color=None text='limiar'
+          RUN: font=None size=12.0pt bold=None color=None text=' de horas'
+        [PARA 2] align=CENTER (2) space_before=4pt
+          TEXT: '↓  Sistema gera o alerta na planilha'
+          RUN: font=None size=12.0pt bold=None color=None text='↓  Sistema '
+          RUN: font=None size=12.0pt bold=None color=None text='gera'
+          RUN: font=None size=12.0pt bold=None color=None text=' o '
+          RUN: font=None size=12.0pt bold=None color=None text='alerta'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='na'
+          RUN: font=None size=12.0pt bold=None color=None text=' '
+          RUN: font=None size=12.0pt bold=None color=None text='planilha'
+        [PARA 3] align=CENTER (2) space_before=4pt
+          TEXT: '↓  Consultor faz o contato'
+          RUN: font=None size=12.0pt bold=None color=None text='↓  Consultor '
+          RUN: font=None size=12.0pt bold=None color=None text='faz'
+          RUN: font=None size=12.0pt bold=None color=None text=' o '
+          RUN: font=None size=12.0pt bold=None color=None text='contato'
+        [PARA 4] align=CENTER (2) space_before=10pt
+          TEXT: 'VENDA ou VENDA PERDIDA'
+          RUN: font=None size=None bold=None color=None text='VENDA '
+          RUN: font=None size=None bold=None color=None text='ou'
+          RUN: font=None size=None bold=None color=None text=' VENDA PERDIDA'
+        [PARA 5] align=CENTER (2) space_before=2pt
+          TEXT: '→ Marco zero atualizado\x0b→ Novo ciclo inicia'
+          RUN: font=None size=11.0pt bold=None color=None text='→ Marco zero '
+          RUN: font=None size=11.0pt bold=None color=None text='atualizado'
+          RUN: font=None size=11.0pt bold=None color=None text='→ Novo '
+          RUN: font=None size=11.0pt bold=None color=None text='ciclo'
+          RUN: font=None size=11.0pt bold=None color=None text=' '
+          RUN: font=None size=11.0pt bold=None color=None text='inicia'
+        [PARA 6] align=CENTER (2) space_before=10pt
+          TEXT: 'SEM CONTATO / EM BRANCO'
+          RUN: font=None size=None bold=None color=None text='SEM CONTATO / EM BRANCO'
+        [PARA 7] align=CENTER (2) space_before=2pt
+          TEXT: '→ Lead permanece na fila\x0b→ Aging cresce no Daily Report'
+          RUN: font=None size=11.0pt bold=None color=None text='→ Lead '
+          RUN: font=None size=11.0pt bold=None color=None text='permanece'
+          RUN: font=None size=11.0pt bold=None color=None text=' '
+          RUN: font=None size=11.0pt bold=None color=None text='na'
+          RUN: font=None size=11.0pt bold=None color=None text=' fila'
+          RUN: font=None size=11.0pt bold=None color=None text='→ Aging '
+          RUN: font=None size=11.0pt bold=None color=None text='cresce'
+          RUN: font=None size=11.0pt bold=None color=None text=' no Daily Report'
+
+  [12] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(0.8", 5.4732") size=(7.2" x 0.8268")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [13] TEXT_BOX
+       name='TextBox 13'
+       pos=(1.0", 5.6232") size=(6.8" x 0.6693")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'POR QUE LIMIARES DIFERENTES PARA RODANTE?'
+          RUN: font=None size=None bold=None color=None text='POR QUE LIMIARES DIFERENTES PARA RODANTE?'
+        [PARA 1] align=None space_before=4pt
+          TEXT: 'Tratores de esteira se locomovem continuamente — esteiras em atrito constante com o solo. Escavadeiras trabalham paradas'
+          RUN: font=None size=None bold=None color=None text='Tratores de esteira se locomovem continuamente — esteiras em atrito constante co'
+
+  [14] TEXT_BOX
+       name='TextBox 15'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[REGRA] Após Venda ou Venda Perdida, o horímetro é zerado e o ciclo reinicia. Leads Sem Contato continuam acumulando hor'
+          RUN: font=None size=16.0pt bold=None color=None text='[REGRA] '
+          RUN: font=None size=16.0pt bold=None color=None text='Após'
+          RUN: font=None size=16.0pt bold=None color=None text=' Venda '
+          RUN: font=None size=16.0pt bold=None color=None text='ou'
+          RUN: font=None size=16.0pt bold=None color=None text=' Venda Perdida, o horímetro é '
+          RUN: font=None size=16.0pt bold=None color=None text='zerado'
+          RUN: font=None size=16.0pt bold=None color=None text=' e o '
+          RUN: font=None size=16.0pt bold=None color=None text='ciclo'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='reinicia'
+          RUN: font=None size=16.0pt bold=None color=None text='. Leads Sem Contato '
+          RUN: font=None size=16.0pt bold=None color=None text='continuam'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='acumulando'
+          RUN: font=None size=16.0pt bold=None color=None text=' horas.'
+
+================================================================================
+SLIDE 5
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [4] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [5] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [6] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'RÉGUA DE ALERTAS // CARGA INICIAL'
+          RUN: font=None size=None bold=None color=None text='RÉGUA DE ALERTAS // CARGA INICIAL'
+
+  [7] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'PRIMEIRA CARGA: PARTINDO DO ZERO SEM RUÍDO'
+          RUN: font=None size=None bold=None color=None text='PRIMEIRA CARGA: PARTINDO DO ZERO SEM RUÍDO'
+
+  [8] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(0.8", 1.5") size=(5.8" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [9] TEXT_BOX
+       name='TextBox 9'
+       pos=(1.0", 1.65") size=(5.4" x 4.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'O DESAFIO DA CARGA INICIAL'
+          RUN: font=None size=None bold=None color=None text='O DESAFIO DA CARGA INICIAL'
+        [PARA 1] align=None space_before=8pt
+          TEXT: 'Na primeira vez que o sistema processa um chassis, não há histórico de quando a última peça foi trocada.'
+          RUN: font=None size=None bold=None color=None text='Na primeira vez que o sistema processa um chassis, não há histórico de quando a '
+        [PARA 2] align=None space_before=12pt
+          TEXT: 'Regra aplicada:'
+          RUN: font=None size=None bold=None color=None text='Regra aplicada:'
+        [PARA 3] align=None space_before=6pt
+          TEXT: 'O horímetro atual é registrado como MARCO ZERO.'
+          RUN: font=None size=None bold=None color=None text='O horímetro atual é registrado como MARCO ZERO.'
+        [PARA 4] align=None space_before=6pt
+          TEXT: 'O primeiro alerta só é gerado após acumular as horas da régua a partir desse momento.'
+          RUN: font=None size=None bold=None color=None text='O primeiro alerta só é gerado após acumular as horas da régua a partir desse mom'
+        [PARA 5] align=None space_before=12pt
+          TEXT: 'Por quê?'
+          RUN: font=None size=None bold=None color=None text='Por quê?'
+        [PARA 6] align=None space_before=4pt
+          TEXT: 'Evita gerar centenas de alertas simultâneos ao ativar a campanha — o que sobrecarregaria a equipe no dia 1.'
+          RUN: font=None size=None bold=None color=None text='Evita gerar centenas de alertas simultâneos ao ativar a campanha — o que sobreca'
+
+  [10] AUTO_SHAPE
+       name='Rectangle 10'
+       pos=(6.9", 1.5") size=(5.6" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [11] TEXT_BOX
+       name='TextBox 11'
+       pos=(7.1", 1.65") size=(5.2" x 4.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'EXEMPLO PRÁTICO — ESCAVADEIRA 200G'
+          RUN: font=None size=None bold=None color=None text='EXEMPLO PRÁTICO — ESCAVADEIRA 200G'
+        [PARA 1] align=None space_before=10pt
+          TEXT: 'Horímetro no momento da ativação:'
+          RUN: font=None size=None bold=None color=None text='Horímetro no momento da ativação:'
+        [PARA 2] align=None space_before=4pt
+          TEXT: '4.200 horas'
+          RUN: font=None size=None bold=None color=None text='4.200 horas'
+        [PARA 3] align=None space_before=8pt
+          TEXT: '→ Marco zero registrado: 4.200h'
+          RUN: font=None size=None bold=None color=None text='→ Marco zero registrado: 4.200h'
+        [PARA 4] align=None space_before=10pt
+          TEXT: 'Próximo alerta de FPS:'
+          RUN: font=None size=None bold=None color=None text='Próximo alerta de FPS:'
+        [PARA 5] align=None space_before=2pt
+          TEXT: '4.400h  (+200h)'
+          RUN: font=None size=None bold=None color=None text='4.400h  (+200h)'
+        [PARA 6] align=None space_before=8pt
+          TEXT: 'Próximo alerta de Rodante:'
+          RUN: font=None size=None bold=None color=None text='Próximo alerta de Rodante:'
+        [PARA 7] align=None space_before=2pt
+          TEXT: '7.200h  (+3.000h)'
+          RUN: font=None size=None bold=None color=None text='7.200h  (+3.000h)'
+        [PARA 8] align=None space_before=10pt
+          TEXT: 'A campanha começa de forma ordenada,\x0bsem ruído desnecessário.'
+          RUN: font=None size=None bold=None color=None text='A campanha começa de forma ordenada,'
+          RUN: font=None size=None bold=None color=None text='sem ruído desnecessário.'
+
+  [12] TEXT_BOX
+       name='TextBox 13'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6059")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[GARANTIA] A ativação da campanha é fluida. Os alertas chegam de forma distribuída ao longo das semanas — nunca todos de'
+          RUN: font=None size=14.0pt bold=None color=None text='['
+          RUN: font=None size=16.0pt bold=None color=None text='GARANTIA'
+          RUN: font=None size=14.0pt bold=None color=None text='] A '
+          RUN: font=None size=14.0pt bold=None color=None text='ativação'
+          RUN: font=None size=14.0pt bold=None color=None text=' da '
+          RUN: font=None size=14.0pt bold=None color=None text='campanha'
+          RUN: font=None size=14.0pt bold=None color=None text=' é fluida'
+          RUN: font=None size=14.0pt bold=None color=None text='. '
+          RUN: font=None size=14.0pt bold=None color=None text='Os'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='alertas'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='chegam'
+          RUN: font=None size=14.0pt bold=None color=None text=' de forma '
+          RUN: font=None size=14.0pt bold=None color=None text='distribuída'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='ao'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='longo'
+          RUN: font=None size=14.0pt bold=None color=None text=' das '
+          RUN: font=None size=14.0pt bold=None color=None text='semanas'
+          RUN: font=None size=14.0pt bold=None color=None text=' — '
+          RUN: font=None size=14.0pt bold=None color=None text='nunca'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='todos'
+          RUN: font=None size=14.0pt bold=None color=None text=' de '
+          RUN: font=None size=14.0pt bold=None color=None text='uma'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='vez'
+          RUN: font=None size=14.0pt bold=None color=None text='.'
+
+================================================================================
+SLIDE 6
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [4] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [5] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'INDICADORES // DESEMPENHO'
+          RUN: font=None size=None bold=None color=None text='INDICADORES // DESEMPENHO'
+
+  [6] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'INDICADORES DE DESEMPENHO (KPIs)'
+          RUN: font=None size=None bold=None color=None text='INDICADORES DE DESEMPENHO (KPIs)'
+
+  [7] AUTO_SHAPE
+       name='Rectangle 9'
+       pos=(7.2", 1.5") size=(5.4" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [8] TEXT_BOX
+       name='TextBox 10'
+       pos=(7.4", 1.65") size=(5.0" x 4.3083")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'OS 4 INDICADORES PRIMÁRIOS'
+          RUN: font=None size=None bold=None color=None text='OS 4 INDICADORES PRIMÁRIOS'
+        [PARA 1] align=None space_before=10pt
+          TEXT: '◀  ADESÃO COMERCIAL'
+          RUN: font=None size=14.0pt bold=None color=None text='◀  ADESÃO COMERCIAL'
+        [PARA 2] align=None space_before=2pt
+          TEXT: '% dos leads com feedback registrado pela equipe.\x0bMede velocidade e engajamento no contato.'
+          RUN: font=None size=16.0pt bold=None color=None text='% dos leads com feedback '
+          RUN: font=None size=16.0pt bold=None color=None text='registrado'
+          RUN: font=None size=16.0pt bold=None color=None text=' pela equipe.'
+          RUN: font=None size=16.0pt bold=None color=None text='Mede '
+          RUN: font=None size=16.0pt bold=None color=None text='velocidade'
+          RUN: font=None size=16.0pt bold=None color=None text=' e '
+          RUN: font=None size=16.0pt bold=None color=None text='engajamento'
+          RUN: font=None size=16.0pt bold=None color=None text=' no '
+          RUN: font=None size=16.0pt bold=None color=None text='contato'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+        [PARA 3] align=None space_before=10pt
+          TEXT: '◀  CONVERSÃO ACUMULADA'
+          RUN: font=None size=14.0pt bold=None color=#22C55E text='◀  CONVERSÃO ACUMULADA'
+        [PARA 4] align=None space_before=2pt
+          TEXT: '% de leads tratados que resultaram em venda.\x0bMede eficiência do discurso comercial.'
+          RUN: font=None size=16.0pt bold=None color=None text='% de leads '
+          RUN: font=None size=16.0pt bold=None color=None text='tratados'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='que'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='resultaram'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='em'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='venda'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+          RUN: font=None size=16.0pt bold=None color=None text='Mede '
+          RUN: font=None size=16.0pt bold=None color=None text='eficiência'
+          RUN: font=None size=16.0pt bold=None color=None text=' do '
+          RUN: font=None size=16.0pt bold=None color=None text='discurso'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='comercial'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+        [PARA 5] align=None space_before=10pt
+          TEXT: '◀  ADERÊNCIA DE PROPOSTAS'
+          RUN: font=None size=14.0pt bold=None color=None text='◀  ADERÊNCIA DE PROPOSTAS'
+        [PARA 6] align=None space_before=2pt
+          TEXT: "% de 'Vendas' com proposta real no Protheus.\x0bA Ponte da Verdade — elimina o autodeclaratório."
+          RUN: font=None size=16.0pt bold=None color=None text="% de '"
+          RUN: font=None size=16.0pt bold=None color=None text='Vendas'
+          RUN: font=None size=16.0pt bold=None color=None text="' com "
+          RUN: font=None size=16.0pt bold=None color=None text='proposta'
+          RUN: font=None size=16.0pt bold=None color=None text=' real no '
+          RUN: font=None size=16.0pt bold=None color=None text='Protheus'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+          RUN: font=None size=16.0pt bold=None color=None text='A Ponte da '
+          RUN: font=None size=16.0pt bold=None color=None text='Verdade'
+          RUN: font=None size=16.0pt bold=None color=None text=' — '
+          RUN: font=None size=16.0pt bold=None color=None text='elimina'
+          RUN: font=None size=16.0pt bold=None color=None text=' o '
+          RUN: font=None size=16.0pt bold=None color=None text='autodeclaratório'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+        [PARA 7] align=None space_before=10pt
+          TEXT: '◀  FATURAMENTO REALIZADO'
+          RUN: font=None size=14.0pt bold=None color=#22C55E text='◀  FATURAMENTO REALIZADO'
+        [PARA 8] align=None space_before=2pt
+          TEXT: 'Valor em R$ das propostas validadas no ERP.'
+          RUN: font=None size=16.0pt bold=None color=None text='Valor '
+          RUN: font=None size=16.0pt bold=None color=None text='em'
+          RUN: font=None size=16.0pt bold=None color=None text=' R$ das '
+          RUN: font=None size=16.0pt bold=None color=None text='propostas'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='validadas'
+          RUN: font=None size=16.0pt bold=None color=None text=' no ERP.'
+
+  [9] AUTO_SHAPE
+       name='Rectangle 11'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [10] TEXT_BOX
+       name='TextBox 12'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[GOVERNANÇA] Os KPIs são enviados diariamente por e-mail para os 8 destinatários do Daily Report — sem necessidade de ac'
+          RUN: font=None size=16.0pt bold=None color=None text='[GOVERNANÇA] '
+          RUN: font=None size=16.0pt bold=None color=None text='Os'
+          RUN: font=None size=16.0pt bold=None color=None text=' KPIs '
+          RUN: font=None size=16.0pt bold=None color=None text='são'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='enviados'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='diariamente'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='por'
+          RUN: font=None size=16.0pt bold=None color=None text=' e-mail para '
+          RUN: font=None size=16.0pt bold=None color=None text='os'
+          RUN: font=None size=16.0pt bold=None color=None text=' 8 '
+          RUN: font=None size=16.0pt bold=None color=None text='destinatários'
+          RUN: font=None size=16.0pt bold=None color=None text=' do Daily Report — '
+          RUN: font=None size=16.0pt bold=None color=None text='sem'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='necessidade'
+          RUN: font=None size=16.0pt bold=None color=None text=' de '
+          RUN: font=None size=16.0pt bold=None color=None text='acessar'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='planilha'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+
+  [11] PICTURE
+       name='Imagem 15'
+       pos=(0.45", 2.2937") size=(6.5889" x 2.9126")
+       PICTURE: Imagem 15
+
+================================================================================
+SLIDE 7
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [4] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [5] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'INDICADORES // METODOLOGIA'
+          RUN: font=None size=None bold=None color=None text='INDICADORES // METODOLOGIA'
+
+  [6] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'METODOLOGIA E AGING COMERCIAL'
+          RUN: font=None size=None bold=None color=None text='METODOLOGIA E AGING COMERCIAL'
+
+  [7] AUTO_SHAPE
+       name='Rectangle 9'
+       pos=(7.2", 1.5") size=(5.4" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [8] TEXT_BOX
+       name='TextBox 10'
+       pos=(7.4", 1.7259") size=(5.0" x 4.3813")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'AGING E PIPELINE FINANCEIRO'
+          RUN: font=None size=14.0pt bold=None color=None text='AGING E PIPELINE FINANCEIRO'
+        [PARA 1] align=None space_before=10pt
+          TEXT: '◀  Aging Médio de Tratativa Comercial'
+          RUN: font=None size=14.0pt bold=None color=None text='◀  '
+          RUN: font=None size=14.0pt bold=None color=None text='Aging'
+          RUN: font=None size=14.0pt bold=None color=None text=' Médio de Tratativa Comercial'
+        [PARA 2] align=None space_before=2pt
+          TEXT: 'Dias médios sem primeiro contato após o alerta.\x0bAlerta para perda de timing preventivo. '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='Dias '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='médios'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='sem'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='primeiro'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='contato'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='após'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text=' o '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='alerta'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='.'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='Alerta'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text=' para '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='perda'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text=' de timing '
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='preventivo'
+          RUN: font=None size=14.0pt bold=True color=inherited/theme text='. '
+        [PARA 4] align=None space_before=10pt
+          TEXT: '◀  Potencial Financeiro de Alertas Ativos'
+          RUN: font=None size=14.0pt bold=None color=None text='◀  Potencial Financeiro de Alertas Ativos'
+        [PARA 5] align=None space_before=10pt
+          TEXT: 'Propostas abertas no Protheus vinculadas à campanha mensurados em R$. Visibilidade financeira do que está em negociação.'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='P'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='ropostas'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='abertas'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' no '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='Protheus'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='vinculadas'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' à '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='campanha'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' mensurados em R$'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='. '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='Visibilidade'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='financeira'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='do '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='que'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='está'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='em'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text=' '
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='negociação'
+          RUN: font=None size=14.0pt bold=None color=inherited/theme text='.'
+        [PARA 7] align=None space_before=14pt
+          TEXT: 'LEITURA DO PAINEL'
+          RUN: font=None size=14.0pt bold=None color=None text='LEITURA DO PAINEL'
+        [PARA 8] align=None space_before=4pt
+          TEXT: 'Aging alto = timing preventivo sendo perdido'
+          RUN: font=None size=14.0pt bold=None color=None text='Aging alto = timing '
+          RUN: font=None size=14.0pt bold=None color=None text='preventivo'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='sendo'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='perdido'
+        [PARA 9] align=None space_before=4pt
+          TEXT: 'Aderência baixa = resultado autodeclaratório'
+          RUN: font=None size=14.0pt bold=None color=None text='Aderência'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='baixa'
+          RUN: font=None size=14.0pt bold=None color=None text=' = '
+          RUN: font=None size=14.0pt bold=None color=None text='resultado'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='autodeclaratório'
+        [PARA 10] align=None space_before=4pt
+          TEXT: 'Conversão crescente = discurso eficaz'
+          RUN: font=None size=14.0pt bold=None color=None text='Conversão'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='crescente'
+          RUN: font=None size=14.0pt bold=None color=None text=' = '
+          RUN: font=None size=14.0pt bold=None color=None text='discurso'
+          RUN: font=None size=14.0pt bold=None color=None text=' '
+          RUN: font=None size=14.0pt bold=None color=None text='eficaz'
+
+  [9] AUTO_SHAPE
+       name='Rectangle 11'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [10] TEXT_BOX
+       name='TextBox 12'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[AUTONOMIA] Gerentes e coordenadores recebem os mesmos KPIs diariamente — mesma visibilidade, comparação justa entre reg'
+          RUN: font=None size=16.0pt bold=None color=None text='['
+          RUN: font=None size=16.0pt bold=None color=None text='AUTONOMIA'
+          RUN: font=None size=16.0pt bold=None color=None text='] '
+          RUN: font=None size=16.0pt bold=None color=None text='Gerentes'
+          RUN: font=None size=16.0pt bold=None color=None text=' e '
+          RUN: font=None size=16.0pt bold=None color=None text='coordenadores'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='recebem'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='os'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='mesmos'
+          RUN: font=None size=16.0pt bold=None color=None text=' KPIs '
+          RUN: font=None size=16.0pt bold=None color=None text='diariamente'
+          RUN: font=None size=16.0pt bold=None color=None text=' — '
+          RUN: font=None size=16.0pt bold=None color=None text='mesma'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='visibilidade'
+          RUN: font=None size=16.0pt bold=None color=None text=', '
+          RUN: font=None size=16.0pt bold=None color=None text='comparação'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='justa'
+          RUN: font=None size=16.0pt bold=None color=None text=' entre '
+          RUN: font=None size=16.0pt bold=None color=None text='regiões'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+
+  [11] PICTURE
+       name='Imagem 22'
+       pos=(0.372", 2.3695") size=(6.7614" x 2.1109")
+       PICTURE: Imagem 22
+
+================================================================================
+SLIDE 8
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [4] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [5] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'GOVERNANÇA // AUDITORIA'
+          RUN: font=None size=None bold=None color=None text='GOVERNANÇA // AUDITORIA'
+
+  [6] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'A PONTE DA VERDADE: PLANILHA × PROTHEUS'
+          RUN: font=None size=None bold=None color=None text='A PONTE DA VERDADE: PLANILHA × PROTHEUS'
+
+  [7] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(0.8", 1.5") size=(5.8" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [8] TEXT_BOX
+       name='TextBox 9'
+       pos=(1.0", 1.65") size=(5.4" x 3.7922")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'COMO A AUDITORIA FUNCIONA'
+          RUN: font=None size=16.0pt bold=None color=None text='COMO A AUDITORIA FUNCIONA'
+        [PARA 1] align=None space_before=10pt
+          TEXT: "1. Consultor registra 'Venda' na planilha"
+          RUN: font=None size=16.0pt bold=None color=None text='1. Consultor '
+          RUN: font=None size=16.0pt bold=None color=None text='registra'
+          RUN: font=None size=16.0pt bold=None color=None text=" 'Venda' "
+          RUN: font=None size=16.0pt bold=None color=None text='na'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='planilha'
+        [PARA 2] align=None space_before=6pt
+          TEXT: '2. Sistema extrai leads marcados como Venda'
+          RUN: font=None size=16.0pt bold=None color=None text='2. Sistema '
+          RUN: font=None size=16.0pt bold=None color=None text='extrai'
+          RUN: font=None size=16.0pt bold=None color=None text=' leads '
+          RUN: font=None size=16.0pt bold=None color=None text='marcados'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='como'
+          RUN: font=None size=16.0pt bold=None color=None text=' Venda'
+        [PARA 3] align=None space_before=6pt
+          TEXT: '3. Cruza com propostas reais do ERP Protheus'
+          RUN: font=None size=16.0pt bold=None color=None text='3. '
+          RUN: font=None size=16.0pt bold=None color=None text='Cruza'
+          RUN: font=None size=16.0pt bold=None color=None text=' com '
+          RUN: font=None size=16.0pt bold=None color=None text='propostas'
+          RUN: font=None size=16.0pt bold=None color=None text=' reais do ERP '
+          RUN: font=None size=16.0pt bold=None color=None text='Protheus'
+        [PARA 4] align=None space_before=6pt
+          TEXT: '4. Calcula Aderência de Propostas (KPI)'
+          RUN: font=None size=16.0pt bold=None color=None text='4. '
+          RUN: font=None size=16.0pt bold=None color=None text='Calcula'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='Aderência'
+          RUN: font=None size=16.0pt bold=None color=None text=' de '
+          RUN: font=None size=16.0pt bold=None color=None text='Propostas'
+          RUN: font=None size=16.0pt bold=None color=None text=' (KPI)'
+        [PARA 6] align=None space_before=8pt
+          TEXT: 'Venda SEM proposta no Protheus:'
+          RUN: font=None size=16.0pt bold=None color=None text='Venda SEM '
+          RUN: font=None size=16.0pt bold=None color=None text='proposta'
+          RUN: font=None size=16.0pt bold=None color=None text=' no '
+          RUN: font=None size=16.0pt bold=None color=None text='Protheus'
+          RUN: font=None size=16.0pt bold=None color=None text=':'
+        [PARA 7] align=None space_before=2pt
+          TEXT: '→ Aparece imediatamente no KPI de Aderência'
+          RUN: font=None size=16.0pt bold=None color=None text='→ '
+          RUN: font=None size=16.0pt bold=None color=None text='Aparece'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='imediatamente'
+          RUN: font=None size=16.0pt bold=None color=None text=' no KPI de '
+          RUN: font=None size=16.0pt bold=None color=None text='Aderência'
+        [PARA 8] align=None space_before=2pt
+          TEXT: '→ Fica destacado no Daily Report para o gerente'
+          RUN: font=None size=16.0pt bold=None color=None text='→ '
+          RUN: font=None size=16.0pt bold=None color=None text='Fica'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='destacado'
+          RUN: font=None size=16.0pt bold=None color=None text=' no Daily Report para o '
+          RUN: font=None size=16.0pt bold=None color=None text='gerente'
+        [PARA 9] align=None space_before=8pt
+          TEXT: 'Venda COM proposta no Protheus:'
+          RUN: font=None size=16.0pt bold=None color=None text='Venda COM '
+          RUN: font=None size=16.0pt bold=None color=None text='proposta'
+          RUN: font=None size=16.0pt bold=None color=None text=' no '
+          RUN: font=None size=16.0pt bold=None color=None text='Protheus'
+          RUN: font=None size=16.0pt bold=None color=None text=':'
+        [PARA 10] align=None space_before=2pt
+          TEXT: '→ Computada no Pipeline Financeiro em R$'
+          RUN: font=None size=16.0pt bold=None color=None text='→ '
+          RUN: font=None size=16.0pt bold=None color=None text='Computada'
+          RUN: font=None size=16.0pt bold=None color=None text=' no Pipeline '
+          RUN: font=None size=16.0pt bold=None color=None text='Financeiro'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='em'
+          RUN: font=None size=16.0pt bold=None color=None text=' R$'
+
+  [9] AUTO_SHAPE
+       name='Rectangle 10'
+       pos=(6.9", 1.5") size=(5.6" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [10] TEXT_BOX
+       name='TextBox 11'
+       pos=(7.1", 1.65") size=(5.2" x 3.652")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'PROTEÇÃO DOS DADOS NA PLANILHA'
+          RUN: font=None size=16.0pt bold=None color=None text='PROTEÇÃO DOS DADOS NA PLANILHA'
+        [PARA 1] align=None space_before=10pt
+          TEXT: 'Colunas de origem BLOQUEADAS:'
+          RUN: font=None size=16.0pt bold=None color=None text='Colunas'
+          RUN: font=None size=16.0pt bold=None color=None text=' de '
+          RUN: font=None size=16.0pt bold=None color=None text='origem'
+          RUN: font=None size=16.0pt bold=None color=None text=' BLOQUEADAS:'
+        [PARA 2] align=None space_before=4pt
+          TEXT: '• Chassi, Cliente, CNPJ, Modelo\x0b• Motivo do alerta, Horímetro'
+          RUN: font=None size=16.0pt bold=None color=None text='• Chassi, '
+          RUN: font=None size=16.0pt bold=None color=None text='Cliente'
+          RUN: font=None size=16.0pt bold=None color=None text=', CNPJ, Modelo'
+          RUN: font=None size=16.0pt bold=None color=None text='• '
+          RUN: font=None size=16.0pt bold=None color=None text='Motivo'
+          RUN: font=None size=16.0pt bold=None color=None text=' do '
+          RUN: font=None size=16.0pt bold=None color=None text='alerta'
+          RUN: font=None size=16.0pt bold=None color=None text=', Horímetro'
+        [PARA 3] align=None space_before=10pt
+          TEXT: 'Consultores só editam:'
+          RUN: font=None size=16.0pt bold=None color=None text='Consultores '
+          RUN: font=None size=16.0pt bold=None color=None text='só'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='editam'
+          RUN: font=None size=16.0pt bold=None color=None text=':'
+        [PARA 4] align=None space_before=4pt
+          TEXT: '• Status (Venda / Venda Perdida / Sem Contato)\x0b• Campo de observações livres'
+          RUN: font=None size=16.0pt bold=None color=None text='• Status (Venda / Venda Perdida / Sem Contato)'
+          RUN: font=None size=16.0pt bold=None color=None text='• Campo de '
+          RUN: font=None size=16.0pt bold=None color=None text='observações'
+          RUN: font=None size=16.0pt bold=None color=None text=' livres'
+        [PARA 5] align=None space_before=10pt
+          TEXT: 'Snapshot diário:'
+          RUN: font=None size=16.0pt bold=None color=None text='Snapshot '
+          RUN: font=None size=16.0pt bold=None color=None text='diário'
+          RUN: font=None size=16.0pt bold=None color=None text=':'
+        [PARA 6] align=None space_before=4pt
+          TEXT: 'Antes de cada atualização semanal, o sistema\x0bsalva o estado completo da planilha para\x0brastreabilidade histórica.'
+          RUN: font=None size=16.0pt bold=None color=None text='Antes de '
+          RUN: font=None size=16.0pt bold=None color=None text='cada'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='atualização'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='semanal'
+          RUN: font=None size=16.0pt bold=None color=None text=', o '
+          RUN: font=None size=16.0pt bold=None color=None text='sistema'
+          RUN: font=None size=16.0pt bold=None color=None text='salva'
+          RUN: font=None size=16.0pt bold=None color=None text=' o '
+          RUN: font=None size=16.0pt bold=None color=None text='estado'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='completo'
+          RUN: font=None size=16.0pt bold=None color=None text=' da '
+          RUN: font=None size=16.0pt bold=None color=None text='planilha'
+          RUN: font=None size=16.0pt bold=None color=None text=' para'
+          RUN: font=None size=16.0pt bold=None color=None text='rastreabilidade'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='histórica'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+
+  [11] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [12] TEXT_BOX
+       name='TextBox 13'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[FIM DO AUTODECLARATÓRIO] Qualquer resultado reportado sem evidência no ERP é detectado automaticamente — tornando os nú'
+          RUN: font=None size=16.0pt bold=None color=None text='[FIM DO AUTODECLARATÓRIO] '
+          RUN: font=None size=16.0pt bold=None color=None text='Qualquer'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='resultado'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='reportado'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='sem'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='evidência'
+          RUN: font=None size=16.0pt bold=None color=None text=' no ERP é '
+          RUN: font=None size=16.0pt bold=None color=None text='detectado'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='automaticamente'
+          RUN: font=None size=16.0pt bold=None color=None text=' — '
+          RUN: font=None size=16.0pt bold=None color=None text='tornando'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='os'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='números'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='confiáveis'
+          RUN: font=None size=16.0pt bold=None color=None text='.'
+
+================================================================================
+SLIDE 9
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [4] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [5] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'PAPÉIS E RESPONSABILIDADES'
+          RUN: font=None size=None bold=None color=None text='PAPÉIS E RESPONSABILIDADES'
+
+  [6] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'QUEM FAZ O QUÊ NA CAMPANHA'
+          RUN: font=None size=None bold=None color=None text='QUEM FAZ O QUÊ NA CAMPANHA'
+
+  [7] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(0.8", 1.5") size=(11.7" x 4.7")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [8] TABLE
+       name='Table 9'
+       pos=(0.9", 1.65") size=(11.5" x 4.4364")
+       TABLE: 5 rows x 3 cols
+         [0,0] bg=#0A0A0A text='Papel'
+         [0,1] bg=#0A0A0A text='Responsável'
+         [0,2] bg=#0A0A0A text='Ação no Projeto'
+         [1,0] bg=#1F2937 text='Gerente de Peças'
+         [1,1] bg=#1F2937 text='Roberto Reis'
+         [1,2] bg=#1F2937 text='Lidera reunião semanal de revisão de metas (terças); avalia '
+         [2,0] bg=#1F2937 text='Gerentes Regionais / Coordenadores Regionais / CSA'
+         [2,1] bg=#1F2937 text='Pedro Sarnaglia, Leandro Silva, Marcelo Costa, Murilo Nunes,'
+         [2,2] bg=#1F2937 text='Acompanham o Daily Report diário; cobram aging elevado dos c'
+         [3,0] bg=#1F2937 text='Consultores de Vendas'
+         [3,1] bg=#1F2937 text='Aurelio Costa, Moises Carvalho, Luis Barbosa, Graziane Leite'
+         [3,2] bg=#1F2937 text='Realizam o contato ativo com os clientes; registram Venda / '
+         [4,0] bg=#1F2937 text='Analista de Dados'
+         [4,1] bg=#1F2937 text='Victor Bernardi'
+         [4,2] bg=#1F2937 text='Mantém o motor de cálculo, atualiza a planilha semanalmente '
+
+  [9] AUTO_SHAPE
+       name='Rectangle 10'
+       pos=(0.8", 6.4") size=(11.7" x 0.8")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [10] TEXT_BOX
+       name='TextBox 25'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[SINERGIA] O sucesso depende da execução diária dos registros preciso e do monitoramento constante dos KPIs.'
+          RUN: font=None size=16.0pt bold=None color=None text='['
+          RUN: font=None size=16.0pt bold=None color=None text='SINERGIA'
+          RUN: font=None size=16.0pt bold=None color=None text='] '
+          RUN: font=None size=16.0pt bold=None color=None text='O sucesso depende da execução diária dos registros preciso e do monitoramento co'
+
+================================================================================
+SLIDE 10
+================================================================================
+
+  [0] AUTO_SHAPE
+       name='Rectangle 1'
+       pos=(0.15", 0.0") size=(0.15" x 7.5")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [1] AUTO_SHAPE
+       name='Rectangle 2'
+       pos=(0.0", 0.0") size=(13.33" x 0.4")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [2] AUTO_SHAPE
+       name='Rectangle 3'
+       pos=(0.0", 7.4") size=(13.33" x 0.1")
+       fill_type=SOLID (1) fore_color=#1F2937
+       HAS TEXT:
+
+  [3] PICTURE
+       name='Picture 4'
+       pos=(10.8", 0.06") size=(1.0" x 0.28")
+       PICTURE: Picture 4
+
+  [4] PICTURE
+       name='Picture 5'
+       pos=(12.0", 0.06") size=(0.58" x 0.28")
+       PICTURE: Picture 5
+
+  [5] TEXT_BOX
+       name='TextBox 6'
+       pos=(0.8", 0.4") size=(8.0" x 0.4")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'ROADMAP // IMPLANTAÇÃO'
+          RUN: font=None size=None bold=None color=None text='ROADMAP // IMPLANTAÇÃO'
+
+  [6] TEXT_BOX
+       name='TextBox 7'
+       pos=(0.8", 0.65") size=(11.5" x 0.8")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: 'PRIMEIROS MARCOS DA CAMPANHA'
+          RUN: font=None size=None bold=None color=None text='PRIMEIROS MARCOS DA CAMPANHA'
+
+  [7] AUTO_SHAPE
+       name='Rectangle 8'
+       pos=(0.7", 1.55") size=(2.7" x 4.5")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [8] TEXT_BOX
+       name='TextBox 9'
+       pos=(0.8", 1.75") size=(2.5" x 0.6")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'SEMANA 1'
+          RUN: font=None size=None bold=None color=None text='SEMANA 1'
+
+  [9] AUTO_SHAPE
+       name='Rectangle 10'
+       pos=(1.2", 2.4") size=(1.7" x 0.04")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [10] TEXT_BOX
+       name='TextBox 11'
+       pos=(0.85", 2.55") size=(2.4" x 0.9088")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Primeiro ciclo semanal de alertas publicado na planilha OneDrive'
+          RUN: font=None size=16.0pt bold=None color=None text='Primeiro '
+          RUN: font=None size=16.0pt bold=None color=None text='ciclo'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='semanal'
+          RUN: font=None size=16.0pt bold=None color=None text=' de '
+          RUN: font=None size=16.0pt bold=None color=None text='alertas'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='publicado'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='na'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='planilha'
+          RUN: font=None size=16.0pt bold=None color=None text=' OneDrive'
+
+  [11] AUTO_SHAPE
+       name='Rectangle 12'
+       pos=(3.7", 1.55") size=(2.7" x 4.5")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [12] TEXT_BOX
+       name='TextBox 13'
+       pos=(4.2338", 1.75") size=(1.6325" x 0.4376")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'SEMANA 1'
+          RUN: font=None size=None bold=None color=#FFC20E text='SEMANA'
+          RUN: font=None size=None bold=None color=None text=' 1'
+
+  [13] AUTO_SHAPE
+       name='Rectangle 14'
+       pos=(4.2", 2.4") size=(1.7" x 0.04")
+       fill_type=SOLID (1) fore_color=#FFC20E
+       HAS TEXT:
+
+  [14] TEXT_BOX
+       name='TextBox 15'
+       pos=(3.85", 2.55") size=(2.4" x 0.5385")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Primeiro Daily Report enviado para todos os 8 destinatários'
+          RUN: font=None size=None bold=None color=None text='Primeiro Daily Report '
+          RUN: font=None size=None bold=None color=None text='enviado'
+          RUN: font=None size=None bold=None color=None text=' para '
+          RUN: font=None size=None bold=None color=None text='todos'
+          RUN: font=None size=None bold=None color=None text=' '
+          RUN: font=None size=None bold=None color=None text='os'
+          RUN: font=None size=None bold=None color=None text=' 8 '
+          RUN: font=None size=16.0pt bold=None color=None text='destinatários'
+
+  [15] AUTO_SHAPE
+       name='Rectangle 16'
+       pos=(6.7", 1.55") size=(2.7" x 4.5")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [16] TEXT_BOX
+       name='TextBox 17'
+       pos=(6.9787", 1.7") size=(2.1426" x 0.4376")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Semana 1'
+          RUN: font=None size=None bold=None color=#FFC20E text='Semana'
+          RUN: font=None size=None bold=None color=None text=' 1'
+
+  [17] AUTO_SHAPE
+       name='Rectangle 18'
+       pos=(7.2", 2.4") size=(1.7" x 0.04")
+       fill_type=SOLID (1) fore_color=#FFC000
+       HAS TEXT:
+
+  [18] TEXT_BOX
+       name='TextBox 19'
+       pos=(6.85", 2.55") size=(2.4" x 1.1781")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Primeira auditoria de Aderência de Propostas: planilha × Protheus'
+          RUN: font=None size=16.0pt bold=None color=None text='Primeira auditoria de Aderência de Propostas: planilha × Protheus'
+
+  [19] AUTO_SHAPE
+       name='Rectangle 20'
+       pos=(9.7", 1.55") size=(2.7" x 4.5")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [20] TEXT_BOX
+       name='TextBox 21'
+       pos=(10.5423", 1.75") size=(1.0154" x 0.4376")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'MÊS 1'
+          RUN: font=None size=None bold=None color=None text='MÊS '
+          RUN: font=None size=None bold=None color=None text='1'
+
+  [21] AUTO_SHAPE
+       name='Rectangle 22'
+       pos=(10.2", 2.4") size=(1.7" x 0.04")
+       fill_type=SOLID (1) fore_color=#22C55E
+       HAS TEXT:
+
+  [22] TEXT_BOX
+       name='TextBox 23'
+       pos=(9.85", 2.55") size=(2.4" x 0.9088")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=CENTER (2) space_before=0pt
+          TEXT: 'Primeiro benchmark de conversão por região disponível'
+          RUN: font=None size=16.0pt bold=None color=None text='Primeiro benchmark de conversão por região disponível'
+
+  [23] AUTO_SHAPE
+       name='Rectangle 24'
+       pos=(0.8", 6.4") size=(11.7323" x 0.7874")
+       fill_type=SOLID (1) fore_color=#1F2937
+       line_color=#FFC20E line_width=1.5pt
+       HAS TEXT:
+
+  [24] TEXT_BOX
+       name='TextBox 25'
+       pos=(1.0", 6.4961") size=(11.3386" x 0.6395")
+       fill_type=BACKGROUND (5) fore_color=N/A
+       HAS TEXT:
+        [PARA 0] align=None space_before=0pt
+          TEXT: '[OBJETIVO] Da semana 1 ao mês 2: do primeiro alerta ao primeiro benchmark de resultado — campanha rodando e auditável em'
+          RUN: font=None size=16.0pt bold=None color=None text='[OBJETIVO] Da '
+          RUN: font=None size=16.0pt bold=None color=None text='semana'
+          RUN: font=None size=16.0pt bold=None color=None text=' 1 '
+          RUN: font=None size=16.0pt bold=None color=None text='ao'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='mês'
+          RUN: font=None size=16.0pt bold=None color=None text=' 2: do '
+          RUN: font=None size=16.0pt bold=None color=None text='primeiro'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='alerta'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='ao'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='primeiro'
+          RUN: font=None size=16.0pt bold=None color=None text=' benchmark de '
+          RUN: font=None size=16.0pt bold=None color=None text='resultado'
+          RUN: font=None size=16.0pt bold=None color=None text=' — '
+          RUN: font=None size=16.0pt bold=None color=None text='campanha'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='rodando'
+          RUN: font=None size=16.0pt bold=None color=None text=' e '
+          RUN: font=None size=16.0pt bold=None color=None text='auditável'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='em'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='30'
+          RUN: font=None size=16.0pt bold=None color=None text=' '
+          RUN: font=None size=16.0pt bold=None color=None text='dias'
+          RUN: font=None size=16.0pt bold=None color=None text='.'

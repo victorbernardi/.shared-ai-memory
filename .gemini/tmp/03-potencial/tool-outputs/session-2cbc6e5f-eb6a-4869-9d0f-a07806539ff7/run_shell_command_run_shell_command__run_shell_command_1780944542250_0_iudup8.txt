@@ -1,0 +1,3 @@
+{
+  "output": "Output: Columns: ['CNPJ PROPRIET�RIO', 'NOME PROPRIET�RIO']\nProcess Group PGID: 32548"
+}

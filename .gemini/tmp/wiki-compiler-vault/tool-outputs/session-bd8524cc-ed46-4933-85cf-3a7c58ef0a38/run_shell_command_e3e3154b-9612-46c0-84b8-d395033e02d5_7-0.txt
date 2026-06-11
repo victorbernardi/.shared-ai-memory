@@ -1,0 +1,1277 @@
+Output: {
+    "v1_cevap_m0_integration.md":  {
+                                       "hash":  "09c26ecb1b9f1386c74f011b35eb4d6089a54808312665ceb6cfc8169cd2903b",
+                                       "timestamp":  "1778861987.2829194",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "v1_cli_interativo.md":  {
+                                 "hash":  "450e025b9525bf7ffa3ec5f7ecc0de0a66025b65b601d06f2b98d02b098d56dd",
+                                 "timestamp":  "1779247591.2593248",
+                                 "created_pages":  [
+                                                       "Fallback Auto-Generated Concept"
+                                                   ],
+                                 "updated_pages":  [
+
+                                                   ]
+                             },
+    "0001-adopt-discrete-yearly-sales-logic.md":  {
+                                                      "hash":  "04b7491eb2a84357b63bf49c2551d93c65da04918bac1666cf139c54c01c4384",
+                                                      "timestamp":  "1778682102.8176808",
+                                                      "created_pages":  [
+                                                                            "Fallback Auto-Generated Concept"
+                                                                        ],
+                                                      "updated_pages":  [
+
+                                                                        ]
+                                                  },
+    "0002-modular-storytelling-report-architecture.md":  {
+                                                             "hash":  "ea3436e44c80a220b05ff75d00b7652d4272f03470ad268f3d7cbf4a990f6754",
+                                                             "timestamp":  "1778687709.329363",
+                                                             "created_pages":  [
+                                                                                   "Fallback Auto-Generated Concept"
+                                                                               ],
+                                                             "updated_pages":  [
+
+                                                                               ]
+                                                         },
+    "0001-resilient-date-conversion-historical-sync.md":  {
+                                                              "hash":  "312122b5e739cd74af00991f18be647f4519d5d8debabc706e4558b595b99897",
+                                                              "timestamp":  "1778073074.5987668",
+                                                              "created_pages":  [
+                                                                                    "Fallback Auto-Generated Concept"
+                                                                                ],
+                                                              "updated_pages":  [
+
+                                                                                ]
+                                                          },
+    "2026-05-13-walkthrough-otimizacao-performance-superantigravity.md":  {
+                                                                              "hash":  "19943386a4a7e79d7ad1d72bcaa0a07c238247abcfdd68b3e99ccff906f4c264",
+                                                                              "timestamp":  "1778691707.6926923",
+                                                                              "created_pages":  [
+                                                                                                    "Fallback Auto-Generated Concept"
+                                                                                                ],
+                                                                              "updated_pages":  [
+
+                                                                                                ]
+                                                                          },
+    "2026-05-18-relatorio-apresentacao-roberto.md":  {
+                                                         "hash":  "701988b275a3ec7140a67d86d3286f36df176e3e2c2e0fe03f3d09224ed4d62d",
+                                                         "timestamp":  "1779118179.6512651",
+                                                         "created_pages":  [
+                                                                               "Fallback Auto-Generated Concept"
+                                                                           ],
+                                                         "updated_pages":  [
+
+                                                                           ]
+                                                     },
+    "2026-05-11-walkthrough-shared-sync.md":  {
+                                                  "hash":  "3306320db6c876edb133b95d0cbcaa62ce4dde2cc02d49232afba94aac309a60",
+                                                  "timestamp":  "1778532749.299244",
+                                                  "created_pages":  [
+                                                                        "Fallback Auto-Generated Concept"
+                                                                    ],
+                                                  "updated_pages":  [
+
+                                                                    ]
+                                              },
+    "2026-05-12_Inova.md":  {
+                                "hash":  "76c9de9003765accff42082ad0d6a7c4cf0d6cb01fdc8671fb6c04a4ff784422",
+                                "timestamp":  "1779247590.528232",
+                                "created_pages":  [
+                                                      "Fallback Auto-Generated Concept"
+                                                  ],
+                                "updated_pages":  [
+
+                                                  ]
+                            },
+    "2026-05-13-walkthrough-transicao-bup.md":  {
+                                                    "hash":  "fe899529143e02f1dfc6f07b48f9f1b8d4b20b0af60ede8431759d34d5c855a8",
+                                                    "timestamp":  "1778675014.229586",
+                                                    "created_pages":  [
+                                                                          "Fallback Auto-Generated Concept"
+                                                                      ],
+                                                    "updated_pages":  [
+
+                                                                      ]
+                                                },
+    "analise_transcricoes_pontos_melhoria.md":  {
+                                                    "hash":  "b9ccec2b892be8c7e050bb8d53286c2f45c2598cfb215f0dc3a40790913e5093",
+                                                    "timestamp":  "1778954525.0057957",
+                                                    "created_pages":  [
+                                                                          "Fallback Auto-Generated Concept"
+                                                                      ],
+                                                    "updated_pages":  [
+
+                                                                      ]
+                                                },
+    "analise_profunda_lupa.md":  {
+                                     "hash":  "9c29d96cbe995a0a1f92e1b08d24d51ab865a225d5f88536f15221e1a5365146",
+                                     "timestamp":  "1778954524.9942882",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "atualizacao-cevap-audit.md":  {
+                                       "hash":  "35ffb6453b7ede3064c3d9000e4684b4396f4fa70d4e10e38b55468c1b1c9086",
+                                       "timestamp":  "1778861987.285522",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "auditoria-reparo-encoding.md":  {
+                                         "hash":  "09b3dff50054ba54c68c454a8fee742ba0e9d2e46d46b06ddf756695a0c17ac1",
+                                         "timestamp":  "1779247588.5783129",
+                                         "created_pages":  [
+                                                               "Fallback Auto-Generated Concept"
+                                                           ],
+                                         "updated_pages":  [
+
+                                                           ]
+                                     },
+    "bup-auto-1-extrair-orcamentos-fabric.md":  {
+                                                    "hash":  "f65e9fdebe44b948e5c6c788318ac62c1fe0713250e9bed510f3759ebf1c2ba8",
+                                                    "timestamp":  "1779247590.6362276",
+                                                    "created_pages":  [
+                                                                          "Fallback Auto-Generated Concept"
+                                                                      ],
+                                                    "updated_pages":  [
+
+                                                                      ]
+                                                },
+    "concept_claude_feedback_antigravity_context_agent_paths_v2.md":  {
+                                                                          "hash":  "44c918b4d4ce1e5b62498e25c93df340f69455e29842fbc056406acfe4c02f81",
+                                                                          "timestamp":  "1779247588.240052",
+                                                                          "created_pages":  [
+                                                                                                "Fallback Auto-Generated Concept"
+                                                                                            ],
+                                                                          "updated_pages":  [
+
+                                                                                            ]
+                                                                      },
+    "concept_claude_feedback_baseline_vs_schema.md":  {
+                                                          "hash":  "450a6f382ddcba6fbf1bb39f99b690b7803156de61c8e349eaae77f5792cdad4",
+                                                          "timestamp":  "1779247590.4509168",
+                                                          "created_pages":  [
+                                                                                "Fallback Auto-Generated Concept"
+                                                                            ],
+                                                          "updated_pages":  [
+
+                                                                            ]
+                                                      },
+    "concept_claude_feedback_antigravity_context_agent_paths.md":  {
+                                                                       "hash":  "53317a117a1c8a20a3307d8d369a29122d85615050aba45171faf24a3d5c6f76",
+                                                                       "timestamp":  "1779247588.2267358",
+                                                                       "created_pages":  [
+                                                                                             "Fallback Auto-Generated Concept"
+                                                                                         ],
+                                                                       "updated_pages":  [
+
+                                                                                         ]
+                                                                   },
+    "concept_claude_feedback_credentials_pattern.md":  {
+                                                           "hash":  "779758fef93169d2f99fd76dc391eb6fa705cc6b5e6bfede417f090be2ff3c6e",
+                                                           "timestamp":  "1779247588.2528076",
+                                                           "created_pages":  [
+                                                                                 "Fallback Auto-Generated Concept"
+                                                                             ],
+                                                           "updated_pages":  [
+
+                                                                             ]
+                                                       },
+    "concept_claude_feedback_credentials_pattern_v2.md":  {
+                                                              "hash":  "c22274f275c793f5ebcce35a3b960eeab3f2e90c0d1c13bc8d2bf9dfe23e22dc",
+                                                              "timestamp":  "1779247588.2651873",
+                                                              "created_pages":  [
+                                                                                    "Fallback Auto-Generated Concept"
+                                                                                ],
+                                                              "updated_pages":  [
+
+                                                                                ]
+                                                          },
+    "concept_claude_project_antigravity_reset.md":  {
+                                                        "hash":  "fb8eb574fb745dd0a92de1bc203dddd0ffc195d50dd03576ad93893b8a198f41",
+                                                        "timestamp":  "1779247588.2841597",
+                                                        "created_pages":  [
+                                                                              "Fallback Auto-Generated Concept"
+                                                                          ],
+                                                        "updated_pages":  [
+
+                                                                          ]
+                                                    },
+    "concept_claude_project_antigravity_reset_v2.md":  {
+                                                           "hash":  "fcd467a58351ab4b019f7c49e1d7ab0368c1b8a5f2871c5ceddd52c5879f996a",
+                                                           "timestamp":  "1779247588.2957888",
+                                                           "created_pages":  [
+                                                                                 "Fallback Auto-Generated Concept"
+                                                                             ],
+                                                           "updated_pages":  [
+
+                                                                             ]
+                                                       },
+    "concept_claude_MEMORY.md":  {
+                                     "hash":  "2a8cd437a469107037836238269ffd52fa3863541793f575c0150015ad828581",
+                                     "timestamp":  "1779247588.2697177",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "concept_claude_project_context_agent.md":  {
+                                                    "hash":  "4df3da7702421ad6d33e47d830ea39fef9d750289776fd7760a3b7572ccbd900",
+                                                    "timestamp":  "1779247588.3211925",
+                                                    "created_pages":  [
+                                                                          "Fallback Auto-Generated Concept"
+                                                                      ],
+                                                    "updated_pages":  [
+
+                                                                      ]
+                                                },
+    "concept_claude_project_context_agent_v2.md":  {
+                                                       "hash":  "9be23101986394ee95e48caa4a74af82538039a0fc208586b63df757dc65b59d",
+                                                       "timestamp":  "1779247588.3358896",
+                                                       "created_pages":  [
+                                                                             "Fallback Auto-Generated Concept"
+                                                                         ],
+                                                       "updated_pages":  [
+
+                                                                         ]
+                                                   },
+    "concept_claude_project_docs_centralizados_v2.md":  {
+                                                            "hash":  "0836e42e9c542664a41d7857f03bb950e4172d2176d98cbb0431f1548efd07c7",
+                                                            "timestamp":  "1779247588.3682606",
+                                                            "created_pages":  [
+                                                                                  "Fallback Auto-Generated Concept"
+                                                                              ],
+                                                            "updated_pages":  [
+
+                                                                              ]
+                                                        },
+    "concept_claude_project_docs_centralizados.md":  {
+                                                         "hash":  "c39b1160318bca5e31688b642b03b83288f70bed467a1eb7d3c5ba037cb1d8c5",
+                                                         "timestamp":  "1779247588.3533833",
+                                                         "created_pages":  [
+                                                                               "Fallback Auto-Generated Concept"
+                                                                           ],
+                                                         "updated_pages":  [
+
+                                                                           ]
+                                                     },
+    "concept_claude_project_fabric_connector.md":  {
+                                                       "hash":  "d00e14c0c4a4f0a12581f229a31eb228eb152c5c07fcc6c378c6931329ea2c40",
+                                                       "timestamp":  "1779247588.3850956",
+                                                       "created_pages":  [
+                                                                             "Fallback Auto-Generated Concept"
+                                                                         ],
+                                                       "updated_pages":  [
+
+                                                                         ]
+                                                   },
+    "concept_claude_project_fabric_connector_v2.md":  {
+                                                          "hash":  "6520d062248c7f3b40735ba1c319923b318256b73a19b8018aa4f383dcac2856",
+                                                          "timestamp":  "1779247588.398661",
+                                                          "created_pages":  [
+                                                                                "Fallback Auto-Generated Concept"
+                                                                            ],
+                                                          "updated_pages":  [
+
+                                                                            ]
+                                                      },
+    "concept_claude_project_faturamento_schema_slim.md":  {
+                                                              "hash":  "c41aa85b9cc3a499d06ca9654a27a35277563bf7e9c7f373605a7f79f6f567e8",
+                                                              "timestamp":  "1779247590.4655106",
+                                                              "created_pages":  [
+                                                                                    "Fallback Auto-Generated Concept"
+                                                                                ],
+                                                              "updated_pages":  [
+
+                                                                                ]
+                                                          },
+    "concept_claude_project_knowledge_graph_pending.md":  {
+                                                              "hash":  "8ad242ab39925e5ea58647a6f6a097dd014a81bca42a5fa1b1972510afa282b0",
+                                                              "timestamp":  "1779247588.4116094",
+                                                              "created_pages":  [
+                                                                                    "Fallback Auto-Generated Concept"
+                                                                                ],
+                                                              "updated_pages":  [
+
+                                                                                ]
+                                                          },
+    "concept_claude_project_knowledge_graph_pending_v2.md":  {
+                                                                 "hash":  "bfb845559b49557715e74f6b8c509487c516ad1cbbfa49030f340e1224605001",
+                                                                 "timestamp":  "1779247588.4253075",
+                                                                 "created_pages":  [
+                                                                                       "Fallback Auto-Generated Concept"
+                                                                                   ],
+                                                                 "updated_pages":  [
+
+                                                                                   ]
+                                                             },
+    "concept_claude_project_llm_wiki_reforma.md":  {
+                                                       "hash":  "bb654f2b0e9d2a7bb7366d6b509ac7ee6476bfcd729283e1efe005b2875feb87",
+                                                       "timestamp":  "1779247588.4413378",
+                                                       "created_pages":  [
+                                                                             "Fallback Auto-Generated Concept"
+                                                                         ],
+                                                       "updated_pages":  [
+
+                                                                         ]
+                                                   },
+    "concept_claude_project_llm_wiki_reforma_v2.md":  {
+                                                          "hash":  "21b775e03b11aa350468b5fbd45933f7a191a7fc89e7fdf8da464e0fcf0f2ea6",
+                                                          "timestamp":  "1779247588.4577122",
+                                                          "created_pages":  [
+                                                                                "Fallback Auto-Generated Concept"
+                                                                            ],
+                                                          "updated_pages":  [
+
+                                                                            ]
+                                                      },
+    "concept_claude_project_opencode_transition.md":  {
+                                                          "hash":  "80fdce1e2df38134dd4713372efe838273c2d749c325588760bebf588df3361f",
+                                                          "timestamp":  "1779247588.4877388",
+                                                          "created_pages":  [
+                                                                                "Fallback Auto-Generated Concept"
+                                                                            ],
+                                                          "updated_pages":  [
+
+                                                                            ]
+                                                      },
+    "concept_claude_project_opencode_transition_v2.md":  {
+                                                             "hash":  "f9f6207113f374da52ffb739e9de233d11f3e0d768be1ac0b8ecfb2f99fae56c",
+                                                             "timestamp":  "1779247588.5012155",
+                                                             "created_pages":  [
+                                                                                   "Fallback Auto-Generated Concept"
+                                                                               ],
+                                                             "updated_pages":  [
+
+                                                                               ]
+                                                         },
+    "concept_claude_project_pendencias_paths.md":  {
+                                                       "hash":  "3462472bd15ef31bf3a889ee999079591fb2a2072e6709d789b8799f7fe34e51",
+                                                       "timestamp":  "1779247590.4847426",
+                                                       "created_pages":  [
+                                                                             "Fallback Auto-Generated Concept"
+                                                                         ],
+                                                       "updated_pages":  [
+
+                                                                         ]
+                                                   },
+    "concept_claude_project_quarentena_pre_migration.md":  {
+                                                               "hash":  "4782235b2663750455da8b219a3cbdcedfe202d3af63b12f2568f98c89854c8e",
+                                                               "timestamp":  "1779247590.4986093",
+                                                               "created_pages":  [
+                                                                                     "Fallback Auto-Generated Concept"
+                                                                                 ],
+                                                               "updated_pages":  [
+
+                                                                                 ]
+                                                           },
+    "concept_claude_project_shared_modules_location.md":  {
+                                                              "hash":  "5eba3c153986a19c0bdabc368cf215bc9d5a7d066bb16f642d0a94c9caaa8fc5",
+                                                              "timestamp":  "1779247590.5117893",
+                                                              "created_pages":  [
+                                                                                    "Fallback Auto-Generated Concept"
+                                                                                ],
+                                                              "updated_pages":  [
+
+                                                                                ]
+                                                          },
+    "concept_claude_project_token_rotation_pending.md":  {
+                                                             "hash":  "60cc19a2ca3f9dd6f44f2e75be51efa04c56791f6092506640f09a146f22ca55",
+                                                             "timestamp":  "1779247588.5180755",
+                                                             "created_pages":  [
+                                                                                   "Fallback Auto-Generated Concept"
+                                                                               ],
+                                                             "updated_pages":  [
+
+                                                                               ]
+                                                         },
+    "concept_claude_project_tracking_agent_pending.md":  {
+                                                             "hash":  "64d6c91151e6e1b9a6ab4505630205162b9b01d380562f3dc2a623ab96c25fef",
+                                                             "timestamp":  "1779247588.5443196",
+                                                             "created_pages":  [
+                                                                                   "Fallback Auto-Generated Concept"
+                                                                               ],
+                                                             "updated_pages":  [
+
+                                                                               ]
+                                                         },
+    "concept_claude_project_token_rotation_pending_v2.md":  {
+                                                                "hash":  "56d41d13e4794ef65426da06ea61953a2adda4ff88b85f43f5c995d823140eb3",
+                                                                "timestamp":  "1779247588.532839",
+                                                                "created_pages":  [
+                                                                                      "Fallback Auto-Generated Concept"
+                                                                                  ],
+                                                                "updated_pages":  [
+
+                                                                                  ]
+                                                            },
+    "concept_claude_project_tracking_agent_pending_v2.md":  {
+                                                                "hash":  "8134d231783ceef12d59b3430d2c104eb6b96381eeb99e556d52510adeb5741a",
+                                                                "timestamp":  "1779247588.5570705",
+                                                                "created_pages":  [
+                                                                                      "Fallback Auto-Generated Concept"
+                                                                                  ],
+                                                                "updated_pages":  [
+
+                                                                                  ]
+                                                            },
+    "concept_claude_project_validate_pipeline.md":  {
+                                                        "hash":  "1af1f871a4fe9fb1716649acfb0133af3d7a66b9176dcff156f3acd0010b249d",
+                                                        "timestamp":  "1779247590.5225427",
+                                                        "created_pages":  [
+                                                                              "Fallback Auto-Generated Concept"
+                                                                          ],
+                                                        "updated_pages":  [
+
+                                                                          ]
+                                                    },
+    "consolidated-pdf-adjustments.md":  {
+                                            "hash":  "50de9e9994437f9838dbfa86a124cc4d5e74c45eaad0cb9cff65a1f2600a5990",
+                                            "timestamp":  "1778954524.7732472",
+                                            "created_pages":  [
+                                                                  "Fallback Auto-Generated Concept"
+                                                              ],
+                                            "updated_pages":  [
+
+                                                              ]
+                                        },
+    "correcao-bridges-laboratorio-m0.md":  {
+                                               "hash":  "609109bf67f9f7733c778e25e1e46e2f3e90e5ab3de90cbbcbde4df12904fd66",
+                                               "timestamp":  "1779247591.1192436",
+                                               "created_pages":  [
+                                                                     "Fallback Auto-Generated Concept"
+                                                                 ],
+                                               "updated_pages":  [
+
+                                                                 ]
+                                           },
+    "design-capa-executiva.md":  {
+                                     "hash":  "152c92e45d724951b1f9535e89411abe21c7041cfb056e390419c22cc1c152dd",
+                                     "timestamp":  "1779247590.5385835",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "delta-qsa-scanner.md":  {
+                                 "hash":  "d044ab85caebe6ff040cdd9920c2098e710e22c6543758f722d15d38441aed43",
+                                 "timestamp":  "1779247591.3713112",
+                                 "created_pages":  [
+                                                       "Fallback Auto-Generated Concept"
+                                                   ],
+                                 "updated_pages":  [
+
+                                                   ]
+                             },
+    "DICIONARIO_OUTPUT.md":  {
+                                 "hash":  "4671d8028fd47ea47ce2c45ec526a052f6058a131af73b590a71f39498b20582",
+                                 "timestamp":  "1779247590.7570148",
+                                 "created_pages":  [
+                                                       "Fallback Auto-Generated Concept"
+                                                   ],
+                                 "updated_pages":  [
+
+                                                   ]
+                             },
+    "dna_recency_v1.md":  {
+                              "hash":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                              "timestamp":  "1779247591.4139757",
+                              "created_pages":  [
+                                                    "Fallback Auto-Generated Concept"
+                                                ],
+                              "updated_pages":  [
+
+                                                ]
+                          },
+    "dropout-sku-page.md":  {
+                                "hash":  "10bb5cc89a6b45af15707bf24488fe31374c4c549b1805d91e07e6d983d73c83",
+                                "timestamp":  "1778954524.7908552",
+                                "created_pages":  [
+                                                      "Fallback Auto-Generated Concept"
+                                                  ],
+                                "updated_pages":  [
+
+                                                  ]
+                            },
+    "ecossistema-maestro-v10.md":  {
+                                       "hash":  "ceca644931f5e0061394657d39fa15bffd6d1388d88eb42b31cac8061e79742a",
+                                       "timestamp":  "1779247591.310997",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "elite-migration-cdd.md":  {
+                                   "hash":  "fc31f69e019d6c40161551fd919642beb77849f3597edc1f33dde75b4ae8cbd2",
+                                   "timestamp":  "1779247650.9042532",
+                                   "created_pages":  [
+                                                         "Fallback Auto-Generated Concept"
+                                                     ],
+                                   "updated_pages":  [
+
+                                                     ]
+                               },
+    "elite-migration-m2-sandbox.md":  {
+                                          "hash":  "c3c6771d3d1f79f7aefd8a34115a54a1a73b92eaf7fbe3fbde7b9eccfecd826d",
+                                          "timestamp":  "1779247650.9077768",
+                                          "created_pages":  [
+                                                                "Fallback Auto-Generated Concept"
+                                                            ],
+                                          "updated_pages":  [
+
+                                                            ]
+                                      },
+    "filtro_bi_orcamentos_abertos.md":  {
+                                            "hash":  "4778cc4c01732b67676b0bf7db61725f417dfa5aff7faa93295e0d33e82c3849",
+                                            "timestamp":  "1779247590.6818266",
+                                            "created_pages":  [
+                                                                  "Fallback Auto-Generated Concept"
+                                                              ],
+                                            "updated_pages":  [
+
+                                                              ]
+                                        },
+    "GESTAO_ESTRATEGICA_INSIGHTS.md":  {
+                                           "hash":  "b5e2d6a4f3817712a1fb4a01d16e42299bebf43089ceca9841cdf84faa317dad",
+                                           "timestamp":  "1778616622.437749",
+                                           "created_pages":  [
+                                                                 "Fallback Auto-Generated Concept"
+                                                             ],
+                                           "updated_pages":  [
+
+                                                             ]
+                                       },
+    "granularidade-filiais.md":  {
+                                     "hash":  "7306894c9ce63a03c435466889154a5b92cc4b665372bb96016fc3d0d67d3a47",
+                                     "timestamp":  "1779247590.8629587",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "implementacao-m0-v9-pops.md":  {
+                                        "hash":  "d933c3ddf29ee78afdffc0b4bd3b16513ce56eb08ea53105e1d4aa15cfb5f886",
+                                        "timestamp":  "1779247591.12369",
+                                        "created_pages":  [
+                                                              "Fallback Auto-Generated Concept"
+                                                          ],
+                                        "updated_pages":  [
+
+                                                          ]
+                                    },
+    "implementacao-relatorio-V2.md":  {
+                                          "hash":  "c01acd9794bb959a035e99fe46602b074caf28e9d985eddf0e18f581b4064cf8",
+                                          "timestamp":  "1779118856.8107822",
+                                          "created_pages":  [
+                                                                "Fallback Auto-Generated Concept"
+                                                            ],
+                                          "updated_pages":  [
+
+                                                            ]
+                                      },
+    "implementacao-relatorio.md":  {
+                                       "hash":  "df339a182e37ca2bedf2cdc79e70cce9cdac43962f7aa6c11aba78b4e411e00d",
+                                       "timestamp":  "1779118856.8131459",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "insight_log.md":  {
+                           "hash":  "c806509557a4f47a06f9dc0b6420cb62b9708e9fe04ebe0565b522e1d6fe4e7a",
+                           "timestamp":  "1779247590.7900383",
+                           "created_pages":  [
+                                                 "Fallback Auto-Generated Concept"
+                                             ],
+                           "updated_pages":  [
+
+                                             ]
+                       },
+    "implementation_plan_m0.md":  {
+                                      "hash":  "7229f73651eb6b7aaf6c96d2994ee3e603911522339cf64b8c19a0fa71814706",
+                                      "timestamp":  "1779247591.2046435",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "integracao-faturamento-subgrupos.md":  {
+                                                "hash":  "797caed79d56f8cf23c9960be2fbc49020a243635b7f0171bb3e3e29cf6845c9",
+                                                "timestamp":  "1778954524.648302",
+                                                "created_pages":  [
+                                                                      "Fallback Auto-Generated Concept"
+                                                                  ],
+                                                "updated_pages":  [
+
+                                                                  ]
+                                            },
+    "lista-clientes-integral.md":  {
+                                       "hash":  "e64dd3c6e04b81ace078d6c4a66c7ab6d80a1fbd204076e1418d681274602ec4",
+                                       "timestamp":  "1779247590.6545358",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "m2-faturamento-elite.md":  {
+                                    "hash":  "c6881d29ff723d9b64213f3829282913c58966f8c5153ed21ed47042b9f9df7b",
+                                    "timestamp":  "1779247650.9188905",
+                                    "created_pages":  [
+                                                          "Fallback Auto-Generated Concept"
+                                                      ],
+                                    "updated_pages":  [
+
+                                                      ]
+                                },
+    "mcp_test_report.md":  {
+                               "hash":  "aa85deee2228425398b074dd16db754da24934e683e83093e2264913bd6d2ede",
+                               "timestamp":  "1779247591.2216074",
+                               "created_pages":  [
+                                                     "Fallback Auto-Generated Concept"
+                                                 ],
+                               "updated_pages":  [
+
+                                                 ]
+                           },
+    "m2-recency-governance.md":  {
+                                     "hash":  "ccdbc8db81ee95058552bac2bee0d55b7e958d8d37adf1632d2a2a6b3e65ed46",
+                                     "timestamp":  "1779247650.913783",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "melhoria-pdf-v2.md":  {
+                               "hash":  "15c2d8a3cfbe026dabdd63e39ccb43e974d098033d5f96212cf1172d866ed62e",
+                               "timestamp":  "1778954524.6672747",
+                               "created_pages":  [
+                                                     "Fallback Auto-Generated Concept"
+                                                 ],
+                               "updated_pages":  [
+
+                                                 ]
+                           },
+    "modular-storytelling-architecture.md":  {
+                                                 "hash":  "d43f1cc87e239836669577fe52524eda7a84d6d4be566b2bdc2df7c4b74bb9ed",
+                                                 "timestamp":  "1778954525.0287344",
+                                                 "created_pages":  [
+                                                                       "Fallback Auto-Generated Concept"
+                                                                   ],
+                                                 "updated_pages":  [
+
+                                                                   ]
+                                             },
+    "multi-output-report-v1.md":  {
+                                      "hash":  "1447c57ccf3142ba610726bb29419a39003739ae7617bcc9c50891f3b25f38d7",
+                                      "timestamp":  "1778954524.9747827",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "pdf-timestamp.md":  {
+                             "hash":  "3da61a1dd3d54fa4b2eb02ec900eeaf3059ed13f7745c175ed666b2a7c4163b6",
+                             "timestamp":  "1778954524.8077717",
+                             "created_pages":  [
+                                                   "Fallback Auto-Generated Concept"
+                                               ],
+                             "updated_pages":  [
+
+                                               ]
+                         },
+    "otimizacao-performance-superantigravity.md":  {
+                                                       "hash":  "216bb5b8a1e6addae5094310a773a756fc772591981c46eda2671894f422c9e3",
+                                                       "timestamp":  "1779247588.5922532",
+                                                       "created_pages":  [
+                                                                             "Fallback Auto-Generated Concept"
+                                                                         ],
+                                                       "updated_pages":  [
+
+                                                                         ]
+                                                   },
+    "PLANO_VALIDACAO_LAB.md":  {
+                                   "hash":  "d6d8c58993518861cc87de43e30d681f573c1350f4b9dc81e7ca3e1f27e38091",
+                                   "timestamp":  "1779247590.7541604",
+                                   "created_pages":  [
+                                                         "Fallback Auto-Generated Concept"
+                                                     ],
+                                   "updated_pages":  [
+
+                                                     ]
+                               },
+    "performance-filial-motion.md":  {
+                                         "hash":  "a9047a0e637d188e27895bfe2da622ac1f704950fe1acbcaf3ecb7a3313fa46d",
+                                         "timestamp":  "1779247590.9525723",
+                                         "created_pages":  [
+                                                               "Fallback Auto-Generated Concept"
+                                                           ],
+                                         "updated_pages":  [
+
+                                                           ]
+                                     },
+    "pricewatch-jd.md":  {
+                             "hash":  "6cdf439176c53eb8effae64142d3196cf92f3538ffc87bcb309064eca7e87650",
+                             "timestamp":  "1778954525.3175738",
+                             "created_pages":  [
+                                                   "Fallback Auto-Generated Concept"
+                                               ],
+                             "updated_pages":  [
+
+                                               ]
+                         },
+    "README.md":  {
+                      "hash":  "a16ccb80ef2f1d4e4a1dafd2f714c492ee989f24ddaa2225a849f624155d5915",
+                      "timestamp":  "1778073087.7815444",
+                      "created_pages":  [
+                                            "Fallback Auto-Generated Concept"
+                                        ],
+                      "updated_pages":  [
+
+                                        ]
+                  },
+    "reativacao-c2-pops.md":  {
+                                  "hash":  "bfc0db10040131263312ea8cc229da1bba2448a425d02cc4da81ca6af5b166ef",
+                                  "timestamp":  "1779247591.3328073",
+                                  "created_pages":  [
+                                                        "Fallback Auto-Generated Concept"
+                                                    ],
+                                  "updated_pages":  [
+
+                                                    ]
+                              },
+    "relatorio-roberto-executivo.md":  {
+                                           "hash":  "852e8157784dab6d1ab13a1cd56788f4fc5a292078e4b072345d3b9770d1b624",
+                                           "timestamp":  "1779247588.668864",
+                                           "created_pages":  [
+                                                                 "Fallback Auto-Generated Concept"
+                                                             ],
+                                           "updated_pages":  [
+
+                                                             ]
+                                       },
+    "roberto-summary-email.md":  {
+                                     "hash":  "9c195d99378e6fba25fd0f0b139e425b57f0937b686512353a0e72cee59f888c",
+                                     "timestamp":  "1779247588.6226108",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "relatorio-roberto-semana-1.md":  {
+                                          "hash":  "5cfe1892a098f48bc466b7dccf3170ffb8ae1c03e9965d1ff773c9bb9fa08606",
+                                          "timestamp":  "1779247588.6071692",
+                                          "created_pages":  [
+                                                                "Fallback Auto-Generated Concept"
+                                                            ],
+                                          "updated_pages":  [
+
+                                                            ]
+                                      },
+    "scanner-360-v2.md":  {
+                              "hash":  "8970349208289f001ea26dcb0b5cdbb8661d6b3f1453d5999e9649c0a1f6e003",
+                              "timestamp":  "1778954524.6910613",
+                              "created_pages":  [
+                                                    "Fallback Auto-Generated Concept"
+                                                ],
+                              "updated_pages":  [
+
+                                                ]
+                          },
+    "segmentacao-granular-overlay.md":  {
+                                            "hash":  "509e6f38fab95d40cf4d65951158ee1930afacbec9361cca331291f24e1221ba",
+                                            "timestamp":  "1779247590.8942893",
+                                            "created_pages":  [
+                                                                  "Fallback Auto-Generated Concept"
+                                                              ],
+                                            "updated_pages":  [
+
+                                                              ]
+                                        },
+    "seo-ge-interface-cli.md":  {
+                                    "hash":  "0eaf6b5790299bd2677a98cbf4658bfb2c1dceed88a4a1c1b8f2e4c68b73fb83",
+                                    "timestamp":  "1779247591.350821",
+                                    "created_pages":  [
+                                                          "Fallback Auto-Generated Concept"
+                                                      ],
+                                    "updated_pages":  [
+
+                                                      ]
+                                },
+    "seo-ge-scanner.md":  {
+                              "hash":  "7efdd671e779598fcd937065494da17815ceba6f78e6330f7b47facbc308b6af",
+                              "timestamp":  "1779247591.1776733",
+                              "created_pages":  [
+                                                    "Fallback Auto-Generated Concept"
+                                                ],
+                              "updated_pages":  [
+
+                                                ]
+                          },
+    "seo-ge-scanner-v2.md":  {
+                                 "hash":  "230b7becdb1a58ddad5d87a8e91fe8a59779709f00630876a4e0bf74ce2ea6aa",
+                                 "timestamp":  "1779247591.1590781",
+                                 "created_pages":  [
+                                                       "Fallback Auto-Generated Concept"
+                                                   ],
+                                 "updated_pages":  [
+
+                                                   ]
+                             },
+    "session_audit_20260519.md":  {
+                                      "hash":  "b5170a4aba597b933ffe8774fb1de52ef5a3a0ca2d71a8ec51506d65ff33a27b",
+                                      "timestamp":  "1779247591.3958378",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "TAXONOMY_MAP.md":  {
+                            "hash":  "6ad84cbc8cf2a5a15ca26a461865475db9e7943505ccd4623004fa46ea55d316",
+                            "timestamp":  "1778612452.625576",
+                            "created_pages":  [
+                                                  "Fallback Auto-Generated Concept"
+                                              ],
+                            "updated_pages":  [
+
+                                              ]
+                        },
+    "shared-sync-v11-7.md":  {
+                                 "hash":  "0c5029efe9899f0abb60af229eeb0253f1cfdcd46c53096f789245fc23efba9e",
+                                 "timestamp":  "1779247591.190521",
+                                 "created_pages":  [
+                                                       "Fallback Auto-Generated Concept"
+                                                   ],
+                                 "updated_pages":  [
+
+                                                   ]
+                             },
+    "transicao-bup.md":  {
+                             "hash":  "400d528269e46935e701ced6117212c31524268fc1aaf84dc9545041459d06fa",
+                             "timestamp":  "1779247590.6131005",
+                             "created_pages":  [
+                                                   "Fallback Auto-Generated Concept"
+                                               ],
+                             "updated_pages":  [
+
+                                               ]
+                         },
+    "transicao-identidade-bup.md":  {
+                                        "hash":  "d13c88d632bba1d88eba723fc95976a99d4d6fb3c3a641f869cc1e1f090897ec",
+                                        "timestamp":  "1779247590.6675467",
+                                        "created_pages":  [
+                                                              "Fallback Auto-Generated Concept"
+                                                          ],
+                                        "updated_pages":  [
+
+                                                          ]
+                                    },
+    "unificacao-memoria-stout.md":  {
+                                        "hash":  "d793be712a04e364701ee94597da983a65257282b635a743cc5f74efe000673b",
+                                        "timestamp":  "1778954524.9419887",
+                                        "created_pages":  [
+                                                              "Fallback Auto-Generated Concept"
+                                                          ],
+                                        "updated_pages":  [
+
+                                                          ]
+                                    },
+    "unificacao-performance.md":  {
+                                      "hash":  "e0d7edb45fd398c0667b22425847d878e718eacfad4641384366819c37909b72",
+                                      "timestamp":  "1778954524.8239107",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "v1.3_segmentacao_overlay.md":  {
+                                        "hash":  "6e76f62a4d17dada4752645184ed025faf58ce9bb9056173d970fd49fd7bc602",
+                                        "timestamp":  "1779247590.9072483",
+                                        "created_pages":  [
+                                                              "Fallback Auto-Generated Concept"
+                                                          ],
+                                        "updated_pages":  [
+
+                                                          ]
+                                    },
+    "v1.4_refinamento_segmentacao.md":  {
+                                            "hash":  "1efa3825ff682f5a607c9902f5fa118f1c251a86041cef01afec2862d9f27da9",
+                                            "timestamp":  "1779247590.9254644",
+                                            "created_pages":  [
+                                                                  "Fallback Auto-Generated Concept"
+                                                              ],
+                                            "updated_pages":  [
+
+                                                              ]
+                                        },
+    "v1_cevap_update_audit.md":  {
+                                     "hash":  "2e64702d20bc487fa8e9459a49d929cb86a543a83b70f3a71eba9d1760f4078a",
+                                     "timestamp":  "1778861987.2840042",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "v1_context-transcriber.md":  {
+                                      "hash":  "2cad22e7441efd4d6aaab776f2fe4a525eceb0b0c8d5c955044a72661c8a3750",
+                                      "timestamp":  "1778954524.9105227",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "v1_filtro_consultores.md":  {
+                                     "hash":  "a1c57ed413cef9ecb79b5eb14e05be18a39b36cde07b62e0a3edd12dfec40571",
+                                     "timestamp":  "1779247590.6922226",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "v1_fix_google_drive_mcp.md":  {
+                                       "hash":  "db11532abd46687dc15c188816421d2622297825cb984ead7569d9abda611ccd",
+                                       "timestamp":  "1779247591.2726564",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "v1_ligar_m3.md":  {
+                           "hash":  "efc49cfdd148c859dff6d41a13518aad591db68f36b0aa1a3ad52abe41555cef",
+                           "timestamp":  "1779247591.0638022",
+                           "created_pages":  [
+                                                 "Fallback Auto-Generated Concept"
+                                             ],
+                           "updated_pages":  [
+
+                                             ]
+                       },
+    "v1_mapeamento_analise_profunda.md":  {
+                                              "hash":  "e74fe0d69157320424590a0c1594b91357c6a46c58bdf9fb57cf8c723bcd9e7e",
+                                              "timestamp":  "1779247590.8054821",
+                                              "created_pages":  [
+                                                                    "Fallback Auto-Generated Concept"
+                                                                ],
+                                              "updated_pages":  [
+
+                                                                ]
+                                          },
+    "v1_mineracao_insights.md":  {
+                                     "hash":  "048721abec2543e0a8244979f2a5b7b877b3ef2e3db0585dc44028bb1a29d7ea",
+                                     "timestamp":  "1779247590.7723532",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "v1_powerembedded_dashboard_export.md":  {
+                                                 "hash":  "d36ae5080dcdf283ad9acbc31ed899df9879b67c6583fd4bd4d22eb4ce1aab16",
+                                                 "timestamp":  "1778856324.1285946",
+                                                 "created_pages":  [
+                                                                       "Fallback Auto-Generated Concept"
+                                                                   ],
+                                                 "updated_pages":  [
+
+                                                                   ]
+                                             },
+    "v1_powerembedded_export.md":  {
+                                       "hash":  "1f6def844fa68fbdee331dd72842986e63f6ddcb549a4341294f9923160afeb2",
+                                       "timestamp":  "1778856324.122869",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "v1_recency_and_motor.md":  {
+                                    "hash":  "b23bf6cd4eea9676e2d1bc5436603699f0d509fcd954d4bda7d996fda6fd9f2b",
+                                    "timestamp":  "1779247591.2783196",
+                                    "created_pages":  [
+                                                          "Fallback Auto-Generated Concept"
+                                                      ],
+                                    "updated_pages":  [
+
+                                                      ]
+                                },
+    "v1_segmentacao_hero.md":  {
+                                   "hash":  "05ac91ee4747ef730c86cd514f18be6d4debf2fbb00607a6a4a2d35c92ad6818",
+                                   "timestamp":  "1779247590.967502",
+                                   "created_pages":  [
+                                                         "Fallback Auto-Generated Concept"
+                                                     ],
+                                   "updated_pages":  [
+
+                                                     ]
+                               },
+    "v1_validacao_granularidade_m3_m0.md":  {
+                                                "hash":  "38b6f507c4d6902c200532549c9736800ca80807590a12b7ad3756098935ad2a",
+                                                "timestamp":  "1779247591.0787663",
+                                                "created_pages":  [
+                                                                      "Fallback Auto-Generated Concept"
+                                                                  ],
+                                                "updated_pages":  [
+
+                                                                  ]
+                                            },
+    "v1_visao_total_subgrupos.md":  {
+                                        "hash":  "401549de2d61690093e8ff12540e5e0ce86d6806ca35eb3fe8d7f89ea9b388a0",
+                                        "timestamp":  "1778954524.8772218",
+                                        "created_pages":  [
+                                                              "Fallback Auto-Generated Concept"
+                                                          ],
+                                        "updated_pages":  [
+
+                                                          ]
+                                    },
+    "v2_ajuste_m3_feedback.md":  {
+                                     "hash":  "3bd23031881510b6960bf1c037cecaf7e374076e752aec08ba75f2d7cbb84d78",
+                                     "timestamp":  "1779247591.091854",
+                                     "created_pages":  [
+                                                           "Fallback Auto-Generated Concept"
+                                                       ],
+                                     "updated_pages":  [
+
+                                                       ]
+                                 },
+    "v2_evolucao_segmentacao.md":  {
+                                       "hash":  "0f4cb30b2f66f13b0e7691e32de1b00ab0e9034bf444538e6c0b92f911d15e1a",
+                                       "timestamp":  "1779247590.9823778",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "v2_fix_google_drive_mcp.md":  {
+                                       "hash":  "a8edff6962eae718c51e3e38b34a18c994c5d459d0c9793823a1fc54d3567dd2",
+                                       "timestamp":  "1779247591.2920637",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "v2_insight_engineering.md":  {
+                                      "hash":  "0ba578e334843194ba76559586fef130a2febab197ee12d71aecb501e2e6ee7a",
+                                      "timestamp":  "1779247590.827172",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "v2_multi_output.md":  {
+                               "hash":  "8d2d80c64d71230f6f19b82b4760f78f86f5f3d0eed74320b6c38c3e25afe069",
+                               "timestamp":  "1778954524.8920946",
+                               "created_pages":  [
+                                                     "Fallback Auto-Generated Concept"
+                                                 ],
+                               "updated_pages":  [
+
+                                                 ]
+                           },
+    "v2_lista_clientes_integral.md":  {
+                                          "hash":  "fcf13205e5e15f2284d5b09f5db7e91caf7fda8d8b8842952ee39068c71ddd15",
+                                          "timestamp":  "1779247590.7063117",
+                                          "created_pages":  [
+                                                                "Fallback Auto-Generated Concept"
+                                                            ],
+                                          "updated_pages":  [
+
+                                                            ]
+                                      },
+    "v3_lista_clientes_detalhada.md":  {
+                                           "hash":  "099ff46149111710f7718cea6b7b4d7beda6156ab35baed02a3abd2d1448b584",
+                                           "timestamp":  "1779247590.719874",
+                                           "created_pages":  [
+                                                                 "Fallback Auto-Generated Concept"
+                                                             ],
+                                           "updated_pages":  [
+
+                                                             ]
+                                       },
+    "v3_refinamento_estetico.md":  {
+                                       "hash":  "18a7d34b9320589cdbf1ed0de3efdae67abcf3ff0e59ab3e47f3737f33139a39",
+                                       "timestamp":  "1779247590.9972563",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "v4_refinamento_filiais.md":  {
+                                      "hash":  "7227f452725d2674748f0cfcab5ccfa332026375d0848ded54e37597836d1cdb",
+                                      "timestamp":  "1779247591.0119383",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "v4_validacao_datas_motores.md":  {
+                                          "hash":  "132fd7673b0c850a2d1273921c76df8a03f1350560d1a2c43cd843149371381d",
+                                          "timestamp":  "1779247590.6418748",
+                                          "created_pages":  [
+                                                                "Fallback Auto-Generated Concept"
+                                                            ],
+                                          "updated_pages":  [
+
+                                                            ]
+                                      },
+    "v5_unificacao_pipeline.md":  {
+                                      "hash":  "bfede0f5cacb320b9692ee18c480b3b757569c833dd405bdeedf94a664a493ca",
+                                      "timestamp":  "1779247591.0268853",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "v6_consultant_filter.md":  {
+                                    "hash":  "92c520debc73b25dbfdddd130ac5e9e86fb935d6047d4a8cbdab60fde67018a1",
+                                    "timestamp":  "1779247591.0410025",
+                                    "created_pages":  [
+                                                          "Fallback Auto-Generated Concept"
+                                                      ],
+                                    "updated_pages":  [
+
+                                                      ]
+                                },
+    "validacao-recencia-cevap.md":  {
+                                        "hash":  "3de608bffc01cf477505f4f1e9d4d41a6003be794c9bcca35cd0fab4f5ab9c0c",
+                                        "timestamp":  "1779247590.9343908",
+                                        "created_pages":  [
+                                                              "Fallback Auto-Generated Concept"
+                                                          ],
+                                        "updated_pages":  [
+
+                                                          ]
+                                    },
+    "vendedores_ativos_2026.md":  {
+                                      "hash":  "ddfc8789df8a6660b1ca95f0c1fa767eb0252e18e2f2e6741d5c953c27dfaa67",
+                                      "timestamp":  "1779247590.5538054",
+                                      "created_pages":  [
+                                                            "Fallback Auto-Generated Concept"
+                                                        ],
+                                      "updated_pages":  [
+
+                                                        ]
+                                  },
+    "walkthrough_v1_cevap_m0.md":  {
+                                       "hash":  "d0b0e614168b4dd6918678f84f7be3af4c858b4aec2f37782577634859edbabc",
+                                       "timestamp":  "1778647367.914981",
+                                       "created_pages":  [
+                                                             "Fallback Auto-Generated Concept"
+                                                         ],
+                                       "updated_pages":  [
+
+                                                         ]
+                                   },
+    "walkthrough_v4_validacao_datas_motores.md":  {
+                                                      "hash":  "5ded1236a3da75f3e404ea3adac0b3596601013b232081ee56ad84258a0143a3",
+                                                      "timestamp":  "1779193366.4438932",
+                                                      "created_pages":  [
+                                                                            "Fallback Auto-Generated Concept"
+                                                                        ],
+                                                      "updated_pages":  [
+
+                                                                        ]
+                                                  },
+    "wiki-llm-failure-analysis.md":  {
+                                         "created_pages":  [
+                                                               "references/wiki-llm-pipeline-failure-analysis.md",
+                                                               "concepts/command-code-wiki-integration.md",
+                                                               "concepts/context-agent-integration.md",
+                                                               "synthesis/stout-stack-decisions-may-2026.md",
+                                                               "journal/2026-05-21.md"
+                                                           ],
+                                         "timestamp":  "134238636000000000",
+                                         "hash":  "",
+                                         "updated_pages":  [
+
+                                                           ]
+                                     },
+    "2026-05-20_03_potencial-(m3).md": {
+        "ingested_at": "2026-05-22T15:00:00Z",
+        "size_bytes": 4052,
+        "modified_at": "1779247650",
+        "content_hash": "sha256:0387C83D92A071CF6D4197C883A89C534C4C33F0AA9D29176CAEA8521F0B06F1",
+        "source_type": "document",
+        "project": "motor-m3",
+        "pages_created": ["concepts/governanca-recencia.md", "projects/motor-m3.md"],
+        "pages_updated": []
+    },
+    "handoff-2026-05-29.md": {
+    "ingested_at": "2026-05-29T10:00:00Z",
+    "size_bytes": 4500,
+    "modified_at": "1779247650",
+    "content_hash": "sha256:f79a7b1c9767e00edbcaff7145eac2ae6127233d8cc3c8865f6da3d001a84303",
+    "source_type": "document",
+    "project": "leads-csc-pops",
+    "pages_created": ["projects/leads-csc-pops/journal/handoff-2026-05-29.md"],
+    "pages_updated": ["projects/leads-csc-pops/leads-csc-pops.md"]
+    },
+    "backup_e_rotacao_leads.md": {
+    "ingested_at": "2026-05-29T10:00:00Z",
+    "size_bytes": 0,
+    "modified_at": "1779247650",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "source_type": "document",
+    "project": "leads-csc-pops",
+    "pages_created": ["projects/lead-csc-pops/plans/2026-05-29-backup_e_rotacao_leads.md"],
+    "pages_updated": []
+    }
+    }
+Process Group PGID: 41404

@@ -1,0 +1,3 @@
+{
+  "output": "Output: Limpando hist�rico: de 3230 para 3106 registros. (124 removidos)\r\nLimpeza conclu�da.\nProcess Group PGID: 22644"
+}

@@ -1,0 +1,3 @@
+{
+  "output": "Directory listing for C:\\Users\\victor.bernardi\\Documents\\wiki-compiler-vault\\projects\\lead-csc-pops:\n[DIR] plans\nintegracao-horimetro-alertas-350p.md (1391 bytes)"
+}

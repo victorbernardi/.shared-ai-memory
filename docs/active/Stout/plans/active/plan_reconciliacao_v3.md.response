@@ -1,0 +1,74 @@
+# Plano de Reconciliação Sistêmica Antigravity (Stout v3)
+
+**Objetivo:** Restaurar a estabilidade total do Antigravity, unificar o ecossistema de skills e garantir que todos os servidores MCP operem abaixo do limite de 100 ferramentas.
+
+**Arquitetura:**
+1.  **Filtro Agressivo de Ferramentas:** Implementação de proxies de filtragem para GitHub e Notion, além do já existente para Drive.
+2.  **Consolidação de Skills:** Migração de `./skills` para `./.gemini/skills` com verificação de integridade.
+3.  **Blindagem NotebookLM:** Wrapper Python para filtragem de JSON no stdout.
+4.  **Limpeza de Ambiente:** Script PowerShell para remoção de locks de arquivo.
+
+---
+
+### Tarefa 1: Unificação e Filtro de Servidores MCP
+
+**Arquivos:**
+- Modificar: `mcp_config.json`
+- Criar: `scripts/github_filter_proxy.py`
+- Criar: `scripts/notion_filter_proxy.py`
+
+**Passo 1: Criar proxy para GitHub (Meta: ~10 ferramentas)**
+Manter apenas: `search_code`, `get_file_contents`, `list_repos`, `create_or_update_file`, `push_files`.
+
+**Passo 2: Criar proxy para Notion (Meta: ~5 ferramentas)**
+Manter apenas: `search`, `append_block`, `create_page`, `get_page`.
+
+**Passo 3: Atualizar mcp_config.json**
+Configurar Notion e Tavily usando os novos proxies e reduzir o Drive para os filtros essenciais.
+
+---
+
+### Tarefa 2: Consolidação da "Fonte da Verdade" de Skills
+
+**Arquivos:**
+- Mover: `./skills/*` -> `./.gemini/skills/`
+- Remover: `./skills/`
+
+**Passo 1: Backup e Sincronização**
+Executar comando de merge que preserva arquivos mais recentes em caso de conflito.
+
+**Passo 2: Verificação de Caminhos**
+Garantir que o arquivo `settings.json` do Gemini CLI aponte para a pasta correta (se aplicável).
+
+---
+
+### Tarefa 3: Blindagem de Encoding do NotebookLM
+
+**Arquivos:**
+- Criar: `scripts/notebooklm_json_wrapper.py`
+- Modificar: `mcp_config.json`
+
+**Passo 1: Criar o Wrapper Python**
+O script deve ler o stdout do `notebooklm-mcp`, tentar dar `json.loads()` em cada linha e apenas repassar para o Antigravity o que for JSON válido.
+
+---
+
+### Tarefa 4: Script de Manutenção "Kill & Clean"
+
+**Arquivos:**
+- Criar: `scripts/antigravity_maintenance.ps1`
+
+**Passo 1: Implementar limpeza de processos**
+Matar `python.exe` e `chrome.exe` associados ao `notebooklm` e `chromedriver`.
+Limpar pasta de cache do `undetected_chromedriver`.
+
+---
+
+### Plano de Validação
+1.  **Contagem de Ferramentas:** Soma de (Drive: 40 + GitHub: 10 + Notion: 5 + Tavily: 5 + NotebookLM: 10 + Knowledge: 10) = ~80 ferramentas.
+2.  **Teste de Handshake:** NotebookLM deve iniciar sem erros de encoding no console.
+3.  **Integridade de Skills:** `activate_skill` deve localizar as skills na nova pasta.
+
+---
+*Assinado: Gemini CLI Builder (Phase: Strategy)*
+*Aguardando aprovação para prosseguir para a fase de Execução (/build).*

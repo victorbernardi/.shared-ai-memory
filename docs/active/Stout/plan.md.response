@@ -1,0 +1,37 @@
+# Plano de Implementação: Novo Output M5 para BI
+
+**Spec de Referência:** `C:\Projetos\Inova\docs\spec_m5_bi_output.md`
+
+Este plano adiciona a exportação simplificada para BI no Motor M5.
+
+---
+
+### Tarefa 1: Implementar o Exportador de BI
+- **Arquivo:** `C:\Projetos\Inova\Potencial Clientes\06_Segmentacao\02_Scripts\motor_segmentacao_v1.py`
+- **Ação:** Inserir o seguinte bloco de código antes da mensagem de finalização:
+    ```python
+    # EXPORTAÇÃO SIMPLIFICADA PARA BI
+    cols_bi = ['Grupo_Economico', 'Potencial_Total', 'CAL2025_PECAS', 'Quadrante']
+    path_bi = os.path.join(DIR_RESULTADOS, "segmentacao_executiva_bi.xlsx")
+    try:
+        df_master_m4[cols_bi].to_excel(path_bi, index=False)
+        print(f"✅ Arquivo de BI gerado: {path_bi}")
+    except Exception as e:
+        # Tratamento para arquivo aberto
+        ts = datetime.now().strftime("%H%M%S")
+        path_bi_alt = path_bi.replace(".xlsx", f"_REVISADO_{ts}.xlsx")
+        df_master_m4[cols_bi].to_excel(path_bi_alt, index=False)
+        print(f"⚠️ Arquivo de BI bloqueado. Salvo como: {path_bi_alt}")
+    ```
+- **Racional:** Atende à solicitação de ter um arquivo enxuto com apenas as colunas essenciais.
+
+### Tarefa 2: Validação da Integridade do Output
+- **Ação:** Executar o motor e abrir o arquivo gerado para verificar se o faturamento de 2025 está correto e se o Quadrante reflete a nova lógica.
+- **Racional:** Garantir que a seleção de colunas não causou perda de contexto ou erro de merge.
+
+---
+
+**⚠️ Verificação de Dados (Regra Global):**
+- **Tipos:** Conferir se `CAL2025_PECAS` está no formato Moeda/Número.
+- **Edge Cases:** Verificar se existem nomes de grupos vazios.
+- **Output:** O arquivo deve ter exatamente 4 colunas.
