@@ -92,6 +92,28 @@ Workflow: desenvolver em `wiki-compiler` → copiar para `shared-ai-memory/skill
 └── context.db   # SQLite FTS5
 ```
 
+## ⚠️ Atenção: Bash Tool vs PowerShell (Claude Code)
+
+Os comandos abaixo usam `$HOME` ou `$env:USERPROFILE` — sintaxe **PowerShell**.
+Quando o agente executa via **Bash tool** (Claude Code), essas variáveis não são expandidas.
+
+**Use sempre o path absoluto na Bash tool:**
+
+```bash
+# Bash tool — path absoluto obrigatório
+PYTHONIOENCODING=utf-8 python "C:/Users/victor.bernardi/.shared-ai-memory/.commandcode/skills/process-context-agent/scripts/context_manager.py" <comando> [args]
+```
+
+**Ou use a PowerShell tool:**
+```powershell
+# PowerShell tool — $HOME funciona normalmente
+python "$HOME\.shared-ai-memory\.commandcode\skills\process-context-agent\scripts\context_manager.py" <comando> [args]
+```
+
+> Passar `--session` com o path do JSONL da sessão atual quando o save automático não encontrar o arquivo.
+
+---
+
 ## Inicialização (Primeira Vez)
 
 ```powershell
