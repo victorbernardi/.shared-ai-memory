@@ -40,7 +40,17 @@ if sys.platform == "win32":
 Crie a estrutura base física: `src/`, `data/`, `tests/`, `notes/`.
 **NÃO crie `docs/` manualmente** — ela será criada como Junction no passo abaixo.
 
-Arquivos Base: `GEMINI.md`, `ANTIGRAVITY.md`, `README.md`, `.env.example`, `.gitignore`.
+Arquivos Base: `GEMINI.md`, `ANTIGRAVITY.md`, `README.md`, `.env.example`, `.gitignore`, `.llm-git-rules.md`.
+
+**`.llm-git-rules.md` (obrigatório em todo projeto novo):**
+
+Copie o template canônico do git-guard para a raiz do projeto:
+
+```powershell
+Copy-Item "C:\Projetos\Stout\Projetos\git-guard\distribute\.llm-git-rules.md" "<raiz-do-projeto>\.llm-git-rules.md"
+```
+
+Este arquivo instrui agentes LLM sobre as operações git proibidas (troca de branch, reset --hard, push --force, merge/rebase autônomo) e o bypass de emergência.
 
 **Bootstrap Python/uv (obrigatório para projetos Python):**
 
@@ -53,7 +63,7 @@ uv venv --python 3.12
 uv pip install -r requirements.txt
 ```
 
-3. Validar:
+1. Validar:
 
 ```powershell
 uv run python -c "import sys; print(f'Python {sys.version[:5]} OK')"
