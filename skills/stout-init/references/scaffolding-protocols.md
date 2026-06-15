@@ -35,22 +35,32 @@ if sys.platform == "win32":
 1. **Coleta de Metadados:** Nome, Domínio, Objetivo, KPI, Stack.
 2. **Seleção de Addons:** Pergunte ao usuário: "Quais addons deseja injetar? [ ] cdd (Recomendado), [ ] outros..."
 
-### Phase 2: Core Scaffolding
+### Phase 2: Core Scaffolding (ICM)
 
-Crie a estrutura base física: `src/`, `data/`, `tests/`, `notes/`.
-**NÃO crie `docs/` manualmente** — ela será criada como Junction no passo abaixo.
+Crie a estrutura ICM usando os templates de `../_shared-icm-templates/`:
 
-Arquivos Base: `GEMINI.md`, `ANTIGRAVITY.md`, `README.md`, `.env.example`, `.gitignore`, `.llm-git-rules.md`.
-
-**`.llm-git-rules.md` (obrigatório em todo projeto novo):**
-
-Copie o template canônico do git-guard para a raiz do projeto:
-
-```powershell
-Copy-Item "C:\Projetos\Stout\Projetos\git-guard\distribute\.llm-git-rules.md" "<raiz-do-projeto>\.llm-git-rules.md"
+```
+<projeto>/
+  CLAUDE.md          ← Layer 0: copiar de CLAUDE.md.template e personalizar
+  AGENTS.md          ← ponteiro fino: copiar de AGENTS.md.template
+  CONTEXT.md         ← Layer 1 pipeline: copiar de CONTEXT.pipeline.md e preencher estágios
+  00_research/
+    CONTEXT.md       ← copiar de CONTEXT.00_research.md
+    references/
+  <NN>_<estagio>/    ← um diretório por estágio operacional (ex: 01_extrair/)
+    CONTEXT.md       ← copiar de CONTEXT.stage.md e preencher as 8 seções
+    output/
+    scripts/
+  shared/            ← scripts reutilizados entre estágios (Layer 3)
+  _config/           ← preenchido pelo addon CDD (se selecionado)
+  tests/             ← cobertura cross-cutting
+  .gitignore
+  .env.example
 ```
 
-Este arquivo instrui agentes LLM sobre as operações git proibidas (troca de branch, reset --hard, push --force, merge/rebase autônomo) e o bypass de emergência.
+**NÃO gerar** `GEMINI.md`, `ANTIGRAVITY.md` nem junction `docs/`.
+
+**Confirmar lista de estágios com o operador** antes de criar os diretórios `NN_<estagio>/`.
 
 **Bootstrap Python/uv (obrigatório para projetos Python):**
 
@@ -70,22 +80,6 @@ uv run python -c "import sys; print(f'Python {sys.version[:5]} OK')"
 ```
 
 **NÃO assumir** que o Anaconda está disponível. Todo projeto nasce com `uv` como runtime.
-
-**Junction obrigatória para `docs/`:**
-
-```powershell
-$projeto = "[NomeProjeto]"
-$destino = "$HOME\.shared-ai-memory\docs\active\$projeto"
-New-Item -ItemType Directory -Force -Path $destino | Out-Null
-mklink /J "$raizProjeto\docs" $destino
-```
-
-Consulte `infra-logic.md` para o padrão completo com verificação pós-criação.
-
-Arquivos de Governança Base (criados dentro de `docs/governance/` após a junction):
-
-- `known_issues.md`
-- `evolution_backlog.md`
 
 ### Phase 3: Addon Injection (Orquestração Declarativa)
 
