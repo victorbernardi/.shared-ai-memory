@@ -1,4 +1,4 @@
-# Contexto Ativo — Atualizado em 2026-06-12 17:17
+# Contexto Ativo — Atualizado em 2026-06-15 16:47
 
 ## Projetos Ativos
 | Projeto | Status | Última Sessão | Próxima Ação |
@@ -40,7 +40,7 @@
 - [ ] Promover sandbox para produção: reescrever extract.py com query_loader; Ajustar run.py para logar VALOR_LIQUIDO; Investigar resíduo +-1.5% por ano (fronteira out/nov 2025); Replicar .gitignore padrão nos outros stages do pipeline (desde session-194)
 - [ ] Consolidar as 10 copias do stout-memory-capture.py em uma unica source of truth com symlinks (desde session-197)
 - [ ] Verificar definição de vw_VENDAS (sp_helptext) para rastrear origem de COD_GRUPO; Solicitar snapshot corrigido com CBIT ao responsável do Fabric; Promover motor para produção após decisão sobre resíduo (desde session-198)
-- [ ] Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO; Solicitar reprocessamento do snapshot com CBIT ao responsável Fabric; Promover motor para produção (desde session-199)
+- [ ] Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO; Solicitar reprocessamento do snapshot com dados CBIT de Jan-Oct 2025; Promover motor para produção (desde session-199)
 - [ ] Investigar NULL DESCRICAO_CC: R5.8M no motor sem CC correspondente no BI — query Fabric para identificar filiais/origem. Investigar anomalia LEIC: R.4M no motor vs R/usr/bin/bash.016M no BI — verificar se é classificação correta ou ruído. Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO e verificar se existe fonte histórica para CBIT. Solicitar ao responsável do Fabric reprocessamento do snapshot com dados CBIT de Jan-Oct 2025. (desde session-200)
 - [ ] Nenhuma pendencia tecnica restou no pipeline de Faturamento. (desde session-201)
 - [ ] Aguardar ~24h ativação app ML no DevCenter e testar OAuth com: python scripts/02-pesquisa/adaptadores/ml_auth.py. Após ML funcionar: rodar scraper.py com lista_pecas.csv completa. Limpar qa_test_ml_api.py da raiz após validação. (desde session-202)
@@ -55,7 +55,7 @@
 - [ ] Sessão 02_Faturamento: renomear branch fix/stout-promote-antigravity-brain-path (commits faturamento já em feat/02-faturamento-filtros-whitelist); revisar branch-policy.yaml gerados se needed; wiki-ingest para sincronizar vault (desde session-208)
 - [ ] Sessão 02_Faturamento: decidir o que fazer com fix/stout-promote-antigravity-brain-path (branch que contém 3 commits de faturamento na história — responsabilidade da sessão de faturamento, não desta) (desde session-209)
 - [ ] Implementar extract_protheus.py com query SD2010 + JOIN SA1010/SA2010 filtrando 3 CNPJs + CCs CSN + D2_TP='ME' + periodo 2022+|Integrar no run.py entre extract e filtros|Remover f_vendas_hist31102025 da query SQL (substituir pelo SD2010)|Atualizar testes|Solicitar a TI replicacao das tabelas faltantes do Protheus para o Fabric (desde session-210)
-- [ ] Solicitar a TI replicacao completa das tabelas Protheus (SD2010/SF2010) para o Fabric | Apos replicacao: criar extract_protheus.py com query SD2010+SA1010 | Apos replicacao: substituir f_vendas_hist por SD2010 em vendas_pecas_construcao.sql | Apos replicacao: integrar no run.py e atualizar testes (desde session-211)
+- [ ] Solicitar a TI replicacao completa das tabelas Protheus (SD2010/SF2010) para o Fabric | Apos replicacao: criar extract_protheus.py com query SD2010+SA1010 | Apos replicacao: substituir f_vendas_hist por SD2010 e-mails de terca, quarta e quinta nao foram enviados por falta de tempo. (desde session-211)
 - [ ] Reativar INOVA_DAILY_EMAIL após validar correção do M2: Enable-ScheduledTask -TaskName INOVA_DAILY_EMAIL (desde session-212)
 - [ ] Investigar branch fix/stout-promote-antigravity-brain-path com 3 commits do 02_Faturamento (responsabilidade da sessão 02_Faturamento) (desde session-213)
 - [ ] **[M3-AUDITORIA] Inclusão do Audit M3/M0:** Incluir o script de auditoria `audit_m3_m0_granularity.py` na validação contínua e no runner principal do motor M3 para auditoria automática da tabela e prevenção de desvios de granularidade. (desde session-214)
@@ -70,7 +70,7 @@
 - [ ] Testar stout-skill-manager end-to-end com skillfish real. Promover stout-skill-manager para golden copy via stout-promote-skill. Atualizar SKILL.md do stout-create-skill para referenciar novo fluxo com stout-skill-manager antes de fabricar. (desde session-226)
 - [ ] Filtrar promote_skills.py por skill escolhida (hoje promove tudo do PROMOTION_MAP); Remover/inativar stout-governance-orchestration-engine do registry (inactive); Migrar stout-brainstorming e stout-cdd-orchestrator para .shared-ai-memory/skills permanentemente (desde session-227)
 - [ ] stash{0} faturamento-auditoria-bi: verificar se consolidate_cevap.py +93 linhas e trabalho valido ou duplicado (desde session-229)
-- [ ] stash{1} potencial-forecasted: verificar se transform.py ja esta em master antes de descartar (branch mergeada) (desde session-229)
+- [ ] stash{1} potencial-forecasted: verificar se transform.py ja esta e no master antes de descartar (branch mergeada) (desde session-229)
 - [ ] Merge feat/cooldown-aging-backfill -> master na sessao do cooldown-aging (desde session-229)
 - [ ] Proxima tarefa: 2026-06-09-plano-implementacao-preenchimentos.md em lead-csc-pops (branch feat/cevap-operational-steps) (desde session-230)
 - [ ] Avaliar 6 fontes com alerta de recencia: Cadastro Clientes, Seedz, InovaPay, Orcamentos Abertos/Cancelados, BUP Pos-Venda (desde session-231)
@@ -107,25 +107,27 @@
 - [ ] Reconectar Power Query em peças.xlsx apontando para base.xlsx no OneDrive (desde session-249)
 - [ ] Definir se Num NF entra dentro da tabela PQ ou permanece coluna manual (desde session-249)
 - [ ] Adicionar backup automático do peças.xlsx ao pipeline (desde session-249)
+- [ ] Remover arquivos legados de data/output/ (orcamentos_abertos_enriquecidos.xlsx e tabela_orçamentos_cancelados.xlsx) após validação downstream (desde session-250)
 
 ## Decisões Recentes
-- [session-242] Design system CEVAP (#1F2937+#FFC20E) adotado como padrao para relatorios HTML da suite Inova; logos em Template/ local para evitar dependencia cross-project; semaforo adesao >=80% verde/>=50% amarelo/<50% vermelho; Potencial Financeiro sempre neutro
-- [session-244] Abrir o relatorio recency_status.md automaticamente no final da consolidacao do CEVAP usando os.startfile de forma nao-bloqueante no Windows.
-- [session-248] VS1_STATUS=='0' e o codigo Protheus para ORC aberto — nunca usar string ABERTO ao consultar Fabric
-- [session-248] BUP fallback estendido: cobre Excel Cancelado e Aberto pre-2026 via _excel_orc_qualifica()
 - [session-248] ConsultorMap v5.6: Fabric-first + _consultar() helper + orc_aberto corrigido + lookup decisivo
 - [session-248] Fast-forward via git update-ref resolve merge quando .commandcode bloqueia git checkout
 - [session-249] Step [5c] removido do run.py — Python não sobrescreve mais peças.xlsx
 - [session-249] peças.xlsx gerenciado pelo Power Query que lê de leads-csc-pops-base.xlsx
 - [session-249] base.xlsx já contém Retorno+Obs+Num NF via reentrada — suficiente como fonte do PQ
 - [session-249] openpyxl direto em pasta OneDrive causa ReparsePoint — padrão correto é shutil.copy2
+- [session-250] OUTPUT_DIR único substituído por TEMP_DIR (data/output/) + OUTPUT_DIR_ABERTOS (01_abertos/output/) + OUTPUT_DIR_CANCELADOS (02_cancelados/output/)
+- [session-250] generate_recency_report.py atualizado para ler dos novos paths ICM — retorna Atualizado Hoje após o fix
+- [session-250] Scripts src/ permanecem compartilhados entre estágios — sem duplicação
+- [session-250] Duas branches mergeadas em master via --no-ff: feat/motor-orcamentos-icm-migrate e fix/motor-orcamentos-icm-output-paths
+- [session-250] Configuração do Git Bash adicionado no PATH de usuário do Windows
 
 ## Bloqueadores Ativos
 - Nenhum
 
 ## Últimas Sessões
-- session-245: <USER_REQUEST>
 - session-246: Detalhamento Pecas - Limpeza, Headed Microsoft e Alertas de Sessao
 - session-247: Detalhamento Pecas - Correcao de Range 2026 em run.py
 - session-248: ConsultorMap v5.6 + BUP ORC Fallback — alinhamento VS1_STATUS Protheus
 - session-249: lead-csc-pops: fix peças.xlsx — ReparsePoint e Power Query
+- session-250: Motor-orçamentos: Migração ICM completa + fix output paths + configuração do Git e do Codex CLI
