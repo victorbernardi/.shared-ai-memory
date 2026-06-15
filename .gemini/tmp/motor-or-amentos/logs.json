@@ -1,0 +1,184 @@
+[
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 0,
+    "type": "user",
+    "message": "/model",
+    "timestamp": "2026-06-11T18:44:06.978Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 1,
+    "type": "user",
+    "message": "C:\\Projetos\\Inova\\projects\\dashboard-inova-data-export\nC:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\ncom base no mapeamento do dashboard e o scrap feito no detalhamento peças\npreciso criar um scrap que faça o download dos orçamentos abertos do embedded do powerbi\nfaça a leitura e quando estiver pronto \n/stour-brainstorming",
+    "timestamp": "2026-06-11T18:45:45.055Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 2,
+    "type": "user",
+    "message": "esta correto podemos seguir",
+    "timestamp": "2026-06-11T18:51:08.317Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 3,
+    "type": "user",
+    "message": "crie a spec depois o plano",
+    "timestamp": "2026-06-11T18:58:45.092Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 4,
+    "type": "user",
+    "message": "@\"C:\\Projetos\\Inova\\pipelines\\potencial-clientes\\Motor-orçamentos\\Captura de tela 2026-06-11 155346.png\" com essa imagem vc não consegue identificar a tabela?",
+    "timestamp": "2026-06-11T19:49:16.767Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 5,
+    "type": "user",
+    "message": "faça 10 testes onde o resultado para ser de sucesso precisa passar nos 10. o resultado precisa ser o download do arquivo. ainda precisamos ajustar a data. estamos exportando apenas um periodo. precisa ser de 01/01/2025 até a data atual. a posição do calendario vc consegue encontrar no script do C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas",
+    "timestamp": "2026-06-11T19:52:47.459Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 6,
+    "type": "user",
+    "message": "se uma falhou vc deve ajustar e começar o teste novamente",
+    "timestamp": "2026-06-11T19:56:12.515Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 7,
+    "type": "user",
+    "message": "otimo! qual branch vc esta? se estiver na correta faça o commit",
+    "timestamp": "2026-06-11T20:16:59.461Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 8,
+    "type": "user",
+    "message": "faça o merge para o main e vamos encerrar essa sessao na proxima vamos cruzar esses dados com os orçamentos do fabric para melhorar a qualidade do dado",
+    "timestamp": "2026-06-11T20:20:20.490Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 9,
+    "type": "user",
+    "message": "vc fez o merge em qual branch?",
+    "timestamp": "2026-06-11T20:22:11.722Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 10,
+    "type": "user",
+    "message": "fix/bup-orc-fonte-fabric esse nao é a sua branch a sua é feat(motor-orcamentos)",
+    "timestamp": "2026-06-11T20:23:42.204Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 11,
+    "type": "user",
+    "message": "/context-management-context-save",
+    "timestamp": "2026-06-11T20:27:01.722Z"
+  },
+  {
+    "sessionId": "42927871-b5f9-4fd6-bf6e-7ba685965120",
+    "messageId": 12,
+    "type": "user",
+    "message": "gere o handoff na proxima sessao vou exportar os orçamentos cancelados",
+    "timestamp": "2026-06-11T21:18:01.498Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 0,
+    "type": "user",
+    "message": "/model",
+    "timestamp": "2026-06-12T01:55:11.495Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 1,
+    "type": "user",
+    "message": "/model",
+    "timestamp": "2026-06-12T02:02:16.818Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 2,
+    "type": "user",
+    "message": "pode seguir",
+    "timestamp": "2026-06-12T02:02:26.501Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 3,
+    "type": "user",
+    "message": "crie a spec",
+    "timestamp": "2026-06-12T02:07:24.351Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 4,
+    "type": "user",
+    "message": "crie uma branch e faça os commits dessa sessão",
+    "timestamp": "2026-06-12T02:23:06.156Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 5,
+    "type": "user",
+    "message": "faça o merge para o master e vamos encerrar a sessao",
+    "timestamp": "2026-06-12T02:27:53.158Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 6,
+    "type": "user",
+    "message": "crie o walktrhout dessa sessao",
+    "timestamp": "2026-06-12T02:29:03.313Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 7,
+    "type": "user",
+    "message": "com todo o conhecimento que vc já tem referente a este projeto. crie o /stout-ini com os arquivos e pastas\nlembrando que estamos em um pipeline e o motor de orçamentos esta na posição 8, ou seja, na sequencia de atualização do pipeline esse é o 8°  motor. O motivo do 8 é pq a contagem começa em 0 e o pops seria o 00 (antes do 0). preciso corrigir a sequencia mas não vem ao caso no momento.\nOutra questão, eu trabalho com a metodologia ICM (stout-init-icm). Não crie pastas, apenas um arquivo context.md e skill.md com as instruções para a llm e a sequencia que ele deve seguir para executar os scripts. Se sentir a necessidade de criar algo mais ou adicionar informações, pode seguir. Desde que vc não alucine com informações falsas ou sem prerrogativa",
+    "timestamp": "2026-06-12T02:39:01.467Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 8,
+    "type": "user",
+    "message": "faltou seguir com a skill /stout-init. muito cuidado para não criar junction e perder conteudo que já esta na pasta docs",
+    "timestamp": "2026-06-12T02:45:55.494Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 9,
+    "type": "user",
+    "message": "vc deve criar a junction da pasta docs, oq vc precisa se atentar é primeiro copiar a pasta para o destino da juntion e depois criar uma nova pasta no projeto e ai sim fazer a junction. o intuito é nao perder o conteudo da pasta",
+    "timestamp": "2026-06-12T03:01:20.003Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 10,
+    "type": "user",
+    "message": "sim. /context-agent",
+    "timestamp": "2026-06-12T03:31:07.854Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 11,
+    "type": "user",
+    "message": "/model",
+    "timestamp": "2026-06-12T03:35:02.656Z"
+  },
+  {
+    "sessionId": "c2dd902a-1245-4977-98e7-31b08a270725",
+    "messageId": 12,
+    "type": "user",
+    "message": "pode seguir",
+    "timestamp": "2026-06-12T03:35:19.693Z"
+  }
+]

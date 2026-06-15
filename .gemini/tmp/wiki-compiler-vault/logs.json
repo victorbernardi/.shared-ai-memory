@@ -68,5 +68,26 @@
     "type": "user",
     "message": "ainda temos 83 na pasta",
     "timestamp": "2026-06-09T22:15:18.909Z"
+  },
+  {
+    "sessionId": "a10933ee-f767-4053-951c-032bc5507b80",
+    "messageId": 0,
+    "type": "user",
+    "message": "/model",
+    "timestamp": "2026-06-12T19:53:56.948Z"
+  },
+  {
+    "sessionId": "a10933ee-f767-4053-951c-032bc5507b80",
+    "messageId": 1,
+    "type": "user",
+    "message": "/wiki-ingest eu quero que vc liste todos os arquivos que estão no _raw, comparei com todos os arquivos que já passaram pela ingest. Todos que passarm pela ingest devem ser deletados. Todos que ainda não passarm na ingest, nós vamos dividir em blocos, sendo os primeiros blocos os grupos prioritarios com informações mais relevantes e os ultimos menos relevantes. cada grupo deve ter no maximo 20 arquivos para ingest",
+    "timestamp": "2026-06-12T19:55:58.600Z"
+  },
+  {
+    "sessionId": "a10933ee-f767-4053-951c-032bc5507b80",
+    "messageId": 2,
+    "type": "user",
+    "message": "agora crie tasks para cada um dos blocos e só pare quando chegar na ultima task. vc tem o meu bypass para fazer a ingestao sem pedir autorização",
+    "timestamp": "2026-06-12T20:24:54.008Z"
   }
 ]
