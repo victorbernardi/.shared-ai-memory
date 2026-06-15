@@ -64,6 +64,7 @@ Converter projetos legados (CDD monolíticos ou scripts procedurais) para o form
 - Documentar se o projeto original tem flag `--force` — isso vira `FORCAR_VALIDACAO=true` no CONTEXT.md
 
 **Exemplo real (Inova-Daily):**
+
 ```
 run_daily.py → 5 estágios ICM:
   01_extrair  (M2 + snapshot + recap + scanners)
@@ -125,8 +126,8 @@ uv pip install -r requirements.txt
   - Regras de negócio → CONTEXT.md do pipeline
   - Restrições operacionais → CONTEXT.md do estágio específico
   - Paths e configurações → `scripts/` do estágio (importam de `src/config.py`)
-- Sempre usar o template de CONTEXT.md (8 seções obrigatórias)
-- Usar template de pipeline em `@references/pipeline-template.md`
+- Sempre usar o template de CONTEXT.md (8 seções obrigatórias) de `@../_shared-icm-templates/CONTEXT.stage.md`
+- Usar template de pipeline em `@../_shared-icm-templates/CONTEXT.pipeline.md`
 
 ---
 
@@ -157,13 +158,24 @@ uv run python scripts/<script_principal>.py --help
 
 ---
 
+### Passo 6.5: Injetar CDD (opcional)
+
+**Se o projeto legado tinha CDD, ou se o operador optar por habilitar:**
+
+- Seguir as instruções de `@../stout-init/addons/cdd/ADDON.md` na seção Installation Steps
+- Destino da infra: `_config/` (não `src/` — legado)
+- Stitching: injetar blocos CDD no `CLAUDE.md` do projeto (seções Governança e Ferramentas)
+- Se o projeto legado tinha `data/config/rules.yaml`: mover para `_config/config/rules.yaml`
+
+---
+
 ### Passo 7: Criar Envelope Fino
 
 - Criar `SKILL.md` na raiz do projeto com apenas YAML frontmatter + apontadores
 - A `description` deve conter triggers semânticos claros
 - Máximo 10 linhas no corpo
 
-**Template com fallback para domínio sem infraestrutura:**
+**Template padrão ICM-CDD (usar `@../_shared-icm-templates/SKILL.thin.md` como base):**
 
 ```yaml
 ---
@@ -171,18 +183,15 @@ name: <nome-do-projeto>
 description: "<Descrição semântica com triggers.>"
 ---
 
-# Regras globais: ..\..\GEMINI.md (Regras 1-9, Karpathy Laws)
-#                ..\..\CLAUDE.md (princípios de código)
-# Caminhos canônicos: ..\..\REFERENCES.md (ou src/config.py se REFERENCES.md não existir)
-# Contrato do pipeline: CONTEXT.md (este diretório)
+# Identidade do workspace: ./CLAUDE.md (Layer 0 — regras globais, mapa ICM)
+# Ponteiro Codex/OpenAI:   ./AGENTS.md
+# Contrato do pipeline:    ./CONTEXT.md (Layer 1 — ordem dos estágios, regras do pipeline)
 ```
 
 **Se o domínio NÃO tem `REFERENCES.md`:**
 
 ```yaml
-# Regras: ./GEMINI.md (já existe no projeto)
-#         ./CLAUDE.md (já existe no projeto)
-# Caminhos: src/config.py (fallback até REFERENCES.md ser criado na raiz do domínio)
+# Caminhos canônicos: ./_config/config.py (fallback até REFERENCES.md ser criado na raiz do domínio)
 # Pipeline: CONTEXT.md
 ```
 
@@ -192,7 +201,8 @@ description: "<Descrição semântica com triggers.>"
 
 ### Passo 8: Atualizar Roteamento
 
-- Se o projeto tem entrada em `data/config/skills_catalog.yaml`, atualizar:
+- Se o projeto tem entrada em `_config/config/skills_catalog.yaml` (ou `data/config/skills_catalog.yaml` legado), atualizar:
+
   ```yaml
   <nome-skill>:
     status: migrated
@@ -200,7 +210,9 @@ description: "<Descrição semântica com triggers.>"
     legacy_entry_point: archived
     migrated_at: <YYYY-MM-DD>
   ```
+
 - Adicionar aviso de arquivamento no entry point original:
+
   ```markdown
   > [ARQUIVADO: migrado para pipeline ICM — ver CONTEXT.md na raiz do projeto]
   ```
@@ -230,6 +242,7 @@ Se o projeto original tem flag `--force` ou equivalente:
 - Ambos os CONTEXT.md devem referenciar a flag com a mesma sintaxe
 
 **Exemplo no CONTEXT.md do pipeline:**
+
 ```markdown
 ## Regras do Pipeline
 - GATE no estágio 02: Se audit.json retornar passed: false, pipeline BLOQUEIA
@@ -240,8 +253,10 @@ Se o projeto original tem flag `--force` ou equivalente:
 
 ## Templates
 
-- `@references/context-template.md` — Template de CONTEXT.md de estágio (8 seções)
-- `@references/pipeline-template.md` — Template de CONTEXT.md de pipeline
+- `@../_shared-icm-templates/CONTEXT.stage.md` — Template de CONTEXT.md de estágio (8 seções, com L3/L4)
+- `@../_shared-icm-templates/CONTEXT.pipeline.md` — Template de CONTEXT.md de pipeline
+- `@../_shared-icm-templates/CLAUDE.md.template` — Layer 0 do workspace
+- `@../_shared-icm-templates/AGENTS.md.template` — Ponteiro fino Codex/OpenAI
 - `@references/migration-checklist.md` — Checklist completo de migração
 
 ## Idioma
