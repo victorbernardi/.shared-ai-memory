@@ -1,0 +1,10 @@
+# AGENTS.md — <Nome do Projeto>
+
+> **Ponteiro fino para Codex/OpenAI**
+> Este arquivo é lido por agentes OpenAI (Codex). A fonte canônica de identidade é `CLAUDE.md`.
+
+## Redirect
+
+Leia `./CLAUDE.md` para as regras globais, mapa do workspace e governança.
+
+Este arquivo existe apenas para compatibilidade com a convenção `AGENTS.md` do ecossistema OpenAI/Codex.

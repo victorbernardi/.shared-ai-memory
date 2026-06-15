@@ -1,0 +1,46 @@
+# CLAUDE.md — <Nome do Projeto>
+
+> **Layer 0 — Identidade do Workspace ICM**
+> Este arquivo é a primeira coisa que qualquer agente deve ler ao entrar neste workspace.
+
+## Identidade
+
+- **Projeto:** `<nome-do-projeto>`
+- **Domínio:** `<domínio de negócio ou técnico>`
+- **Motor LLM primário:** Claude (`.claude/skills/`) | Codex → `AGENTS.md`
+- **Arquitetura:** ICM (Interpretable Context Methodology) — filesystem como agente
+
+## Mapa do Workspace
+
+```
+<projeto>/
+  CLAUDE.md          ← você está aqui (Layer 0)
+  AGENTS.md          ← ponteiro fino para Codex/OpenAI
+  CONTEXT.md         ← Layer 1: contrato do pipeline (ordem dos estágios)
+  00_research/       ← cold storage (sob demanda)
+  01_<estagio>/      ← Layer 2: CONTEXT.md + output/ + scripts/
+  NN_<estagio>/      ← demais estágios numerados
+  shared/            ← scripts compartilhados entre estágios (Layer 3)
+  _config/           ← infraestrutura CDD: router.py, rules.yaml, schemas/ (se addon ativo)
+  tests/             ← cobertura cross-cutting
+```
+
+## Regras de Navegação
+
+1. **Leia `CONTEXT.md` (pipeline) antes de executar qualquer estágio.**
+2. **Nunca pule estágios** — a ordem numérica é absoluta.
+3. **Nunca carregue `00_research/` inteiro** — referencie arquivos individuais sob demanda.
+4. **Prefira `shared/`** para scripts reutilizados em ≥2 estágios.
+5. **`_config/`** contém regras CDD estáveis — internalizar como restrição (Layer 3), não processar como dado.
+
+## Ferramentas e Skills
+
+- Thin wrappers: `.claude/skills/<skill-name>/`
+- Para Codex/OpenAI: ver `AGENTS.md`
+
+## Governança
+
+- Comunicação: **PT-BR**
+- Código/identificadores: **EN**
+- Imutabilidade: criar novos objetos, nunca mutar existentes
+- Erros: tratar explicitamente em todos os níveis
