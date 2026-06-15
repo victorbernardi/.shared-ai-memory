@@ -21,32 +21,23 @@
 }
 ```
 
-## 🛠️ Lógica de Junctions (Windows)
+## 🛠️ Wrappers de Skills (`.claude/skills/`)
 
-Sempre utilize o comando de link físico (Junction) para conectar a pasta de documentação local à memória global.
+Skills thin são instaladas em `.claude/skills/<nome>/` dentro do workspace do projeto. **NÃO usar** `.gemini/skills/` nem `.agents/skills/`.
 
-O destino **obrigatório** é `.shared-ai-memory\docs\active\[NomeProjeto]`. Nunca aponte para `docs\` diretamente.
+Estrutura padrão de um wrapper thin:
 
-```powershell
-# Padrão correto — substitua [NomeProjeto] pelo nome real do projeto
-$projeto = "[NomeProjeto]"
-$destino = "$HOME\.shared-ai-memory\docs\active\$projeto"
-New-Item -ItemType Directory -Force -Path $destino | Out-Null
-mklink /J "C:\Projetos\[Caminho]\docs" $destino
+```
+.claude/skills/<nome>/
+  SKILL.md       ← ponteiro para a Golden Copy em ~/.shared-ai-memory/skills/<nome>/
 ```
 
-**Verificação pós-criação:**
+## 🛠️ Detecção de Ferramentas por Motor
 
-```powershell
-(Get-Item "C:\Projetos\[Caminho]\docs").LinkType  # deve retornar "Junction"
-(Get-Item "C:\Projetos\[Caminho]\docs").Target     # deve apontar para active\[NomeProjeto]
-```
-
-## 🛠️ Detecção de Ferramentas por Ambiente
-
-| Operação | Gemini CLI | Antigravity |
+| Operação | Claude Code (primário) | Codex/OpenAI (secundário) |
 | :--- | :--- | :--- |
-| Ler | `read_file` | `view_file` |
-| Escrever | `write_file` | `write_to_file` |
-| Editar | `replace` | `replace_file_content` |
-| Shell | `run_shell_command` | `run_command` |
+| Ler | `Read` | `read_file` |
+| Escrever | `Write` | `write_file` |
+| Editar | `Edit` | `replace` |
+| Shell | `Bash` / `PowerShell` | `run_shell_command` |
+| Buscar | `Grep` / `Glob` | `grep_search` / `find_files` |

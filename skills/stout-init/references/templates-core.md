@@ -1,49 +1,21 @@
 # Templates de Inicialização Stout (Core)
 
-## 1. Modelo GEMINI.md (Manual do Engenheiro)
-```markdown
-# 📂 GEMINI.md — PROJETO: [Nome do Projeto]
+## 1. Layer 0 — CLAUDE.md (Identidade do Workspace ICM)
 
-> [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
+Template canônico em `@../_shared-icm-templates/CLAUDE.md.template`.
 
-> **Herança:** Plano Executivo Global
-> **Ambiente:** [Gemini CLI / Antigravity]
-> **Inicializado em:** [DATA]
+Copiar e personalizar: nome do projeto, domínio, lista de estágios do mapa do workspace.
 
----
+**NÃO gerar** `GEMINI.md` (legado) — Layer 0 é sempre `CLAUDE.md`.
 
-## 1. CONTEXTO DE NEGÓCIO
-**Objetivo:** [Descreva aqui]
-**KPI Principal:** [Como medir sucesso]
+## 2. Ponteiro Codex/OpenAI — AGENTS.md
 
-## 2. CONTEXTO TÉCNICO
-### Stack
-- Linguagem: [Preencher]
-- MCPs: context7, google-drive, notebooklm
+Template canônico em `@../_shared-icm-templates/AGENTS.md.template`.
 
-## 3. REGRAS LOCAIS
-- Seguir padrão CDD.
-- Rastreabilidade em .GCC/.
-
-## 4. ESTADO ATUAL
-- Phase: Research ⏳
-```
-
-## 2. Modelo ANTIGRAVITY.md (Kernel Operacional)
-```markdown
-# 🧠 ANTIGRAVITY.md — Kernel Agêntico
-
-> [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
-
----
-## 1. ARQUITETURA DE MEMÓRIA
-- Junction: docs/ -> .shared-ai-memory/docs/[Projeto]
-
-## 2. FRAMEWORK STOUT
-1. Research -> 2. Strategy -> 3. Execution -> 4. Validation
-```
+Copiar sem modificação — apenas substituir `<nome-do-projeto>` no cabeçalho.
 
 ## 3. Modelo known_issues.md (Bugs Conhecidos)
+
 ```markdown
 # 🐛 Lista de Bugs Conhecidos & Workarounds
 
@@ -61,6 +33,7 @@ Este documento registra de forma viva, imutável e estruturada todos os bugs de 
 ```
 
 ## 4. Modelo evolution_backlog.md (Evolução Técnica)
+
 ```markdown
 # 🚀 Backlog de Evolução Técnica & Estética
 

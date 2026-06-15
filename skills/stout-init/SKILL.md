@@ -1,8 +1,8 @@
 ---
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
 name: stout-init
-description: "Inicialização modular de projetos Stout com arquitetura de Addons. Triggers: inicializar projeto, novo projeto, scaffold, stout-init, projeto modular."
-version: 2.1.0
+description: "Inicializa projetos Stout com arquitetura ICM-CDD: estrutura numerada de estágios, CLAUDE.md Layer 0, addon CDD opt-in. Triggers: inicializar projeto, novo projeto, scaffold, stout-init, projeto ICM, projeto CDD, novo pipeline."
+version: 2.2.0
 author: Arquiteto Stout
 tier: 3
 source: custom
@@ -23,8 +23,8 @@ Garantir que todo novo projeto nasça com a base técnica nota 100 da Stout, uni
 A inteligência de inicialização está fragmentada para máxima eficiência:
 
 1. **Protocólos de Scaffolding:** `@references/scaffolding-protocols.md` (As 4 fases).
-2. **Templates de Arquivo:** `@references/templates-core.md` (GEMINI.md, ANTIGRAVITY.md).
-3. **Configuração Técnica:** `@references/infra-logic.md` (MCPs, Junctions, Comandos).
+2. **Templates ICM:** `@references/templates-core.md` + `@../_shared-icm-templates/` (CLAUDE.md, AGENTS.md, CONTEXT.pipeline, stages).
+3. **Configuração Técnica:** `@references/infra-logic.md` (MCPs, wrappers .claude/skills/).
 4. **Sistema de Addons:** Localizado em `/addons/` (Injeção de CDD, Schemas e Ferramentas).
 
 ---

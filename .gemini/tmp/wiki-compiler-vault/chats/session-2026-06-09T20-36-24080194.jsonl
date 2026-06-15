@@ -1276,3 +1276,4 @@
 {"$set":{"lastUpdated":"2026-06-09T22:17:04.421Z"}}
 {"id":"c4785951-ec30-40fe-9f9b-7453ee459602","timestamp":"2026-06-09T22:17:08.487Z","type":"gemini","content":"O diretório `_raw/` foi completamente saneado. Todos os 83 arquivos foram processados, integrados à wiki conforme a política de governança, registrados nos logs e removidos com sucesso. A pasta encontra-se agora vazia, em conformidade com o seu pedido.\n\nDesja realizar mais alguma tarefa ou verificação na estrutura atual da wiki?","thoughts":[],"tokens":{"input":149912,"output":76,"cached":142800,"thoughts":29,"tool":0,"total":150017},"model":"gemini-3.1-flash-lite"}
 {"$set":{"lastUpdated":"2026-06-09T22:17:08.488Z"}}
+{"$set":{"memoryScratchpad":{"version":1,"workflowSummary":"run_shell_command: shell -> invoke_agent -> run_shell_command: ls -> list_directory","toolSequence":["run_shell_command: shell","invoke_agent","run_shell_command: ls","list_directory"]}}}
