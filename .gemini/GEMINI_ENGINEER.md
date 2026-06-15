@@ -93,3 +93,9 @@ Todo projeto deve inicializar obrigatoriamente estes 3 MCPs:
 
 ---
 *Este arquivo é a âncora de governança do Gemini CLI Engenheiro.*
+
+<claude-mem-context>
+# Memory Context from Past Sessions
+
+*No context yet. Complete your first session and context will appear here.*
+</claude-mem-context>
