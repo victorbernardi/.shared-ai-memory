@@ -44,3 +44,4 @@
 - Código/identificadores: **EN**
 - Imutabilidade: criar novos objetos, nunca mutar existentes
 - Erros: tratar explicitamente em todos os níveis
+- **Comportamento (Karpathy Laws):** Seguir estritamente as diretrizes comportamentais de **Alterações Cirúrgicas** (Surgical Changes) e **Não-Suposição** (Think Before Coding) descritas no CLAUDE.md do projeto raiz.
