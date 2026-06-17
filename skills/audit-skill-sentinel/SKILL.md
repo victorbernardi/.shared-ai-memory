@@ -48,7 +48,7 @@ e recomenda novas skills especialistas.
 ## Resumo Rapido
 
 | Area | Script | O que faz |
-|------|--------|-----------|
+| ------ | -------- | ----------- |
 | **Discovery** | `scanner.py` | Descobre todas as skills automaticamente |
 | **Qualidade** | `analyzers/code_quality.py` | Complexidade, docstrings, error handling |
 | **Seguranca** | `analyzers/security.py` | Secrets, SQL injection, HTTPS |
@@ -65,7 +65,7 @@ e recomenda novas skills especialistas.
 ## Localizacao
 
 ```
-%USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\
+%USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\
 ├── SKILL.md
 ├── scripts/
 │   ├── requirements.txt
@@ -98,7 +98,7 @@ e recomenda novas skills especialistas.
 ## Instalacao
 
 ```bash
-pip install -r %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\requirements.txt
+pip install -r %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\requirements.txt
 ```
 
 ## Comandos Principais
@@ -107,39 +107,39 @@ pip install -r %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\r
 
 ## Auditoria Completa De Todas As Skills
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\run_audit.py
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\run_audit.py
 
 ## Auditar Apenas Uma Skill
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\run_audit.py --skill instagram
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\run_audit.py --skill instagram
 
 ## Apenas Recomendacoes De Novas Skills
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\run_audit.py --recommend
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\run_audit.py --recommend
 
 ## Comparar Com Auditoria Anterior (Tendencias)
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\run_audit.py --compare
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\run_audit.py --compare
 
 ## Output Em Json (Para Processamento)
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\run_audit.py --format json
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\run_audit.py --format json
 
 ## Ver Historico De Auditorias
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\run_audit.py --history
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\run_audit.py --history
 
 ## Descobrir Skills Disponiveis
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\scanner.py
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\scanner.py
 
 ## Ver Audit Log Do Sentinel
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\governance.py
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\governance.py
 
 ## Verificar Banco De Dados
 
-python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\db.py
+python %USERPROFILE%\.shared-ai-memory\skills\audit-skill-sentinel\scripts\db.py
 ```
 
 ## 1. Qualidade De Codigo (Peso: 20%)
@@ -198,6 +198,7 @@ python %USERPROFILE%\.gemini\antigravity\skills\skill-sentinel\scripts\db.py
 ## Otimizacao De Custos
 
 Alem das 7 dimensoes, o sentinel analisa impacto de custo:
+
 - Tamanho do SKILL.md (tokens consumidos por ativacao)
 - References grandes sem indice
 - Output verboso dos scripts
@@ -212,6 +213,7 @@ para novas skills sugeridas.
 ## Governanca Do Sentinel
 
 O proprio sentinel pratica o que prega:
+
 - Todas as auditorias sao registradas em action_log
 - Historico de scores em score_history para tendencias
 - Relatorios salvos em data/reports/
@@ -219,32 +221,41 @@ O proprio sentinel pratica o que prega:
 ## Workflows Comuns
 
 **1. Primeira auditoria do ecossistema:**
+
 ```
 python run_audit.py
 ```
+
 Gera relatorio completo com scores, findings e recomendacoes.
 
 **2. Monitorar evolucao ao longo do tempo:**
+
 ```
 python run_audit.py --compare
 ```
+
 Mostra delta de scores entre auditorias.
 
 **3. Validar uma skill antes de deploy:**
+
 ```
 python run_audit.py --skill nome-da-skill
 ```
+
 Auditoria focada com findings especificos.
 
 **4. Identificar proxima skill a criar:**
+
 ```
 python run_audit.py --recommend
 ```
+
 Gap analysis com templates prontos.
 
 ## Formato Do Relatorio
 
 O relatorio gerado em `data/reports/` contem:
+
 1. Resumo executivo (tabela de scores)
 2. Tendencias (se houver auditoria anterior)
 3. Findings por severidade (critico/alto/medio/baixo/info)
@@ -255,6 +266,7 @@ O relatorio gerado em `data/reports/` contem:
 ## Referencias
 
 Para detalhes tecnicos, consultar:
+
 - `references/analysis_criteria.md` - Rubricas de scoring
 - `references/security_patterns.md` - Padroes de seguranca
 - `references/skill_template.md` - Template para novas skills
