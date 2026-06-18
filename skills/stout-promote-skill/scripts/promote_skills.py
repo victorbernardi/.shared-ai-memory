@@ -42,6 +42,8 @@ PROMOTION_MAP = {
     "stout-retrofit":             [],
     "stout-skill-manager":        [],
     "skillfish":                  [],
+    "inova-pipeline-01":          [],
+    "inova-motor-faturamento":    [],
 }
 
 

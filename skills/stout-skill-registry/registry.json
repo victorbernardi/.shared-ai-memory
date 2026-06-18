@@ -22,7 +22,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Padrão Ouro de Doc. Score: 98.8/100",
-      "promoted_at": "2026-05-29"
+      "promoted_at": "2026-06-18"
     },
     {
       "name": "stout-skill-auditor",
@@ -42,7 +42,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Padrão Ouro de Doc. Score: 98.5/100",
-      "promoted_at": "2026-05-29"
+      "promoted_at": "2026-06-18"
     },
     {
       "name": "stout-improve-skill",
@@ -79,7 +79,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Padrão Ouro de Doc. Score: 92.8/100",
-      "promoted_at": "2026-05-29"
+      "promoted_at": "2026-06-18"
     },
     {
       "name": "stout-immunity-gate",
@@ -173,7 +173,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Resgate integral de templates e scripts. Score: 100/100",
-      "promoted_at": "2026-05-29"
+      "promoted_at": "2026-06-18"
     },
     {
       "name": "stout-systematic-debugging",
@@ -229,7 +229,7 @@
       "updated_at": "2026-05-22",
       "author": "Victor",
       "notes": "Superior à V1: Resgate integral de infra + encoding fix. Score: 100/100",
-      "promoted_at": "2026-05-29"
+      "promoted_at": "2026-06-18"
     },
     {
       "name": "stout-cdd-orchestrator",
@@ -286,7 +286,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-29",
+      "promoted_at": "2026-06-18",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "author": "Victor",
@@ -370,7 +370,7 @@
       ],
       "version": "1.0.0",
       "status": "active",
-      "promoted_at": "2026-05-29",
+      "promoted_at": "2026-06-18",
       "created_at": "2026-05-22",
       "updated_at": "2026-05-22",
       "author": "Engenheiro Stout"
@@ -477,7 +477,7 @@
       "updated_at": "2026-05-29",
       "author": "Victor",
       "notes": "Skill de descoberta e instalacao via skillfish CLI. Path canonico: .shared-ai-memory/skills/",
-      "promoted_at": "2026-05-29"
+      "promoted_at": "2026-06-18"
     },
     {
       "name": "stout-skill-manager",
@@ -498,7 +498,7 @@
       "updated_at": "2026-05-29",
       "author": "Victor",
       "notes": "Orquestrador das 5 fases: busca local -> skillfish -> auditor -> install -> sentinel",
-      "promoted_at": "2026-05-29"
+      "promoted_at": "2026-06-18"
     },
     {
       "name": "audit-skill-manager",
@@ -517,6 +517,80 @@
       "updated_at": "2026-05-29",
       "author": "Victor",
       "notes": "DEPRECADO em 2026-05-29. Substituido por stout-skill-manager. Remover em 30 dias."
+    },
+    {
+      "name": "using-superpowers",
+      "path": ".shared-ai-memory/skills/using-superpowers",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarifying questions",
+      "triggers": [
+        "superpowers",
+        "using-superpowers"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "Obra",
+      "notes": "Instalada via skillfish com score 84/100 na auditoria Sentinel."
+    },
+    {
+      "name": "inova-daily-update",
+      "path": "skills/inova-daily-update",
+      "tier": 2,
+      "category": "engineering",
+      "role": "Atualiza os dados da daily executiva do Inova",
+      "triggers": [
+        "atualizar daily",
+        "update-daily",
+        "atualizar dados da daily",
+        "daily-update",
+        "rodar daily"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "Victor",
+      "notes": "Score: 79/100 na auditoria Sentinel."
+    },
+    {
+      "name": "inova-pipeline-01",
+      "path": ".shared-ai-memory/skills/inova-pipeline-01",
+      "tier": 1,
+      "category": "orchestrator",
+      "role": "Atualizacao e orquestracao do pipeline potencial-clientes",
+      "triggers": [
+        "atualizar pipeline",
+        "inova-pipeline-01",
+        "executar pipeline comercial"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "Victor",
+      "notes": "Criada via stout-create-skill. Aprovada no Quality Gate Stout Inova.",
+      "promoted_at": "2026-06-18"
+    },
+    {
+      "name": "inova-motor-faturamento",
+      "path": "skills/inova-motor-faturamento",
+      "tier": 1,
+      "category": "orchestrator",
+      "role": "Executa o processamento e atualizacao do motor de faturamento local M2",
+      "triggers": [
+        "atualizar motor faturamento",
+        "inova-motor-faturamento",
+        "executar motor faturamento"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "Victor",
+      "notes": "Criada via stout-create-skill. Aprovada no Quality Gate Stout Inova."
     }
   ],
   "deprecated": [

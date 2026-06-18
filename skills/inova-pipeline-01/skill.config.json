@@ -1,0 +1,41 @@
+{
+  "name": "inova-pipeline-01",
+  "version": "1.0.0",
+  "author": "Victor",
+  "platforms": {
+    "claude-code": {
+      "enabled": true,
+      "output": ".claude/skills"
+    },
+    "antigravity": {
+      "enabled": true,
+      "output": ".gemini/antigravity-cli/skills"
+    },
+    "commandcode": {
+      "enabled": true,
+      "output": ".commandcode/skills"
+    }
+  },
+  "description": {
+    "full": "Atualizacao e orquestracao do pipeline potencial-clientes",
+    "short": "Atualizacao e orquestracao do pipeline potencial-clientes"
+  },
+  "body": {
+    "source": "SKILL.md",
+    "sections": {
+      "claude": [
+        "all"
+      ],
+      "antigravity": [
+        "Objetivo",
+        "Fluxo",
+        "Constraints"
+      ],
+      "commandcode": [
+        "Objetivo",
+        "Fluxo",
+        "Constraints"
+      ]
+    }
+  }
+}
