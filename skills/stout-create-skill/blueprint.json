@@ -1,0 +1,15 @@
+{
+  "name": "inova-daily-update",
+  "tier": 2,
+  "description": "Atualiza os dados da daily executiva do Inova",
+  "target_platforms": [
+    "claude-code",
+    "antigravity",
+    "commandcode"
+  ],
+  "structure": [
+    "SKILL.md",
+    "scripts/",
+    "tests/"
+  ]
+}

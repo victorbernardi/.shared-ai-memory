@@ -592,6 +592,774 @@
       "author": "Victor",
       "notes": "Criada via stout-create-skill. Aprovada no Quality Gate Stout Inova.",
       "promoted_at": "2026-06-18"
+    },
+    {
+      "name": "audio-transcriber",
+      "path": "skills/audio-transcriber",
+      "tier": 2,
+      "category": "content",
+      "role": "Transform audio recordings into professional Markdown documentation with intelligent summaries using LLM integration",
+      "triggers": [
+        "audio-transcriber"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-02-27",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "skill-sentinel",
+      "path": "skills/audit-skill-sentinel",
+      "tier": 2,
+      "category": "general",
+      "role": "Auditoria e evolucao do ecossistema de skills. Qualidade de codigo, seguranca, custos, gaps, duplicacoes, dependencias e relatorios de saude.",
+      "triggers": [
+        "skill-sentinel"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-03-06",
+      "updated_at": "2026-06-18",
+      "author": "renat",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "brainstorming",
+      "path": "skills/brainstorming",
+      "tier": 2,
+      "category": "general",
+      "role": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+      "triggers": [
+        "brainstorming"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "deep-research",
+      "path": "skills/deep-research",
+      "tier": 2,
+      "category": "general",
+      "role": "Run autonomous research tasks that plan, search, read, and synthesize information into comprehensive reports.",
+      "triggers": [
+        "deep-research"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-02-27",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "path": "skills/dispatching-parallel-agents",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
+      "triggers": [
+        "dispatching-parallel-agents"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "executing-plans",
+      "path": "skills/executing-plans",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+      "triggers": [
+        "executing-plans"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "find-skills",
+      "path": "skills/find-skills",
+      "tier": 2,
+      "category": "general",
+      "role": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+      "triggers": [
+        "find-skills"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "finishing-a-development-branch",
+      "path": "skills/finishing-a-development-branch",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+      "triggers": [
+        "finishing-a-development-branch"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "grill-me",
+      "path": "skills/grill-me",
+      "tier": 2,
+      "category": "general",
+      "role": "Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions \"grill me\".",
+      "triggers": [
+        "grill-me"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "grill-with-docs",
+      "path": "skills/grill-with-docs",
+      "tier": 2,
+      "category": "general",
+      "role": "Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (CONTEXT.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions.",
+      "triggers": [
+        "grill-with-docs"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "handoff",
+      "path": "skills/handoff",
+      "tier": 2,
+      "category": "general",
+      "role": "Compact the current conversation into a handoff document for another agent to pick up.",
+      "triggers": [
+        "handoff"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "inova-bi-faturamento",
+      "path": "skills/inova-bi-faturamento",
+      "tier": 2,
+      "category": "general",
+      "role": "Atualiza os parquets de faturamento do BI (Detalhamento-Peças) executando o scraper Playwright contra o Power BI da Inova. Use quando os arquivos detalhamento_vendas_2025/2026.parquet estiverem desatualizados ou quando o M2 precisar de dados frescos para validação.",
+      "triggers": [
+        "inova-bi-faturamento"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "writing-skills",
+      "path": "skills/process-writing-skills",
+      "tier": 2,
+      "category": "meta",
+      "role": "Use when creating, updating, or improving agent skills.",
+      "triggers": [
+        "writing-skills"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-02-27",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "receiving-code-review",
+      "path": "skills/receiving-code-review",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
+      "triggers": [
+        "receiving-code-review"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "requesting-code-review",
+      "path": "skills/requesting-code-review",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+      "triggers": [
+        "requesting-code-review"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "setup-matt-pocock-skills",
+      "path": "skills/setup-matt-pocock-skills",
+      "tier": 2,
+      "category": "general",
+      "role": "Sets up an `## Agent skills` block in AGENTS.md/CLAUDE.md and `docs/agents/` so the engineering skills know this repo's issue tracker (GitHub or local markdown), triage label vocabulary, and domain doc layout. Run before first use of `to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, or `zoom-out` — or if those skills appear to be missing context about the issue tracker, triage labels, or domain docs.",
+      "triggers": [
+        "setup-matt-pocock-skills"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "stout-icm-migrate",
+      "path": "skills/stout-icm-migrate",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Converte projetos legados para o formato ICM nativo com estágios numerados e contratos explícitos (CONTEXT.md). Detecta estrutura atual, classifica research por conteúdo, cria pipeline com gates de auditoria. Use quando for migrar projeto existente, ICM-izar, converter para pipeline ICM, ou adaptar estrutura. Triggers: migrar projeto, converter para ICM, icm-izar, adaptar estrutura.",
+      "triggers": [
+        "stout-icm-migrate"
+      ],
+      "version": "1.1.0",
+      "status": "active",
+      "created_at": "2026-05-27",
+      "updated_at": "2026-06-18",
+      "author": "Arquiteto Stout",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "stout-init-icm",
+      "path": "skills/stout-init-icm",
+      "tier": 3,
+      "category": "meta-governance",
+      "role": "Inicialização modular de projetos Stout com arquitetura ICM nativa. Gera workspaces de estágios numerados com contratos explícitos (CONTEXT.md), envelope fino para progressive disclosure (SKILL.md), e infraestrutura GCC. Use para criar novo projeto, scaffold ICM, inicializar workspace, ou projeto modular. Triggers: inicializar projeto icm, novo workspace, scaffold icm, projeto novo no padrao, stout-init-icm.",
+      "triggers": [
+        "stout-init-icm"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-05-27",
+      "updated_at": "2026-06-18",
+      "author": "Arquiteto Stout",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "subagent-driven-development",
+      "path": "skills/subagent-driven-development",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when executing implementation plans with independent tasks in the current session",
+      "triggers": [
+        "subagent-driven-development"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "systematic-debugging",
+      "path": "skills/systematic-debugging",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+      "triggers": [
+        "systematic-debugging"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "test-driven-development",
+      "path": "skills/test-driven-development",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when implementing any feature or bugfix, before writing implementation code",
+      "triggers": [
+        "test-driven-development"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "to-issues",
+      "path": "skills/to-issues",
+      "tier": 2,
+      "category": "general",
+      "role": "Break a plan, spec, or PRD into independently-grabbable issues on the project issue tracker using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues.",
+      "triggers": [
+        "to-issues"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "to-prd",
+      "path": "skills/to-prd",
+      "tier": 2,
+      "category": "general",
+      "role": "Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context.",
+      "triggers": [
+        "to-prd"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "triage",
+      "path": "skills/triage",
+      "tier": 2,
+      "category": "general",
+      "role": "Triage issues through a state machine driven by triage roles. Use when user wants to create an issue, triage issues, review incoming bugs or feature requests, prepare issues for an AFK agent, or manage issue workflow.",
+      "triggers": [
+        "triage"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "using-git-worktrees",
+      "path": "skills/using-git-worktrees",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback",
+      "triggers": [
+        "using-git-worktrees"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "using-matt",
+      "path": "skills/using-matt",
+      "tier": 2,
+      "category": "general",
+      "role": "Use at the start of every conversation to determine which skill applies before any response or action. Routes debugging, TDD, planning, brainstorming, code review, and execution to the best skill available.",
+      "triggers": [
+        "using-matt"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "uv",
+      "path": "skills/uv",
+      "tier": 2,
+      "category": "general",
+      "role": ">-",
+      "triggers": [
+        "uv"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "verification-before-completion",
+      "path": "skills/verification-before-completion",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
+      "triggers": [
+        "verification-before-completion"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "claude-history-ingest",
+      "path": "skills/wiki - claude-history-ingest",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "claude-history-ingest"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "data-ingest",
+      "path": "skills/wiki - data - ingest",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "data-ingest"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "graph-colorize",
+      "path": "skills/wiki - graph-colorize",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "graph-colorize"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "ingest-url",
+      "path": "skills/wiki - ingest-url",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "ingest-url"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "llm-wiki",
+      "path": "skills/wiki - llm-wiki",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "llm-wiki"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "cross-linker",
+      "path": "skills/wiki -cross-linker",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "cross-linker"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-capture",
+      "path": "skills/wiki-capture",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-capture"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-dashboard",
+      "path": "skills/wiki-dashboard",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-dashboard"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-export",
+      "path": "skills/wiki-export",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-export"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-history-ingest",
+      "path": "skills/wiki-history-ingest",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-history-ingest"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-ingest",
+      "path": "skills/wiki-ingest",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-ingest"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-lint",
+      "path": "skills/wiki-lint",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-lint"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-query",
+      "path": "skills/wiki-query",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-query"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-rebuild",
+      "path": "skills/wiki-rebuild",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-rebuild"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-research",
+      "path": "skills/wiki-research",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-research"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-setup",
+      "path": "skills/wiki-setup",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-setup"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-status",
+      "path": "skills/wiki-status",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-status"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-synthesize",
+      "path": "skills/wiki-synthesize",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-synthesize"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "wiki-update",
+      "path": "skills/wiki-update",
+      "tier": 2,
+      "category": "general",
+      "role": ">",
+      "triggers": [
+        "wiki-update"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "writing-plans",
+      "path": "skills/writing-plans",
+      "tier": 2,
+      "category": "general",
+      "role": "Use when you have a spec or requirements for a multi-step task, before touching code",
+      "triggers": [
+        "writing-plans"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-18",
+      "updated_at": "2026-06-18",
+      "author": "System",
+      "notes": "Descoberta física e adicionada automaticamente ao ledger."
     }
   ],
   "deprecated": [

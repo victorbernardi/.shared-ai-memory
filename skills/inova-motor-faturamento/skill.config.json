@@ -1,0 +1,41 @@
+{
+  "name": "inova-motor-faturamento",
+  "version": "1.0.0",
+  "author": "Victor",
+  "platforms": {
+    "claude-code": {
+      "enabled": true,
+      "output": ".claude/skills"
+    },
+    "antigravity": {
+      "enabled": true,
+      "output": ".gemini/antigravity-cli/skills"
+    },
+    "commandcode": {
+      "enabled": true,
+      "output": ".commandcode/skills"
+    }
+  },
+  "description": {
+    "full": "Executa o processamento e atualizacao do motor de faturamento local M2",
+    "short": "Executa o processamento e atualizacao do motor de faturamento local M2"
+  },
+  "body": {
+    "source": "SKILL.md",
+    "sections": {
+      "claude": [
+        "all"
+      ],
+      "antigravity": [
+        "Objetivo",
+        "Fluxo",
+        "Constraints"
+      ],
+      "commandcode": [
+        "Objetivo",
+        "Fluxo",
+        "Constraints"
+      ]
+    }
+  }
+}
