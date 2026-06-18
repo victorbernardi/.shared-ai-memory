@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/skill_entry.schema.json",
   "version": "1.3.0",
-  "last_updated": "2026-05-29",
+  "last_updated": "2026-06-18",
   "ecosystem": "stout-inova",
   "skills": [
     {
@@ -56,11 +56,11 @@
         "auto-healing"
       ],
       "version": "1.3.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-15",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Integrada ao Sentinel Core. Score Doc: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -94,11 +94,11 @@
         "imutabilidade"
       ],
       "version": "1.3.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-14",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Integrada com Guardrail V2.0. Score: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -113,11 +113,11 @@
         "testes"
       ],
       "version": "1.4.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "TDD Elite com Simplicity/Surgical laws. Score: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -132,11 +132,11 @@
         "design"
       ],
       "version": "1.3.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Fidelidade total e fragmentação concluída. Score: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-22"
     },
     {
@@ -150,11 +150,11 @@
         "roteiro"
       ],
       "version": "1.4.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Planos Atômicos com Goal-Driven Execution. Score: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -187,11 +187,11 @@
         "investigação"
       ],
       "version": "1.3.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Fragmentação de contexto em 316+ lines originais. Score: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -205,11 +205,11 @@
         "rastreabilidade"
       ],
       "version": "1.3.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Resgate integral de checklists técnicos. Score: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -243,11 +243,11 @@
       ],
       "dependencies": [],
       "version": "1.1.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Motor Mãe com Karpathy Laws injetadas. Score: 100/100",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -262,11 +262,11 @@
       ],
       "dependencies": [],
       "version": "1.0.0",
-      "status": "active",
+      "status": "deprecated",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
+      "updated_at": "2026-06-18",
       "author": "Victor",
-      "notes": "Elite Upgrade V1.3.0",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário.",
       "promoted_at": "2026-05-29"
     },
     {
@@ -306,11 +306,12 @@
         "fase de construção"
       ],
       "version": "1.0.0",
-      "status": "active",
+      "status": "deprecated",
       "promoted_at": "2026-05-29",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
-      "author": "Arquiteto Stout"
+      "updated_at": "2026-06-18",
+      "author": "Arquiteto Stout",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário."
     },
     {
       "name": "stout-finishing-a-development-branch",
@@ -326,11 +327,12 @@
         "concluir build"
       ],
       "version": "1.0.0",
-      "status": "active",
+      "status": "deprecated",
       "promoted_at": "2026-05-29",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
-      "author": "Arquiteto Stout"
+      "updated_at": "2026-06-18",
+      "author": "Arquiteto Stout",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário."
     },
     {
       "name": "stout-subagent-driven-development",
@@ -347,11 +349,12 @@
         "assembly line"
       ],
       "version": "1.0.0",
-      "status": "active",
+      "status": "deprecated",
       "promoted_at": "2026-05-29",
       "created_at": "2026-05-16",
-      "updated_at": "2026-05-22",
-      "author": "Arquiteto Stout"
+      "updated_at": "2026-06-18",
+      "author": "Arquiteto Stout",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário."
     },
     {
       "name": "stout-session-learning",
@@ -386,11 +389,12 @@
         "analisar dados"
       ],
       "version": "1.0.0",
-      "status": "active",
+      "status": "deprecated",
       "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22",
-      "author": "Victor"
+      "updated_at": "2026-06-18",
+      "author": "Victor",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário."
     },
     {
       "name": "stout-data-sql-queries",
@@ -406,11 +410,12 @@
         "translate sql"
       ],
       "version": "1.0.0",
-      "status": "active",
+      "status": "deprecated",
       "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22",
-      "author": "Victor"
+      "updated_at": "2026-06-18",
+      "author": "Victor",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário."
     },
     {
       "name": "stout-data-write-query",
@@ -425,11 +430,12 @@
         "sql syntax"
       ],
       "version": "1.0.0",
-      "status": "active",
+      "status": "deprecated",
       "promoted_at": "2026-05-29",
       "created_at": "2026-05-22",
-      "updated_at": "2026-05-22",
-      "author": "Victor"
+      "updated_at": "2026-06-18",
+      "author": "Victor",
+      "notes": "Arquivado em lote em 2026-06-18 a pedido do usuário."
     },
     {
       "name": "stout-retrofit",

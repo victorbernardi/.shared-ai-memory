@@ -25,9 +25,9 @@ except ImportError:
 class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
     
-    rules_path: str = './_config/config/rules.yaml'
-    rules_schema_path: str = './_config/config/rules.schema.json'
-    skills_schema_path: str = './_config/config/skills.schema.json'
+    rules_path: str = './data/config/rules.yaml'
+    rules_schema_path: str = './data/config/rules.schema.json'
+    skills_schema_path: str = './data/config/skills.schema.json'
     
     local_skills_path: str = './skills'
     global_skills_path: str = os.path.expanduser('~/.shared-ai-memory/.gemini/skills')

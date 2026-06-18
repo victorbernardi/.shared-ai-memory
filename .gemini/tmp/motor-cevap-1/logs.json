@@ -1,0 +1,58 @@
+[
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 0,
+    "type": "user",
+    "message": "ligue o motor do cevap para atualizar",
+    "timestamp": "2026-06-16T13:31:15.225Z"
+  },
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 1,
+    "type": "user",
+    "message": "pq vc diz que m3 e m5 estão desatualizados se no @C:\\Projetos\\Inova\\shared\\recency_status.md  eles estão atualizados?",
+    "timestamp": "2026-06-16T13:37:52.915Z"
+  },
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 2,
+    "type": "user",
+    "message": "Vc esta parcialmente correto. Atualização do dia 12/06 deve ser considerada desatualizada. Vc apenas não enxergou que essas bases estão com o sinal verde e não amarelo. Eu vou atualizar as bases e retorno aqui.",
+    "timestamp": "2026-06-16T13:43:40.220Z"
+  },
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 3,
+    "type": "user",
+    "message": "pode seguir. motores atualizados",
+    "timestamp": "2026-06-16T17:32:43.489Z"
+  },
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 4,
+    "type": "user",
+    "message": "veja se esta correto. não tem nenhum cliente com data da ultima compra em 2026 e nenhuma tenativa de contato com o cliente em junho. tenho certeza que esta com erro de atualização",
+    "timestamp": "2026-06-16T17:54:00.441Z"
+  },
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 5,
+    "type": "user",
+    "message": "@\"C:\\Users\\victor.bernardi\\OneDrive - INOVA EQUIPAMENTOS LTDA\\Documentos\\CEVAP_ATIVACAO.xlsx\" \nvc valiodu essa atualização? pq ela continua com dados de compra e contato desatualiados",
+    "timestamp": "2026-06-16T18:07:35.647Z"
+  },
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 6,
+    "type": "user",
+    "message": "aparentemente o cevap esta atualizado. veja se temos commit pendente. Se tiver inicie uma branch para fazer o commit",
+    "timestamp": "2026-06-16T18:22:28.890Z"
+  },
+  {
+    "sessionId": "6f4ae126-49e7-4bd9-9258-e8149799d20b",
+    "messageId": 7,
+    "type": "user",
+    "message": "/exit",
+    "timestamp": "2026-06-16T18:35:10.900Z"
+  }
+]

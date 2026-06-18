@@ -16,17 +16,6 @@ Converter projetos legados (CDD monolíticos ou scripts procedurais) para o form
 
 ---
 
-## 🛫 Bloco PRÉ-VÔO (Think Before Coding)
-
-**ATENÇÃO AGENTE:** Antes de iniciar o Passo 0, você DEVE fazer as seguintes perguntas ao Victor (ou verificar de forma autônoma e obter confirmação explícita):
-1. O projeto legado está rodando no estado atual (Passo 0 concluído)?
-2. Quantos estágios sequenciais numerados serão criados?
-3. O projeto usa CDD (requer atualização do catalog em `data/config/skills_catalog.yaml`)?
-
-**Regra Absoluta:** NÃO inicie nenhuma alteração de código ou estrutura física do projeto antes de responder a estas perguntas.
-
----
-
 ## Processo de Migração (8 Passos)
 
 ### Passo 0: Verificar Integridade (NOVO)
@@ -203,8 +192,7 @@ description: "<Descrição semântica com triggers.>"
 
 ### Passo 8: Atualizar Roteamento
 
-- **Verificação de existência:** Antes de tentar ler ou editar `data/config/skills_catalog.yaml`, verifique explicitamente se o arquivo existe. Se NÃO existir, ignore este passo e registre nas notas de migração que a atualização do roteamento CDD foi pulada por inexistência do catálogo.
-- Se o arquivo `data/config/skills_catalog.yaml` existir, atualize a entrada correspondente à skill:
+- Se o projeto tem entrada em `data/config/skills_catalog.yaml`, atualizar:
   ```yaml
   <nome-skill>:
     status: migrated
@@ -254,6 +242,7 @@ Se o projeto original tem flag `--force` ou equivalente:
 
 - `@references/context-template.md` — Template de CONTEXT.md de estágio (8 seções)
 - `@references/pipeline-template.md` — Template de CONTEXT.md de pipeline
+- `@references/migration-checklist.md` — Checklist completo de migração
 
 ## Idioma
 
@@ -262,59 +251,3 @@ Obrigatório o uso de **Português (PT-BR)** para todos os artefatos de governan
 ## Escopo
 
 Esta skill se aplica à migração de projetos legados para o formato ICM nativo.
-
----
-
-## 🧩 Addon CDD (opcional)
-
-Se o projeto legado utiliza CDD ou se o Victor solicitar a injeção do Addon CDD durante a migração:
-1. Siga as instruções descritas no catálogo global de addons do `stout-init` (injetando o Motor de Regras, GCC Controller, etc.).
-2. Certifique-se de que os arquivos `data/config/rules.yaml` e schemas correspondentes estão presentes no novo workspace do estágio correspondente.
-
----
-
-## 🏁 Verificação Final (DoD)
-
-O processo de migração só é considerado concluído quando todos os itens abaixo forem validados (marcar com `[x]`):
-
-### Pré-Migração
-- [ ] Projeto legado identificado (caminho, domínio, skills ativas)
-- [ ] Estrutura atual mapeada: skills, scripts, configurações, dependências
-- [ ] Fluxo de execução documentado (ordem de carregamento, handoffs implícitos)
-- [ ] Número de estágios ICM planejado (um por propósito distincto)
-
-### Estrutura
-- [ ] Estágios ICM criados DENTRO do diretório do projeto existente
-- [ ] Estágios numerados criados: `01_<estagio>`, `02_<estagio>`, ...
-- [ ] Cada estágio tem `CONTEXT.md` com as 8 seções obrigatórias
-- [ ] Cada estágio tem `output/`
-- [ ] Estágios com scripts têm `scripts/`
-
-### Contratos
-- [ ] `CONTEXT.md` do pipeline define ordem e regras globais do workspace
-- [ ] Regras globais extraídas do SKILL.md original → CONTEXT.md do pipeline
-- [ ] Restrições operacionais → CONTEXT.md do estágio específico
-- [ ] Nenhuma seção vazia ou placeholder em nenhum CONTEXT.md
-
-### Scripts
-- [ ] Scripts copiados (não movidos) para `scripts/` do estágio correto
-- [ ] Encoding UTF-8 verificado em todos os scripts
-- [ ] Permissão de execução garantida (chmod +x ou equivalente)
-- [ ] Scripts originais preservados no local antigo
-
-### Envelope
-- [ ] `SKILL.md` fino criado na raiz do workspace
-- [ ] YAML frontmatter contém `name` e `description` com triggers semânticos
-- [ ] Corpo do SKILL.md tem no máximo 10 linhas (só apontadores)
-- [ ] Description contém palavras-chave que correspondem ao uso original
-
-### Roteamento
-- [ ] Se o catálogo `data/config/skills_catalog.yaml` existia, foi atualizado.
-- [ ] SKILL.md original atualizado com aviso de arquivamento no topo do arquivo (antes do frontmatter).
-
-### Validação Pós-Migração
-- [ ] Pipeline ICM executado do início ao fim sem erros
-- [ ] Outputs equivalentes aos do fluxo original
-- [ ] Nenhum script quebrou (testado isoladamente)
-- [ ] Agente descobre o workspace via `SKILL.md` fino
-- [ ] Skill original ainda funciona se invocada diretamente

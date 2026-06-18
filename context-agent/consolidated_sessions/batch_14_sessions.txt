@@ -1,0 +1,359 @@
+================================================================================
+SESSION: session-244-20260611-145536-antigravity-134ac42d.md
+================================================================================
+
+# Sessão 244 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- Atualizacao Operacional do Motor CEVAP e Abertura do Relatorio de Recencia
+
+## Decisões
+- Abrir o relatorio recency_status.md automaticamente no final da consolidacao do CEVAP usando os.startfile de forma nao-bloqueante no Windows.
+
+## Tarefas Pendentes
+- [ ] Nenhuma (prioridade: medium)
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Descobertas
+- RESUMO: Atualizacao operacional da planilha CEVAP_ATIVACAO no OneDrive (3495 clientes, 277 tratativas comerciais preservadas), criacao do spec e plan V7, e implementacao cirurgica de abertura visual do arquivo recency_status.md no final da consolidacao com testes pytest 100% verdes.
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-243](session-243.md)*
+
+================================================================================
+END SESSION: session-244-20260611-145536-antigravity-134ac42d.md
+================================================================================
+
+================================================================================
+SESSION: session-245-20260611-145726-antigravity-e1e02f14.md
+================================================================================
+
+# Sessão 245 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- <USER_REQUEST>
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-244](session-244.md)*
+
+================================================================================
+END SESSION: session-245-20260611-145726-antigravity-e1e02f14.md
+================================================================================
+
+================================================================================
+SESSION: session-246-20260611-151329-antigravity-810b1e6d.md
+================================================================================
+
+# Sessão 246 — 2026-06-11
+**Slug:**  | **Duração:** ~440min | **Modelo:** 
+
+## Tópicos
+- Detalhamento Pecas - Limpeza, Headed Microsoft e Alertas de Sessao
+
+## Tarefas Concluídas
+- [x] o primeiro lote de tarefas (Tasks 1, 2 e 3) correspondente às adaptações de caminhos de diretório e à transição do Playwright para Contexto Persistente.
+- [x] **Task 1:** Ajuste de Configurações de Diretórios (Paths) — **Concluída**
+- [x] **Task 2:** Refatoração da Autenticação (`authenticate.py`) — **Concluída**
+- [x] **Task 3:** Refatoração da Extração (`extract.py`) — **Concluída**
+- [x] **Task 4:** Ajuste do Range e Sobrescrita de 2026 (`run.py`) — **Concluída**
+- [x] **Task 5:** Re-autenticação Interativa (Login Inicial) — **Concluída**
+
+## Tarefas Pendentes
+- [ ] **Task 2:** Refatoração da Autenticação (`authenticate.py`) (prioridade: medium)
+- [ ] **Task 3:** Refatoração da Extração (`extract.py`) (prioridade: medium)
+- [ ] **Task 4:** Ajuste do Range e Sobrescrita de 2026 (`run.py`) (prioridade: medium)
+- [ ] **Task 5:** Re-autenticação Interativa (Login Inicial) (prioridade: medium)
+- [ ] **Task 6:** Execução da Carga de Produção de 2026 e Validação (prioridade: medium)
+
+## Arquivos Modificados
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\plans\\2026-06-11-carga-incremental-2026.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\specs\\2026-06-11-detalhamento-pecas-persistent-profile.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\plans\\2026-06-11-carga-total-persistent-profile.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\dashboard-inova-data-export\\src\\config.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\src\\config.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\dashboard-inova-data-export\\authenticate.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\src\\extract.py` — multi_replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\tests\\test_transform.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\run.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\specs\\2026-06-11-limpeza-e-robustez-headless.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\plans\\2026-06-11-limpeza-e-robustez-headless.md` — write_to_file
+- `C:\\Projetos\\Inova\\.gitignore` — replace_file_content
+
+## Descobertas
+- RESUMO: Conclusao da limpeza do repositorio com delecao de arquivos lixo e debug, adicao de debug_*.png no gitignore. Modificacao de extract.py para modo headed devido a restricoes Azure AD SSO, e implementacao de tratamento de erro amigavel de expiracao de sessao.
+- 4. **IMPORTANTE:** Quando a Microsoft perguntar **"Permanecer conectado?" / "Stay signed in?"**, clique em **SIM** (isso é vital para salvar a sessão).
+
+## Erros Resolvidos
+- de autenticação, e nós realizaremos o login interativo com o `authenticate.py`.
+- pré-existente no arquivo de testes `tests/test_transform.py` no teste `test_validar_schema_pass`. O teste simulava a coluna como `'Data'`, mas a validação de produção real do `transform.py` busca pela
+- pré-existente nos testes locais onde a coluna do schema de dados no teste simulava `'Data'` em vez de `'Data Emissão'`. Corrigimos [test_transform.py](file:///C:/Projetos/Inova/projects/Detalhamento-P
+- na raiz do projeto. Isso nos permitirá inspecionar visualmente o que o navegador está vendo em modo headless.
+- o portal do Power BI Embedded (`powerembedded.com.br`) iniciou exibindo a tela corporativa exigindo autenticação através do botão **"Autenticação Microsoft"** (uma tela de SSO intermediária).
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 288
+- Tool calls: 199
+
+---
+*Sessão anterior: [session-245](session-245.md)*
+
+================================================================================
+END SESSION: session-246-20260611-151329-antigravity-810b1e6d.md
+================================================================================
+
+================================================================================
+SESSION: session-247-20260611-153154-antigravity-9137a2b3.md
+================================================================================
+
+# Sessão 247 — 2026-06-11
+**Slug:**  | **Duração:** ~460min | **Modelo:** 
+
+## Tópicos
+- Detalhamento Pecas - Correcao de Range 2026 em run.py
+
+## Tarefas Concluídas
+- [x] o primeiro lote de tarefas (Tasks 1, 2 e 3) correspondente às adaptações de caminhos de diretório e à transição do Playwright para Contexto Persistente.
+- [x] **Task 1:** Ajuste de Configurações de Diretórios (Paths) — **Concluída**
+- [x] **Task 2:** Refatoração da Autenticação (`authenticate.py`) — **Concluída**
+- [x] **Task 3:** Refatoração da Extração (`extract.py`) — **Concluída**
+- [x] **Task 4:** Ajuste do Range e Sobrescrita de 2026 (`run.py`) — **Concluída**
+- [x] **Task 5:** Re-autenticação Interativa (Login Inicial) — **Concluída**
+
+## Tarefas Pendentes
+- [ ] **Task 2:** Refatoração da Autenticação (`authenticate.py`) (prioridade: medium)
+- [ ] **Task 3:** Refatoração da Extração (`extract.py`) (prioridade: medium)
+- [ ] **Task 4:** Ajuste do Range e Sobrescrita de 2026 (`run.py`) (prioridade: medium)
+- [ ] **Task 5:** Re-autenticação Interativa (Login Inicial) (prioridade: medium)
+- [ ] **Task 6:** Execução da Carga de Produção de 2026 e Validação (prioridade: medium)
+
+## Arquivos Modificados
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\plans\\2026-06-11-carga-incremental-2026.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\specs\\2026-06-11-detalhamento-pecas-persistent-profile.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\plans\\2026-06-11-carga-total-persistent-profile.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\dashboard-inova-data-export\\src\\config.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\src\\config.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\dashboard-inova-data-export\\authenticate.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\src\\extract.py` — multi_replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\tests\\test_transform.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\run.py` — replace_file_content
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\specs\\2026-06-11-limpeza-e-robustez-headless.md` — write_to_file
+- `C:\\Projetos\\Inova\\projects\\Detalhamento-Pecas\\docs\\plans\\2026-06-11-limpeza-e-robustez-headless.md` — write_to_file
+- `C:\\Projetos\\Inova\\.gitignore` — replace_file_content
+
+## Descobertas
+- RESUMO: Corrigido bug critico no run.py onde a funcao _calcular_range_2026 calculava datas incrementais mas sobrescrevia o arquivo final apagando o historico. Agora, run.py executa sempre a carga total acumulada (01/01/2026 ate hoje) de forma deterministica, em conformidade com a Spec 2.0.
+- 4. **IMPORTANTE:** Quando a Microsoft perguntar **"Permanecer conectado?" / "Stay signed in?"**, clique em **SIM** (isso é vital para salvar a sessão).
+
+## Erros Resolvidos
+- de autenticação, e nós realizaremos o login interativo com o `authenticate.py`.
+- pré-existente no arquivo de testes `tests/test_transform.py` no teste `test_validar_schema_pass`. O teste simulava a coluna como `'Data'`, mas a validação de produção real do `transform.py` busca pela
+- pré-existente nos testes locais onde a coluna do schema de dados no teste simulava `'Data'` em vez de `'Data Emissão'`. Corrigimos [test_transform.py](file:///C:/Projetos/Inova/projects/Detalhamento-P
+- na raiz do projeto. Isso nos permitirá inspecionar visualmente o que o navegador está vendo em modo headless.
+- o portal do Power BI Embedded (`powerembedded.com.br`) iniciou exibindo a tela corporativa exigindo autenticação através do botão **"Autenticação Microsoft"** (uma tela de SSO intermediária).
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 304
+- Tool calls: 208
+
+---
+*Sessão anterior: [session-246](session-246.md)*
+
+================================================================================
+END SESSION: session-247-20260611-153154-antigravity-9137a2b3.md
+================================================================================
+
+================================================================================
+SESSION: session-248-20260611-235817-claude-780654d2.md
+================================================================================
+
+# Sessão 248 — 2026-06-10
+**Slug:**  | **Duração:** ~0min | **Modelo:** 
+
+## Tópicos
+- ConsultorMap v5.6 + BUP ORC Fallback — alinhamento VS1_STATUS Protheus
+
+## Decisões
+- VS1_STATUS=='0' e o codigo Protheus para ORC aberto — nunca usar string ABERTO ao consultar Fabric
+- BUP fallback estendido: cobre Excel Cancelado e Aberto pre-2026 via _excel_orc_qualifica()
+- ConsultorMap v5.6: Fabric-first + _consultar() helper + orc_aberto corrigido + lookup decisivo
+- Fast-forward via git update-ref resolve merge quando .commandcode bloqueia git checkout
+
+## Tarefas Pendentes
+- [ ] feat/lead-csc-pops-validacao-venda-nf: Grupo A cego ate P1 (ler Num_NF da planilha dos consultores) (prioridade: medium)
+
+## Descobertas
+- RESUMO: Sessao focada em alinhar regras CONSULTOR/CEVAP entre ConsultorMap e BUP. Descoberta critica: VS1_STATUS no Fabric usa codigos Protheus ('0'=aberto, 'X'=cancelado) — nao texto 'ABERTO'. Ambos tinham orc_aberto quebrado. Apos corrigir: BUP promove 1872 clientes via Fabric fallback, accuracy 100% (4790/4790). Todas tasks concluidas: v5.6 Fabric-first, merge BUP e monorepo, leads regenerados.
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 3
+- Tool calls: 0
+
+---
+*Sessão anterior: [session-247](session-247.md)*
+
+================================================================================
+END SESSION: session-248-20260611-235817-claude-780654d2.md
+================================================================================
+
+================================================================================
+SESSION: session-249-20260612-171705-claude-ac747e9d.md
+================================================================================
+
+# Sessão 249 — 2026-06-12
+**Slug:** shimmying-wibbling-pretzel | **Duração:** ~538min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- lead-csc-pops: fix peças.xlsx — ReparsePoint e Power Query
+
+## Decisões
+- Step [5c] removido do run.py — Python não sobrescreve mais peças.xlsx
+- peças.xlsx gerenciado pelo Power Query que lê de leads-csc-pops-base.xlsx
+- base.xlsx já contém Retorno+Obs+Num NF via reentrada — suficiente como fonte do PQ
+- openpyxl direto em pasta OneDrive causa ReparsePoint — padrão correto é shutil.copy2
+
+## Tarefas Concluídas
+- [x] **tem Num NF** |
+- [x] Gera `base.xlsx` local e sincroniza no OneDrive — **fonte de dados do PQ**
+- [x] Gera o report HTML de KPIs
+- [x] Atualizado |
+- [x] Pipeline não tocou |
+- [x] Correto |
+
+## Tarefas Pendentes
+- [ ] Reconectar Power Query em peças.xlsx apontando para base.xlsx no OneDrive (prioridade: medium)
+- [ ] Definir se Num NF entra dentro da tabela PQ ou permanece coluna manual (prioridade: medium)
+- [ ] Adicionar backup automático do peças.xlsx ao pipeline (prioridade: medium)
+
+## Arquivos Modificados
+- `C:\Projetos\Inova\projects\lead-csc-pops\run.py` — edit
+
+## Descobertas
+- RESUMO: Diagnóstico e correção do pipeline lead-csc-pops. Root cause: step [5c] sobrescrevia peças.xlsx via openpyxl destruindo o Power Query e gerando ReparsePoint no OneDrive. Solução: remoção do step [5c] (commit 45dd618 master). Pipeline agora gera apenas base.xlsx; peças.xlsx permanece intacto no OneDrive gerenciado pelo PQ.
+- Encontrei a causa raiz. Veja o padrão:
+
+## Erros Resolvidos
+- do Excel provavelmente ocorreu porque o arquivo ainda estava sendo sincronizado pelo OneDrive quando você tentou abrir.
+- tem três possíveis causas — veja qual se aplica:
+- — "A pasta de trabalho tem o mesmo nome de outra pasta de trabalho aberta no momento." Verifique se o Excel já tem esse arquivo aberto em outra janela (incluindo instâncias minimizadas ou em backgroun
+- era provavelmente um conflito de lock durante o processo de escrita/sincronização do pipeline.
+- na última vez que salvou: **"Falha ao baixar"** — `base.xlsx` estava inacessível
+
+## Métricas
+- Input tokens: 247
+- Output tokens: 112,472
+- Cache tokens: 10,392,109
+- Mensagens: 217
+- Tool calls: 54
+
+---
+*Sessão anterior: [session-248](session-248.md)*
+
+================================================================================
+END SESSION: session-249-20260612-171705-claude-ac747e9d.md
+================================================================================
+
+================================================================================
+SESSION: session-250-20260615-152200-claude-fd701450.md
+================================================================================
+
+# Sessão 250 — 2026-06-15
+**Slug:**  | **Duração:** ~176min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Motor-orçamentos: Migração ICM completa + fix output paths
+
+## Decisões
+- OUTPUT_DIR único substituído por TEMP_DIR (data/output/) + OUTPUT_DIR_ABERTOS (01_abertos/output/) + OUTPUT_DIR_CANCELADOS (02_cancelados/output/)
+- generate_recency_report.py atualizado para ler dos novos paths ICM — retorna Atualizado Hoje após o fix
+- Scripts src/ permanecem compartilhados entre estágios — sem duplicação
+- Duas branches mergeadas em master via --no-ff: feat/motor-orcamentos-icm-migrate e fix/motor-orcamentos-icm-output-paths
+
+## Tarefas Concluídas
+- [x] Passo N concluído: [o que foi feito]"* ou *"🔴 Passo N — DESVIO: [o que aconteceu vs o que era esperado]"*
+- [x] Pre-flight concluído: Motor pronto para processamento.
+- [x] with no output)
+- [x] **Passo 0 concluído:**
+- [x] **Passo 1 — Mapeamento:**
+- [x] **Passo 3 auditado:** nenhum `.py` com paths reais de produção na pesquisa — todos os `.py` de produção estão em `src/`.
+- [x] **Passo 4 auditado:** diretórios criados sem `GEMINI.md`, sem junction `docs/`, sem `src/` novo. Scripts originais em `src/` intocados.
+- [x] **Auditado:** todos os scripts em `src/` (`config.py`, `extract.py`, `transform.py`) são compartilhados por ambos os estágios → **permanecem em `src/` intocados**. Nenhuma cópia necessária. `src/` original preservado.
+- [x] **Auditado:** projeto não tem `data/config/rules.yaml` nem `src/router.py` → **CDD não aplicável**, passo ignorado corretamente.
+- [x] SKILL.md criado com YAML frontmatter + 3 linhas apontadores. Aponta para `./CLAUDE.md` (não `GEMINI.md`). CLAUDE.md e AGENTS.md criados.
+- [x] **Passo 8 concluído.** Verifico se há `skills_catalog.yaml` para atualizar:
+- [x] `CLAUDE.md`, `AGENTS.md`, `CONTEXT.md`, `SKILL.md`, `00_research/`, `01_abertos/`, `02_cancelados/`, `src/` |
+- [x] `GEMINI.md` ausente, `ANTIGRAVITY.md` ausente, sem junction `docs/` |
+- [x] N/A — projeto não tinha CDD; Passo 6.5 ignorado corretamente |
+- [x] Todos os 3 estágios: 8 seções `##` + `Layer 3` presente |
+
+## Tarefas Pendentes
+- [ ] Remover arquivos legados de data/output/ (orcamentos_abertos_enriquecidos.xlsx e tabela_orçamentos_cancelados.xlsx) após validação downstream (prioridade: medium)
+
+## Arquivos Modificados
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\CONTEXT.md` — write
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\00_research\CONTEXT.md` — write
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\01_abertos\CONTEXT.md` — write
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\02_cancelados\CONTEXT.md` — write
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\CLAUDE.md` — write
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\AGENTS.md` — write
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\SKILL.md` — write
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\run.py` — edit
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\src\config.py` — edit
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\src\extract.py` — edit
+- `C:\Projetos\Inova\pipelines\potencial-clientes\Motor-orçamentos\src\transform.py` — edit
+- `C:\Projetos\Inova\shared\generate_recency_report.py` — edit
+
+## Descobertas
+- RESUMO: Migração completa do Motor-orçamentos de script procedural para pipeline ICM com 2 estágios (01_abertos, 02_cancelados). Primeiro commit criou estrutura/contratos mas outputs ainda iam para data/output/ legado. Segundo commit conectou os scripts aos diretórios ICM reais. Motor testado e validado com 650 abertos e 61.977 cancelados nos paths corretos.
+
+## Métricas
+- Input tokens: 11,416
+- Output tokens: 84,172
+- Cache tokens: 11,600,770
+- Mensagens: 241
+- Tool calls: 78
+
+---
+*Sessão anterior: [session-249](session-249.md)*
+
+================================================================================
+END SESSION: session-250-20260615-152200-claude-fd701450.md
+================================================================================
+

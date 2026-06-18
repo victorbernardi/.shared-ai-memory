@@ -1,0 +1,482 @@
+Output: warning: in the working copy of 'MISSION_STOUT.md', LF will be replaced by CRLF the next time Git touches it
+[chore/hooks-validation-v3 7a8bdac] feat(skills): update mission and superantigravity skills
+ 481 files changed, 28889 insertions(+), 29213 deletions(-)
+ delete mode 160000 Plugins/everything-claude-code
+ delete mode 160000 Plugins/notebooklm-mcp-cli
+ create mode 100644 Projetos/NotebookLM/.env.example
+ create mode 100644 Projetos/NotebookLM/.gitignore
+ create mode 100644 Projetos/NotebookLM/.llm-git-rules.md
+ create mode 100644 Projetos/NotebookLM/ANTIGRAVITY.md
+ create mode 100644 "Projetos/NotebookLM/Descri\303\247\303\243o das atividades - Analista de Insights.txt"
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (1)/START_HERE.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (1)/script.py
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (2)/CHECKLIST_notebooklm_execution_ptbr.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (2)/PROMPT_agent_notebooklm_operator_ptbr.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (2)/README_agentic_notebooklm_runbook_ptbr.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (2)/script.py
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (3)/CHECKLIST_notebooklm_execution.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (3)/PROMPT_agent_notebooklm_operator.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (3)/README_agentic_notebooklm_runbook.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (3)/script.py
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (4)/README_notebooklm_upload_priority.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (4)/notebooklm_llm_upload_priority_300.csv
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (4)/notebooklm_llm_upload_priority_300.json
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (4)/notebooklm_llm_upload_priority_base.csv
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (4)/notebooklm_llm_upload_priority_base.json
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (4)/script.py
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/build_notebooklm_llm_kb_research_300_regenerated.py
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/catalog_errors_research_300.json
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/catalog_results_research_300.json
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S01_llamaindex_advanced_retrieval_strategies_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S03_sentence_transformers_docs_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S04_aws_contextual_retrieval_anthropic_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S05_survey_autonomous_agents_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S05_survey_autonomous_agents_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S05_survey_autonomous_agents_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S05_survey_autonomous_agents_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S05_survey_autonomous_agents_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S05_survey_autonomous_agents_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S05_survey_autonomous_agents_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S06_survey_evaluation_agents_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S06_survey_evaluation_agents_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S06_survey_evaluation_agents_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S06_survey_evaluation_agents_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S06_survey_evaluation_agents_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S06_survey_evaluation_agents_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S06_survey_evaluation_agents_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S07_langgraph_overview_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S07_langgraph_overview_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S07_langgraph_overview_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S07_langgraph_overview_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S07_langgraph_overview_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S07_langgraph_overview_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S07_langgraph_overview_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S08_dspy_learning_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S08_dspy_learning_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S08_dspy_learning_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S08_dspy_learning_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S08_dspy_learning_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S08_dspy_learning_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S08_dspy_learning_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S09_dspy_github_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S09_dspy_github_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S09_dspy_github_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S09_dspy_github_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S09_dspy_github_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S09_dspy_github_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S10_openai_evals_guide_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S10_openai_evals_guide_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S10_openai_evals_guide_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S10_openai_evals_guide_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S10_openai_evals_guide_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S10_openai_evals_guide_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S10_openai_evals_guide_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S11_openai_evals_github_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S11_openai_evals_github_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S11_openai_evals_github_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S11_openai_evals_github_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S11_openai_evals_github_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S11_openai_evals_github_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S11_openai_evals_github_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S12_vllm_docs_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S12_vllm_docs_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S12_vllm_docs_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S12_vllm_docs_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S12_vllm_docs_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S12_vllm_docs_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S12_vllm_docs_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S13_vllm_paged_attention_design_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S13_vllm_paged_attention_design_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S13_vllm_paged_attention_design_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S13_vllm_paged_attention_design_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S13_vllm_paged_attention_design_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S13_vllm_paged_attention_design_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S13_vllm_paged_attention_design_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S14_pagedattention_paper_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S14_pagedattention_paper_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S14_pagedattention_paper_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S14_pagedattention_paper_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S14_pagedattention_paper_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S14_pagedattention_paper_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S14_pagedattention_paper_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S15_google_sre_book_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S15_google_sre_book_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S15_google_sre_book_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S15_google_sre_book_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S15_google_sre_book_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S15_google_sre_book_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S15_google_sre_book_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S16_peft_hf_docs_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S17_peft_github_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S18_deep_learning_book_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S19_azure_ai_architecture_center_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S21_system_design_primer_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S22_mcp_specification_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S23_mcp_github_org_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S24_nist_ai_rmf_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S25_people_ai_guidebook_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S26_docling_rag_haystack_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S28_sentence_transformers_full_docs_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S29_multimodal_azure_ai_architecture_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_11.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S30_llmops_vllm_docs_chunk_12.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_11.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S31_llmops_azure_ai_center_chunk_12.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_11.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S32_llmops_google_sre_book_chunk_12.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_11.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S33_interviews_system_design_primer_chunk_12.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_01.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_02.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_03.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_04.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_05.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_06.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_07.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_08.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_09.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_10.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_11.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/generated_pdfs_research_300/S34_interviews_openai_evals_chunk_12.pdf
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/logs_research_300/run.log
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/notebooklm_llm_manifest_research_300.json
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets (6)/script.py
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets/SESSION_BOOTSTRAP_PROMPT.md
+ create mode 100644 Projetos/NotebookLM/Estudo - Advanced AI Research and Systems Architecture/exported-assets/script.py
+ create mode 100644 Projetos/NotebookLM/GEMINI.md
+ create mode 100644 Projetos/NotebookLM/README.md
+ create mode 100644 Projetos/NotebookLM/START_HERE.md
+ create mode 100644 Projetos/NotebookLM/branch-policy.yaml
+ create mode 100644 Projetos/NotebookLM/data/archived/Analista de Insight Sales INOVA.docx
+ create mode 100644 Projetos/NotebookLM/data/archived/plano_executivo_kpis_ia_pos_venda_v2.md
+ create mode 100644 Projetos/NotebookLM/data/error_report.json
+ create mode 100644 Projetos/NotebookLM/data/exported-assets (5)/README_notebooklm_upload_priority.md
+ create mode 100644 Projetos/NotebookLM/data/exported-assets (5)/notebooklm_llm_upload_priority_300.csv
+ create mode 100644 Projetos/NotebookLM/data/exported-assets (5)/notebooklm_llm_upload_priority_300.json
+ create mode 100644 Projetos/NotebookLM/data/exported-assets (5)/notebooklm_llm_upload_priority_base.csv
+ create mode 100644 Projetos/NotebookLM/data/exported-assets (5)/notebooklm_llm_upload_priority_base.json
+ create mode 100644 Projetos/NotebookLM/data/exported-assets (5)/script.py
+ create mode 100644 Projetos/NotebookLM/data/notebooklm-config.json
+ create mode 100644 Projetos/NotebookLM/data/settings.json
+ create mode 100644 Projetos/NotebookLM/data/sources_market_research.json
+ create mode 100644 Projetos/NotebookLM/data/template_sources.json
+ create mode 100644 Projetos/NotebookLM/output/notebooklm_kpis_cases/sources.json
+ create mode 100644 Projetos/NotebookLM/requirements.txt
+ create mode 100644 Projetos/NotebookLM/script.py
+ create mode 100644 Projetos/NotebookLM/scripts/inspect_mcp.py
+ create mode 100644 Projetos/NotebookLM/scripts/script.py
+ create mode 100644 Projetos/NotebookLM/src/branch_policy_validator.py
+ create mode 100644 Projetos/NotebookLM/src/notebooklm_uploader.py
+ create mode 100644 Projetos/NotebookLM/src/tools/markdown-auto-fixer/watcher.py
+ create mode 100644 Projetos/NotebookLM/src/tools/stout_promote.py
+ create mode 100644 Projetos/NotebookLM/workspace.env.code-workspace
+ delete mode 100644 docs/mcp_fix_spec.md
+ delete mode 100644 docs/plan.md.response
+ delete mode 100644 docs/plans/2026-04-30-git-sync-implementation.md.response
+ delete mode 100644 docs/plans/2026-05-14-plan-relatorio-roberto-semana-1.md
+ delete mode 100644 docs/plans/2026-05-14-plan-roberto-summary-email.md
+ delete mode 100644 docs/plans/active/plan_correcao_governanca.md.response
+ delete mode 100644 docs/plans/active/plan_reconciliacao_v3.md.response
+ delete mode 100644 docs/plans/active/plan_v5_unificacao.md.response
+ delete mode 100644 docs/plans/active/plan_v6_unificacao_historico_docs.md.response
+ delete mode 100644 docs/plans/active/plan_v7_blindagem_diretorios.md.response
+ delete mode 100644 docs/plans/legacy/2026-04-16-superantigravity-skills-import.md
+ delete mode 100644 docs/plans/legacy/2026-04-17-canary-deployment.md
+ delete mode 100644 docs/plans/legacy/2026-04-17-context-agent-artifact-copy.md
+ delete mode 100644 docs/plans/legacy/2026-04-17-knowledge-graph-obsidian.md
+ delete mode 100644 docs/plans/legacy/2026-04-17-knowledge-graph-relations.md
+ delete mode 100644 docs/plans/legacy/2026-04-17-orchestration-hooks.md
+ delete mode 100644 docs/plans/legacy/2026-04-19-hot-cache.md
+ delete mode 100644 docs/plans/legacy/2026-04-20-cortex.md
+ delete mode 100644 docs/plans/legacy/2026-04-22-opencode-context-agent.md
+ delete mode 100644 docs/plans/legacy/2026-04-23-context-agent-session-close-trigger.md
+ delete mode 100644 docs/plans/legacy/2026-04-23-fase1-context-agent-unificado.md
+ delete mode 100644 docs/plans/legacy/2026-04-23-fase2-superpowers-cleaner.md
+ delete mode 100644 docs/plans/legacy/2026-04-23-fase3-ar9av-compilador.md
+ delete mode 100644 docs/plans/legacy/2026-04-23-fase4-reset-rebuild.md
+ delete mode 100644 docs/plans/legacy/2026-04-23-fase5-index-nlm-feedback.md
+ delete mode 100644 docs/plans/legacy/2026-04-23-opencode-global-tool-routing.md
+ delete mode 100644 docs/plans/legacy/2026-04-28-mcp-global-fix.md.response
+ delete mode 100644 docs/plans/legacy/2026-04-28-merge-skills-stout.md
+ delete mode 100644 docs/plans/legacy/2026-04-28-notebooklm-stability-fix.md.response
+ delete mode 100644 docs/plans/legacy/2026-04-29-install-skillfish.md.response
+ delete mode 100644 docs/plans/legacy/plan_conversao_data_skills.md.response
+ delete mode 100644 docs/plans/legacy/plan_fix_notebooklm_final.md.response
+ delete mode 100644 docs/plans/legacy/plan_fix_notebooklm_unicode.md
+ delete mode 100644 docs/plans/legacy/plan_gemini_cli_builder_v2.md.response
+ delete mode 100644 docs/plans/legacy/plan_gemini_tools.md.response
+ delete mode 100644 docs/plans/legacy/plan_memory_split.md.response
+ delete mode 100644 docs/plans/legacy/plan_notebooklm_stability.md.response
+ delete mode 100644 docs/plans/legacy/plan_patch_client_py.md
+ delete mode 100644 docs/plans/legacy/plan_reset_chromedriver.md
+ delete mode 100644 docs/plans/plan_context_agent_manual_overrides.md.response
+ delete mode 100644 docs/plans/plan_notebooklm_mcp_fix.md.response
+ delete mode 100644 docs/specs/2026-05-14-spec-relatorio-roberto-executivo.md
+ delete mode 100644 docs/specs/2026-05-14-spec-roberto-summary-email.md
+ delete mode 100644 docs/specs/active/2026-04-30-governance-github-sessions.md
+ delete mode 100644 docs/specs/active/spec_context_agent_manual_overrides.md
+ delete mode 100644 docs/specs/active/spec_notebooklm_mcp_fix.md
+ delete mode 100644 docs/specs/active/spec_v2_diagnostico_mcp.md
+ delete mode 100644 docs/specs/active/spec_v3_reconciliacao_sistemica.md
+ delete mode 100644 docs/specs/active/spec_v5_unificacao.md
+ delete mode 100644 docs/specs/active/spec_v6_unificacao_historico_docs.md
+ delete mode 100644 docs/specs/active/spec_v7_blindagem_diretorios.md
+ delete mode 100644 docs/specs/legacy/2026-04-17-canary-deployment-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-17-knowledge-graph-obsidian-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-17-knowledge-graph-relations-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-17-orchestration-hooks-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-19-hot-cache-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-19-mission-stout-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-20-cortex-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-23-llm-wiki-reforma-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-23-opencode-global-tool-routing-design.md
+ delete mode 100644 docs/specs/legacy/2026-04-28-fix-chromedriver-mismatch.md
+ delete mode 100644 docs/specs/legacy/2026-04-28-fix-notebooklm-unicode-error.md
+ delete mode 100644 docs/specs/legacy/2026-04-28-mcp-global-fix.md
+ delete mode 100644 docs/specs/legacy/2026-04-28-notebooklm-encoding-fix.md
+ delete mode 100644 docs/specs/legacy/2026-04-28-patch-notebooklm-client-version.md
+ delete mode 100644 docs/specs/legacy/2026-04-29-conversao-knowledge-work-plugins.md
+ delete mode 100644 docs/specs/legacy/2026-04-29-install-skillfish.md
+ delete mode 100644 docs/specs/legacy/SKILL_ATLAS.md
+ delete mode 100644 docs/superpowers/plans/2026-04-17-canary-deployment.md
+ delete mode 100644 docs/superpowers/plans/2026-04-17-context-agent-artifact-copy.md
+ delete mode 100644 docs/superpowers/plans/2026-04-17-knowledge-graph-obsidian.md
+ delete mode 100644 docs/superpowers/plans/2026-04-17-knowledge-graph-relations.md
+ delete mode 100644 docs/superpowers/plans/2026-04-17-orchestration-hooks.md
+ delete mode 100644 docs/superpowers/plans/2026-04-19-hot-cache.md
+ delete mode 100644 docs/superpowers/plans/2026-04-20-cortex.md
+ delete mode 100644 docs/superpowers/plans/2026-04-22-opencode-context-agent.md
+ delete mode 100644 docs/superpowers/plans/2026-04-23-context-agent-session-close-trigger.md
+ delete mode 100644 docs/superpowers/plans/2026-04-23-fase1-context-agent-unificado.md
+ delete mode 100644 docs/superpowers/plans/2026-04-23-fase2-superpowers-cleaner.md
+ delete mode 100644 docs/superpowers/plans/2026-04-23-fase3-ar9av-compilador.md
+ delete mode 100644 docs/superpowers/plans/2026-04-23-fase4-reset-rebuild.md
+ delete mode 100644 docs/superpowers/plans/2026-04-23-fase5-index-nlm-feedback.md
+ delete mode 100644 docs/superpowers/plans/2026-04-23-opencode-global-tool-routing.md
+ delete mode 100644 docs/superpowers/plans/2026-04-28-fase1-context-agent-unificado-reformulado.md
+ delete mode 100644 docs/superpowers/plans/2026-04-28-fase1-correcoes.md
+ delete mode 100644 docs/superpowers/plans/2026-04-29-fase2-antigravity-overview-parser.md
+ delete mode 100644 docs/superpowers/plans/2026-04-29-fase2.5-bugs-do-save.md
+ delete mode 100644 docs/superpowers/specs/2026-04-17-canary-deployment-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-17-knowledge-graph-obsidian-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-17-knowledge-graph-relations-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-17-orchestration-hooks-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-19-hot-cache-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-19-mission-stout-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-20-cortex-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-23-llm-wiki-reforma-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-23-opencode-global-tool-routing-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-28-gemini-parser-context-agent-design.md
+ delete mode 100644 docs/superpowers/specs/2026-04-29-fase2.5-bugs-do-save.md
+ delete mode 100644 memory/ACTIVE_CONTEXT.md
+ delete mode 100644 memory/ARCHITECTURE.md
+ delete mode 100644 memory/HANDOFF_SESSION_040.md
+ delete mode 100644 memory/MEMORY.md
+ delete mode 100644 memory/PROJECT_REGISTRY.md
+ delete mode 100644 memory/context-agent/ACTIVE_CONTEXT.md
+ delete mode 100644 memory/context-agent/PROJECT_REGISTRY.md
+ delete mode 100644 memory/context-agent/archive/.gitkeep
+ delete mode 100644 memory/context-agent/archive/session-001-antigravity.md
+ delete mode 100644 memory/context-agent/cleaned/.gitkeep
+ delete mode 100644 memory/context-agent/context.db
+ delete mode 100644 memory/context-agent/context.db.bak-20260428
+ delete mode 100644 memory/context-agent/sessions/.gitkeep
+ delete mode 100644 memory/context-agent/sessions/session-004-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-005-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-006-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-007-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-008-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-009-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-010-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-011-antigravity.md
+ delete mode 100644 memory/context-agent/sessions/session-012-temp1.md
+ delete mode 100644 memory/context-agent/sessions/session-013-temp2.md
+ delete mode 100644 memory/context-agent/sessions/session-014-001.md
+ delete mode 100644 memory/context-agent/sessions/session-015-002.md
+ delete mode 100644 memory/context-agent/sessions/session-016-003.md
+ delete mode 100644 memory/context-agent/sessions/session-017-20260429-013112-antigravity-5d0b502e.md
+ delete mode 100644 memory/context-agent/sessions/session-018-20260429-014526-antigravity-92fb2f71.md
+ delete mode 100644 memory/context-agent/sessions/session-019-20260429-082037-claude-fd570560.md
+ delete mode 100644 memory/context-agent/sessions/session-020-20260429-103526-antigravity-da1e4c8b.md
+ delete mode 100644 memory/context-agent/sessions/session-021-20260429-103633-antigravity-c65b5dec.md
+ delete mode 100644 memory/context-agent/sessions/session-022-20260429-114321-antigravity-ac896e9c.md
+ delete mode 100644 memory/context-agent/sessions/session-023-20260429-115203-antigravity-bf3f7237.md
+ delete mode 100644 memory/context-agent/sessions/session-024-20260429-140502-antigravity-dd618d27.md
+ delete mode 100644 memory/context-agent/sessions/session-025-20260429-220318-antigravity-82301890.md
+ delete mode 100644 memory/context-agent/sessions/session-026-20260429-220353-antigravity-38d94097.md
+ delete mode 100644 memory/context-agent/sessions/session-027-20260429-233214-antigravity-e504a72c.md
+ delete mode 100644 memory/context-agent/sessions/session-028-20260430-000606-antigravity-0be0dfcd.md
+ delete mode 100644 memory/context-agent/sessions/session-029-20260430-112933-antigravity-2bd511eb.md
+ delete mode 100644 memory/context-agent/sessions/session-030-20260430-113307-antigravity-a7736552.md
+ delete mode 100644 memory/context-agent/sessions/session-031-20260430-115559-antigravity-5dc0033b.md
+ delete mode 100644 memory/context-agent/sessions/session-032-20260430-121737-antigravity-ce44a739.md
+ delete mode 100644 memory/context-agent/sessions/session-033-20260430-122531-antigravity-65c2fa73.md
+ delete mode 100644 memory/context-agent/sessions/session-034-20260430-130530-antigravity-598e1ca1.md
+ delete mode 100644 memory/context-agent/sessions/session-035-20260430-134330-antigravity-78f0aa4d.md
+ delete mode 100644 memory/context-agent/sessions/session-036-20260430-134338-antigravity-1dabad12.md
+ delete mode 100644 memory/context-agent/sessions/session-037-20260430-134351-antigravity-0610ad04.md
+ delete mode 100644 memory/context-agent/sessions/session-038-20260430-140034-antigravity-c7804233.md
+ delete mode 100644 memory/context-agent/sessions/session-039-20260430-154034-antigravity-a58f4418.md
+ delete mode 100644 memory/ecosystem.md
+ delete mode 100644 memory/mission.md
+ delete mode 100644 memory/preferences.md
+Process Group PGID: 35200

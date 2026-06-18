@@ -1,0 +1,1084 @@
+================================================================================
+SESSION: session-20260508-001402-claude-8a957dee.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~188min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- me ajude a resolver o problema:
+- Exit code 127
+- exe : INFORMAÇÕES: não foi possível localizar arquivos para o(s) padrão(ões) especificado(s)
+- (PowerShell completed with no output)
+- Exit code 1
+- ├── @piotr-agier/google-drive-mcp@2
+- C:\Users\victor
+- C:\Program Files\dotnet
+- Diretório: C:\Users\victor
+- eu utilizo o gemini como extensão do antigravity
+
+## Tarefas Concluídas
+- [x] with no output)
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\memory\context-agent\ACTIVE_CONTEXT.md` — write
+
+## Descobertas
+- Encontrei o problema. A extensão `google.gemini-cli-vscode-ide-companion` é apenas o **companion do IDE** — ela se conecta a um `gemini` CLI que deve estar instalado separadamente no sistema. O binári
+
+## Métricas
+- Input tokens: 120
+- Output tokens: 17,961
+- Cache tokens: 3,312,485
+- Mensagens: 156
+- Tool calls: 62
+
+---
+*Sessão anterior: [session-20260508-001314-claude-85b5c034](session-20260508-001314-claude-85b5c034.md)*
+
+================================================================================
+END SESSION: session-20260508-001402-claude-8a957dee.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-001445-claude-27805713.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~189min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- me ajude a resolver o problema:
+- Exit code 127
+- exe : INFORMAÇÕES: não foi possível localizar arquivos para o(s) padrão(ões) especificado(s)
+- (PowerShell completed with no output)
+- Exit code 1
+- ├── @piotr-agier/google-drive-mcp@2
+- C:\Users\victor
+- C:\Program Files\dotnet
+- Diretório: C:\Users\victor
+- eu utilizo o gemini como extensão do antigravity
+
+## Tarefas Concluídas
+- [x] with no output)
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\memory\context-agent\ACTIVE_CONTEXT.md` — write
+
+## Descobertas
+- Encontrei o problema. A extensão `google.gemini-cli-vscode-ide-companion` é apenas o **companion do IDE** — ela se conecta a um `gemini` CLI que deve estar instalado separadamente no sistema. O binári
+
+## Métricas
+- Input tokens: 127
+- Output tokens: 19,496
+- Cache tokens: 3,625,173
+- Mensagens: 165
+- Tool calls: 65
+
+---
+*Sessão anterior: [session-20260508-001402-claude-8a957dee](session-20260508-001402-claude-8a957dee.md)*
+
+================================================================================
+END SESSION: session-20260508-001445-claude-27805713.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-001520-claude-fb0ae74b.md
+================================================================================
+
+# Sessão 2026-05-07 — claude
+**Slug:** rippling-crafting-sifakis | **Duração:** ~804min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- eu não estou conseguindo abrir o meu arquivo de skills
+- Microsoft Windows [vers�o 10
+- (PowerShell completed with no output)
+- Diretório: C:\Users\victor
+- The user doesn't want to proceed with this tool use
+- [Request interrupted by user for tool use]
+- Output too large (322KB)
+- O volume na unidade C é OS
+- Exit code 1
+
+## Decisões
+- 60	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 61	    "a decisão foi", "ficou decidido", "definimos que",
+- 62	    "a abordagem será", "seguiremos com",
+- 63	    "we decided", "let's use", "we'll go with", "the decision is",
+- 64	    "we chose", "going with", "the approach will be", "decided to",
+- 39	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 40	    "a decisão foi", "ficou decidido", "definimos que",
+- 41	    "a abordagem será", "seguiremos com",
+- 44	    "we decided", "let's use", "we'll go with", "the decision is",
+- 45	    "we chose", "going with", "the approach will be", "decided to",
+
+## Tarefas Concluídas
+- [x] with no output)
+- [x] the work but flagged doubts. Read the concerns before proceeding. If the concerns are about correctness or scope, address them before review. If they're observations (e.g., "this file is getting large"), note them and proceed to review.
+- [x] Spec compliant - all requirements met, nothing extra
+- [x] Spec compliant now
+- [x] Approved
+- [x] successfully.
+- [x] (robocopy exit 1 = success with new files).
+- [x] (large browser profile, hundreds of files).
+- [x] — e o subagente encontrou bugs reais no config.py: o username estava errado (`renat` em vez de `victor.bernardi`) e o `SKILLS_ROOT` usava variável de ambiente literal sem expandir. Tudo corrigido e testado.
+
+## Tarefas Pendentes
+- [ ] Implementar promote-to-prod.ps1 para sincronizaÃ§Ã£o reversa de skills validadas. (prioridade: medium)
+- [ ] Refatorar FastMCP (upstream) para remover emojis nativos (opcional, patch atual Ã© suficiente). (prioridade: medium)
+- [ ] Acompanhar estabilidade do novo fluxo hÃ­brico nas prÃ³ximas sessÃµes (desde session-033) (prioridade: medium)
+- [ ] Implementar agendamento diÃ¡rio do Wave9_Deployment_OnePage.py no Windows Task Scheduler. (desde session-034) (prioridade: medium)
+- [ ] Restaurar fidelidade visual 1:1 com o Dashboard_Executivo_M6.html original (Bento/GSAP/Glow) mantendo o motor modular. (desde session-040) (prioridade: medium)
+- [ ] Monitorar performance do ScrollTrigger; Avaliar necessidade de cores adicionais para alertas criticos. (desde session-041) (prioridade: medium)
+
+## Arquivos Modificados
+- `C:\Users\victor.bernardi\.shared-ai-memory\docs\superpowers\plans\2026-05-07-ecosystem-reorganization.md` — write
+- `C:\Users\victor.bernardi\.claude\projects\C--Users-victor-bernardi--claude\memory\feedback_plan_location.md` — write
+- `C:\Users\victor.bernardi\.claude\projects\C--Users-victor-bernardi--claude\memory\MEMORY.md` — write
+- `C:\Users\victor.bernardi\.shared-ai-memory\docs\plans\active\2026-05-07-ecosystem-reorganization.md` — edit
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\config.py` — edit
+- `C:\Users\victor.bernardi\.shared-ai-memory\docs\specs\active\2026-05-07-docs-active-legacy-automation.md` — write
+- `C:\Users\victor.bernardi\.shared-ai-memory\docs\plans\active\2026-05-08-docs-archiver.md` — write
+
+## Descobertas
+- Encontrei. Seus planos ativos ficam em `docs/plans/active/`. Vou mover o arquivo e salvar a preferência em memória.
+- Task 0 concluída com uma descoberta importante: **`C:\Projetos\Stout\.gemini` é uma junction apontando para `C:\Motores-LLM\gemini-cli`** — não é uma pasta real. E `~/.gemini` já estava correto e atua
+
+## Métricas
+- Input tokens: 546
+- Output tokens: 121,213
+- Cache tokens: 27,777,232
+- Mensagens: 533
+- Tool calls: 164
+
+---
+*Sessão anterior: [session-20260508-001445-claude-27805713](session-20260508-001445-claude-27805713.md)*
+
+================================================================================
+END SESSION: session-20260508-001520-claude-fb0ae74b.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-001523-claude-d4f8f4bd.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~189min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- me ajude a resolver o problema:
+- Exit code 127
+- exe : INFORMAÇÕES: não foi possível localizar arquivos para o(s) padrão(ões) especificado(s)
+- (PowerShell completed with no output)
+- Exit code 1
+- ├── @piotr-agier/google-drive-mcp@2
+- C:\Users\victor
+- C:\Program Files\dotnet
+- Diretório: C:\Users\victor
+- eu utilizo o gemini como extensão do antigravity
+
+## Tarefas Concluídas
+- [x] with no output)
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\memory\context-agent\ACTIVE_CONTEXT.md` — write
+
+## Descobertas
+- Encontrei o problema. A extensão `google.gemini-cli-vscode-ide-companion` é apenas o **companion do IDE** — ela se conecta a um `gemini` CLI que deve estar instalado separadamente no sistema. O binári
+
+## Métricas
+- Input tokens: 133
+- Output tokens: 19,735
+- Cache tokens: 3,827,553
+- Mensagens: 172
+- Tool calls: 67
+
+---
+*Sessão anterior: [session-20260508-001520-claude-fb0ae74b](session-20260508-001520-claude-fb0ae74b.md)*
+
+================================================================================
+END SESSION: session-20260508-001523-claude-d4f8f4bd.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-092041-claude-1b7b9bc4.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~9min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- claude doctor
+- Command was manually backgrounded by user with ID: byqhw27yi
+
+## Métricas
+- Input tokens: 22
+- Output tokens: 1,231
+- Cache tokens: 271,166
+- Mensagens: 21
+- Tool calls: 4
+
+---
+*Sessão anterior: [session-20260508-001523-claude-d4f8f4bd](session-20260508-001523-claude-d4f8f4bd.md)*
+
+================================================================================
+END SESSION: session-20260508-092041-claude-1b7b9bc4.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-092056-claude-ac1f8bdf.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~9min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- claude doctor
+- Command was manually backgrounded by user with ID: byqhw27yi
+- qual o comando
+
+## Métricas
+- Input tokens: 25
+- Output tokens: 1,273
+- Cache tokens: 301,990
+- Mensagens: 23
+- Tool calls: 4
+
+---
+*Sessão anterior: [session-20260508-092041-claude-1b7b9bc4](session-20260508-092041-claude-1b7b9bc4.md)*
+
+================================================================================
+END SESSION: session-20260508-092056-claude-ac1f8bdf.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-092202-claude-7f800f9f.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~11min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- claude doctor
+- Command was manually backgrounded by user with ID: byqhw27yi
+- qual o comando
+- Diagnostics
+
+## Métricas
+- Input tokens: 28
+- Output tokens: 1,352
+- Cache tokens: 332,869
+- Mensagens: 25
+- Tool calls: 4
+
+---
+*Sessão anterior: [session-20260508-092056-claude-ac1f8bdf](session-20260508-092056-claude-ac1f8bdf.md)*
+
+================================================================================
+END SESSION: session-20260508-092202-claude-7f800f9f.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-092704-claude-acd33e14.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~16min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- claude doctor
+- Command was manually backgrounded by user with ID: byqhw27yi
+- qual o comando
+- Diagnostics
+- apenas isso esta com falha
+
+## Métricas
+- Input tokens: 31
+- Output tokens: 1,429
+- Cache tokens: 364,093
+- Mensagens: 27
+- Tool calls: 4
+
+---
+*Sessão anterior: [session-20260508-092202-claude-7f800f9f](session-20260508-092202-claude-7f800f9f.md)*
+
+================================================================================
+END SESSION: session-20260508-092704-claude-acd33e14.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-092723-claude-4efefa0e.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~16min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- claude doctor
+- Command was manually backgrounded by user with ID: byqhw27yi
+- qual o comando
+- Diagnostics
+- apenas isso esta com falha
+- vamos encerrar a sessao
+
+## Métricas
+- Input tokens: 34
+- Output tokens: 1,436
+- Cache tokens: 395,406
+- Mensagens: 29
+- Tool calls: 4
+
+---
+*Sessão anterior: [session-20260508-092704-claude-acd33e14](session-20260508-092704-claude-acd33e14.md)*
+
+================================================================================
+END SESSION: session-20260508-092723-claude-4efefa0e.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-092746-claude-b6233f6b.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~0min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+
+## Métricas
+- Input tokens: 4
+- Output tokens: 128
+- Cache tokens: 30,834
+- Mensagens: 6
+- Tool calls: 0
+
+---
+*Sessão anterior: [session-20260508-092723-claude-4efefa0e](session-20260508-092723-claude-4efefa0e.md)*
+
+================================================================================
+END SESSION: session-20260508-092746-claude-b6233f6b.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-093004-claude-34f09c36.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~0min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+
+## Métricas
+- Input tokens: 11
+- Output tokens: 754
+- Cache tokens: 138,707
+- Mensagens: 11
+- Tool calls: 2
+
+---
+*Sessão anterior: [session-20260508-092746-claude-b6233f6b](session-20260508-092746-claude-b6233f6b.md)*
+
+================================================================================
+END SESSION: session-20260508-093004-claude-34f09c36.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-095122-claude-d3f0cc5b.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~21min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+- precisamos atualizar a sua skill de context-agent para que ela siga os mesmos padrões do gemini cli e antigravity
+- Agora tenho todas as informações
+- md — Stout (Engenheiro de Ecossistema)
+- 2	name: context-agent
+
+## Tarefas Concluídas
+- [x] **Dois ACTIVE_CONTEXT.md divergentes** (Golden Copy atualizado em 09:30, Stout residual em 00:19)
+- [x] **Duplicação massiva de tarefas** (101 linhas vs 150 máximo, com 14x repetições idênticas)
+- [x] **Encoding UTF-8 corrompido** (acentos em "ruído" → "ruÃ­do")
+- [x] **config.py do Stout usa path ambíguo** (lê de múltiplos lugares)
+- [x] **Cópia residual em `Stout/memory/context-agent/`** (nunca sincronizada, nunca limpada)
+- [x] **Hook Stop em settings.json correto** (chama `context_manager.py save`)
+- [x] **Skill context-agent é junction** (viola regra GEMINI.md sobre "proibido junctions para skills")
+
+## Métricas
+- Input tokens: 26
+- Output tokens: 5,691
+- Cache tokens: 442,251
+- Mensagens: 24
+- Tool calls: 5
+
+---
+*Sessão anterior: [session-20260508-093004-claude-34f09c36](session-20260508-093004-claude-34f09c36.md)*
+
+================================================================================
+END SESSION: session-20260508-095122-claude-d3f0cc5b.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-100725-claude-651fa218.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~37min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+- precisamos atualizar a sua skill de context-agent para que ela siga os mesmos padrões do gemini cli e antigravity
+- Agora tenho todas as informações
+- md — Stout (Engenheiro de Ecossistema)
+- 2	name: context-agent
+- 1	# ANTIGRAVITY
+- Task #1 created successfully: Criar CLAUDE
+- Task #2 created successfully: Corrigir Bug 1: deduplicação em active_context
+
+## Decisões
+- 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 61	    "a abordagem será", "seguiremos com",
+- 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 63	    "we chose", "going with", "the approach will be", "decided to",
+
+## Tarefas Concluídas
+- [x] **Dois ACTIVE_CONTEXT.md divergentes** (Golden Copy atualizado em 09:30, Stout residual em 00:19)
+- [x] **Duplicação massiva de tarefas** (101 linhas vs 150 máximo, com 14x repetições idênticas)
+- [x] **Encoding UTF-8 corrompido** (acentos em "ruído" → "ruÃ­do")
+- [x] **config.py do Stout usa path ambíguo** (lê de múltiplos lugares)
+- [x] **Cópia residual em `Stout/memory/context-agent/`** (nunca sincronizada, nunca limpada)
+- [x] **Hook Stop em settings.json correto** (chama `context_manager.py save`)
+- [x] **Skill context-agent é junction** (viola regra GEMINI.md sobre "proibido junctions para skills")
+- [x] with no output)
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\CLAUDE.md` — write
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\active_context.py` — edit
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\config.py` — edit
+- `C:\Projetos\Stout\.claude\skills\context-agent\skill.md` — write
+- `C:\Projetos\Stout\.claude\settings.json` — edit
+
+## Descobertas
+- Encontrei o bug root cause. O `load_active_context()` não deduplica ao ler — então duplicatas já no arquivo são carregadas intactas e perpetuadas. Também há um bug secundário na linha 145: `source_ses
+- Encontrei outro bug no `config.py` — `CLAUDE_SESSION_DIR` aponta para `C--Users-victor-bernardi--claude` mas o projeto Stout salva sessões em `C--Projetos-Stout`:
+
+## Métricas
+- Input tokens: 127
+- Output tokens: 31,875
+- Cache tokens: 6,185,269
+- Mensagens: 180
+- Tool calls: 65
+
+---
+*Sessão anterior: [session-20260507-233329-claude-3aa7b338](session-20260507-233329-claude-3aa7b338.md)*
+
+================================================================================
+END SESSION: session-20260508-100725-claude-651fa218.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-101341-claude-3a27238f.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~43min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+- precisamos atualizar a sua skill de context-agent para que ela siga os mesmos padrões do gemini cli e antigravity
+- Agora tenho todas as informações
+- md — Stout (Engenheiro de Ecossistema)
+- 2	name: context-agent
+- 1	# ANTIGRAVITY
+- Task #1 created successfully: Criar CLAUDE
+- Task #2 created successfully: Corrigir Bug 1: deduplicação em active_context
+
+## Decisões
+- 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 61	    "a abordagem será", "seguiremos com",
+- 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 63	    "we chose", "going with", "the approach will be", "decided to",
+
+## Tarefas Concluídas
+- [x] **Dois ACTIVE_CONTEXT.md divergentes** (Golden Copy atualizado em 09:30, Stout residual em 00:19)
+- [x] **Duplicação massiva de tarefas** (101 linhas vs 150 máximo, com 14x repetições idênticas)
+- [x] **Encoding UTF-8 corrompido** (acentos em "ruído" → "ruÃ­do")
+- [x] **config.py do Stout usa path ambíguo** (lê de múltiplos lugares)
+- [x] **Cópia residual em `Stout/memory/context-agent/`** (nunca sincronizada, nunca limpada)
+- [x] **Hook Stop em settings.json correto** (chama `context_manager.py save`)
+- [x] **Skill context-agent é junction** (viola regra GEMINI.md sobre "proibido junctions para skills")
+- [x] with no output)
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\CLAUDE.md` — write
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\active_context.py` — edit
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\config.py` — edit
+- `C:\Projetos\Stout\.claude\skills\context-agent\skill.md` — write
+- `C:\Projetos\Stout\.claude\settings.json` — edit
+
+## Descobertas
+- Encontrei o bug root cause. O `load_active_context()` não deduplica ao ler — então duplicatas já no arquivo são carregadas intactas e perpetuadas. Também há um bug secundário na linha 145: `source_ses
+- Encontrei outro bug no `config.py` — `CLAUDE_SESSION_DIR` aponta para `C--Users-victor-bernardi--claude` mas o projeto Stout salva sessões em `C--Projetos-Stout`:
+
+## Métricas
+- Input tokens: 140
+- Output tokens: 34,306
+- Cache tokens: 7,045,998
+- Mensagens: 198
+- Tool calls: 71
+
+---
+*Sessão anterior: [session-20260508-100725-claude-651fa218](session-20260508-100725-claude-651fa218.md)*
+
+================================================================================
+END SESSION: session-20260508-101341-claude-3a27238f.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-101424-claude-af459c24.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~44min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+- precisamos atualizar a sua skill de context-agent para que ela siga os mesmos padrões do gemini cli e antigravity
+- Agora tenho todas as informações
+- md — Stout (Engenheiro de Ecossistema)
+- 2	name: context-agent
+- 1	# ANTIGRAVITY
+- Task #1 created successfully: Criar CLAUDE
+- Task #2 created successfully: Corrigir Bug 1: deduplicação em active_context
+
+## Decisões
+- 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 61	    "a abordagem será", "seguiremos com",
+- 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 63	    "we chose", "going with", "the approach will be", "decided to",
+
+## Tarefas Concluídas
+- [x] **Dois ACTIVE_CONTEXT.md divergentes** (Golden Copy atualizado em 09:30, Stout residual em 00:19)
+- [x] **Duplicação massiva de tarefas** (101 linhas vs 150 máximo, com 14x repetições idênticas)
+- [x] **Encoding UTF-8 corrompido** (acentos em "ruído" → "ruÃ­do")
+- [x] **config.py do Stout usa path ambíguo** (lê de múltiplos lugares)
+- [x] **Cópia residual em `Stout/memory/context-agent/`** (nunca sincronizada, nunca limpada)
+- [x] **Hook Stop em settings.json correto** (chama `context_manager.py save`)
+- [x] **Skill context-agent é junction** (viola regra GEMINI.md sobre "proibido junctions para skills")
+- [x] with no output)
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\CLAUDE.md` — write
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\active_context.py` — edit
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\config.py` — edit
+- `C:\Projetos\Stout\.claude\skills\context-agent\skill.md` — write
+- `C:\Projetos\Stout\.claude\settings.json` — edit
+
+## Descobertas
+- Encontrei o bug root cause. O `load_active_context()` não deduplica ao ler — então duplicatas já no arquivo são carregadas intactas e perpetuadas. Também há um bug secundário na linha 145: `source_ses
+- Encontrei outro bug no `config.py` — `CLAUDE_SESSION_DIR` aponta para `C--Users-victor-bernardi--claude` mas o projeto Stout salva sessões em `C--Projetos-Stout`:
+
+## Métricas
+- Input tokens: 146
+- Output tokens: 36,012
+- Cache tokens: 7,206,024
+- Mensagens: 201
+- Tool calls: 71
+
+---
+*Sessão anterior: [session-20260508-101341-claude-3a27238f](session-20260508-101341-claude-3a27238f.md)*
+
+================================================================================
+END SESSION: session-20260508-101424-claude-af459c24.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-101737-claude-1fdc0768.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~47min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+- precisamos atualizar a sua skill de context-agent para que ela siga os mesmos padrões do gemini cli e antigravity
+- Agora tenho todas as informações
+- md — Stout (Engenheiro de Ecossistema)
+- 2	name: context-agent
+- 1	# ANTIGRAVITY
+- Task #1 created successfully: Criar CLAUDE
+- Task #2 created successfully: Corrigir Bug 1: deduplicação em active_context
+
+## Decisões
+- 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 61	    "a abordagem será", "seguiremos com",
+- 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 63	    "we chose", "going with", "the approach will be", "decided to",
+- 65	- [session-20260509] 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 66	- [session-20260509] 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 67	- [session-20260509] 61	    "a abordagem será", "seguiremos com",
+- 68	- [session-20260509] 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 69	- [session-20260509] 63	    "we chose", "going with", "the approach will be", "decided to",
+
+## Tarefas Concluídas
+- [x] **Dois ACTIVE_CONTEXT.md divergentes** (Golden Copy atualizado em 09:30, Stout residual em 00:19)
+- [x] **Duplicação massiva de tarefas** (101 linhas vs 150 máximo, com 14x repetições idênticas)
+- [x] **Encoding UTF-8 corrompido** (acentos em "ruído" → "ruÃ­do")
+- [x] **config.py do Stout usa path ambíguo** (lê de múltiplos lugares)
+- [x] **Cópia residual em `Stout/memory/context-agent/`** (nunca sincronizada, nunca limpada)
+- [x] **Hook Stop em settings.json correto** (chama `context_manager.py save`)
+- [x] **Skill context-agent é junction** (viola regra GEMINI.md sobre "proibido junctions para skills")
+- [x] with no output)
+- [x] Ativo | — | Manter sincronização de sessões Antigravity. |
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\CLAUDE.md` — write
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\active_context.py` — edit
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\config.py` — edit
+- `C:\Projetos\Stout\.claude\skills\context-agent\skill.md` — write
+- `C:\Projetos\Stout\.claude\settings.json` — edit
+- `C:\Users\victor.bernardi\.shared-ai-memory\context-agent\ACTIVE_CONTEXT.md` — write
+
+## Descobertas
+- Encontrei o bug root cause. O `load_active_context()` não deduplica ao ler — então duplicatas já no arquivo são carregadas intactas e perpetuadas. Também há um bug secundário na linha 145: `source_ses
+- Encontrei outro bug no `config.py` — `CLAUDE_SESSION_DIR` aponta para `C--Users-victor-bernardi--claude` mas o projeto Stout salva sessões em `C--Projetos-Stout`:
+
+## Métricas
+- Input tokens: 161
+- Output tokens: 40,120
+- Cache tokens: 7,941,679
+- Mensagens: 214
+- Tool calls: 74
+
+---
+*Sessão anterior: [session-20260508-101424-claude-af459c24](session-20260508-101424-claude-af459c24.md)*
+
+================================================================================
+END SESSION: session-20260508-101737-claude-1fdc0768.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-102809-claude-fa86bd4a.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~58min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+- precisamos atualizar a sua skill de context-agent para que ela siga os mesmos padrões do gemini cli e antigravity
+- Agora tenho todas as informações
+- md — Stout (Engenheiro de Ecossistema)
+- 2	name: context-agent
+- 1	# ANTIGRAVITY
+- Task #1 created successfully: Criar CLAUDE
+- Task #2 created successfully: Corrigir Bug 1: deduplicação em active_context
+
+## Decisões
+- 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 61	    "a abordagem será", "seguiremos com",
+- 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 63	    "we chose", "going with", "the approach will be", "decided to",
+- 65	- [session-20260509] 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 66	- [session-20260509] 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 67	- [session-20260509] 61	    "a abordagem será", "seguiremos com",
+- 68	- [session-20260509] 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 69	- [session-20260509] 63	    "we chose", "going with", "the approach will be", "decided to",
+
+## Tarefas Concluídas
+- [x] **Dois ACTIVE_CONTEXT.md divergentes** (Golden Copy atualizado em 09:30, Stout residual em 00:19)
+- [x] **Duplicação massiva de tarefas** (101 linhas vs 150 máximo, com 14x repetições idênticas)
+- [x] **Encoding UTF-8 corrompido** (acentos em "ruído" → "ruÃ­do")
+- [x] **config.py do Stout usa path ambíguo** (lê de múltiplos lugares)
+- [x] **Cópia residual em `Stout/memory/context-agent/`** (nunca sincronizada, nunca limpada)
+- [x] **Hook Stop em settings.json correto** (chama `context_manager.py save`)
+- [x] **Skill context-agent é junction** (viola regra GEMINI.md sobre "proibido junctions para skills")
+- [x] with no output)
+- [x] Ativo | — | Manter sincronização de sessões Antigravity. |
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\CLAUDE.md` — write
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\active_context.py` — edit
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\config.py` — edit
+- `C:\Projetos\Stout\.claude\skills\context-agent\skill.md` — write
+- `C:\Projetos\Stout\.claude\settings.json` — edit
+- `C:\Users\victor.bernardi\.shared-ai-memory\context-agent\ACTIVE_CONTEXT.md` — write
+
+## Descobertas
+- Encontrei o bug root cause. O `load_active_context()` não deduplica ao ler — então duplicatas já no arquivo são carregadas intactas e perpetuadas. Também há um bug secundário na linha 145: `source_ses
+- Encontrei outro bug no `config.py` — `CLAUDE_SESSION_DIR` aponta para `C--Users-victor-bernardi--claude` mas o projeto Stout salva sessões em `C--Projetos-Stout`:
+
+## Métricas
+- Input tokens: 170
+- Output tokens: 42,154
+- Cache tokens: 8,196,154
+- Mensagens: 219
+- Tool calls: 75
+
+---
+*Sessão anterior: [session-20260508-101737-claude-1fdc0768](session-20260508-101737-claude-1fdc0768.md)*
+
+================================================================================
+END SESSION: session-20260508-102809-claude-fa86bd4a.md
+================================================================================
+
+================================================================================
+SESSION: session-20260508-102832-claude-721b7ee5.md
+================================================================================
+
+# Sessão 2026-05-08 — claude
+**Slug:**  | **Duração:** ~58min | **Modelo:** claude-sonnet-4-6
+
+## Tópicos
+- Base directory for this skill: C:\Users\victor
+- Launching skill: context-agent
+- # Briefing de Contexto
+- precisamos atualizar a sua skill de context-agent para que ela siga os mesmos padrões do gemini cli e antigravity
+- Agora tenho todas as informações
+- md — Stout (Engenheiro de Ecossistema)
+- 2	name: context-agent
+- 1	# ANTIGRAVITY
+- Task #1 created successfully: Criar CLAUDE
+- Task #2 created successfully: Corrigir Bug 1: deduplicação em active_context
+
+## Decisões
+- 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 61	    "a abordagem será", "seguiremos com",
+- 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 63	    "we chose", "going with", "the approach will be", "decided to",
+- 65	- [session-20260509] 59	    "decidimos", "vamos usar", "optamos por", "escolhemos",
+- 66	- [session-20260509] 60	    "a decisão foi", "ficou decidido", "definimos que",
+- 67	- [session-20260509] 61	    "a abordagem será", "seguiremos com",
+- 68	- [session-20260509] 62	    "we decided", "let's use", "we'll go with", "the decision is",
+- 69	- [session-20260509] 63	    "we chose", "going with", "the approach will be", "decided to",
+
+## Tarefas Concluídas
+- [x] **Dois ACTIVE_CONTEXT.md divergentes** (Golden Copy atualizado em 09:30, Stout residual em 00:19)
+- [x] **Duplicação massiva de tarefas** (101 linhas vs 150 máximo, com 14x repetições idênticas)
+- [x] **Encoding UTF-8 corrompido** (acentos em "ruído" → "ruÃ­do")
+- [x] **config.py do Stout usa path ambíguo** (lê de múltiplos lugares)
+- [x] **Cópia residual em `Stout/memory/context-agent/`** (nunca sincronizada, nunca limpada)
+- [x] **Hook Stop em settings.json correto** (chama `context_manager.py save`)
+- [x] **Skill context-agent é junction** (viola regra GEMINI.md sobre "proibido junctions para skills")
+- [x] with no output)
+- [x] Ativo | — | Manter sincronização de sessões Antigravity. |
+
+## Arquivos Modificados
+- `C:\Projetos\Stout\CLAUDE.md` — write
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\active_context.py` — edit
+- `C:\Users\victor.bernardi\.claude\skills\context-agent\scripts\config.py` — edit
+- `C:\Projetos\Stout\.claude\skills\context-agent\skill.md` — write
+- `C:\Projetos\Stout\.claude\settings.json` — edit
+- `C:\Users\victor.bernardi\.shared-ai-memory\context-agent\ACTIVE_CONTEXT.md` — write
+
+## Descobertas
+- Encontrei o bug root cause. O `load_active_context()` não deduplica ao ler — então duplicatas já no arquivo são carregadas intactas e perpetuadas. Também há um bug secundário na linha 145: `source_ses
+- Encontrei outro bug no `config.py` — `CLAUDE_SESSION_DIR` aponta para `C--Users-victor-bernardi--claude` mas o projeto Stout salva sessões em `C--Projetos-Stout`:
+
+## Métricas
+- Input tokens: 177
+- Output tokens: 45,385
+- Cache tokens: 8,803,714
+- Mensagens: 229
+- Tool calls: 78
+
+---
+*Sessão anterior: [session-20260508-102809-claude-fa86bd4a](session-20260508-102809-claude-fa86bd4a.md)*
+
+================================================================================
+END SESSION: session-20260508-102832-claude-721b7ee5.md
+================================================================================
+
+================================================================================
+SESSION: session-185-20260522-013831-claude-2e7cd83d.md
+================================================================================
+
+# Sessão 185 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- Promoção stout-init session-learning para global
+
+## Decisões
+- Promoção manual via Copy-Item após confirmar divergência com Compare-Object
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Descobertas
+- RESUMO: Verificação e promoção das modificações do stout-init feitas na última sessão Gemini CLI para o global (~/.shared-ai-memory/skills/stout-init). 4 arquivos promovidos e commitados.
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-184](session-184.md)*
+
+================================================================================
+END SESSION: session-185-20260522-013831-claude-2e7cd83d.md
+================================================================================
+
+================================================================================
+SESSION: session-186-20260522-014712-claude-5bf77a0c.md
+================================================================================
+
+# Sessão 186 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- Fix: junction stout-init corrigida
+
+## Decisões
+- Junction deve ser criada antes de qualquer arquivo em docs/ para evitar conflito de diretorio ja existente
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Descobertas
+- RESUMO: Corrigido caminho da junction em infra-logic.md (active\[projeto]) e adicionada criacao de junction na Phase 2 do scaffolding-protocols.md. Promovido ao global e commitado.
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-185](session-185.md)*
+
+================================================================================
+END SESSION: session-186-20260522-014712-claude-5bf77a0c.md
+================================================================================
+
+================================================================================
+SESSION: session-187-20260522-113849-claude-0b47b53b.md
+================================================================================
+
+# Sessão 187 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- Motor CEVAP: BUP como fonte unica + task scheduler
+
+## Decisões
+- CEVAP usa BUP como fonte unica — nao mais pipeline proprio
+- Dias_Inativo e Data_Ultima_Compra derivados do SF2010 ao vivo (qualquer consultor, sem filtro de data)
+- Valor_12m permanece do cache M3 — migracao para SF2010 rejeitada por complexidade do TES
+- Task CEVAP agendada 17:40 Seg-Sex com StartWhenAvailable para recuperar execucoes perdidas
+- BUP tem repositorio git proprio dentro do monorepo Inova — commits separados
+
+## Tarefas Pendentes
+- [ ] Validar formatacao de datas dd/mm/aaaa apos proxima execucao automatica (BUP 17:30, CEVAP 17:40) (prioridade: medium)
+- [ ] Investigar/corrigir LEICA GEOSYSTEMS zero CNPJ (bug pre-existente nos testes BUP) (prioridade: medium)
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Descobertas
+- RESUMO: Refatoracao completa do motor-cevap para usar BUP como fonte unica. CEVAP agora filtra BUP por Consultor==CEVAP, preservando 5 colunas do Filipe do OneDrive. BUP corrigido para unificar Data_Ultima_Compra e Dias_Inativo via SF2010 ao vivo. Task CEVAP_Ativacao criada no scheduler (17:40 Seg-Sex, StartWhenAvailable).
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-186](session-186.md)*
+
+================================================================================
+END SESSION: session-187-20260522-113849-claude-0b47b53b.md
+================================================================================
+
+================================================================================
+SESSION: session-188-20260522-135737-claude-ec9b5558.md
+================================================================================
+
+# Sessão 188 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- Orchestrator Preflight + promoted_at + stout-promote-skill
+
+## Decisões
+- preflight.py verifica dependencias de primeiro nivel antes de lancar qualquer skill via orchestrator / campo promoted_at adicionado a todos os registries (null=nunca promovida, ISO date=ultima promocao) / promote_runner.py exibe skills pendentes ao final e oferece continuar promovendo / docs_archiver ativo-para-legado abandonado pois move diretorios que sao alvos de junctions dos projetos / stout-promote-skill tem dependencies:[stout-skill-auditor] no registry
+
+## Tarefas Pendentes
+- [ ] Promover stout-promote-skill ao golden copy quando auditoria passar (prioridade: medium)
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Descobertas
+- RESUMO: Implementacao completa do plano 2026-05-22-orchestrator-preflight-promote-skill: preflight.py no orchestrator, campo promoted_at no registry, promote_skills.py atualiza promoted_at, stout-promote-skill criada com runner interativo e gate de aprovacao.
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-187](session-187.md)*
+
+================================================================================
+END SESSION: session-188-20260522-135737-claude-ec9b5558.md
+================================================================================
+
+================================================================================
+SESSION: session-189-20260522-135804-antigravity-23b63883.md
+================================================================================
+
+# Sessão 189 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- <USER_REQUEST>
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-188](session-188.md)*
+
+================================================================================
+END SESSION: session-189-20260522-135804-antigravity-23b63883.md
+================================================================================
+
+================================================================================
+SESSION: session-190-20260522-150958-antigravity-38ac1102.md
+================================================================================
+
+# Sessão 190 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- Consulta Cadastral e de Faturamento do BUP
+
+## Decisões
+- Remoção automática de zeros padding para busca de CPFs de 11 caracteres no banco Fabric
+
+## Tarefas Pendentes
+- [ ] Nenhuma tarefa pendente (prioridade: medium)
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Descobertas
+- RESUMO: Realizada a consulta do cadastro de clientes e da data da última compra de Gleisson Vieira e Evandro Lima no Microsoft Fabric. Resolvido o problema de padding de zeros nos CPFs.
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-189](session-189.md)*
+
+================================================================================
+END SESSION: session-190-20260522-150958-antigravity-38ac1102.md
+================================================================================
+
+================================================================================
+SESSION: session-191-20260522-172240-claude-ccc06072.md
+================================================================================
+
+# Sessão 191 — 2026-05-20
+**Slug:**  | **Duração:** ~52min | **Modelo:** 
+
+## Tópicos
+- M2 Faturamento - Reverse Engineering da Query PowerBI
+
+## Decisões
+- Valor alvo = Valor Líquido (não Valor Bruto). Targets: 2025=R99.8M, 2026=R5.4M, combinado=R75.2M (dentro de 0,045% do PowerBI R75.367M). Correção principal no extract.py: incluir OR FILIAL LIKE 03% no WHERE.
+
+## Tarefas Pendentes
+- [ ] Corrigir extract.py para incluir filiais 03XX. Verificar se há outras diferenças (TES, Centro Custo, VALOR_DO_PRODUTO vs Valor Líquido). Rodar M2 contra Fabric e comparar total com R75.2M. Investigar se VALOR_DO_PRODUTO no banco = Valor Bruto ou Valor Líquido. (prioridade: medium)
+
+## Arquivos Modificados
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\scratch_read_results.py` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\docs\\specs\\EMAIL_ENTREGA_CAMPANHA_UBERLANDIA.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\src\\main_campanha_uberlandia.py` — replace_file_content
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\examples\\campanha-comms.md` — write_to_file
+- `c:\\Projetos\\Inova\\projects\\campanha-lubrificantes-uberlandia-2026\\skills\\internal-comms\\SKILL.md` — replace_file_content
+
+## Descobertas
+- RESUMO: Sessão de grill para descobrir os filtros SQL que replicam o relatório PowerBI de vendas 2025-2026 no Motor M2 (02_Faturamento). Identificamos o problema principal: a query atual filtra apenas FILIAL LIKE 02% mas o relatório inclui também filiais 03XX (0301-Contagem e 0302-Pompéu). Os arquivos Excel exportados do PowerBI têm linhas Total embutidas que duplicam a soma — devem ser excluídas antes de calcular.
+
+## Métricas
+- Input tokens: 0
+- Output tokens: 0
+- Cache tokens: 0
+- Mensagens: 72
+- Tool calls: 55
+
+---
+*Sessão anterior: [session-190](session-190.md)*
+
+================================================================================
+END SESSION: session-191-20260522-172240-claude-ccc06072.md
+================================================================================
+

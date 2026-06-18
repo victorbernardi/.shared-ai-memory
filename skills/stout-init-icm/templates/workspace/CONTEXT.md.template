@@ -1,0 +1,27 @@
+---
+pipeline: <nome-do-projeto>
+layer: 2
+role: pipeline_contract
+stages: [<estagio1>, <estagio2>, ...]
+---
+
+# CONTEXT.md — Pipeline: <Nome>
+
+## Ordem dos Estágios
+
+| Ordem | Estágio | Propósito |
+|-------|---------|-----------|
+| 1 | `01_<estagio1>/` | <propósito em uma frase> |
+| 2 | `02_<estagio2>/` | <propósito em uma frase> |
+
+## Regras do Pipeline
+
+- **NUNCA** pule estágios. A ordem numérica é absoluta.
+- **NUNCA** avance para o próximo estágio sem que o atual atinja todos os critérios de conclusão.
+- **SEMPRE** consuma o output do estágio anterior como input do próximo.
+- **NUNCA** propague artefatos incompletos entre estágios.
+- **SEMPRE** carregue `..\..\GEMINI.md` (Regras 1-9) e `..\..\REFERENCES.md` (caminhos canônicos) antes de executar os estágios.
+
+## Handoff Final
+
+Após aprovação no último estágio, os artefatos são consolidados e disponíveis para arquivamento.
