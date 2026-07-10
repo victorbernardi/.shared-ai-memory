@@ -1,0 +1,60 @@
+{
+  "name": "stout-groq-transcriber",
+  "display_name": "Stout Groq Transcriber",
+  "version": "1.0.0",
+  "type": "utility",
+  "category": "transcrição",
+  "author": "Claude Code (Stout)",
+  "created": "2026-07-01",
+  "last_updated": "2026-07-01",
+  "description": "Transcrição de áudio via Groq Whisper v3 + LLaMA, com limpeza automática e estruturação (summary + action items)",
+  "long_description": "Skill para transcrição automática de áudio usando Groq Whisper v3 + LLaMA 3.3-70b. Inclui correção de termos via dicionário customizável, limpeza semântica automática, e extração de ação items.",
+  "tags": [
+    "audio",
+    "transcription",
+    "groq",
+    "whisper",
+    "nlm",
+    "meeting",
+    "português",
+    "inova"
+  ],
+  "triggers": [
+    "transcribe audio",
+    "transcrever áudio",
+    "convert meeting to text",
+    "gerar transcrição",
+    "meeting transcriber"
+  ],
+  "role": "transcrição automática com estruturação",
+  "dependencies": {
+    "groq": ">=1.5.0",
+    "python-dotenv": ">=1.0.0"
+  },
+  "entrypoint": "scripts/transcribe.py",
+  "status": "active",
+  "tier": 3,
+  "docs": {
+    "quickstart": "docs/QUICKSTART.md",
+    "full": "SKILL.md"
+  },
+  "metrics": {
+    "accuracy": "98-99%",
+    "latency": "2-3 min per 10min audio",
+    "cost": "$0.02-0.03 per 10min"
+  },
+  "config": {
+    "corrections_file": "config/corrections.json",
+    "models": {
+      "whisper": "whisper-large-v3",
+      "cleanup": "llama-3.3-70b-versatile"
+    }
+  },
+  "roadmap": {
+    "v1.1": "Diarização (múltiplos falantes automáticos)",
+    "v1.2": "API REST",
+    "v1.3": "Batch processing",
+    "v1.4": "Dashboard de análise",
+    "v2.0": "Armazenamento em banco com busca"
+  }
+}

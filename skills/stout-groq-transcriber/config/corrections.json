@@ -1,0 +1,37 @@
+{
+  "_comment": "Dicionário de correções para transcrição Groq — Inova Equipamentos",
+  "_instructions": "Adicione pares 'erro': 'correção' para termos que o Whisper frequentemente erra. Use com moderação — correções automáticas são aplicadas ANTES da limpeza via LLM.",
+
+  "Arca": "Arka",
+  "arca": "Arka",
+  "indopaycom": "Indopacom",
+  "Indopaycom": "Indopacom",
+  "indo pay com": "Indopacom",
+
+  "CRC": "CRC",
+  "MTBF": "MTBF",
+  "MTTR": "MTTR",
+  "manutenção": "manutenção",
+
+  "CVA": "CVA",
+  "CSC": "CSC",
+  "TI": "TI",
+
+  "Uberlândia": "Uberlândia",
+  "Serra": "Serra",
+  "Contagem": "Contagem",
+  "Tanguá": "Tanguá",
+
+  "Leandro": "Leandro",
+  "Victor": "Victor",
+  "Pedro": "Pedro",
+  "Bianca": "Bianca",
+  "João": "João",
+  "Arthur": "Arthur",
+  "Adria": "Adria",
+  "Eberton": "Eberton",
+
+  "telecadeira": "telecadeira",
+  "retroescavadeira": "retroescavadeira",
+  "pá carregadeira": "pá carregadeira"
+}
