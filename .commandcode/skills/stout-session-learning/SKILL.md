@@ -1,5 +1,3 @@
-[ARQUIVADA: workspace ICM - 2026-05-27]
-
 ---
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
 name: stout-session-learning
@@ -30,20 +28,26 @@ Ela atua integrada por ganchos (`pre_action`) ao comando de salvamento do `conte
 ## 🚀 Como Usar
 
 ### Execução Automática (Pipeline Unificado)
+
 A skill é acionada autonomamente como `pre_action` de qualquer intenção de fechar sessão ou salvar contexto:
+
 ```bash
 # O motor CDD interceptará a intenção e executará o pipeline
 "salvar contexto" ou "fechar sessão"
 ```
 
 ### Invocação Direta da Skill
+
 Para acionar especificamente a destilação de aprendizados da sessão atual de forma manual:
+
 ```bash
 python skills/stout-session-learning/scripts/stout-memory-capture.py
 ```
 
 ### Geração de Relatórios e Consultas
+
 O script local suporta argumentos de interface para consultas e visualização tática:
+
 ```bash
 # Consultar aprendizados indexados por relevância lexical
 python skills/stout-session-learning/scripts/stout-memory-capture.py --query "PermissionError"

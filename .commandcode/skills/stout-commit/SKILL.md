@@ -2,7 +2,7 @@
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
 name: stout-commit
 description: "Padrão Sentry de Commits para o ecossistema Stout. Garante mensagens estruturadas, rastreabilidade de issues e segurança de branch. Triggers: commit, git commit, salvar mudanças, enviar código, mensagem de commit, fechar issue."
-version: 1.1.0
+version: 1.2.0
 author: Arquiteto Stout
 tier: 2
 source: custom
@@ -28,15 +28,38 @@ Before committing, always check the current branch:
 git branch --show-current
 ```
 
-**If you're on `main` or `master`, you MUST create a feature branch first** — unless the user explicitly asked to commit to main. Do not ask the user whether to create a branch; just proceed with branch creation. The `create-branch` skill will still propose a branch name for the user to confirm.
+**Se estiver em `main` ou `master`:**
 
-Use the `create-branch` skill to create the branch. After `create-branch` completes, verify the current branch has changed before proceeding:
+- **Trabalho rotineiro:** Crie um branch de feature seguindo o padrão Sentry. Não pergunte ao usuário; prossiga diretamente.
+- **Merge direto legítimo (releases, hotfixes, quando o usuário explicitamente solicitou):** Adicione `Allow-Main: true` ao footer do commit — o hook `main-guard` exige este token para permitir o commit em `main`/`master`.
+
+### Criar Branch (quando necessário)
+
+Se estiver em `main`/`master` e for trabalho rotineiro, crie um branch seguindo o padrão Sentry:
+
+```bash
+git checkout -b <type>/<issue>-<descricao-curta>
+```
+
+**Exemplos:**
+- `feat/SENTRY-1234-nova-feature`
+- `fix/GH-5678-correcao-bug`
+- `ref/JIRA-9012-refatoracao`
+
+Se não houver issue associado, use o padrão:
+```bash
+git checkout -b <type>/<descricao-curta>
+```
+
+**Exemplo:** `feat/add-user-auth`
+
+Após criar o branch, verifique que o branch mudou antes de continuar:
 
 ```bash
 git branch --show-current
 ```
 
-If still on `main` or `master` (e.g., the user aborted branch creation), stop — do not commit.
+Se ainda estiver em `main` ou `master` e nenhum `Allow-Main: true` foi solicitado, pare — não faça commit.
 
 ## Branch Policy Validation (Ecossistema Stout)
 
@@ -112,6 +135,12 @@ Refs LINEAR-ABC-123
 
 - `Fixes` closes the issue when merged
 - `Refs` links without closing
+
+## Footer: Escape Hatches (Ecossistema Stout)
+
+| Token | Quando usar |
+|-------|-------------|
+| `Allow-Main: true` | Commit direto em `main`/`master` legítimo (release, hotfix). Obrigatório — sem este token o hook `main-guard` bloqueia o commit. |
 
 ## AI-Generated Changes
 
