@@ -1,4 +1,4 @@
-# Contexto Ativo — Atualizado em 2026-06-15 16:47
+# Contexto Ativo — Atualizado em 2026-06-09 09:45
 
 ## Projetos Ativos
 | Projeto | Status | Última Sessão | Próxima Ação |
@@ -7,7 +7,6 @@
 | **Inova John Deere** | 📅 Em Espera | — | Prosseguir com M1-M4 após estabilização do motor. |
 | **Configuration-Driven Development** | ✅ Ativo | — | Finalizar Auditoria e Sincronização de Skills. |
 | **Context Agent** | ✅ Ativo | — | Manter sincronização de sessões Antigravity. |
-| Context Agent | active | — | — |
 
 ## Tarefas Pendentes
 ### Média Prioridade
@@ -40,7 +39,7 @@
 - [ ] Promover sandbox para produção: reescrever extract.py com query_loader; Ajustar run.py para logar VALOR_LIQUIDO; Investigar resíduo +-1.5% por ano (fronteira out/nov 2025); Replicar .gitignore padrão nos outros stages do pipeline (desde session-194)
 - [ ] Consolidar as 10 copias do stout-memory-capture.py em uma unica source of truth com symlinks (desde session-197)
 - [ ] Verificar definição de vw_VENDAS (sp_helptext) para rastrear origem de COD_GRUPO; Solicitar snapshot corrigido com CBIT ao responsável do Fabric; Promover motor para produção após decisão sobre resíduo (desde session-198)
-- [ ] Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO; Solicitar reprocessamento do snapshot com dados CBIT de Jan-Oct 2025; Promover motor para produção (desde session-199)
+- [ ] Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO; Solicitar reprocessamento do snapshot com CBIT ao responsável Fabric; Promover motor para produção (desde session-199)
 - [ ] Investigar NULL DESCRICAO_CC: R5.8M no motor sem CC correspondente no BI — query Fabric para identificar filiais/origem. Investigar anomalia LEIC: R.4M no motor vs R/usr/bin/bash.016M no BI — verificar se é classificação correta ou ruído. Executar sp_helptext vw_VENDAS para rastrear origem de COD_GRUPO e verificar se existe fonte histórica para CBIT. Solicitar ao responsável do Fabric reprocessamento do snapshot com dados CBIT de Jan-Oct 2025. (desde session-200)
 - [ ] Nenhuma pendencia tecnica restou no pipeline de Faturamento. (desde session-201)
 - [ ] Aguardar ~24h ativação app ML no DevCenter e testar OAuth com: python scripts/02-pesquisa/adaptadores/ml_auth.py. Após ML funcionar: rodar scraper.py com lista_pecas.csv completa. Limpar qa_test_ml_api.py da raiz após validação. (desde session-202)
@@ -55,7 +54,7 @@
 - [ ] Sessão 02_Faturamento: renomear branch fix/stout-promote-antigravity-brain-path (commits faturamento já em feat/02-faturamento-filtros-whitelist); revisar branch-policy.yaml gerados se needed; wiki-ingest para sincronizar vault (desde session-208)
 - [ ] Sessão 02_Faturamento: decidir o que fazer com fix/stout-promote-antigravity-brain-path (branch que contém 3 commits de faturamento na história — responsabilidade da sessão de faturamento, não desta) (desde session-209)
 - [ ] Implementar extract_protheus.py com query SD2010 + JOIN SA1010/SA2010 filtrando 3 CNPJs + CCs CSN + D2_TP='ME' + periodo 2022+|Integrar no run.py entre extract e filtros|Remover f_vendas_hist31102025 da query SQL (substituir pelo SD2010)|Atualizar testes|Solicitar a TI replicacao das tabelas faltantes do Protheus para o Fabric (desde session-210)
-- [ ] Solicitar a TI replicacao completa das tabelas Protheus (SD2010/SF2010) para o Fabric | Apos replicacao: criar extract_protheus.py com query SD2010+SA1010 | Apos replicacao: substituir f_vendas_hist por SD2010 e-mails de terca, quarta e quinta nao foram enviados por falta de tempo. (desde session-211)
+- [ ] Solicitar a TI replicacao completa das tabelas Protheus (SD2010/SF2010) para o Fabric | Apos replicacao: criar extract_protheus.py com query SD2010+SA1010 | Apos replicacao: substituir f_vendas_hist por SD2010 em vendas_pecas_construcao.sql | Apos replicacao: integrar no run.py e atualizar testes (desde session-211)
 - [ ] Reativar INOVA_DAILY_EMAIL após validar correção do M2: Enable-ScheduledTask -TaskName INOVA_DAILY_EMAIL (desde session-212)
 - [ ] Investigar branch fix/stout-promote-antigravity-brain-path com 3 commits do 02_Faturamento (responsabilidade da sessão 02_Faturamento) (desde session-213)
 - [ ] **[M3-AUDITORIA] Inclusão do Audit M3/M0:** Incluir o script de auditoria `audit_m3_m0_granularity.py` na validação contínua e no runner principal do motor M3 para auditoria automática da tabela e prevenção de desvios de granularidade. (desde session-214)
@@ -69,65 +68,58 @@
 - [ ] Investigar NAN SERVICOS IRRIGACAO. Investigar filial 302. Investigar gap de imposto global (filial 203, TES). (desde session-223)
 - [ ] Testar stout-skill-manager end-to-end com skillfish real. Promover stout-skill-manager para golden copy via stout-promote-skill. Atualizar SKILL.md do stout-create-skill para referenciar novo fluxo com stout-skill-manager antes de fabricar. (desde session-226)
 - [ ] Filtrar promote_skills.py por skill escolhida (hoje promove tudo do PROMOTION_MAP); Remover/inativar stout-governance-orchestration-engine do registry (inactive); Migrar stout-brainstorming e stout-cdd-orchestrator para .shared-ai-memory/skills permanentemente (desde session-227)
-- [ ] stash{0} faturamento-auditoria-bi: verificar se consolidate_cevap.py +93 linhas e trabalho valido ou duplicado (desde session-229)
-- [ ] stash{1} potencial-forecasted: verificar se transform.py ja esta e no master antes de descartar (branch mergeada) (desde session-229)
-- [ ] Merge feat/cooldown-aging-backfill -> master na sessao do cooldown-aging (desde session-229)
-- [ ] Proxima tarefa: 2026-06-09-plano-implementacao-preenchimentos.md em lead-csc-pops (branch feat/cevap-operational-steps) (desde session-230)
-- [ ] Avaliar 6 fontes com alerta de recencia: Cadastro Clientes, Seedz, InovaPay, Orcamentos Abertos/Cancelados, BUP Pos-Venda (desde session-231)
-- [ ] Taxa cobertura oficina M3 = 0% - investigar imputacao de horimetro (desde session-231)
-- [ ] Fazer merge ou PR da branch feat/pipeline-potencial-refresh (desde session-231)
-- [ ] Merge feat/bup-cevap-entrada-dates para master no BUP standalone|Items 2-5 do handoff: threshold Dias_Inativo<90, path cidade_mesoregiao, resgate_dados_v4.py, orquestrador (desde session-232)
-- [ ] Merge fix/cevap-kpis-n-orcamento-html-report em main quando aprovado (desde session-233)
-- [ ] Sincronizar CEVAP_ATIVACAO no OneDrive apos usuario fechar Excel e rodar patch_n_orcamento.py (desde session-233)
-- [ ] Aging por consultor mostra N/A ate BUP rodar com Fabric e gerar cevap_entrada_dates.json (desde session-233)
-- [ ] Corrigir CLAUDE_SESSION_DIR no config do context-agent para apontar para ~/.claude/projects|Commitar mudancas pendentes no lead-csc-pops (rename Data_Primeiro_Alerta->Data_Alerta) na branch correta|Atualizar fontes ausentes no BUP: Cadastro Clientes, Orcamentos Abertos/Cancelados, Detalhamento Pecas 2025/2026 (desde session-234)
-- [ ] Rodar motor M2 antes de gerar daily para ter dados atualizados. Substituir Excel BI por detalhamento_vendas_2026.parquet no audit_bi.py quando motor Detalhamento-Pecas for corrigido. (desde session-235)
-- [ ] Nenhuma pendencia nesta sessao; continuar o desenvolvimento de consultores na branch feat/de-volta-consultor-cnpj. (desde session-237)
-- [ ] Deletar branch feat/lead-csc-pops-kpi-mensal-consultor|Monitorar novos ciclos encerrados no historico (desde session-238)
-- [ ] Rodar run.py --ano 2026 na proxima sessao; Validar soma Valor Liquido 2026 contra referencia manual (desde session-239)
-- [ ] Testar generate_leads.py end-to-end apos mudancas de schema Serial_Number com underscore (desde session-241)
-- [ ] Replicar design system CEVAP para outros relatorios HTML da suite (ex: De-volta-para-inova) (desde session-242)
-- [ ] **Task 2:** Refatoração da Autenticação (`authenticate.py`) (desde session-243)
-- [ ] **Task 3:** Refatoração da Extração (`extract.py`) (desde session-243)
-- [ ] **Task 4:** Ajuste do Range e Sobrescrita de 2026 (`run.py`) (desde session-243)
-- [ ] **Task 5:** Re-autenticação Interativa (Login Inicial) (desde session-243)
-- [ ] **Task 6:** Execução da Carga de Produção de 2026 e Validação (desde session-243)
-- [ ] Nenhuma (desde session-244)
-- [ ] **Task 2:** Refatoração da Autenticação (`authenticate.py`) (desde session-246)
-- [ ] **Task 3:** Refatoração da Extração (`extract.py`) (desde session-246)
-- [ ] **Task 4:** Ajuste do Range e Sobrescrita de 2026 (`run.py`) (desde session-246)
-- [ ] **Task 5:** Re-autenticação Interativa (Login Inicial) (desde session-246)
-- [ ] **Task 6:** Execução da Carga de Produção de 2026 e Validação (desde session-246)
-- [ ] **Task 2:** Refatoração da Autenticação (`authenticate.py`) (desde session-247)
-- [ ] **Task 3:** Refatoração da Extração (`extract.py`) (desde session-247)
-- [ ] **Task 4:** Ajuste do Range e Sobrescrita de 2026 (`run.py`) (desde session-247)
-- [ ] **Task 5:** Re-autenticação Interativa (Login Inicial) (desde session-247)
-- [ ] **Task 6:** Execução da Carga de Produção de 2026 e Validação (desde session-247)
-- [ ] feat/lead-csc-pops-validacao-venda-nf: Grupo A cego ate P1 (ler Num_NF da planilha dos consultores) (desde session-248)
-- [ ] Reconectar Power Query em peças.xlsx apontando para base.xlsx no OneDrive (desde session-249)
-- [ ] Definir se Num NF entra dentro da tabela PQ ou permanece coluna manual (desde session-249)
-- [ ] Adicionar backup automático do peças.xlsx ao pipeline (desde session-249)
-- [ ] Remover arquivos legados de data/output/ (orcamentos_abertos_enriquecidos.xlsx e tabela_orçamentos_cancelados.xlsx) após validação downstream (desde session-250)
+- [ ] Migrar o Motor M1 para o padrao de imports isolados caso utilize config dinamico; realizar a auditoria dos elos de outros mega-grupos usando o novo linkage tracker. (desde session-228)
+- [ ] Verificar se promote_runner.py ja passa --skill corretamente para promote_skills.py (validar integracao end-to-end do argumento novo) (desde session-229)
+- [ ] Monitorar primeiro ciclo semanal de producao com feedbacks reais do comercial (desde session-230)
+- [ ] Spike modelo preditivo horimetro: treinar regressor nas RECENTES (1792 maquinas, 71 colunas POPS), validar MAE holdout vs baseline mediana — ver memory project_horimetro_modelo_spike;Paths hardcoded: ~43 scripts com C:\Projetos\Inova\Potencial Clientes — migrar para shared/config.py;Quarentena _pre_migration: vencida desde 2026-05-26, liberar para delete;Modulos shared: segmentation_logic e inova_audit_core ainda com source em 00_Cerebro_Inova em vez de shared/;Cross-stage audit: replicar auditoria de integridade do M3 em M1->M0, M2->M0, M4->M3, M5->M4;BUP+CEVAP: exportacao PowerBI manual bloqueia H2.1 do Inova Daily;Inova Daily: roadmap H1->H4 priorizado (H2.2 entregue) (desde session-231)
+- [ ] Nenhuma tarefa pendente desta sessao — todas as 3 tasks do plano concluidas (desde session-232)
+- [ ] Executar context-agent save ao encerrar sessão; Monitorar execução da task Inova\RecencyReport às 16:50 no dia seguinte; Avaliar adicionar M1 ao recency também no generate_recency_report.py se label ainda divergir (desde session-233)
+- [ ] Fechar branch feat/bup-rebranding-and-logic-stabilization via PR para main quando ciclo de estabilizacao concluir. (desde session-234)
+- [ ] Religar INOVA_DAILY_EMAIL após validação do usuário: Enable-ScheduledTask -TaskName INOVA_DAILY_EMAIL (desde session-235)
+- [ ] validate_pipeline.py baseline pode divergir após próxima refatoração de schema — monitorar (desde session-235)
+- [ ] Concluir a fase Green do TDD atualizando load.py e run.py; Atualizar o script generate_recency_report.py para incluir a nova fonte de cache (desde session-236)
+- [ ] Nenhuma tarefa pendente neste escopo (desde session-237)
+- [ ] Nenhuma pendente no pipeline de dados para este tópico. (desde session-238)
+- [ ] Monitorar execução do pipeline M0-M5 (desde session-240)
+- [ ] Validar dashboard HTML com dados reais do OneDrive. Rodar cross-reference com Fabric para popular conversao_audit.json (desde session-241)
+- [ ] Atualizar copia local skills/stout-commit no projeto CDD (ainda em v1.0.0, global esta em v1.2.0) (desde session-242)
+- [ ] Aguardar aprovacao /build do plan_v2; Comecar pelo Tier 0 (hooks context_manager.py/save_hook.py/google-dev-knowledge-mcp.py) em coexistencia; 02_Faturamento e estagios 00-05/99 nao tem requirements.txt - gerar via pipreqs; investigar NotebookLM (2048 .py = ambiente embarcado?) antes de tratar como projeto; conferir wheels torch p/ 3.12 no whisper_repo (desde session-243)
+- [ ] T4.2: Desinstalar Anaconda via appwiz.cpl (ação humana). T4.3-T4.7: Limpeza pós-desinstalação (PATH, PROFILE, VS Code, pastas residuais, Jupyter). T3.2: Período de coexistência — usar projetos via uv run para validar. Tier 3 pendente: notebooklm-mcp-cli, Transcricoes, Refatorar-pipeline, NotebookLM. (desde session-244)
+- [ ] Testar wrapper global em outros projetos Inova; Verificar se o agentic agent respeita as novas regras na proxima sessao (desde session-246)
+- [ ] Adicionar .gitignore em motor-cevap/data/ para excluir arquivos .xlsx/.xlsm de saída do versionamento (desde session-247)
+- [ ] Testar sincronizacao quando pecas.xlsm estiver aberto por consultor (fluxo de failsafe). Considerar notificacao ao consultor apos sincronizacao automatica. (desde session-248)
+- [ ] Verificar se crash persiste apos limpeza de processos (desde session-249)
+- [ ] Verificar visualmente o layout no OneDrive com o Filipe (desde session-252)
+- [ ] Testar claude --version no terminal apos recarregar PROFILE; Testar command-code apos fix do loop infinito; Reload Window no VS Code confirmar erro de activate sumiu; Migracao UV F2.5 Tier 3; Migracao UV F3.6 stout-init; Executar GATE GO/NO-GO da migracao UV (desde session-253)
+- [ ] Verificar a aderencia das tratativas comerciais nas proximas rodadas semanais do pipeline. (desde session-254)
+- [ ] branch stout-commit: feat/skills-uv-bootstrap está com commits não mergeados (acima da master). branch potencial-clientes: feat/documentacao-e-protecao-cevap-v5 tem alterações nos requirements.txt dos 8 estágios (pyarrow, openpyxl) não commitadas. (desde session-255)
+- [ ] Nenhuma tarefa pendente desta sessão. (desde session-257)
+- [ ] Realizar o primeiro login interativo da Graph API no host de producao para gerar a permissao persistente de compartilhamento da planilha CEVAP. (desde session-259)
+- [ ] Validacao visual e fisica no OneDrive concluida com sucesso. (desde session-260)
+- [ ] Merge feat/auditoria-preenchimento-leads em master (usar git stash --include-untracked antes); Organizar pendências dos outros projetos em branches específicas por projeto; Track 3: fix extract.py para usar Horimetro_Final ao invés de Forecasted Machine Hours (desde session-261)
+- [ ] Monitorar impacto da renomeação de colunas no motor M4 (Estratégia); Integrar schema_sensor.py nos demais motores (M0, M1, M2, M4, M5). (desde session-262)
+- [ ] Distribuir planilha leads_campanha_de_volta_oficina_real.xlsx para supervisores. Monitorar conversao dos kits de revisao subsididados pela JD. (desde session-263)
+- [ ] Avaliar se WO_ANCHOR deve ter piso de 50% da mediana do modelo para casos de máquinas leves (ex: 130P). Revisar regras em próxima sessão após execução real do pipeline. (desde session-265)
+- [ ] Implementar o teste e o esqueleto de historico (Task 1 do plano); Integrar no run.py (Task 2 do plano); Configurar gitignore local (Task 3 do plano); Rodar testes e validacao final. (desde session-266)
 
 ## Decisões Recentes
-- [session-248] ConsultorMap v5.6: Fabric-first + _consultar() helper + orc_aberto corrigido + lookup decisivo
-- [session-248] Fast-forward via git update-ref resolve merge quando .commandcode bloqueia git checkout
-- [session-249] Step [5c] removido do run.py — Python não sobrescreve mais peças.xlsx
-- [session-249] peças.xlsx gerenciado pelo Power Query que lê de leads-csc-pops-base.xlsx
-- [session-249] base.xlsx já contém Retorno+Obs+Num NF via reentrada — suficiente como fonte do PQ
-- [session-249] openpyxl direto em pasta OneDrive causa ReparsePoint — padrão correto é shutil.copy2
-- [session-250] OUTPUT_DIR único substituído por TEMP_DIR (data/output/) + OUTPUT_DIR_ABERTOS (01_abertos/output/) + OUTPUT_DIR_CANCELADOS (02_cancelados/output/)
-- [session-250] generate_recency_report.py atualizado para ler dos novos paths ICM — retorna Atualizado Hoje após o fix
-- [session-250] Scripts src/ permanecem compartilhados entre estágios — sem duplicação
-- [session-250] Duas branches mergeadas em master via --no-ff: feat/motor-orcamentos-icm-migrate e fix/motor-orcamentos-icm-output-paths
-- [session-250] Configuração do Git Bash adicionado no PATH de usuário do Windows
+- [session-255] Tier 3 (notebooklm, Transcricoes, etc.) não precisa de .venv individual — usa Stout\.venv centralizado. Apenas CDD tem .venv próprio. pyarrow é dependência obrigatória para todos os estágios do pipeline (parquet support). uv run --project não funciona sem pyproject.toml — usar .venv\Scripts\python.exe diretamente.
+- [session-257] 1. Adicionado CLAUDE_CODE_ENTRYPOINT=cli ao perfil PowerShell. 2. Criada função wrapper 'claude' no perfil que limpa CLAUDECODE='' e CLAUDE_CODE_ENTRYPOINT=cli antes de chamar claude.cmd. 3. Alterado enableInteractiveShell de false para true no settings.json do Antigravity IDE (~/.gemini/settings.json).
+- [session-259] Inicializar a coluna E-mail como string vazia no consolidate_cevap.py caso esteja ausente no BUP, mantendo o contrato de 20 colunas Gold V5; Usar try-catch SMTP no scheduler_daily.ps1 para evitar quebras de envio; Criar script share_onedrive_leads.ps1 baseado em Graph API com Device Code e fallback dry-run.
+- [session-260] Utilizar script isolado recover_historical_leads.py. Implementacao de protecao contra sobreposicao de campos ja preenchidos.
+- [session-261] Regra A: preserva Retorno/Obs quando floor(Delta_Horas/intervalo) igual; Regra B: fechar_ciclo por tipo e lead entra limpo quando cruza novo threshold; carry-forward (df_pend_mapeado) removido completamente; ciclos=[] em comparar_track2.py para não mutar JSON; merge em master bloqueado por pendências de outras sessões no workspace
+- [session-262] Renomear Horimetro_Final para Horimetro_Anual_Final; Expor Horimetro_Total_Acumulado no output de chassi; Implementar validação ativa de schema (strict mode) via shared/schema_sensor.py; Utilizar exclusivamente ferramentas nativas UTF-8 para evitar Mojibake no Windows.
+- [session-263] Utilizar chassi completo (17 digitos ou zfill para 8) como chave de join unica. Descartar coluna Average Parts Revenue por falta de confiabilidade. Priorizar categoria A por proximidade do gatilho de 500h (telemetria JDLink).
+- [session-265] WO_ANCHOR projeta WO + (dias_desde_Last_Serviced / 365.25) × taxa_modelo até hoje. Condições ZERADO: WO>0, Last Serviced < 366 dias, wo_proj <= 50k. Condições DEFASADO: idem + Last Serviced mais recente que aorLastLocationDate. Cap de 50.000h absoluto para outliers de sistema. Hierarquia final: OFICINA > WO_ANCHOR > TELEMETRIA > MEDIANA_DEFASADA > MEDIANA > 1000h > clip(100h).
+- [session-266] Salvar no formato Parquet compactado no diretorio local do Extractor. Utilizar a Abordagem B (gravar nova linha para o chassi apenas se houver variacao no horimetro ou telemetria, limitando a 1 registro por dia).
+- [session-267] Ao atualizar o CEVAP no OneDrive, o arquivo final CEVAP_ATIVACAO.xlsx nunca deve ser recriado com timestamp ou nomes novos para nao quebrar os links dos consultores. Deve ser atualizado in-place ou a execucao deve ser interrompida.
 
 ## Bloqueadores Ativos
 - Nenhum
 
 ## Últimas Sessões
-- session-246: Detalhamento Pecas - Limpeza, Headed Microsoft e Alertas de Sessao
-- session-247: Detalhamento Pecas - Correcao de Range 2026 em run.py
-- session-248: ConsultorMap v5.6 + BUP ORC Fallback — alinhamento VS1_STATUS Protheus
-- session-249: lead-csc-pops: fix peças.xlsx — ReparsePoint e Power Query
-- session-250: Motor-orçamentos: Migração ICM completa + fix output paths + configuração do Git e do Codex CLI
+- session-264: <USER_REQUEST>
+- session-265: M3 Potencial: Revisão e evolução das regras de Horimetro_Anual_Final
+- session-266: Historico Incremental do PoPS
+- session-267: <USER_REQUEST>
+- session-268: <USER_REQUEST>

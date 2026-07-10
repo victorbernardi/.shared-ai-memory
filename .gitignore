@@ -19,6 +19,17 @@ context-agent/data/logs/
 **/*.sqlite
 **/*.log
 
+# Sessões e cache do Gemini CLI (arquivos grandes)
+.gemini/tmp/
+
+# Mídia temporária do antigravity brain (screenshots, webp, png)
+brain/**/.tempmediaStorage/
+brain/**/.system_generated/
+brain/**/*.webp
+brain/**/*.png
+brain/**/*.jpg
+brain/**/*.jpeg
+
 # Configurações Sensíveis (Proteção)
 .env
 **/.env
