@@ -1,7 +1,7 @@
 {
-  "name": "inova-daily-update",
+  "name": "inova-motor-orcamentos",
   "tier": 2,
-  "description": "Atualiza os dados da daily executiva do Inova",
+  "description": "Atualiza o motor de orcamentos rodando o pipeline completo: estagio 01_abertos (scraper Power BI + Fabric) e estagio 02_cancelados (Fabric JDBC), consolidando o output em shared/data",
   "target_platforms": [
     "claude-code",
     "antigravity",

@@ -1,5 +1,5 @@
 {
-  "name": "inova-daily-update",
+  "name": "inova-motor-orcamentos",
   "version": "1.0.0",
   "author": "Victor",
   "platforms": {
@@ -17,8 +17,8 @@
     }
   },
   "description": {
-    "full": "Atualiza os dados da daily executiva do Inova",
-    "short": "Atualiza os dados da daily executiva do Inova"
+    "full": "Atualiza o motor de orcamentos rodando o pipeline completo: estagio 01_abertos (scraper Power BI + Fabric) e estagio 02_cancelados (Fabric JDBC), consolidando o output em shared/data",
+    "short": "Atualiza o motor de orcamentos rodando o pipeline completo: estagio 01_abertos (scraper Power BI + Fabric) e estagio 02_..."
   },
   "body": {
     "source": "SKILL.md",

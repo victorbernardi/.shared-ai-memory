@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/skill_entry.schema.json",
   "version": "1.3.0",
-  "last_updated": "2026-06-18",
+  "last_updated": "2026-06-23",
   "ecosystem": "stout-inova",
   "skills": [
     {
@@ -1360,6 +1360,27 @@
       "updated_at": "2026-06-18",
       "author": "System",
       "notes": "Descoberta física e adicionada automaticamente ao ledger."
+    },
+    {
+      "name": "inova-motor-orcamentos",
+      "path": ".shared-ai-memory/skills/inova-motor-orcamentos",
+      "tier": 2,
+      "category": "orchestrator",
+      "role": "Atualiza o motor de orcamentos rodando o pipeline completo (01_abertos PBI+Fabric, 02_cancelados Fabric JDBC)",
+      "triggers": [
+        "atualizar motor orcamentos",
+        "rodar motor orcamentos",
+        "atualizar orcamentos",
+        "motor-orcamentos",
+        "inova-motor-orcamentos"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-06-23",
+      "updated_at": "2026-06-23",
+      "author": "Victor",
+      "notes": "Criada via stout-skill-manager + stout-create-skill. Auditor APPROVED (overlaps=0). Quality Gate OK. Skill-sentinel 84/100.",
+      "promoted_at": "2026-06-23"
     }
   ],
   "deprecated": [
