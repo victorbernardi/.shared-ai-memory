@@ -319,4 +319,3 @@ Create `docs/superpowers/validation/2026-07-15-hybrid-skill-platforms.md` with a
 git add stout-skill-manager stout-create-skill/SKILL.md docs/superpowers/specs docs/superpowers/validation
 git commit -m "chore(skills): remove antigravity pipeline"
 ```
-
