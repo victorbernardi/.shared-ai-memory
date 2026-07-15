@@ -14,28 +14,26 @@ PLACEHOLDER_OBJETIVO.
 - PLACEHOLDER_INPUT_1: descrição
 - PLACEHOLDER_INPUT_2: descrição
 
-<!-- @if platform=claude -->
+---
 
 ## Fluxo Detalhado
 
 1. PLACEHOLDER_PASSO_1
 2. PLACEHOLDER_PASSO_2
-3. Se necessário: `python scripts/PLACEHOLDER_SCRIPT.py --arg <valor>`
+3. Se necessario: `python scripts/PLACEHOLDER_SCRIPT.py --arg <valor>`
 4. PLACEHOLDER_PASSO_4
 
 ## Exemplos
 
 **Caso simples:**
 Input: "PLACEHOLDER_INPUT_SIMPLES"
-Ação: PLACEHOLDER_ACAO_SIMPLES
+Acao: PLACEHOLDER_ACAO_SIMPLES
 Output: PLACEHOLDER_OUTPUT_SIMPLES
 
 **Caso complexo:**
 Input: "PLACEHOLDER_INPUT_COMPLEXO"
-Ação: Usa `scripts/PLACEHOLDER_SCRIPT.py`
+Acao: Usa `scripts/PLACEHOLDER_SCRIPT.py`
 Output: PLACEHOLDER_OUTPUT_COMPLEXO
-
-<!-- @endif -->
 
 ---
 

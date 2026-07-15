@@ -31,9 +31,12 @@ def load_thresholds() -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def run_junction_guard() -> bool:
+def run_global_install(skill_name: str) -> bool:
     result = subprocess.run(
-        [sys.executable, str(SCRIPT_DIR / "junction_guard.py")],
+        [sys.executable, str(SCRIPT_DIR / "global_installer.py"),
+         "--source-path", str(CANONICAL_PATH / skill_name),
+         "--artifacts-dir", str(CANONICAL_PATH / skill_name),
+         "--replace"],
         capture_output=False
     )
     return result.returncode == 0
@@ -241,10 +244,6 @@ def phase3_audit(skill_name: str, role: str, triggers: str) -> str:
 
 def phase4_install(repo: str, skill_name: str) -> bool:
     print(f"\n[FASE 4] Instalando '{skill_name}' de {repo}")
-    print("  Verificando junctions antes da instalacao...")
-    if not run_junction_guard():
-        print("[ERRO] Junction guard falhou — abortando instalacao")
-        return False
 
     if not run_skillfish_install(repo):
         print(f"[ERRO] skillfish add falhou para {repo}")
