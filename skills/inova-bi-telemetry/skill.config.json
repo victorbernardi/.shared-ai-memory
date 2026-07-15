@@ -1,0 +1,41 @@
+﻿{
+    "name":  "inova-bi-telemetry",
+    "version":  "1.0.0",
+    "author":  "Victor",
+    "platforms":  {
+                      "claude-code":  {
+                                          "enabled":  true,
+                                          "output":  ".claude/skills"
+                                      },
+                      "commandcode":  {
+                                          "enabled":  true,
+                                          "output":  ".commandcode/skills"
+                                      },
+                      "codex":  {
+                                    "enabled":  true,
+                                    "output":  ".codex/skills"
+                                }
+                  },
+    "description":  {
+                        "full":  "Atualiza o relatório jd-bi-acs-telemetry executando o pipeline completo via run.py com pré-flight operacional e validação pós-execução",
+                        "short":  "Atualiza o relatório jd-bi-acs-telemetry executando o pipeline completo via run.py com pré-flight operacional e validaçã..."
+                    },
+    "body":  {
+                 "source":  "SKILL.md",
+                 "sections":  {
+                                  "claude":  [
+                                                 "all"
+                                             ],
+                                  "commandcode":  [
+                                                      "Objetivo",
+                                                      "Fluxo",
+                                                      "Constraints"
+                                                  ],
+                                  "codex":  [
+                                                "Objetivo",
+                                                "Fluxo",
+                                                "Constraints"
+                                            ]
+                              }
+             }
+}
