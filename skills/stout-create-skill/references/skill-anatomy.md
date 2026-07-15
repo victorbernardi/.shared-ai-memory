@@ -9,7 +9,7 @@ Referência obrigatória para o `code_drafter_agent`. Consultar antes de gerar q
 ```
 <nome-da-skill>/
   SKILL.md           ← obrigatório — definição e instruções
-  skill.config.json  ← obrigatório para skills multi-plataforma
+  skill.platforms.yaml  ← manifesto de plataformas e extensões
   scripts/           ← opcional — Python, Bash, Node
   references/        ← opcional — docs, templates, critérios
   assets/            ← opcional — arquivos estáticos
@@ -18,7 +18,7 @@ Referência obrigatória para o `code_drafter_agent`. Consultar antes de gerar q
 
 ---
 
-## Frontmatter YAML — Campos por Plataforma
+## Frontmatter YAML — Campos Universais
 
 O frontmatter é o bloco `---` no topo do SKILL.md. Deve ser o **primeiro conteúdo do arquivo**, sem espaço antes do `---` de abertura.
 
@@ -34,57 +34,19 @@ O frontmatter é o bloco `---` no topo do SKILL.md. Deve ser o **primeiro conte�
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
 | `version` | string | SemVer. Ex: `1.0.0` |
-| `tier` | int | 1=orchestrator, 2=feature, 3=platform, 4=meta-factory |
+| `tier` | int | 1=utility, 2=feature, 3=platform, 4=orchestrator |
 | `category` | string | engineering, governance, meta-governance, orchestrator, design |
-| `tools` | list | Plataformas suportadas (ver abaixo) |
 | `author` | string | Nome do criador |
-| `triggers` | list | Frases exatas que ativam a skill |
-
-### Campo `tools` — Valores Válidos
-
-```yaml
-tools:
-  - claude-code       # Claude Code CLI (~/.claude/skills/)
-  - antigravity       # Antigravity CLI (~/.gemini/antigravity-cli/skills/)
-  - commandcode       # CommandCode CLI (~/.commandcode/skills/)
-  - gemini-cli        # Gemini CLI compartilhado (~/.gemini/skills/)
-  - codex             # OpenAI Codex CLI
-  - cursor            # Cursor IDE
-```
-
-### Campos Opcionais
-
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `tags` | list | Categorias livres para busca |
-| `dependencies` | list | Skills que devem existir antes desta |
-| `risk` | string | `safe`, `moderate`, `high` |
-| `source` | string | `custom`, `community`, `official` |
 
 ---
 
-## Exemplo de Frontmatter Completo
+## Plataformas Suportadas
 
-```yaml
----
-name: minha-skill
-version: 1.0.0
-tier: 2
-category: engineering
-description: >
-  Use quando o usuário precisar de X. Provê capacidade de Y
-  em projetos Z.
-tools:
-  - claude-code
-  - antigravity
-  - commandcode
-triggers:
-  - fazer X
-  - execute X
-  - X para o projeto
-author: Victor
----
-```
+| Plataforma | ID | Diretório de Instalação |
+|-----------|-----|------------------------|
+| Codex | `codex` | `~/.agents/skills/` |
+| Claude Code | `claude-code` | `~/.claude/skills/` |
+| CommandCode | `commandcode` | `~/.commandcode/skills/` |
 
 ---
 
@@ -102,6 +64,5 @@ Após o frontmatter, o conteúdo é Markdown livre lido pelo agente como instru�
 
 **Regra de tamanho:**
 
-- Claude Code: sem limite prático — use seções ricas
-- Antigravity / CommandCode: prefira SKILL.md ≤ 300 linhas; mova detalhes para `references/`
-- Description no frontmatter: ≤ 1024 chars em todas as plataformas
+- Todas as plataformas: use seções ricas
+- Description no frontmatter: ≤ 1024 chars

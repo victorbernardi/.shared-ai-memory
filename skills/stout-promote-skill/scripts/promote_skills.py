@@ -1,4 +1,4 @@
-"""Promote CDD skills to Golden Copy and archive replaced generics.
+"""Promote CDD skills to global platform targets.
 
 Usage:
     python scripts/promote_skills.py --dry-run   # preview only
@@ -6,15 +6,18 @@ Usage:
 """
 import sys
 import json
-import shutil
+import subprocess
 import argparse
 from pathlib import Path
 from datetime import date
 
 SKILLS_ROOT = Path(__file__).resolve().parents[3] / "skills"
-GOLDEN_COPY = Path.home() / ".shared-ai-memory" / "skills"
-ARCHIVE_DIR = Path.home() / ".shared-ai-memory" / "skills" / "_archived"
-AUDIT_DIR = Path(__file__).resolve().parents[3] / "docs" / "audits"
+STOUT_CREATE = SKILLS_ROOT / "stout-create-skill"
+STOUT_MANAGER = SKILLS_ROOT / "stout-skill-manager"
+RENDERER_SCRIPT = STOUT_CREATE / "scripts" / "platform_renderer.py"
+INSTALLER_SCRIPT = STOUT_MANAGER / "scripts" / "global_installer.py"
+VALIDATOR_SCRIPT = STOUT_CREATE / "scripts" / "hybrid_validator.py"
+CATALOG_PATH = STOUT_CREATE / "config" / "platform_capabilities.yaml"
 
 PROMOTION_MAP = {
     "stout-brainstorming":        ["process-brainstorming"],
@@ -47,79 +50,86 @@ PROMOTION_MAP = {
 }
 
 
-def load_latest_audit() -> dict:
-    reports = sorted(AUDIT_DIR.glob("skill-audit-*.json"))
-    if not reports:
-        return {}
-    data = json.loads(reports[-1].read_text(encoding="utf-8"))
-    return {r["skill"]: r["status"] for r in data["results"]}
-
-
 def resolve_source(skill_name: str) -> Path | None:
     candidate = SKILLS_ROOT / skill_name
     return candidate if candidate.exists() else None
 
 
+def validate_source(skill_name: str) -> bool:
+    source_dir = SKILLS_ROOT / skill_name
+    if not source_dir.exists():
+        return False
+    result = subprocess.run(
+        [sys.executable, str(VALIDATOR_SCRIPT), "--source-path", str(source_dir)],
+        capture_output=True, text=True,
+    )
+    return result.returncode == 0
+
+
+def render_skill(skill_name: str, output_dir: Path) -> bool:
+    source_dir = SKILLS_ROOT / skill_name
+    if not source_dir.exists():
+        return False
+    result = subprocess.run(
+        [sys.executable, str(RENDERER_SCRIPT),
+         "--source-path", str(source_dir),
+         "--output-dir", str(output_dir),
+         "--catalog", str(CATALOG_PATH)],
+        capture_output=True, text=True,
+    )
+    return result.returncode == 0
+
+
+def install_skill(skill_name: str, artifacts_dir: Path, replace: bool) -> bool:
+    source_dir = SKILLS_ROOT / skill_name
+    if not source_dir.exists():
+        return False
+    cmd = [
+        sys.executable, str(INSTALLER_SCRIPT),
+        "--source-path", str(source_dir),
+        "--artifacts-dir", str(artifacts_dir),
+        "--replace" if replace else "",
+    ]
+    cmd = [c for c in cmd if c]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return result.returncode == 0
+
+
 def promote_skill(skill_name: str, replaced: list, dry_run: bool) -> dict:
-    src = resolve_source(skill_name)
-    dst = GOLDEN_COPY / skill_name
+    source = resolve_source(skill_name)
     actions = []
 
-    if src is None:
+    if source is None:
         return {"skill": skill_name, "status": "SOURCE_MISSING", "actions": []}
 
-    for old_name in replaced:
-        old_path = GOLDEN_COPY / old_name
-        if old_path.exists():
-            archive_path = ARCHIVE_DIR / f"{old_name}_{date.today()}"
-            actions.append(f"ARCHIVE {old_name} -> _archived/{old_name}_{date.today()}")
-            if not dry_run:
-                ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
-                if archive_path.exists():
-                    shutil.rmtree(archive_path)
-                shutil.move(str(old_path), str(archive_path))
+    if not validate_source(skill_name):
+        actions.append(f"VALIDATION FAILED {skill_name}")
+        return {"skill": skill_name, "status": "VALIDATION_FAILED", "actions": actions}
 
-    if src.resolve() == dst.resolve():
-        # Skill já está no golden copy (source of truth unificada)
-        actions.append(f"ALREADY IN PLACE {skill_name} (source == golden copy)")
-    else:
-        actions.append(f"COPY {skill_name} -> Golden Copy")
-        if not dry_run:
-            if dst.exists():
-                shutil.rmtree(dst)
-            shutil.copytree(src, dst)
+    if dry_run:
+        actions.append(f"WOULD RENDER {skill_name}")
+        actions.append(f"WOULD INSTALL {skill_name} to all targets")
+        return {"skill": skill_name, "status": "DRY_RUN", "actions": actions}
 
-    if not dry_run:
-        registry_path = SKILLS_ROOT / "stout-skill-registry" / "registry.json"
-        update_promoted_at(skill_name, registry_path)
+    import tempfile
+    artifacts_dir = Path(tempfile.mkdtemp(prefix="stout-promote-"))
+    if not render_skill(skill_name, artifacts_dir):
+        actions.append(f"RENDER FAILED {skill_name}")
+        return {"skill": skill_name, "status": "RENDER_FAILED", "actions": actions}
 
+    if not install_skill(skill_name, artifacts_dir, replace=False):
+        actions.append(f"INSTALL FAILED {skill_name}")
+        return {"skill": skill_name, "status": "INSTALL_FAILED", "actions": actions}
+
+    actions.append(f"PROMOTED {skill_name} to all targets")
     return {"skill": skill_name, "status": "PROMOTED", "actions": actions}
 
 
-def update_promoted_at(skill_name: str, registry_path: Path) -> None:
-    """Set promoted_at to today in the project registry after a successful promotion."""
-    if not registry_path.exists():
-        return
-    data = json.loads(registry_path.read_text(encoding="utf-8"))
-    for skill in data["skills"]:
-        if skill["name"] == skill_name:
-            skill["promoted_at"] = str(date.today())
-            break
-    registry_path.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
-
-
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Promote CDD skills to Golden Copy")
+    parser = argparse.ArgumentParser(description="Promote CDD skills to global targets")
     parser.add_argument("--dry-run", action="store_true", help="Preview without changes")
     parser.add_argument("--skill", metavar="NAME", help="Promote only this skill")
     args = parser.parse_args()
-
-    audit = load_latest_audit()
-    if not audit:
-        print("ERROR: No audit report found. Run audit_skills.py first.")
-        return 1
 
     if args.skill and args.skill not in PROMOTION_MAP:
         print(f"ERROR: '{args.skill}' not found in PROMOTION_MAP.")
@@ -138,10 +148,6 @@ def main() -> int:
 
     results = []
     for skill_name, replaced in promotion_items:
-        status = audit.get(skill_name)
-        if status != "PASS":
-            print(f"  SKIP {skill_name} (audit status: {status or 'not audited'})")
-            continue
         result = promote_skill(skill_name, replaced, args.dry_run)
         results.append(result)
         print(f"  {result['status']} {skill_name}")

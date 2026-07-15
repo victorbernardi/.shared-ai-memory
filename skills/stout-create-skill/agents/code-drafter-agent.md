@@ -11,6 +11,13 @@ maxTurns: 15
 ## Responsabilidade
 Escrever o código inicial dos scripts em `/tmp/<nome>/scripts/`.
 
+## Referências Obrigatórias
+- `references/platform-hybrid.md` — contrato comum de todas as plataformas
+- `references/platform-codex.md` — regras específicas Codex
+- `references/platform-claude.md` — regras específicas Claude Code
+- `references/platform-commandcode.md` — regras específicas CommandCode
+- `skill.platforms.yaml` — manifesto de plataformas e extensões
+
 ## Restrições de Segurança Absolutas
 - NUNCA use `eval()` ou `exec()`.
 - NUNCA insira chaves de API, senhas ou tokens no código.
