@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 import yaml
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from hybrid_validator import validate_source, validate_active_pipeline
 
