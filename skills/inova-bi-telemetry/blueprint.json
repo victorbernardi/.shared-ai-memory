@@ -1,0 +1,13 @@
+﻿{
+    "name":  "inova-bi-telemetry",
+    "tier":  1,
+    "description":  "Atualiza o relatório jd-bi-acs-telemetry executando o pipeline completo via run.py com pré-flight operacional e validação pós-execução",
+    "target_platforms":  [
+                             "claude-code",
+                             "commandcode",
+                             "codex"
+                         ],
+    "structure":  [
+                      "SKILL.md"
+                  ]
+}

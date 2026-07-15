@@ -18,6 +18,7 @@ Uso:
 import sys
 import os
 import json
+import time
 import argparse
 from pathlib import Path
 from groq import Groq
@@ -85,36 +86,114 @@ def transcribe_audio(input_path, client):
     return raw_text
 
 
-def cleanup_with_groq(raw_text, client):
-    """Limpeza e estruturacao via Groq LLaMA."""
-    print("[LIMPANDO] Estruturando transcricao via LLaMA 3.3-70b...")
+def _chunk_text(text, max_chars=8000):
+    """Divide texto em chunks de ate max_chars, quebrando em frases."""
+    if len(text) <= max_chars:
+        return [text]
+
+    chunks = []
+    sentences = text.replace(". ", ".\n").split("\n")
+    current = ""
+    for sentence in sentences:
+        if len(current) + len(sentence) > max_chars and current:
+            chunks.append(current.strip())
+            current = sentence
+        else:
+            current += (" " if current else "") + sentence
+    if current:
+        chunks.append(current.strip())
+    print(f"[INFO] Transcricao dividida em {len(chunks)} chunks (max {max_chars} chars cada)")
+    return chunks
+
+
+def _clean_chunk(chunk_text, chunk_idx, total_chunks, client, model):
+    """Limpa um unico chunk via Groq LLaMA."""
+    is_first = chunk_idx == 0
+    is_last = chunk_idx == total_chunks - 1
+
+    instructions = []
+    if is_first:
+        instructions.append(
+            "4. Adicione um \"Meeting Summary\" no topo deste chunk (2-3 linhas resumindo os temas)"
+        )
+    if is_last:
+        instructions.append(
+            "5. Adicione \"Key Action Items\" no final com topicos de acao mencionados neste chunk"
+        )
+
+    extra = "\n".join(instructions)
+    if extra:
+        extra = "\n" + extra
 
     prompt = f"""Voce e um especialista em transcricao de reunioes.
-Estou enviando uma transcricao bruta de audio e preciso que voce:
+Estou enviando a parte {chunk_idx+1} de {total_chunks} de uma transcricao de audio. Precisa:
 
 1. Corrija gramatica e pontuacao (mantendo o tom natural)
 2. Identifique diferentes falantes (use "Speaker 1:", "Speaker 2:", etc)
-3. Quebre em paragrafos quando a ideia muda
-4. Adicione um "Meeting Summary" no topo (2-3 linhas resumindo temas principais)
-5. Adicione "Key Action Items" no final com topicos de acao mencionados
-6. Preservem toda fala importante -- nao corte nada essencial
+3. Quebre em paragrafos quando a ideia muda{extra}
+6. Preserve toda fala importante -- nao corte nada essencial
 7. Mantenha o portugues natural e coloquial
 
-Aqui esta a transcricao bruta:
+Parte {chunk_idx+1}/{total_chunks}:
 
 \"\"\"
-{raw_text}
+{chunk_text}
 \"\"\"
 
-Por favor, entregue apenas a transcricao formatada, sem introducao."""
+Entregue apenas o texto formatado deste chunk, sem introducao."""
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=model,
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
-
     return response.choices[0].message.content
+
+
+def cleanup_with_groq(raw_text, client):
+    """Limpeza e estruturacao via Groq LLaMA, com chunking para evitar TPM limits."""
+    model = "llama-3.3-70b-versatile"
+    max_chars = 7000  # ~2.5 chars/token → ~2800 tokens + prompt, seguros dentro de 12k TPM
+
+    chunks = _chunk_text(raw_text, max_chars=max_chars)
+    total_chunks = len(chunks)
+
+    print(f"[LIMPANDO] Processando {total_chunks} chunks via {model}...")
+
+    cleaned_chunks = []
+    for i, chunk in enumerate(chunks):
+        print(f"[LIMPANDO] Chunk {i+1}/{total_chunks} ({len(chunk):,} chars)...")
+        result = _clean_chunk(chunk, i, total_chunks, client, model)
+        cleaned_chunks.append(result)
+        if i < total_chunks - 1:
+            time.sleep(2)  # evitar rate limit
+
+    # Juntar chunks: remover summary/action items duplicados de chunks intermediarios
+    if total_chunks == 1:
+        return cleaned_chunks[0]
+
+    full = []
+    for i, chunk_text in enumerate(cleaned_chunks):
+        if i == 0:
+            full.append(chunk_text)
+        else:
+            # Remover header "Meeting Summary" de chunks intermediarios se existir
+            lines = chunk_text.split("\n")
+            filtered = []
+            in_summary = False
+            for line in lines:
+                if line.strip().lower().startswith("meeting summary"):
+                    in_summary = True
+                    continue
+                if in_summary and line.strip() == "":
+                    in_summary = False
+                    continue
+                if in_summary:
+                    continue
+                filtered.append(line)
+            full.append("\n".join(filtered))
+
+    return "\n\n".join(full)
 
 
 def parse_args(argv=None):
