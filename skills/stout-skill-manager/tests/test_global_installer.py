@@ -54,10 +54,9 @@ class TestGlobalInstaller(unittest.TestCase):
             self.assertTrue((dest / "SKILL.md").exists(), f"SKILL.md missing for {platform}")
 
     def test_collision_requires_replace(self) -> None:
-        for platform in ("codex",):
-            dest = self.global_targets[platform].path / "demo-skill"
-            dest.mkdir()
-            (dest / "SKILL.md").write_text("old", encoding="utf-8")
+        dest = self.global_targets["codex"].path / "demo-skill"
+        dest.mkdir()
+        (dest / "SKILL.md").write_text("old", encoding="utf-8")
 
         result = install_artifacts(
             self.source_dir, self.artifacts_dir,
@@ -80,15 +79,35 @@ class TestGlobalInstaller(unittest.TestCase):
         content = (dest / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("platform: codex", content)
 
-    def test_second_copy_failure_restores_first_target(self) -> None:
-        dest_codex = self.global_targets["codex"].path / "demo-skill"
-        dest_codex.mkdir()
-        (dest_codex / "SKILL.md").write_text("old-codex", encoding="utf-8")
+    def test_stout_install_json_written(self) -> None:
+        result = install_artifacts(
+            self.source_dir, self.artifacts_dir,
+            ("codex",), replace=False, global_targets=self.global_targets,
+        )
+        self.assertEqual(result["status"], "ok")
+        install_json = self.source_dir / ".stout-install.json"
+        self.assertTrue(install_json.exists())
+        data = __import__("json").loads(install_json.read_text(encoding="utf-8"))
+        self.assertEqual(data["skill_name"], "demo-skill")
+        self.assertIn("codex", data["targets"])
 
-        dest_claude = self.global_targets["claude-code"].path / "demo-skill"
-        dest_claude.mkdir()
-        (dest_claude / "SKILL.md").write_text("old-claude", encoding="utf-8")
+    def test_install_uses_source_dir_name_not_artifacts_dir_name(self) -> None:
+        weird_artifacts = self.base_dir / "stout-promote-abc123" / "demo-skill"
+        for platform in ("codex",):
+            rendered = weird_artifacts / "rendered" / platform / "demo-skill"
+            rendered.mkdir(parents=True)
+            (rendered / "SKILL.md").write_text("---\nname: demo\n---\n", encoding="utf-8")
 
+        result = install_artifacts(
+            self.source_dir, weird_artifacts,
+            ("codex",), replace=False, global_targets=self.global_targets,
+        )
+        self.assertEqual(result["status"], "ok")
+        dest = self.global_targets["codex"].path / "demo-skill"
+        self.assertTrue(dest.exists(), "Destination should use source dir name, not artifacts dir name")
+
+    def test_rollback_removes_newly_created_destinations(self) -> None:
+        self.artifacts_dir / "rendered" / "claude-code" / "demo-skill"
         broken_artifacts = self.base_dir / "broken" / "demo-skill"
         broken_artifacts.mkdir(parents=True)
         (broken_artifacts / "rendered" / "codex" / "demo-skill").mkdir(parents=True)
@@ -107,21 +126,10 @@ class TestGlobalInstaller(unittest.TestCase):
             self.source_dir, broken_artifacts,
             ("codex", "claude-code"), replace=True, global_targets=failing_targets,
         )
-
         self.assertEqual(result["status"], "error")
         self.assertTrue(result["rolled_back"])
-
-    def test_stout_install_json_written(self) -> None:
-        result = install_artifacts(
-            self.source_dir, self.artifacts_dir,
-            ("codex",), replace=False, global_targets=self.global_targets,
-        )
-        self.assertEqual(result["status"], "ok")
-        install_json = self.source_dir / ".stout-install.json"
-        self.assertTrue(install_json.exists())
-        data = __import__("json").loads(install_json.read_text(encoding="utf-8"))
-        self.assertEqual(data["skill_name"], "demo-skill")
-        self.assertIn("codex", data["targets"])
+        codex_dest = self.dest_base / "codex" / "skills" / "demo-skill"
+        self.assertFalse(codex_dest.exists(), "Newly created codex destination should be removed on rollback")
 
 
 class TestGlobalTargets(unittest.TestCase):

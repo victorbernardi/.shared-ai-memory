@@ -79,7 +79,9 @@ def install_artifacts(
     result = {"status": "ok", "installed": {}, "rolled_back": False, "message": ""}
 
     backups: dict[str, Path] = {}
+    created_now: list[str] = []
     backup_dir = Path(tempfile.mkdtemp(prefix="stout-backup-"))
+    skill_name = source_dir.name
 
     try:
         for platform in targets:
@@ -89,7 +91,7 @@ def install_artifacts(
                 return result
 
             target = global_targets[platform]
-            dest = target.path / source_dir.name
+            dest = target.path / skill_name
 
             if dest.exists() and not replace:
                 result["status"] = "collision"
@@ -99,8 +101,6 @@ def install_artifacts(
             if dest.exists() and replace:
                 backups[platform] = _backup_destination(dest, backup_dir)
 
-        skill_name = artifacts_dir.name if artifacts_dir.is_dir() else source_dir.name
-
         for platform in targets:
             target = global_targets[platform]
             dest = target.path / skill_name
@@ -109,7 +109,7 @@ def install_artifacts(
             if not rendered.exists():
                 result["status"] = "error"
                 result["message"] = f"Pacote renderizado nao encontrado: {rendered}"
-                _restore_backups(backups, global_targets, skill_name)
+                _rollback(backups, created_now, global_targets, skill_name)
                 result["rolled_back"] = True
                 return result
 
@@ -121,10 +121,12 @@ def install_artifacts(
                         dest.unlink()
                 shutil.copytree(rendered, dest)
                 result["installed"][platform] = str(dest)
+                if platform not in backups:
+                    created_now.append(platform)
             except Exception as exc:
                 result["status"] = "error"
                 result["message"] = f"Falha ao copiar para {platform}: {exc}"
-                _restore_backups(backups, global_targets, skill_name)
+                _rollback(backups, created_now, global_targets, skill_name)
                 result["rolled_back"] = True
                 return result
 
@@ -149,11 +151,24 @@ def install_artifacts(
         shutil.rmtree(backup_dir, ignore_errors=True)
 
 
-def _restore_backups(
+def _rollback(
     backups: dict[str, Path],
+    created_now: list[str],
     global_targets: dict[str, GlobalTarget],
     skill_name: str,
 ) -> None:
+    for platform in created_now:
+        if platform not in backups:
+            target = global_targets[platform]
+            dest = target.path / skill_name
+            try:
+                if dest.is_dir():
+                    shutil.rmtree(dest)
+                elif dest.exists():
+                    dest.unlink()
+            except Exception:
+                pass
+
     for platform, backup_path in backups.items():
         target = global_targets[platform]
         dest = target.path / skill_name

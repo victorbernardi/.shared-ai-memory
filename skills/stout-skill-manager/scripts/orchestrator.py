@@ -31,15 +31,35 @@ def load_thresholds() -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
+RENDERER_SCRIPT = SKILLS_ROOT / "stout-create-skill" / "scripts" / "platform_renderer.py"
+INSTALLER_SCRIPT = SCRIPT_DIR / "global_installer.py"
+CATALOG_PATH = SKILLS_ROOT / "stout-create-skill" / "config" / "platform_capabilities.yaml"
+
+
 def run_global_install(skill_name: str) -> bool:
-    result = subprocess.run(
-        [sys.executable, str(SCRIPT_DIR / "global_installer.py"),
-         "--source-path", str(CANONICAL_PATH / skill_name),
-         "--artifacts-dir", str(CANONICAL_PATH / skill_name),
-         "--replace"],
-        capture_output=False
-    )
-    return result.returncode == 0
+    import tempfile
+    artifacts_dir = Path(tempfile.mkdtemp(prefix="stout-promote-"))
+    try:
+        result = subprocess.run(
+            [sys.executable, str(RENDERER_SCRIPT),
+             "--source-path", str(CANONICAL_PATH / skill_name),
+             "--output-dir", str(artifacts_dir),
+             "--catalog", str(CATALOG_PATH)],
+            capture_output=False,
+        )
+        if result.returncode != 0:
+            return False
+
+        result = subprocess.run(
+            [sys.executable, str(INSTALLER_SCRIPT),
+             "--source-path", str(CANONICAL_PATH / skill_name),
+             "--artifacts-dir", str(artifacts_dir),
+             "--replace"],
+            capture_output=False,
+        )
+        return result.returncode == 0
+    finally:
+        shutil.rmtree(artifacts_dir, ignore_errors=True)
 
 
 def run_local_search(query: str, threshold: int) -> list[dict]:
@@ -257,6 +277,11 @@ def phase4_install(repo: str, skill_name: str) -> bool:
     print(f"  Validando estrutura Stout...")
     if not run_validator(skill_path):
         print("[ERRO] Validacao de estrutura falhou")
+        return False
+
+    print(f"  Renderizando e instalando pacotes globais...")
+    if not run_global_install(skill_name):
+        print("[ERRO] Instalacao global falhou")
         return False
 
     print(f"  Instalacao concluida: {skill_path}")
