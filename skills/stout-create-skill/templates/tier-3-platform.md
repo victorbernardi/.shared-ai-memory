@@ -1,15 +1,6 @@
 ---
 name: PLACEHOLDER_NAME
-description: >
-  Use quando PLACEHOLDER_TRIGGER. Plataforma completa para gerenciamento
-  de PLACEHOLDER_DOMINIO integrando scripts, configurações e referências.
-  Foca em automação robusta de PLACEHOLDER_PROCESSO com suporte a persistência.
-version: 1.0.0
-tier: 3
-category: data-engineering
-source: custom
-date_added: '2026-05-15'
-author: Victor
+description: Use quando PLACEHOLDER_TRIGGER. Executa PLACEHOLDER_ACTION para PLACEHOLDER_DOMINIO.
 ---
 
 # PLACEHOLDER_NAME

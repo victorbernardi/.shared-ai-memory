@@ -1,15 +1,6 @@
 ---
 name: PLACEHOLDER_NAME
-description: >
-  Use quando PLACEHOLDER_TRIGGER. Orquestra processos complexos de PLACEHOLDER_DOMINIO
-  via subagentes isolados com aprovação humana obrigatória (HITL) no fluxo.
-  Skill de Orquestração (Tier 4) para gerenciamento de ecossistema e automação de elite.
-version: 1.0.0
-tier: 4
-category: meta-factory
-source: custom
-date_added: '2026-05-15'
-author: Victor
+description: Use quando PLACEHOLDER_TRIGGER. Executa PLACEHOLDER_ACTION para PLACEHOLDER_DOMINIO.
 ---
 
 # PLACEHOLDER_NAME

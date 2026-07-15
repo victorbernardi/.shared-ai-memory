@@ -1,15 +1,6 @@
 ---
 name: PLACEHOLDER_NAME
-description: >
-  Use quando PLACEHOLDER_TRIGGER. Executa PLACEHOLDER_ACTION
-  de forma simples e direta para PLACEHOLDER_DOMINIO.
-  Esta skill de utilidade foca em tarefa única sem dependências.
-version: 1.0.0
-tier: 1
-category: meta-governance
-source: custom
-date_added: '2026-05-15'
-author: Victor
+description: Use quando PLACEHOLDER_TRIGGER. Executa PLACEHOLDER_ACTION para PLACEHOLDER_DOMINIO.
 ---
 
 # PLACEHOLDER_NAME

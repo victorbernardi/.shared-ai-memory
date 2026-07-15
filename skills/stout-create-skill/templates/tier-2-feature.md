@@ -1,20 +1,6 @@
 ---
 name: PLACEHOLDER_NAME
-version: 1.0.0
-tier: 2
-category: PLACEHOLDER_CATEGORY
-description: >
-  Use quando PLACEHOLDER_TRIGGER. Provê capacidades de PLACEHOLDER_ACAO
-  suportando múltiplos cenários e integração com scripts auxiliares.
-  Skill de característica (feature) para processamento de PLACEHOLDER_DOMINIO.
-tools:
-  - claude-code
-  - antigravity
-  - commandcode
-triggers:
-  - PLACEHOLDER_TRIGGER_1
-  - PLACEHOLDER_TRIGGER_2
-author: Victor
+description: Use quando PLACEHOLDER_TRIGGER. Executa PLACEHOLDER_ACTION para PLACEHOLDER_DOMINIO.
 ---
 
 # PLACEHOLDER_NAME
@@ -51,7 +37,7 @@ Output: PLACEHOLDER_OUTPUT_COMPLEXO
 
 <!-- @endif -->
 
-<!-- @if platform=antigravity,commandcode -->
+---
 
 ## Fluxo
 
@@ -59,7 +45,7 @@ Output: PLACEHOLDER_OUTPUT_COMPLEXO
 2. PLACEHOLDER_PASSO_2
 3. `python scripts/PLACEHOLDER_SCRIPT.py --arg <valor>`
 
-<!-- @endif -->
+---
 
 ## Constraints
 

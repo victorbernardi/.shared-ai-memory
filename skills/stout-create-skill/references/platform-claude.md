@@ -1,101 +1,61 @@
 # Platform Reference: Claude Code
 
-## Diretório de Skills
+## Platform ID
+`claude-code`
 
-```
-Global:   %USERPROFILE%\.claude\skills\<nome-da-skill>\
-Projeto:  .claude\skills\<nome-da-skill>\
-```
+## Output Directory
+`~/.claude/skills/<skill-name>/`
 
-No ecossistema Stout, o diretório global é uma **junction** para:
+## Platform-Specific Extensions
 
-```
-%USERPROFILE%\.shared-ai-memory\skills\<nome-da-skill>\
-```
+### `claude.allowed-tools`
+- **Kind:** Frontmatter
+- **Output:** `allowed-tools`
+- **Value type:** string_list
+- **Documentation:** https://code.claude.com/docs/en/skills
 
----
+This extension specifies which tools the skill is allowed to use.
 
-## Frontmatter — Campos Específicos Claude Code
+## Frontmatter — Claude Code Specific Fields
 
-Claude Code lê o frontmatter YAML padrão. Não há campos exclusivos, mas os seguintes têm efeito direto:
+Claude Code reads the standard YAML frontmatter. No exclusive fields, but these have direct effect:
 
-| Campo | Comportamento |
-|-------|--------------|
-| `description` | Usado pelo sistema de roteamento para decidir quando carregar a skill. Máximo 1024 chars. Prefixar com "Use when" ou "Use quando". |
-| `name` | Identificador único. Deve coincidir com o nome da pasta. |
+| Field | Behavior |
+|-------|----------|
+| `description` | Used by routing system to decide when to load the skill. Max 1024 chars. Prefix with "Use when" or "Use quando". |
+| `name` | Unique identifier. Must match the directory name. |
 
----
-
-## Capacidades Exclusivas do Claude Code
+## Capabilities
 
 ### Tool Use
-
-Skills podem referenciar e invocar tools diretamente:
+Skills can reference and invoke tools directly:
 
 ```markdown
-Use a ferramenta `Read` para ler o arquivo, depois `Edit` para modificar.
+Use the `Read` tool to read the file, then `Edit` to modify it.
 ```
 
 ### MCP (Model Context Protocol)
-
-Skills podem instruir o uso de servidores MCP:
+Skills can instruct the use of MCP servers:
 
 ```markdown
-Use o MCP `context7` para buscar documentação atualizada antes de implementar.
+Use the `context7` MCP server to fetch updated documentation before implementing.
 ```
 
 ### Skill Tool
-
-Skills podem invocar outras skills:
-
-```markdown
-Invoque a skill `stout-commit` ao finalizar a implementação.
-```
-
-### Subagentes (Agent Tool)
+Skills can invoke other skills:
 
 ```markdown
-Dispatche um subagente com `subagent_type=Explore` para mapear o codebase.
+Invoke the `stout-commit` skill when finalizing the implementation.
 ```
 
----
-
-## Limites e Comportamento
-
-- **Tamanho do SKILL.md:** sem limite prático — Claude lê o arquivo completo
-- **Memória entre sessões:** não há — use `references/` para conhecimento persistente
-- **Ativação:** baseada no campo `description` + contexto da conversa
-- **Ordem de busca:** projeto → global (`~/.claude/skills/`) → plugins
-
----
-
-## Boas Práticas para Claude Code
-
-1. **SKILL.md rico**: use seções completas, exemplos detalhados, diagramas em ASCII
-2. **References/**: mova documentação longa para `references/*.md` e referencie no SKILL.md
-3. **Constraints explícitas**: use NUNCA/SEMPRE/NÃO para regras críticas
-4. **Tool mapping**: liste quais tools o agente deve usar em cada passo
-5. **Anti-patterns**: inclua seção "Do Not Use When" para reduzir ativações incorretas
-
----
-
-## Exemplo de Seção Claude-Only
+### Subagents (Agent Tool)
 
 ```markdown
-<!-- @if platform=claude -->
-
-## Fluxo Detalhado
-
-### Passo 1 — Análise
-Use a tool `Read` para ler `src/` e mapear a estrutura.
-Dispatche subagente `Explore` para buscas amplas.
-
-### Passo 2 — Implementação
-Siga o ciclo TDD: invoque `superpowers:test-driven-development`.
-
-### Referências
-- `references/architecture.md` — decisões arquiteturais
-- `references/patterns.md` — padrões do projeto
-
-<!-- @endif -->
+Dispatch a subagent with `subagent_type=Explore` to map the codebase.
 ```
+
+## Rendering Rules
+
+- Common files are copied to all platforms.
+- The `claude.allowed-tools` extension is only included for `claude-code`.
+- The renderer creates artifacts under `<output-dir>/rendered/claude-code/<skill-name>/`.

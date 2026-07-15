@@ -10,6 +10,11 @@ from hybrid_validator import validate_source, validate_active_pipeline
 
 SKILL_DIR = Path(__file__).parent.parent
 CATALOG_PATH = SKILL_DIR / "config" / "platform_capabilities.yaml"
+REFERENCES = SKILL_DIR / "references"
+DRAFTER_AGENTS = [
+    SKILL_DIR / "agents" / "code-drafter-agent.md",
+    SKILL_DIR / "agents" / "code_drafter_agent.md",
+]
 
 
 def _load_catalog():
@@ -123,6 +128,28 @@ class TestHybridValidator(unittest.TestCase):
         errors = validate_active_pipeline(active_roots)
         self.assertTrue(errors)
         shutil.rmtree(active_roots[0])
+
+    def test_all_authoring_assets_name_the_multiformat_contract(self) -> None:
+        for reference in ("platform-codex.md", "platform-claude.md", "platform-commandcode.md", "platform-hybrid.md"):
+            self.assertTrue((REFERENCES / reference).exists(), f"Missing reference: {reference}")
+        for agent in DRAFTER_AGENTS:
+            if agent.exists():
+                text = agent.read_text(encoding="utf-8")
+                self.assertIn("platform-hybrid.md", text, f"{agent.name} missing platform-hybrid.md reference")
+                self.assertIn("skill.platforms.yaml", text, f"{agent.name} missing skill.platforms.yaml reference")
+
+    def test_no_active_antigravity_in_references(self) -> None:
+        for ref in REFERENCES.glob("*.md"):
+            if ref.name == "platform-hybrid.md":
+                continue
+            text = ref.read_text(encoding="utf-8")
+            self.assertNotIn("antigravity", text.lower(), f"{ref.name} contains antigravity reference")
+
+    def test_no_active_antigravity_in_templates(self) -> None:
+        templates_dir = SKILL_DIR / "templates"
+        for template in templates_dir.glob("*.md"):
+            text = template.read_text(encoding="utf-8")
+            self.assertNotIn("antigravity", text.lower(), f"{template.name} contains antigravity reference")
 
 
 if __name__ == "__main__":
