@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+
 import yaml
 
 SKILL_DIR = Path(__file__).parent.parent
