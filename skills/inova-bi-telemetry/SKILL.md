@@ -55,7 +55,7 @@ O projeto fica em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry`.
 
 3. **Validação pós-execução**:
    - Confirme o `status` retornado pela execução.
-   - Verifique o log `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\docs\run_logs\jd_bi_acs_telemetry_runs.jsonl`.
+   - Verifique o log `C:\Projetos\Inova\docs\run_logs\jd_bi_acs_telemetry_runs.jsonl`.
    - Verifique o snapshot atual em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\output\jd_bi_acs_telemetry_snapshot_v1.parquet`.
    - Verifique o histórico canônico em `C:\Projetos\Inova\shared\data\jd_bi_acs_telemetry_events_v1.parquet`.
    - Verifique o log de anomalias em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\logs\jd_bi_acs_telemetry_anomalies.jsonl`.
@@ -66,7 +66,7 @@ O projeto fica em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry`.
 
 1. Configure o terminal com `chcp 65001` e `PYTHONIOENCODING=utf-8`, e use `uv run --no-project python` ou `C:\Projetos\Inova\.venv\Scripts\python.exe`.
 2. Em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry`, execute `run.py` com `--report-url` obrigatório; use `--headless` só quando necessário.
-3. Valide `status`, `docs\run_logs\jd_bi_acs_telemetry_runs.jsonl`, o snapshot em `data\output\`, o histórico em `shared\data\` e o anomaly log em `data\logs\`.
+3. Valide `status`, `C:\Projetos\Inova\docs\run_logs\jd_bi_acs_telemetry_runs.jsonl`, o snapshot em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\output\`, o histórico em `C:\Projetos\Inova\shared\data\` e o anomaly log em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\logs\`.
 <!-- @endif -->
 
 ## Constraints
@@ -89,3 +89,4 @@ O projeto fica em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry`.
 ## Critérios de Conclusão
 
 A skill é concluída quando o `run.py` termina sem erro e os artefatos esperados ficam observáveis no `run summary`, no snapshot atual, no histórico canônico e no log de anomalias.
+
