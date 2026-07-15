@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ from platform_renderer import render_source
 
 SKILL_DIR = Path(__file__).parent.parent
 CATALOG_PATH = SKILL_DIR / "config" / "platform_capabilities.yaml"
+RENDERER_CLI = SKILL_DIR / "scripts" / "platform_renderer.py"
 
 
 class TestPlatformRenderer(unittest.TestCase):
@@ -133,6 +135,60 @@ class TestPlatformRenderer(unittest.TestCase):
         report = render_source(self.source, self.output, self.catalog)
         errors = [item for item in report if item.status == "error"]
         self.assertTrue(len(errors) > 0, "Should report error for unknown extension")
+
+    def test_required_extension_with_no_compatible_target_errors(self) -> None:
+        manifest = {
+            "targets": ["codex"],
+            "extensions": [
+                {"id": "claude.allowed-tools", "required": True, "value": ["Read"]},
+            ],
+        }
+        (self.source / "skill.platforms.yaml").write_text(
+            yaml.dump(manifest), encoding="utf-8"
+        )
+        report = render_source(self.source, self.output, self.catalog)
+        errors = [item for item in report if item.status == "error"]
+        included = [item for item in report if item.status == "included"]
+        self.assertTrue(len(errors) >= 1, "Required extension with no compatible target must error")
+        self.assertFalse(any(i.extension_id == "claude.allowed-tools" for i in included),
+                         "Should not have included items for this extension")
+
+    def test_optional_extension_with_no_compatible_target_skips(self) -> None:
+        manifest = {
+            "targets": ["codex"],
+            "extensions": [
+                {"id": "claude.allowed-tools", "required": False, "value": ["Read"]},
+            ],
+        }
+        (self.source / "skill.platforms.yaml").write_text(
+            yaml.dump(manifest), encoding="utf-8"
+        )
+        report = render_source(self.source, self.output, self.catalog)
+        errors = [item for item in report if item.status == "error"]
+        skipped = [item for item in report if item.status == "skipped"
+                   and item.extension_id == "claude.allowed-tools"]
+        self.assertFalse(errors, "Optional extension with no compatible target should not error")
+        self.assertTrue(skipped, "Optional extension should be skipped per-platform")
+
+    def test_cli_exits_nonzero_for_required_extension_no_compatible_target(self) -> None:
+        manifest = {
+            "targets": ["codex"],
+            "extensions": [
+                {"id": "claude.allowed-tools", "required": True, "value": ["Read"]},
+            ],
+        }
+        (self.source / "skill.platforms.yaml").write_text(
+            yaml.dump(manifest), encoding="utf-8"
+        )
+        result = subprocess.run(
+            [sys.executable, str(RENDERER_CLI),
+             "--source-path", str(self.source),
+             "--output-dir", str(self.output),
+             "--catalog", str(CATALOG_PATH)],
+            capture_output=True, text=True,
+        )
+        self.assertNotEqual(result.returncode, 0, "CLI must exit nonzero for required extension with no compatible target")
+        self.assertIn("error", result.stderr.lower())
 
 
 if __name__ == "__main__":

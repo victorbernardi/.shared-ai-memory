@@ -77,6 +77,16 @@ def render_source(source_dir: Path, output_dir: Path, catalog: dict) -> list[Com
             continue
 
         ext_platforms = set(ext_meta.get("platforms", []))
+        compatible = ext_platforms & set(target_platforms)
+        if not compatible and ext.required:
+            items.append(CompatibilityItem(
+                extension_id=ext.id,
+                platform="all",
+                status="error",
+                reason="extensao obrigatoria sem plataforma compativel nos targets",
+            ))
+            continue
+
         for platform in target_platforms:
             if platform in ext_platforms:
                 items.append(CompatibilityItem(
