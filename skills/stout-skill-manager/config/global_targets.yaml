@@ -1,0 +1,4 @@
+targets:
+  codex: "%USERPROFILE%/.agents/skills"
+  claude-code: "%USERPROFILE%/.claude/skills"
+  commandcode: "%USERPROFILE%/.commandcode/skills"
