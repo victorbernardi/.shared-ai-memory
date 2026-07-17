@@ -1,0 +1,22 @@
+{
+  "name": "inova-parquet-to-excel",
+  "version": "1.0.0",
+  "author": "Victor",
+  "platforms": {
+    "codex": {"enabled": true, "output": ".codex/skills"},
+    "claude-code": {"enabled": true, "output": ".claude/skills"},
+    "commandcode": {"enabled": true, "output": ".commandcode/skills"}
+  },
+  "description": {
+    "full": "Converte Parquet em Excel de aba única, solicitando ou inferindo os caminhos de entrada e saída.",
+    "short": "Converte Parquet para XLSX em uma única aba."
+  },
+  "body": {
+    "source": "SKILL.md",
+    "sections": {
+      "claude": ["all"],
+      "codex": ["Objetivo", "Fluxo", "Validações", "Resultado", "Constraints"],
+      "commandcode": ["Objetivo", "Fluxo", "Validações", "Resultado", "Constraints"]
+    }
+  }
+}
