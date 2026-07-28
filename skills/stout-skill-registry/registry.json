@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/skill_entry.schema.json",
   "version": "1.3.0",
-  "last_updated": "2026-06-23",
+  "last_updated": "2026-07-28",
   "ecosystem": "stout-inova",
   "skills": [
     {
@@ -534,6 +534,26 @@
       "updated_at": "2026-06-18",
       "author": "Obra",
       "notes": "Instalada via skillfish com score 84/100 na auditoria Sentinel."
+    },
+    {
+      "name": "superpowers-update",
+      "path": "skills/superpowers-update",
+      "tier": 2,
+      "category": "meta-governance",
+      "role": "Compara obra/superpowers/main e atualiza somente skills divergentes nos runtimes locais",
+      "triggers": [
+        "superpowers-update",
+        "atualizar superpowers",
+        "sincronizar skills",
+        "skills modificadas",
+        "obra main"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-07-28",
+      "updated_at": "2026-07-28",
+      "author": "Victor",
+      "notes": "Sincronização seletiva com rollback e sem relatórios persistentes por padrão. Auditor APPROVED; Sentinel 77/100."
     },
     {
       "name": "inova-daily-update",

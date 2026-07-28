@@ -32,8 +32,8 @@ O comando aceitará destinos adicionais explicitamente para projetos que tenham 
 - Obtém uma cópia temporária do repositório público.
 - Enumera todas as pastas `skills/<nome>` que contenham `SKILL.md`.
 - Compara arquivos canônicos entre a fonte pública e cada destino.
-- Classifica skills como novas, modificadas, removidas ou iguais.
-- Reporta arquivos extras locais sem removê-los.
+- Classifica skills presentes na fonte pública como novas, modificadas ou iguais.
+- Reporta skills e arquivos extras locais sem removê-los. Uma pasta local ausente da fonte não é declarada como removida sem evidência de que era gerenciada pelo Superpowers, evitando confundir skills próprias do ecossistema com skills removidas do projeto público.
 - Não modifica repositórios, instalações ou arquivos de relatório persistentes.
 
 ### Modo `apply`
@@ -77,7 +77,7 @@ Saídas principais:
 
 ## Testes
 
-- Detecção de skill nova, modificada, removida e igual.
+- Detecção de skill nova, modificada, igual e de candidatas removidas somente quando marcadas como gerenciadas.
 - Ignorar CRLF/LF na comparação.
 - Atualizar somente a skill modificada.
 - Preservar arquivos extras.
