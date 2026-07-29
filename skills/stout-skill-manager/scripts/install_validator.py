@@ -8,6 +8,11 @@ import re
 import argparse
 from pathlib import Path
 
+try:
+    import yaml
+except ImportError:  # pragma: no cover - installation fallback
+    yaml = None
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
@@ -20,11 +25,39 @@ def extract_frontmatter(skill_md: Path) -> dict:
     match = re.match(r"^---\s*\n(.*?)\n---", content, re.DOTALL)
     if not match:
         return {}
+
+    if yaml is not None:
+        parsed = yaml.safe_load(match.group(1))
+        if isinstance(parsed, dict):
+            fields = dict(parsed)
+            metadata = fields.get("metadata")
+            if isinstance(metadata, dict):
+                # Stout historically expected version/tools/tier at the top
+                # level. Keep aliases while preserving the common nested
+                # metadata contract used by Codex and CommandCode.
+                for key, value in metadata.items():
+                    fields.setdefault(key, value)
+            return fields
+
     fields = {}
+    metadata = {}
+    section = None
     for line in match.group(1).splitlines():
-        if ":" in line:
-            key, _, val = line.partition(":")
-            fields[key.strip()] = val.strip()
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        key, separator, val = line.partition(":")
+        if not separator:
+            continue
+        indentation = len(line) - len(line.lstrip())
+        if indentation == 0:
+            section = key.strip()
+            fields[section] = val.strip()
+        elif section == "metadata":
+            metadata[key.strip()] = val.strip().strip("'\"")
+    if metadata:
+        fields["metadata"] = metadata
+        for key, value in metadata.items():
+            fields.setdefault(key, value)
     return fields
 
 

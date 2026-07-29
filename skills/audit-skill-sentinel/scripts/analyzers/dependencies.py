@@ -23,6 +23,7 @@ def _extract_imports(source: str) -> Set[str]:
             "time", "math", "io", "csv", "logging", "traceback", "textwrap",
             "urllib", "http", "shutil", "subprocess", "tempfile", "threading",
             "concurrent", "asyncio", "dataclasses", "enum", "abc", "copy",
+            "__future__",
             "config", "db", "governance", "scanner", "analyzers",  # modulos internos
         }:
             imports.add(pkg)
@@ -44,10 +45,21 @@ def analyze(skill_data: Dict[str, Any]) -> Tuple[float, List[Dict[str, Any]]]:
     requirements = skill_data.get("requirements", [])
     reqs_path = skill_path / "scripts" / "requirements.txt"
 
+    all_imports: Set[str] = set()
+    for rel_path in skill_data.get("python_files", []):
+        filepath = skill_path / rel_path
+        if not filepath.exists():
+            continue
+        try:
+            source = filepath.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        all_imports.update(_extract_imports(source))
+
     # Sem requirements.txt
     if not reqs_path.exists():
-        # Se nao tem Python files, nao precisa
-        if skill_data.get("file_count", 0) > 0:
+        # Skills que usam somente stdlib nao precisam de requirements.txt.
+        if all_imports:
             findings.append({
                 "skill_name": skill_name,
                 "dimension": "dependencies",
@@ -79,17 +91,6 @@ def analyze(skill_data: Dict[str, Any]) -> Tuple[float, List[Dict[str, Any]]]:
         score -= min(10, len(unpinned) * 2)
 
     # Verificar deps importadas vs listadas
-    all_imports: Set[str] = set()
-    for rel_path in skill_data.get("python_files", []):
-        filepath = skill_path / rel_path
-        if not filepath.exists():
-            continue
-        try:
-            source = filepath.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        all_imports.update(_extract_imports(source))
-
     listed_names = {_normalize_pkg_name(r["name"]) for r in requirements}
 
     # Importadas mas nao listadas (possivel dep faltando)

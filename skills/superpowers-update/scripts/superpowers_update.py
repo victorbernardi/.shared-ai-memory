@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 import shutil
 import subprocess
 import sys
@@ -22,6 +23,7 @@ DEFAULT_TARGET_NAMES = (
     ".claude/skills",
     ".commandcode/skills",
 )
+LOGGER = logging.getLogger(__name__)
 
 
 class SyncError(RuntimeError):
@@ -111,54 +113,62 @@ def _build_comparisons(source_root: Path, targets: list[Path]) -> dict[str, dict
     return comparisons
 
 
+def _classify_comparison(comparison: dict) -> str:
+    source_present = comparison.get("source_present", bool(comparison["missing"]))
+    target_present = comparison.get("target_present", bool(comparison["extra"]))
+    if not source_present and target_present:
+        return "removed" if comparison.get("source_managed", False) else "extra"
+    if source_present and not target_present:
+        return "new"
+    if comparison["missing"] or comparison["changed"]:
+        return "modified"
+    return "equal"
+
+
+def _classify_target_comparisons(
+    target: str,
+    skill_comparisons: dict[str, dict],
+    categories: dict[str, set[str]],
+    extras: dict[str, dict[str, list[str]]],
+    extra_skills: dict[str, list[str]],
+) -> dict[str, dict]:
+    target_report: dict[str, dict] = {}
+    for name, comparison in skill_comparisons.items():
+        classification = _classify_comparison(comparison)
+        if classification in categories:
+            categories[classification].add(name)
+        elif classification == "extra":
+            extra_skills.setdefault(target, []).append(name)
+        report_comparison = dict(comparison)
+        report_comparison["classification"] = classification
+        target_report[name] = report_comparison
+        if comparison["extra"]:
+            extras.setdefault(target, {})[name] = comparison["extra"]
+    return target_report
+
+
 def build_report(source_sha: str, comparisons: dict[str, dict[str, dict]]) -> dict:
     """Build a stable report from target-by-target comparison results."""
 
-    new: set[str] = set()
-    modified: set[str] = set()
-    removed: set[str] = set()
-    equal: set[str] = set()
+    categories = {name: set() for name in ("new", "modified", "removed", "equal")}
     extras: dict[str, dict[str, list[str]]] = {}
     extra_skills: dict[str, list[str]] = {}
-    report_comparisons: dict[str, dict[str, dict]] = {}
-    for target, skill_comparisons in comparisons.items():
-        target_report: dict[str, dict] = {}
-        for name, comparison in skill_comparisons.items():
-            source_present = comparison.get("source_present", bool(comparison["missing"]))
-            target_present = comparison.get("target_present", bool(comparison["extra"]))
-            if not source_present and target_present:
-                if comparison.get("source_managed", False):
-                    removed.add(name)
-                    classification = "removed"
-                else:
-                    extra_skills.setdefault(target, []).append(name)
-                    classification = "extra"
-            elif source_present and not target_present:
-                new.add(name)
-                classification = "new"
-            elif comparison["missing"] or comparison["changed"]:
-                modified.add(name)
-                classification = "modified"
-            else:
-                equal.add(name)
-                classification = "equal"
-            report_comparison = dict(comparison)
-            report_comparison["classification"] = classification
-            target_report[name] = report_comparison
-            if comparison["extra"]:
-                extras.setdefault(target, {})[name] = comparison["extra"]
-        report_comparisons[target] = target_report
-
-    changed = new | modified
+    report_comparisons = {
+        target: _classify_target_comparisons(
+            target, skill_comparisons, categories, extras, extra_skills
+        )
+        for target, skill_comparisons in comparisons.items()
+    }
+    changed = categories["new"] | categories["modified"]
 
     return {
-        "status": "CHANGES_AVAILABLE" if changed or removed else "NO_OP",
+        "status": "CHANGES_AVAILABLE" if changed or categories["removed"] else "NO_OP",
         "source_sha": source_sha,
         "changed_skills": sorted(changed),
-        "new_skills": sorted(new),
-        "modified_skills": sorted(modified),
-        "removed_skills": sorted(removed),
-        "equal_skills": sorted(equal),
+        "new_skills": sorted(categories["new"]),
+        "modified_skills": sorted(categories["modified"]),
+        "removed_skills": sorted(categories["removed"]),
+        "equal_skills": sorted(categories["equal"]),
         "extra_skills": {target: sorted(names) for target, names in sorted(extra_skills.items())},
         "extra_files": extras,
         "comparisons": report_comparisons,
@@ -229,6 +239,43 @@ def _restore_entry(destination: Path, backup: Path, existed: bool, kind: str | N
         shutil.copy2(backup, destination)
 
 
+def _sync_one(
+    source_dir: Path,
+    target_dir: Path,
+    backup_root: Path,
+    index: int,
+    journal: list[tuple[Path, Path, bool, str | None]],
+) -> None:
+    backup_path = backup_root / str(index)
+    existed = target_dir.exists() or target_dir.is_symlink()
+    kind = _backup_path(target_dir, backup_path) if existed else None
+    journal.append((target_dir, backup_path, existed, kind))
+    copy_skill_files(source_dir, target_dir)
+
+    source_snapshot = snapshot_skill(source_dir)
+    target_snapshot = snapshot_skill(target_dir)
+    canonical_target = {
+        path: target_snapshot[path]
+        for path in source_snapshot
+        if path in target_snapshot
+    }
+    if _snapshot_digest(source_snapshot) != _snapshot_digest(canonical_target):
+        raise SyncError(f"Verificação pós-cópia falhou: {target_dir}")
+
+
+def _rollback(
+    journal: list[tuple[Path, Path, bool, str | None]],
+) -> list[str]:
+    errors: list[str] = []
+    for destination, backup_path, existed, kind in reversed(journal):
+        try:
+            _restore_entry(destination, backup_path, existed, kind)
+        except Exception as error:  # pragma: no cover - defensive path
+            LOGGER.error("Falha no rollback de %s: %s", destination, error)
+            errors.append(str(error))
+    return errors
+
+
 def _sync_operations(operations: Iterable[tuple[Path, Path]]) -> None:
     operations = list(operations)
     if not operations:
@@ -239,28 +286,10 @@ def _sync_operations(operations: Iterable[tuple[Path, Path]]) -> None:
         journal: list[tuple[Path, Path, bool, str | None]] = []
         try:
             for index, (source_dir, target_dir) in enumerate(operations):
-                backup_path = backup_root / str(index)
-                existed = target_dir.exists() or target_dir.is_symlink()
-                kind = _backup_path(target_dir, backup_path) if existed else None
-                journal.append((target_dir, backup_path, existed, kind))
-                copy_skill_files(source_dir, target_dir)
-
-                source_snapshot = snapshot_skill(source_dir)
-                target_snapshot = snapshot_skill(target_dir)
-                canonical_target = {
-                    path: target_snapshot[path]
-                    for path in source_snapshot
-                    if path in target_snapshot
-                }
-                if _snapshot_digest(source_snapshot) != _snapshot_digest(canonical_target):
-                    raise SyncError(f"Verificação pós-cópia falhou: {target_dir}")
+                _sync_one(source_dir, target_dir, backup_root, index, journal)
         except Exception as error:
-            rollback_errors: list[str] = []
-            for destination, backup_path, existed, kind in reversed(journal):
-                try:
-                    _restore_entry(destination, backup_path, existed, kind)
-                except Exception as rollback_error:  # pragma: no cover - defensive path
-                    rollback_errors.append(str(rollback_error))
+            LOGGER.exception("Falha na sincronização; iniciando rollback")
+            rollback_errors = _rollback(journal)
             detail = f"; rollback incompleto: {' | '.join(rollback_errors)}" if rollback_errors else ""
             if isinstance(error, SyncError):
                 raise SyncError(f"{error}{detail}") from error
@@ -424,6 +453,7 @@ def main(argv: list[str] | None = None) -> int:
             emit_report(report, args.report.expanduser().resolve() if args.report else None)
             return 1 if report["status"] == "FAILED" else 0
     except Exception as error:
+        LOGGER.exception("Falha na execução do superpowers-update")
         report = {"status": "FAILED", "error": str(error)}
         emit_report(report, args.report.expanduser().resolve() if args.report else None)
         return 1

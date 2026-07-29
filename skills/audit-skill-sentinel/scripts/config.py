@@ -97,9 +97,9 @@ SECRET_EXCEPTIONS: List[str] = [
 ]
 
 SQL_INJECTION_PATTERNS: List[re.Pattern] = [
-    re.compile(r'f["\'].*(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE).*\{', re.I),
-    re.compile(r'\.format\(.*(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE)', re.I),
-    re.compile(r'%\s*\(.*(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE)', re.I),
+    re.compile(r'f["\'].*\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE)\b.*\{', re.I),
+    re.compile(r'\.format\(.*\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE)\b', re.I),
+    re.compile(r'%\s*\(.*\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE)\b', re.I),
 ]
 
 # -- Performance Thresholds ----------------------------------------------------

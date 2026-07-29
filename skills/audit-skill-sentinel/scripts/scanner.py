@@ -18,6 +18,11 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+try:
+    import yaml
+except ImportError:  # pragma: no cover - dependency is declared by the Sentinel
+    yaml = None
+
 from config import (
     IGNORE_DIRS,
     SKILL_MAX_DEPTH,
@@ -26,14 +31,28 @@ from config import (
 )
 
 
-def _parse_yaml_frontmatter(content: str) -> Dict[str, str]:
-    """Extrai frontmatter YAML simples de um arquivo SKILL.md."""
+def _parse_yaml_frontmatter(content: str) -> Dict[str, Any]:
+    """Extrai frontmatter YAML e nivela metadata para os analyzers."""
     if not content.startswith("---"):
         return {}
     end = content.find("---", 3)
     if end == -1:
         return {}
     frontmatter = content[3:end].strip()
+
+    if yaml is not None:
+        try:
+            parsed = yaml.safe_load(frontmatter) or {}
+            if isinstance(parsed, dict):
+                result = dict(parsed)
+                nested = result.get("metadata")
+                if isinstance(nested, dict):
+                    for key, value in nested.items():
+                        result.setdefault(key, value)
+                return result
+        except yaml.YAMLError:
+            pass
+
     result = {}
     for line in frontmatter.split("\n"):
         line = line.strip()
@@ -236,6 +255,7 @@ class SkillScanner:
             "name": meta.get("name", skill_dir.name),
             "path": str(skill_dir),
             "version": meta.get("version", ""),
+            "sentinel_profile": meta.get("sentinel_profile", ""),
             "description": meta.get("description", ""),
             "skill_md_path": str(skill_md),
             "skill_md_lines": _count_lines(skill_md),

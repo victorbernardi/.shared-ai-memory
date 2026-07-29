@@ -57,7 +57,10 @@ def _check_except_patterns(node: ast.AST) -> List[Dict[str, Any]]:
             elif isinstance(child.type, ast.Name) and child.type.id == "Exception":
                 # Verificar se tem logging no corpo
                 has_log = False
+                has_reraise = False
                 for stmt in ast.walk(child):
+                    if isinstance(stmt, ast.Raise):
+                        has_reraise = True
                     if isinstance(stmt, ast.Call):
                         func = stmt.func
                         if isinstance(func, ast.Attribute) and func.attr in (
@@ -68,7 +71,7 @@ def _check_except_patterns(node: ast.AST) -> List[Dict[str, Any]]:
                         if isinstance(func, ast.Name) and func.id == "print":
                             has_log = True
                             break
-                if not has_log:
+                if not has_log and not has_reraise:
                     issues.append({
                         "type": "broad_except_no_log",
                         "line": child.lineno,
