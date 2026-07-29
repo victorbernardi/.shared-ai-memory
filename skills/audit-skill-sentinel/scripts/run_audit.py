@@ -34,6 +34,19 @@ import cost_optimizer
 import recommender
 
 
+def configure_stdio() -> None:
+    """Garante saída UTF-8 em Codex/CommandCode no Windows."""
+
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            continue
+
+
 def _compute_overall_score(scores: Dict[str, float]) -> float:
     """Calcula score composto ponderado."""
     total = 0.0
@@ -214,6 +227,7 @@ def show_history(db: Database) -> None:
 
 
 def main():
+    configure_stdio()
     parser = argparse.ArgumentParser(
         description="Sentinel: Auditoria do ecossistema de skills",
         formatter_class=argparse.RawDescriptionHelpFormatter,

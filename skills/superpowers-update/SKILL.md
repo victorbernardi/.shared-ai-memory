@@ -1,20 +1,25 @@
 ---
 name: superpowers-update
-version: 1.0.0
-tier: 2
-category: meta-governance
 description: Use when checking or updating installed Superpowers skills against obra/superpowers main, especially after a public repository change or when local skills may be stale.
-triggers:
-  - superpowers-update
-  - atualizar superpowers
-  - sincronizar skills
-  - skills modificadas
-  - obra main
-tools:
-  - python
-  - git
-  - filesystem
-author: Victor
+metadata:
+  version: "1.1.0"
+  tier: "2"
+  category: meta-governance
+  author: Victor
+  triggers:
+    - superpowers-update
+    - atualizar superpowers
+    - sincronizar skills
+    - skills modificadas
+    - obra main
+  tools:
+    - python
+    - git
+    - filesystem
+  agents:
+    - codex
+    - commandcode
+  sentinel_profile: safe-local
 ---
 
 # Superpowers Update
@@ -48,6 +53,8 @@ Para destinos adicionais, repita `--target PATH`. `--source-root PATH` existe pa
 ## Instalação
 
 A skill deve permanecer no catálogo canônico `skills/superpowers-update`. A propagação para `.agents\skills`, `.codex\skills`, `.claude\skills` e `.commandcode\skills` deve usar o instalador global do ecossistema. Não edite cópias instaladas como fonte.
+
+O Codex usa `agents/openai.yaml` para metadados de interface. O CommandCode usa o frontmatter comum e a extensão `metadata`; ambos devem continuar válidos.
 
 ## Governança
 

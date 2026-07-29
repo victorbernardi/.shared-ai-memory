@@ -1,0 +1,7 @@
+interface:
+  display_name: "Superpowers Update"
+  short_description: "Safely sync Superpowers skills across runtimes"
+  default_prompt: "Use $superpowers-update to check and apply safe updates from obra/superpowers main."
+
+policy:
+  allow_implicit_invocation: true

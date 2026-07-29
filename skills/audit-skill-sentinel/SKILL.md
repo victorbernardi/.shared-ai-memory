@@ -1,21 +1,28 @@
 ---
 name: skill-sentinel
-description: Auditoria e evolucao do ecossistema de skills. Qualidade de codigo, seguranca, custos, gaps, duplicacoes, dependencias e relatorios de saude.
-risk: safe
-source: community
-date_added: '2026-03-06'
-author: renat
-tags:
-- governance
-- audit
-- quality
-- skill-health
-tools:
-- claude-code
-- antigravity
-- cursor
-- gemini-cli
-- codex-cli
+description: Use when auditing or improving the health, quality, security, dependencies, or governance of an agent-skill ecosystem.
+metadata:
+  version: "1.1.0"
+  risk: safe
+  source: community
+  date_added: "2026-03-06"
+  author: renat
+  tier: "2"
+  category: governance
+  tags:
+    - governance
+    - audit
+    - quality
+    - skill-health
+  tools:
+    - claude-code
+    - antigravity
+    - cursor
+    - gemini-cli
+    - codex-cli
+  agents:
+    - codex
+    - commandcode
 ---
 
 # Skill Sentinel
@@ -23,6 +30,13 @@ tools:
 ## Overview
 
 Auditoria e evolucao do ecossistema de skills. Qualidade de codigo, seguranca, custos, gaps, duplicacoes, dependencias e relatorios de saude.
+
+## Platform Contract
+
+- The frontmatter keeps only the common `name`, `description`, and `metadata` keys required by Codex.
+- Codex-specific interface metadata belongs in `agents/openai.yaml`.
+- CommandCode consumes the common frontmatter and the nested `metadata` extension.
+- Analyzer profiles must be declared in `metadata` only when their behavior is explicitly supported by the Sentinel.
 
 ## When to Use This Skill
 

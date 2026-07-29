@@ -548,12 +548,12 @@
         "skills modificadas",
         "obra main"
       ],
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "created_at": "2026-07-28",
       "updated_at": "2026-07-28",
       "author": "Victor",
-      "notes": "Sincronização seletiva com rollback e sem relatórios persistentes por padrão. Auditor APPROVED; Sentinel 77/100."
+      "notes": "Sincronização seletiva com rollback e sem relatórios persistentes por padrão. Contrato Codex/CommandCode validado; Sentinel 95/100."
     },
     {
       "name": "inova-daily-update",
@@ -638,12 +638,12 @@
       "triggers": [
         "skill-sentinel"
       ],
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "created_at": "2026-03-06",
-      "updated_at": "2026-06-18",
+      "updated_at": "2026-07-28",
       "author": "renat",
-      "notes": "Descoberta física e adicionada automaticamente ao ledger."
+      "notes": "Contrato Codex/CommandCode validado; parser de metadata compatível com o validador Stout; auditoria UTF-8 e perfis safe-local suportados."
     },
     {
       "name": "brainstorming",

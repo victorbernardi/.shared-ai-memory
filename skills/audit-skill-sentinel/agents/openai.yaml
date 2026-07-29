@@ -1,0 +1,7 @@
+interface:
+  display_name: "Skill Sentinel"
+  short_description: "Audit and improve agent-skill ecosystem health"
+  default_prompt: "Use $skill-sentinel to audit and improve the health of the installed skills."
+
+policy:
+  allow_implicit_invocation: true

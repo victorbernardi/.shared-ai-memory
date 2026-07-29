@@ -88,7 +88,7 @@ def _check_token_in_logs(source: str, rel_path: str, skill_name: str) -> List[Di
     """Verifica se tokens/secrets aparecem em print/logging."""
     findings = []
     log_pattern = re.compile(
-        r'(?:print|logging\.\w+|logger\.\w+)\s*\(.*(?:token|secret|password|key|credential)',
+        r'(?:print|logging\.\w+|logger\.\w+)\s*\(.*(?:\btoken\b|\bsecret\b|\bpassword\b|\bcredential\b|\b(?:api|access|private)[_-](?:key|token)\b)',
         re.I
     )
     for i, line in enumerate(source.splitlines(), 1):

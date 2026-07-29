@@ -8,9 +8,51 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 from config import GOVERNANCE_LEVELS
+
+
+_EXTERNAL_INTEGRATION_PATTERN = re.compile(
+    r"(?:\brequests\b|\bhttpx\b|\baiohttp\b|\bboto3\b|\bopenai\b|"
+    r"\bplaywright\b|\bselenium\b|\burllib\.request\b|\bgoogle\.generativeai\b)",
+    re.I,
+)
+_EXTERNAL_DESTRUCTIVE_PATTERN = re.compile(
+    r"(?:\b(?:requests|httpx)\.(?:post|put|delete|patch)\s*\(|"
+    r"\bgit\s+(?:push|merge|reset|clean)\b|"
+    r"\b(?:publish|send_email|send_message)\s*\()",
+    re.I,
+)
+
+
+def _read_sources(skill_data: Dict[str, Any]) -> List[str]:
+    sources: List[str] = []
+    skill_path = Path(skill_data["path"])
+    for rel_path in skill_data.get("python_files", []):
+        filepath = skill_path / rel_path
+        if not filepath.exists():
+            continue
+        try:
+            sources.append(filepath.read_text(encoding="utf-8", errors="replace"))
+        except OSError:
+            continue
+    return sources
+
+
+def _has_external_integrations(sources: Iterable[str]) -> bool:
+    return any(_EXTERNAL_INTEGRATION_PATTERN.search(source) for source in sources)
+
+
+def _has_external_destructive_action(sources: Iterable[str]) -> bool:
+    return any(_EXTERNAL_DESTRUCTIVE_PATTERN.search(source) for source in sources)
+
+
+def _is_valid_safe_local_profile(sources: Iterable[str]) -> bool:
+    """Aceita perfil seguro somente sem integrações ou mutações externas."""
+
+    source_list = list(sources)
+    return not _has_external_integrations(source_list) and not _has_external_destructive_action(source_list)
 
 
 def _detect_governance_level(skill_data: Dict[str, Any], skill_path: Path) -> int:
@@ -54,9 +96,21 @@ def analyze(skill_data: Dict[str, Any]) -> Tuple[float, List[Dict[str, Any]]]:
     findings: List[Dict[str, Any]] = []
     skill_name = skill_data["name"]
     skill_path = Path(skill_data["path"])
+    sources = _read_sources(skill_data)
+
+    if skill_data.get("sentinel_profile") == "safe-local" and _is_valid_safe_local_profile(sources):
+        return 100.0, [{
+            "skill_name": skill_name,
+            "dimension": "governance",
+            "severity": "info",
+            "category": "safe_local_profile",
+            "title": "Perfil safe-local validado",
+            "description": "A skill não executa mutações externas nem integrações de API; controles de rate limit e confirmação não são aplicáveis.",
+        }]
 
     level = _detect_governance_level(skill_data, skill_path)
     score = level * 25.0  # 0=0, 1=25, 2=50, 3=75, 4=100
+    has_external_integrations = _has_external_integrations(sources)
 
     # Findings baseados no nivel
     if level == 0:
@@ -74,7 +128,7 @@ def analyze(skill_data: Dict[str, Any]) -> Tuple[float, List[Dict[str, Any]]]:
             "impact": "high",
         })
 
-    if level < 2:
+    if level < 2 and has_external_integrations:
         findings.append({
             "skill_name": skill_name,
             "dimension": "governance",
@@ -88,18 +142,7 @@ def analyze(skill_data: Dict[str, Any]) -> Tuple[float, List[Dict[str, Any]]]:
         })
 
     if level < 3:
-        has_destructive = False
-        for rel_path in skill_data.get("python_files", []):
-            filepath = skill_path / rel_path
-            if not filepath.exists():
-                continue
-            try:
-                source = filepath.read_text(encoding="utf-8", errors="replace")
-            except OSError:
-                continue
-            if re.search(r'(?:delete|publish|send|post|remove)', source, re.I):
-                has_destructive = True
-                break
+        has_destructive = _has_external_destructive_action(sources)
 
         if has_destructive:
             findings.append({

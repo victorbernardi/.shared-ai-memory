@@ -15,6 +15,7 @@ Uso:
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -116,6 +117,34 @@ CREATE INDEX IF NOT EXISTS idx_history_time      ON score_history (recorded_at);
 CREATE INDEX IF NOT EXISTS idx_action_log_time   ON action_log (created_at);
 """
 
+_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_INSERT_COLUMNS = {
+    "skill_snapshots": {
+        "audit_run_id", "skill_name", "skill_path", "version", "file_count",
+        "line_count", "overall_score", "code_quality", "security", "performance",
+        "governance", "documentation", "dependencies", "raw_metrics",
+    },
+    "findings": {
+        "audit_run_id", "skill_name", "dimension", "severity", "category", "title",
+        "description", "file_path", "line_number", "recommendation", "effort", "impact",
+    },
+    "skill_recommendations": {
+        "audit_run_id", "suggested_name", "rationale", "capabilities", "priority",
+        "skill_md_draft",
+    },
+}
+
+
+def _build_insert_sql(table: str, keys: List[str]) -> str:
+    """Build INSERT SQL from validated, internal schema identifiers."""
+
+    allowed = _INSERT_COLUMNS.get(table)
+    if allowed is None or any(not _IDENTIFIER.fullmatch(key) or key not in allowed for key in keys):
+        raise ValueError(f"Colunas invalidas para a tabela {table!r}")
+    placeholders = ", ".join(f":{key}" for key in keys)
+    columns = ", ".join(keys)
+    return "INSERT INTO " + table + " (" + columns + ") VALUES (" + placeholders + ")"
+
 
 class Database:
     def __init__(self, db_path: Path = DB_PATH):
@@ -186,9 +215,7 @@ class Database:
         if "raw_metrics" in data and isinstance(data["raw_metrics"], dict):
             data["raw_metrics"] = json.dumps(data["raw_metrics"], ensure_ascii=False)
         keys = list(data.keys())
-        placeholders = ", ".join(f":{k}" for k in keys)
-        columns = ", ".join(keys)
-        sql = f"INSERT INTO skill_snapshots ({columns}) VALUES ({placeholders})"
+        sql = _build_insert_sql("skill_snapshots", keys)
         with self._connect() as conn:
             cursor = conn.execute(sql, data)
             return cursor.lastrowid
@@ -217,9 +244,7 @@ class Database:
         """Insere um finding. Retorna o id."""
         data["audit_run_id"] = run_id
         keys = list(data.keys())
-        placeholders = ", ".join(f":{k}" for k in keys)
-        columns = ", ".join(keys)
-        sql = f"INSERT INTO findings ({columns}) VALUES ({placeholders})"
+        sql = _build_insert_sql("findings", keys)
         with self._connect() as conn:
             cursor = conn.execute(sql, data)
             return cursor.lastrowid
@@ -248,7 +273,7 @@ class Database:
             conditions.append("dimension = ?")
             params.append(dimension)
         where = " AND ".join(conditions)
-        sql = f"SELECT * FROM findings WHERE {where} ORDER BY severity, dimension"
+        sql = "SELECT * FROM findings WHERE " + where + " ORDER BY severity, dimension"
         with self._connect() as conn:
             rows = conn.execute(sql, params).fetchall()
         return [dict(r) for r in rows]
@@ -270,9 +295,7 @@ class Database:
         if "capabilities" in data and isinstance(data["capabilities"], list):
             data["capabilities"] = json.dumps(data["capabilities"], ensure_ascii=False)
         keys = list(data.keys())
-        placeholders = ", ".join(f":{k}" for k in keys)
-        columns = ", ".join(keys)
-        sql = f"INSERT INTO skill_recommendations ({columns}) VALUES ({placeholders})"
+        sql = _build_insert_sql("skill_recommendations", keys)
         with self._connect() as conn:
             cursor = conn.execute(sql, data)
             return cursor.lastrowid
