@@ -156,6 +156,19 @@ conflicts that only emerge from implementation.
 
 ## Model Selection
 
+### Workspace model policy
+
+For this workspace, use these assignments for every subagent dispatch:
+
+- **Implementers and implementation fix rounds:** `model="gpt-5.6-terra"` with `reasoning_effort="medium"`.
+- **Task reviewers, scoped re-reviewers, and the final whole-branch reviewer:** `model="gpt-5.6-sol"` with `reasoning_effort="xhigh"`.
+
+Always pass both fields explicitly. Never allow an implementer to inherit the
+controller's model or reasoning effort. These assignments override the generic
+complexity guidance and the generic fix-loop escalation guidance below: even
+rounds 4–5 keep implementation on Terra medium, while every review stays on
+Sol xhigh. A different assignment requires an explicit human instruction.
+
 Use the least powerful model that can handle each role to conserve cost and increase speed.
 
 **Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
