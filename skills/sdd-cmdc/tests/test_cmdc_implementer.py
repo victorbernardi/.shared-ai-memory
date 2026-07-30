@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+from types import SimpleNamespace
 from pathlib import Path
 
 
@@ -98,3 +99,83 @@ def test_render_blocked_emits_the_structured_contract() -> None:
             "ACTION: executar cmdc --list-models e interromper a tarefa",
         ]
     )
+
+
+def _write_prompt(tmp_path: Path, report_path: Path) -> Path:
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text(
+        f"Write your full report to {report_path}:\n",
+        encoding="utf-8",
+    )
+    return prompt_path
+
+
+def test_run_implementer_accepts_success_with_report(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    report_path = tmp_path / "report.md"
+    report_path.write_text("STATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    observed: dict[str, object] = {}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_run(command, **kwargs):
+        observed["command"] = command
+        observed["kwargs"] = kwargs
+        return SimpleNamespace(returncode=0, stdout="worker output", stderr="")
+
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+
+    assert MODULE.run_implementer(tmp_path, prompt_path) == 0
+    assert observed["command"] == MODULE.build_command(Path("cmdc"))
+    assert capsys.readouterr().out == "worker output\n"
+
+
+def test_run_implementer_preserves_failed_process_diagnostics(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    prompt_path = _write_prompt(tmp_path, tmp_path / "missing-report.md")
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE.subprocess,
+        "run",
+        lambda command, **kwargs: SimpleNamespace(
+            returncode=4, stdout="partial output", stderr="MODEL_NOT_IN_PLAN"
+        ),
+    )
+
+    assert MODULE.run_implementer(tmp_path, prompt_path) == 4
+    captured = capsys.readouterr()
+    assert "partial output" in captured.out
+    assert "BLOCKER_CODE: MODEL_UNAVAILABLE" in captured.err
+    assert "STDERR: MODEL_NOT_IN_PLAN" in captured.err
+
+
+def test_run_implementer_reports_missing_command(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    prompt_path = _write_prompt(tmp_path, tmp_path / "missing-report.md")
+
+    def missing_command(cmd_bin="cmdc"):
+        raise FileNotFoundError("cmdc binary not found")
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", missing_command)
+
+    assert MODULE.run_implementer(tmp_path, prompt_path) == 127
+    assert "BLOCKER_CODE: CMD_NOT_FOUND" in capsys.readouterr().err
+
+
+def test_run_implementer_reports_missing_report_after_zero_exit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    prompt_path = _write_prompt(tmp_path, tmp_path / "missing-report.md")
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE.subprocess,
+        "run",
+        lambda command, **kwargs: SimpleNamespace(returncode=0, stdout="", stderr=""),
+    )
+
+    assert MODULE.run_implementer(tmp_path, prompt_path) == 1
+    assert "BLOCKER_CODE: REPORT_MISSING" in capsys.readouterr().err
