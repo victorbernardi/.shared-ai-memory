@@ -23,6 +23,7 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "deepseek/deepseek-v4-flash",
         "--max-turns",
         "20",
+        "--no-skills",
         "--trust",
         "--skip-onboarding",
         "--yolo",

@@ -164,6 +164,10 @@ conflicts that only emerge from implementation.
   `scripts/cmdc-implementer.py`.
 - The adapter always passes `--model deepseek/deepseek-v4-flash` and defaults to
   `--max-turns 20`.
+- The adapter passes `--no-skills` so the implementation worker cannot load
+  global orchestration/reviewer skills and recursively spend its turn budget
+  planning the SDD workflow. Its only workflow context is the focused prompt,
+  brief, report and repository files supplied by the controller.
 - On Windows, resolve `cmdc`, `cmdc.ps1` or `cmdc.cmd`; reject the native
   `C:\Windows\System32\cmd.exe` as the backend.
 - Never route implementation to a Codex worker and never silently fall back to

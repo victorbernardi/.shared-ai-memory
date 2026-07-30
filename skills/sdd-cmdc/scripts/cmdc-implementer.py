@@ -13,7 +13,12 @@ from pathlib import Path
 
 MODEL_ID = "deepseek/deepseek-v4-flash"
 DEFAULT_MAX_TURNS = 20
-COMMAND_FLAGS = ("-p", "--model", MODEL_ID, "--trust", "--skip-onboarding", "--yolo")
+COMMAND_FLAGS = (
+    "--no-skills",
+    "--trust",
+    "--skip-onboarding",
+    "--yolo",
+)
 REPORT_MARKER = "Write your full report to "
 
 
@@ -26,9 +31,7 @@ def build_command(cmd_path: Path, max_turns: int = DEFAULT_MAX_TURNS) -> list[st
         MODEL_ID,
         "--max-turns",
         str(max_turns),
-        "--trust",
-        "--skip-onboarding",
-        "--yolo",
+        *COMMAND_FLAGS,
     ]
 
 
