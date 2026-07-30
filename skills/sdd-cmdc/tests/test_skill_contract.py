@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import subprocess
 from pathlib import Path
 
@@ -72,3 +73,57 @@ def test_skill_does_not_route_implementation_to_codex() -> None:
     assert "Codex implementer" not in content
     assert "gpt-5.6-terra" not in content
     assert "fresh cmdc implementer" in content
+
+
+def test_audit_artifact_is_approved_for_this_skill() -> None:
+    audit = json.loads((CMDC_SKILL / "audit_result.json").read_text(encoding="utf-8"))
+
+    assert audit["verdict"] == "APPROVED"
+    assert audit["proposed_name"] == "sdd-cmdc"
+    assert audit["proposed_tier"] == 4
+    assert audit["proposed_role"] == (
+        "Execução de planos de implementação com delegação de tarefas, "
+        "revisão por tarefa e revisão final via Command Code"
+    )
+
+
+def test_registry_has_one_active_sdd_cmdc_entry() -> None:
+    registry = json.loads(
+        (REPO_ROOT / "skills" / "stout-skill-registry" / "registry.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    entries = [entry for entry in registry["skills"] if entry["name"] == "sdd-cmdc"]
+
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry["path"] == "skills/sdd-cmdc"
+    assert entry["tier"] == 4
+    assert entry["category"] == "meta-factory"
+    assert entry["status"] == "active"
+    assert entry["triggers"] == [
+        "sdd-cmdc",
+        "command-code",
+        "executar plano",
+        "delegar implementação",
+        "revisão por tarefa",
+    ]
+
+
+def test_pressure_scenarios_cover_fail_closed_contract() -> None:
+    pressure_dir = CMDC_SKILL / "tests" / "pressure"
+    expected = {
+        "no-cmdc.md": ("CMD_NOT_FOUND", "não executar implementação Codex"),
+        "model-unavailable.md": ("MODEL_UNAVAILABLE", "não trocar silenciosamente"),
+        "report-missing.md": ("REPORT_MISSING", "rejeitar o sucesso aparente"),
+        "implementer-needs-context.md": (
+            "NEEDS_CONTEXT",
+            "não iniciar review com trabalho incompleto",
+        ),
+    }
+
+    assert {path.name for path in pressure_dir.glob("*.md")} == set(expected)
+    for filename, markers in expected.items():
+        content = (pressure_dir / filename).read_text(encoding="utf-8").lower()
+        for marker in markers:
+            assert marker.lower() in content
