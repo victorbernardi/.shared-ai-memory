@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import subprocess
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILL = REPO_ROOT / "skills" / "sdd-cmdc-opencode"
 SOURCE = REPO_ROOT / "skills" / "sdd-cmdc"
+REGISTRY = REPO_ROOT / "skills" / "stout-skill-registry" / "registry.json"
 
 
 def digest(path: Path) -> str:
@@ -198,3 +200,55 @@ def test_source_skills_have_no_worktree_diff() -> None:
 
     assert result.returncode == 0
     assert result.stdout.strip() == ""
+
+
+def test_skill_has_approved_audit_artifact() -> None:
+    audit_path = SKILL / "audit_result.json"
+
+    assert audit_path.is_file(), "missing audit_result.json in the new skill directory"
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+
+    assert audit["verdict"] == "APPROVED"
+    assert audit["proposed_name"] == "sdd-cmdc-opencode"
+    assert audit["proposed_tier"] == 4
+    assert "open-code-review" in audit["proposed_role"].lower() or "delegation" in audit[
+        "proposed_role"
+    ].lower()
+
+
+def test_skill_is_registered_active_in_stout_registry() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+
+    matches = [
+        entry for entry in registry["skills"] if entry.get("name") == "sdd-cmdc-opencode"
+    ]
+
+    assert len(matches) == 1, f"expected exactly one registry entry, got {len(matches)}"
+    entry = matches[0]
+
+    assert entry["path"] == "skills/sdd-cmdc-opencode"
+    assert entry["tier"] == 4
+    assert entry["category"] == "meta-factory"
+    assert entry["status"] == "active"
+    assert entry["triggers"] == [
+        "sdd-cmdc-opencode",
+        "open-code-review",
+        "revisão delegada",
+        "revisão por tarefa",
+        "executar plano",
+    ]
+    assert "OPENAI_API_KEY" in entry["notes"]
+
+
+def test_stout_registry_preserves_sdd_cmdc_entry() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+
+    sdd_cmdc_entries = [
+        entry for entry in registry["skills"] if entry.get("name") == "sdd-cmdc"
+    ]
+
+    assert len(sdd_cmdc_entries) == 1, (
+        f"expected exactly one sdd-cmdc entry, got {len(sdd_cmdc_entries)}"
+    )
+    assert sdd_cmdc_entries[0]["status"] == "active"
+    assert sdd_cmdc_entries[0]["tier"] == 4
