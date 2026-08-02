@@ -336,6 +336,19 @@ subskill:
 8. Re-run only the fix range through delegated preview/rule/diff review
    after a fix round (section 4).
 
+**Windows shell for exact-range OCR:** PowerShell mangles OCR ref
+arguments — `ocr delegate preview --commit <rev>` or `--from/--to` fails
+with `Needed a single revision` — while Git Bash resolves the same exact
+ref. Detect a working shell at the start of each review: prefer Git Bash on
+Windows (or any shell where OCR ref resolution demonstrably succeeds) and
+run every exact-range `ocr delegate preview` and `ocr delegate rule`
+through it. Preserve the exact BASE/FIX_BASE/MERGE_BASE range the review
+package was built from; never shift, truncate, or re-derive the range to
+work around a shell quirk. Record the shell name, the full command, and its
+exit code in the review evidence, along with any fallback shell attempt or
+blocker. Never change the range silently, and never fall back to a Codex or
+API review when the shell or OCR fails.
+
 The review output must identify: the number of files reviewed, the excluded
 files, the commands executed, their exit codes, findings by severity
 (Critical/High and Medium), and the review status. Every recommendation

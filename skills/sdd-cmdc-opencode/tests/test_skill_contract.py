@@ -71,6 +71,25 @@ def test_no_codex_reviewer_prompts_in_new_skill() -> None:
         )
 
 
+def test_skill_documents_windows_shell_for_exact_range_ocr() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # The delegated preview/rule flow must instruct a working shell for
+    # exact-range OCR on Windows (PowerShell fails ref resolution with
+    # "Needed a single revision"; Git Bash resolves the same ref).
+    assert "Needed a single revision" in content
+    assert "Git Bash" in content
+    assert "PowerShell" in content
+    # The exact BASE/FIX_BASE/MERGE_BASE range must be preserved, never
+    # silently shifted, and the shell + command + exit code recorded.
+    assert "BASE" in content and "FIX_BASE" in content and "MERGE_BASE" in content
+    assert "never shift" in content.lower()
+    assert "shell name" in content.lower()
+    assert "exit code" in content.lower()
+    # No silent Codex/API fallback when the shell or OCR fails.
+    assert "fall back" in content.lower() and "never" in content.lower()
+
+
 def test_skill_requires_delegate_subskill_for_every_review() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
