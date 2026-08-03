@@ -587,6 +587,32 @@ A review-only report missing any of these fields, or a host session that
 times out, exits without a final message, or leaves orphaned evidence is
 `REVIEW INCOMPLETE` or `BLOCKED` — never `REVIEW CLEAN`.
 
+**Worked example (historical fixture).** The completed range
+`0f3d86c..d5eddb8` on this branch is the recorded fixture for a review-only
+run: it covers the delegated-review contract, the recovery-evidence fixes,
+and the launcher itself. A controller re-runs that exact range read-only as:
+
+```bash
+# Deterministic OCR phase (Git Bash on Windows; PowerShell mangles refs)
+scripts/review-package PLAN_FILE 0f3d86c d5eddb8
+ocr delegate preview --from 0f3d86c --to d5eddb8
+ocr delegate rule skills/sdd-cmdc-opencode/scripts/cmdc-implementer.py \
+  skills/sdd-cmdc-opencode/tests/test_cmdc_implementer.py \
+  skills/sdd-cmdc-opencode/tests/test_skill_contract.py
+```
+
+```powershell
+# Clean host-session phase: render task-reviewer-prompt.md with the preview,
+# rule-group, package and report paths, then run the launcher with a finite
+# timeout. REVIEW CLEAN only when the host report declares it.
+python scripts/review-session.py PLAN_FILE 0f3d86c d5eddb8 PROMPT_FILE REPORT_FILE `
+  --timeout-seconds 1800
+```
+
+These values are a fixture for documentation and smoke runs only — never
+hardcode any range inside the scripts; always pass the exact `BASE`/`HEAD`
+the review package was built from.
+
 ## Governance States
 
 The fail-closed states below govern every review, re-review, and the final

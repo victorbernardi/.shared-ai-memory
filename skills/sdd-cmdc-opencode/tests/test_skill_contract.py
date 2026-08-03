@@ -88,9 +88,13 @@ def test_skill_does_not_reference_codex_reviewer_prompts() -> None:
 
     # SKILL.md must not name or route reviews through Codex reviewer prompt
     # templates; every review uses the delegated open-code-review-delegate
-    # flow instead.
-    assert "task-reviewer-prompt.md" not in content
-    assert "re-review-prompt.md" not in content
+    # flow instead. The versioned host-session instruction template for the
+    # initial review (task-reviewer-prompt.md) may be named only as an
+    # instruction template rendered into the clean host session — never as a
+    # Codex reviewer prompt — and the re-review is the scoped counterpart.
+    assert "task-reviewer-prompt.md" in content
+    assert "re-review" in content.lower()
+    assert "instruction template" in content.lower()
 
 
 def test_skill_documents_windows_shell_for_exact_range_ocr() -> None:
@@ -421,3 +425,27 @@ def test_skill_review_only_clean_host_launcher_reference() -> None:
     assert "REVIEW INCOMPLETE" in content
     assert "BLOCKED" in content
     assert "REVIEW CLEAN" in content
+
+
+def test_skill_documents_review_only_command_with_historical_fixture() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # Task 4: the review-only command is documented with the historical
+    # fixture range 0f3d86c..d5eddb8, as an example only.
+    assert "0f3d86c" in content
+    assert "d5eddb8" in content
+    assert "Worked example (historical fixture)" in content
+    assert "scripts/review-package PLAN_FILE 0f3d86c d5eddb8" in content
+    assert "ocr delegate preview --from 0f3d86c --to d5eddb8" in content
+    assert "ocr delegate rule" in content
+    assert "review-session.py PLAN_FILE 0f3d86c d5eddb8" in content
+    assert "--timeout-seconds 1800" in content
+
+
+def test_fixture_range_is_not_hardcoded_in_scripts() -> None:
+    # The fixture range appears in SKILL.md as documentation only; no script
+    # may embed 0f3d86c/d5eddb8 as a default or constant.
+    for script in (SKILL / "scripts").glob("*.py"):
+        source = script.read_text(encoding="utf-8")
+        assert "0f3d86c" not in source
+        assert "d5eddb8" not in source
