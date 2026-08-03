@@ -11,10 +11,13 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 MODEL_ID = "deepseek/deepseek-v4-flash"
-DEFAULT_MAX_TURNS = 20
+DEFAULT_MAX_TURNS = 100
+DEFAULT_WALL_TIMEOUT_SECONDS = 4 * 60 * 60
+MAX_WALL_TIMEOUT_SECONDS = 12 * 60 * 60
 DEFAULT_RECOVERY_MAX_TURNS = 5
 TEST_EVIDENCE_RE = re.compile(
     r"(?:\b\d+\s+passed\b|"
@@ -286,7 +289,9 @@ def _heartbeat_loop(
     command: str,
     interval: float,
     stop_event: threading.Event,
+    started_monotonic: float | None = None,
 ) -> None:
+    started_monotonic = started_monotonic or time.monotonic()
     while not stop_event.wait(interval):
         try:
             snapshot = collect_workspace_snapshot(
@@ -306,6 +311,7 @@ def _heartbeat_loop(
                 last_output=str(exc),
             )
             continue
+        snapshot["elapsed_seconds"] = round(time.monotonic() - started_monotonic, 1)
         _write_checkpoint(
             checkpoint_file,
             "HEARTBEAT",
@@ -375,6 +381,7 @@ def run_implementer(
     checkpoint_file: Path | None = None,
     heartbeat_interval: float = 30.0,
     recovery_max_turns: int = DEFAULT_RECOVERY_MAX_TURNS,
+    wall_timeout_seconds: int = DEFAULT_WALL_TIMEOUT_SECONDS,
 ) -> int:
     """Run Command Code and return zero only after process/report success."""
     cwd = cwd.expanduser().resolve()
@@ -404,6 +411,10 @@ def run_implementer(
     completed = None
     heartbeat_stop = threading.Event()
     heartbeat_thread: threading.Thread | None = None
+    wall_timeout_seconds = min(
+        max(60, wall_timeout_seconds), MAX_WALL_TIMEOUT_SECONDS
+    )
+    started_monotonic = time.monotonic()
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
@@ -430,6 +441,7 @@ def run_implementer(
                         command_text,
                         heartbeat_interval,
                         heartbeat_stop,
+                        started_monotonic,
                     ),
                     daemon=True,
                 )
@@ -441,7 +453,7 @@ def run_implementer(
             cwd=str(cwd),
             capture_output=True,
             check=False,
-            timeout=max(60, max_turns * 120),
+            timeout=wall_timeout_seconds,
         )
         if completed.stdout:
             stdout = _text_output(completed.stdout)
@@ -720,6 +732,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--checkpoint-file", type=Path)
     parser.add_argument("--heartbeat-interval", default=30.0, type=float)
     parser.add_argument(
+        "--wall-timeout-seconds",
+        default=DEFAULT_WALL_TIMEOUT_SECONDS,
+        type=int,
+        help="finite process watchdog; turn budget remains controlled by --max-turns",
+    )
+    parser.add_argument(
         "--recovery-max-turns", default=DEFAULT_RECOVERY_MAX_TURNS, type=int
     )
     return parser.parse_args()
@@ -735,6 +753,7 @@ def main() -> int:
         checkpoint_file=args.checkpoint_file,
         heartbeat_interval=args.heartbeat_interval,
         recovery_max_turns=args.recovery_max_turns,
+        wall_timeout_seconds=args.wall_timeout_seconds,
     )
 
 

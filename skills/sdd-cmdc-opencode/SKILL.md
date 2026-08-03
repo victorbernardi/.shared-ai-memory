@@ -194,7 +194,9 @@ conflicts that only emerge from implementation.
 - Every implementation task and every implementation fix round invokes
   `scripts/cmdc-implementer.py`.
 - The adapter always passes `--model deepseek/deepseek-v4-flash` and defaults to
-  `--max-turns 20`.
+  `--max-turns 100`, matching the Command Code CLI default. The turn budget is
+  separate from the finite wall-clock watchdog, which defaults to four hours
+  and is recorded in the heartbeat evidence.
 - The adapter passes `--no-skills` so the implementation worker cannot load
   global orchestration/reviewer skills and recursively spend its turn budget
   planning the SDD workflow. Its only workflow context is the focused prompt,
@@ -265,9 +267,10 @@ $workspace = (Get-Location).Path
 & python (Join-Path $skillDir "scripts\cmdc-implementer.py") `
   --cwd $workspace `
   --prompt-file "<cmdc-prompt-file>" `
-  --max-turns 20 `
+  --max-turns 100 `
   --checkpoint-file "<checkpoint-file>" `
   --heartbeat-interval 30 `
+  --wall-timeout-seconds 14400 `
   --recovery-max-turns 5
 ```
 

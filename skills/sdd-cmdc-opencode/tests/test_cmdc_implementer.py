@@ -25,7 +25,7 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "--model",
         "deepseek/deepseek-v4-flash",
         "--max-turns",
-        "20",
+        "100",
         "--output-format",
         "json",
         "--no-skills",
@@ -497,6 +497,11 @@ def test_success_writes_starting_and_finished_checkpoints(
     assert checkpoints[-1]["last_output"] == "pytest 1 passed"
 
 
+def test_default_wall_timeout_is_separate_from_turn_budget() -> None:
+    assert MODULE.DEFAULT_MAX_TURNS == 100
+    assert MODULE.DEFAULT_WALL_TIMEOUT_SECONDS == 4 * 60 * 60
+
+
 def test_git_success_without_commit_is_transaction_incomplete(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -570,6 +575,7 @@ def test_long_run_emits_heartbeat_with_command_and_workspace_snapshot(
     assert heartbeat["phase"] == "RUNNING"
     assert "cmdc" in heartbeat["last_command"]
     assert "head" in heartbeat["snapshot"]
+    assert heartbeat["snapshot"]["elapsed_seconds"] >= 0
 
 
 def test_timeout_checkpoint_detects_test_output(

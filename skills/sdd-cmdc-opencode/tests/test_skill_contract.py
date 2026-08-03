@@ -191,6 +191,7 @@ def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
     assert "implementer-prompt.md" in content
     assert "--checkpoint-file" in content
     assert "--heartbeat-interval" in content
+    assert "--wall-timeout-seconds" in content
     assert "--recovery-max-turns" in content
     assert "STATUS: RECOVERED" in content
     assert "PERMISSION_DENIED" in content
