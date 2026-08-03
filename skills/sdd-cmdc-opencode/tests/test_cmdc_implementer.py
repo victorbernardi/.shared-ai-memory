@@ -234,6 +234,20 @@ def test_collect_workspace_snapshot_detects_partial_unicode_fixture_diff(
     assert snapshot["state"] == "IMPLEMENTATION INCOMPLETE"
 
 
+def test_activity_fingerprint_detects_content_change_with_same_git_status(
+    tmp_path: Path,
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-content-fingerprint")
+    tracked = repo / "tracked.py"
+    tracked.write_text("VALUE = 2\n", encoding="utf-8")
+    first = MODULE.collect_workspace_snapshot(repo)
+    tracked.write_text("VALUE = 3\n", encoding="utf-8")
+    second = MODULE.collect_workspace_snapshot(repo)
+
+    assert first["status"] == second["status"]
+    assert MODULE._activity_fingerprint(first) != MODULE._activity_fingerprint(second)
+
+
 def test_timeout_with_partial_diff_writes_incomplete_checkpoint(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

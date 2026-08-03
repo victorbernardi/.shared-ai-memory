@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -213,6 +214,31 @@ def _report_output(report_path: Path | None) -> str:
     return report_path.read_text(encoding="utf-8", errors="replace")
 
 
+def _workspace_content_fingerprint(
+    cwd: Path,
+    status_lines: list[str],
+    report_path: Path | None,
+) -> str:
+    digest = hashlib.sha256()
+    paths: set[Path] = set()
+    for line in status_lines:
+        normalized = line.lstrip()
+        relative = normalized[2:].strip() if len(normalized) >= 2 else ""
+        if " -> " in relative:
+            relative = relative.rsplit(" -> ", 1)[-1]
+        if relative:
+            paths.add((cwd / relative).resolve())
+    if report_path is not None:
+        paths.add(report_path.expanduser().resolve())
+    for path in sorted(paths, key=lambda item: str(item)):
+        digest.update(str(path).encode("utf-8", errors="replace"))
+        try:
+            digest.update(path.read_bytes())
+        except OSError:
+            digest.update(b"<unreadable-or-missing>")
+    return digest.hexdigest()
+
+
 def collect_workspace_snapshot(
     cwd: Path,
     *,
@@ -259,6 +285,9 @@ def collect_workspace_snapshot(
         "report_path": str(report_path) if report_path else None,
         "tests_detectable": _has_test_evidence(test_output),
         "state": state,
+        "workspace_content_fingerprint": _workspace_content_fingerprint(
+            cwd, status_lines, report_path
+        ),
     }
 
 
@@ -267,6 +296,7 @@ def _activity_fingerprint(snapshot: dict[str, object]) -> tuple[object, ...]:
         snapshot.get("head"),
         tuple(snapshot.get("status", [])),
         snapshot.get("report_exists"),
+        snapshot.get("workspace_content_fingerprint"),
     )
 
 
