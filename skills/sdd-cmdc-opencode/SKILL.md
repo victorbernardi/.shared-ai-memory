@@ -266,7 +266,9 @@ $workspace = (Get-Location).Path
   --cwd $workspace `
   --prompt-file "<cmdc-prompt-file>" `
   --max-turns 20 `
-  --checkpoint-file "<checkpoint-file>"
+  --checkpoint-file "<checkpoint-file>" `
+  --heartbeat-interval 30 `
+  --recovery-max-turns 5
 ```
 
 The adapter's stdout/stderr and exit code are part of the dispatch result. A
@@ -275,7 +277,12 @@ non-zero result or missing report emits `STATUS: BLOCKED` with
 that reason into the ledger and do not generate a review package. A timeout
 with workspace evidence emits `STATUS: IMPLEMENTATION INCOMPLETE`, appends a
 `TIMED_OUT` JSONL checkpoint and blocks review/next-task progression until the
-workspace, report and commit are recovered deterministically.
+workspace, report and commit are recovered deterministically. When a partial
+diff or commit is present, the adapter starts one fresh, bounded CMDc recovery
+phase. Recovery is accepted only when a new commit, the requested report and
+detectable test evidence all exist; otherwise it remains incomplete and blocks
+review. A successful recovery emits `STATUS: RECOVERED`; this permits package
+generation only after the normal delegated review gates are rechecked.
 
 Template: [implementer-prompt.md](implementer-prompt.md)
 

@@ -10,10 +10,17 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 MODEL_ID = "deepseek/deepseek-v4-flash"
 DEFAULT_MAX_TURNS = 20
+DEFAULT_RECOVERY_MAX_TURNS = 5
+TEST_EVIDENCE_RE = re.compile(
+    r"(?:\bpytest\b|\bunittest\b|\b\d+\s+(?:passed|failed|skipped|errors?)\b|"
+    r"\btests?\b.{0,80}\b(?:pass(?:ed)?|fail(?:ed|ure)?|error)\b)",
+    flags=re.IGNORECASE | re.DOTALL,
+)
 COMMAND_FLAGS = (
     "--no-skills",
     "--trust",
@@ -149,17 +156,52 @@ def _run_git(cwd: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
+def _text_output(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
+def _has_test_evidence(output: str) -> bool:
+    return bool(TEST_EVIDENCE_RE.search(output))
+
+
+def _report_output(report_path: Path | None) -> str:
+    if report_path is None or not report_path.is_file():
+        return ""
+    return report_path.read_text(encoding="utf-8", errors="replace")
+
+
 def collect_workspace_snapshot(
     cwd: Path,
     *,
     baseline_head: str | None = None,
     report_path: Path | None = None,
+    checkpoint_file: Path | None = None,
+    test_output: str = "",
 ) -> dict[str, object]:
     """Collect deterministic Git/report evidence without invoking a shell."""
     git_root = _run_git(cwd, "rev-parse", "--show-toplevel")
+    if not git_root:
+        raise RuntimeError("git root was empty")
     head = _run_git(cwd, "rev-parse", "HEAD")
     status = _run_git(cwd, "status", "--short", "--untracked-files=all")
     status_lines = status.splitlines() if status else []
+    if checkpoint_file is not None:
+        checkpoint_path = checkpoint_file.expanduser().resolve()
+        root_path = Path(git_root).resolve()
+        try:
+            checkpoint_relative = checkpoint_path.relative_to(root_path).as_posix()
+        except ValueError:
+            checkpoint_relative = None
+        if checkpoint_relative:
+            status_lines = [
+                line
+                for line in status_lines
+                if line[3:].strip().replace("\\", "/") != checkpoint_relative
+            ]
     commits_since_baseline: list[str] = []
     if baseline_head and baseline_head != head:
         commits = _run_git(cwd, "rev-list", "--reverse", f"{baseline_head}..HEAD")
@@ -176,6 +218,7 @@ def collect_workspace_snapshot(
         "commits_since_baseline": commits_since_baseline,
         "report_exists": report_exists,
         "report_path": str(report_path) if report_path else None,
+        "tests_detectable": _has_test_evidence(test_output),
         "state": state,
     }
 
@@ -185,15 +228,55 @@ def _write_checkpoint(
     event: str,
     snapshot: dict[str, object],
     state: str | None = None,
+    *,
+    phase: str | None = None,
+    last_command: str = "",
+    last_output: str = "",
 ) -> None:
     """Append one JSONL checkpoint record; the snapshot never claims COMPLETE."""
     path.parent.mkdir(parents=True, exist_ok=True)
     state = state or str(snapshot["state"])
     if state == "COMPLETE":
         raise ValueError("a workspace snapshot cannot claim COMPLETE")
-    payload = {"event": event, "snapshot": snapshot, "state": state}
+    payload = {
+        "event": event,
+        "last_command": last_command,
+        "last_output": last_output,
+        "phase": phase or event,
+        "snapshot": snapshot,
+        "state": state,
+    }
     with path.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def _heartbeat_loop(
+    cwd: Path,
+    baseline_head: str,
+    report_path: Path | None,
+    checkpoint_file: Path,
+    command: str,
+    interval: float,
+    stop_event: threading.Event,
+) -> None:
+    while not stop_event.wait(interval):
+        try:
+            snapshot = collect_workspace_snapshot(
+                cwd,
+                baseline_head=baseline_head,
+                report_path=report_path,
+                checkpoint_file=checkpoint_file,
+            )
+        except RuntimeError:
+            continue
+        _write_checkpoint(
+            checkpoint_file,
+            "HEARTBEAT",
+            snapshot,
+            state="RUNNING",
+            phase="RUNNING",
+            last_command=command,
+        )
 
 
 def _render_incomplete(
@@ -209,6 +292,7 @@ def _render_incomplete(
             f"WORKSPACE_STATUS: {' | '.join(snapshot['status'])}",
             f"WORKSPACE_COMMITS: {len(snapshot['commits_since_baseline'])}",
             f"REPORT_EXISTS: {'true' if snapshot['report_exists'] else 'false'}",
+            f"WORKSPACE_TESTS: {'true' if snapshot['tests_detectable'] else 'false'}",
             f"CHECKPOINT_FILE: {checkpoint_file or ''}",
         ]
     )
@@ -252,6 +336,8 @@ def run_implementer(
     max_turns: int = DEFAULT_MAX_TURNS,
     cmd_bin: str = "cmdc",
     checkpoint_file: Path | None = None,
+    heartbeat_interval: float = 30.0,
+    recovery_max_turns: int = DEFAULT_RECOVERY_MAX_TURNS,
 ) -> int:
     """Run Command Code and return zero only after process/report success."""
     cwd = cwd.expanduser().resolve()
@@ -260,14 +346,48 @@ def run_implementer(
     report_path = _extract_report_path(prompt_text, cwd)
     baseline_snapshot: dict[str, object] | None = None
     try:
-        baseline_snapshot = collect_workspace_snapshot(cwd, report_path=report_path)
+        baseline_snapshot = collect_workspace_snapshot(
+            cwd,
+            report_path=report_path,
+            checkpoint_file=checkpoint_file,
+        )
     except RuntimeError:
         baseline_snapshot = None
+
+    command: list[str] = [cmd_bin, *COMMAND_FLAGS]
+    completed = None
+    heartbeat_stop = threading.Event()
+    heartbeat_thread: threading.Thread | None = None
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
         command = build_command(cmd_path, max_turns=max_turns)
         process_command = _platform_command(command)
+        command_text = " ".join(str(part) for part in command)
+        if checkpoint_file and baseline_snapshot is not None:
+            _write_checkpoint(
+                checkpoint_file,
+                "STARTING",
+                baseline_snapshot,
+                state="STARTING",
+                phase="STARTING",
+                last_command=command_text,
+            )
+            if heartbeat_interval > 0:
+                heartbeat_thread = threading.Thread(
+                    target=_heartbeat_loop,
+                    args=(
+                        cwd,
+                        str(baseline_snapshot["head"]),
+                        report_path,
+                        checkpoint_file,
+                        command_text,
+                        heartbeat_interval,
+                        heartbeat_stop,
+                    ),
+                    daemon=True,
+                )
+                heartbeat_thread.start()
         completed = subprocess.run(
             process_command,
             input=prompt_text,
@@ -278,17 +398,19 @@ def run_implementer(
             timeout=max(60, max_turns * 120),
         )
         if completed.stdout:
-            sys.stdout.write(completed.stdout)
-            if not completed.stdout.endswith("\n"):
+            stdout = _text_output(completed.stdout)
+            sys.stdout.write(stdout)
+            if not stdout.endswith("\n"):
                 sys.stdout.write("\n")
         if completed.stderr:
-            sys.stderr.write(completed.stderr)
-            if not completed.stderr.endswith("\n"):
+            stderr = _text_output(completed.stderr)
+            sys.stderr.write(stderr)
+            if not stderr.endswith("\n"):
                 sys.stderr.write("\n")
         report_exists = report_path is not None and report_path.is_file()
         diagnostic = classify_failure(
             completed.returncode,
-            completed.stderr,
+            stderr if completed.stderr else "",
             report_exists=report_exists,
         )
         exit_code = completed.returncode
@@ -298,7 +420,11 @@ def run_implementer(
         exit_code = 127
     except subprocess.TimeoutExpired as exc:
         command = build_command(Path(cmd_bin), max_turns=max_turns)
-        timeout_stderr = str(exc.stderr or exc)
+        timeout_stdout = _text_output(exc.stdout)
+        timeout_stderr = _text_output(exc.stderr) or str(exc)
+        timeout_output = "\n".join(
+            part for part in (timeout_stdout, timeout_stderr) if part
+        )
         diagnostic = classify_failure(8, timeout_stderr, report_exists=False)
         exit_code = 8
 
@@ -309,6 +435,8 @@ def run_implementer(
                     cwd,
                     baseline_head=str(baseline_snapshot["head"]),
                     report_path=report_path,
+                    checkpoint_file=checkpoint_file,
+                    test_output=f"{timeout_output}\n{_report_output(report_path)}",
                 )
             except RuntimeError as snapshot_error:
                 diagnostic["STDERR"] = (
@@ -328,10 +456,207 @@ def run_implementer(
                     "TIMED_OUT",
                     snapshot,
                     state="IMPLEMENTATION INCOMPLETE",
+                    phase="TIMED_OUT",
+                    last_command=" ".join(str(part) for part in command),
+                    last_output=timeout_output,
                 )
+            partial_workspace = bool(
+                snapshot["diff_present"] or snapshot["commits_since_baseline"]
+            )
+            if checkpoint_file and partial_workspace:
+                heartbeat_stop.set()
+                if heartbeat_thread is not None:
+                    heartbeat_thread.join(timeout=max(1.0, heartbeat_interval))
+                recovery_command = [cmd_bin, *COMMAND_FLAGS]
+                recovery_text = (
+                    f"{prompt_text}\n\n"
+                    "RECOVERY MODE: the previous implementer timed out. This is a "
+                    "fresh, short CMDc process. Inspect the current workspace and "
+                    "preserve valid partial work. Run the focused/full validation "
+                    "required by the brief, write the requested report, and commit "
+                    "only the task scope. Do not claim completion if any artifact "
+                    "is missing.\n"
+                )
+                try:
+                    recovery_command = build_command(
+                        resolve_cmdc(cmd_bin), max_turns=recovery_max_turns
+                    )
+                    command = recovery_command
+                    recovery_completed = subprocess.run(
+                        _platform_command(recovery_command),
+                        input=recovery_text,
+                        text=True,
+                        cwd=str(cwd),
+                        capture_output=True,
+                        check=False,
+                        timeout=max(60, recovery_max_turns * 120),
+                    )
+                    recovery_output = "\n".join(
+                        part
+                        for part in (
+                            _text_output(recovery_completed.stdout),
+                            _text_output(recovery_completed.stderr),
+                        )
+                        if part
+                    )
+                    if recovery_completed.stdout:
+                        print(_text_output(recovery_completed.stdout), end="")
+                    if recovery_completed.stderr:
+                        print(_text_output(recovery_completed.stderr), end="", file=sys.stderr)
+                    recovery_snapshot = collect_workspace_snapshot(
+                        cwd,
+                        baseline_head=str(baseline_snapshot["head"]),
+                        report_path=report_path,
+                        checkpoint_file=checkpoint_file,
+                        test_output=f"{recovery_output}\n{_report_output(report_path)}",
+                    )
+                    recovery_ready = (
+                        recovery_completed.returncode == 0
+                        and bool(recovery_snapshot["commits_since_baseline"])
+                        and bool(recovery_snapshot["report_exists"])
+                        and bool(recovery_snapshot["tests_detectable"])
+                    )
+                    _write_checkpoint(
+                        checkpoint_file,
+                        "RECOVERY_FINISHED",
+                        recovery_snapshot,
+                        state=(
+                            "CHECKPOINT"
+                            if recovery_ready
+                            else "IMPLEMENTATION INCOMPLETE"
+                        ),
+                        phase="RECOVERY_FINISHED",
+                        last_command=" ".join(str(part) for part in recovery_command),
+                        last_output=recovery_output,
+                    )
+                    if recovery_ready:
+                        print("STATUS: RECOVERED")
+                        print(
+                            "RECOVERY_EVIDENCE: commit=true report=true tests=true"
+                        )
+                        return 0
+                    snapshot = recovery_snapshot
+                    diagnostic = classify_failure(
+                        recovery_completed.returncode,
+                        recovery_output,
+                        report_exists=bool(recovery_snapshot["report_exists"]),
+                    )
+                    if not diagnostic:
+                        diagnostic = {
+                            "BLOCKER_CODE": "RECOVERY_INCOMPLETE",
+                            "MESSAGE": (
+                                "a recuperação terminou sem evidência transacional completa"
+                            ),
+                            "COMMAND": "",
+                            "EXIT_CODE": str(recovery_completed.returncode),
+                            "STDERR": recovery_output,
+                            "ACTION": (
+                                "preservar o estado e recuperar commit, relatório e testes "
+                                "antes da revisão"
+                            ),
+                        }
+                except (FileNotFoundError, RuntimeError, subprocess.TimeoutExpired) as recovery_error:
+                    recovery_output = _text_output(
+                        getattr(recovery_error, "stdout", "")
+                    ) + "\n" + _text_output(
+                        getattr(recovery_error, "stderr", "")
+                    )
+                    try:
+                        snapshot = collect_workspace_snapshot(
+                            cwd,
+                            baseline_head=str(baseline_snapshot["head"]),
+                            report_path=report_path,
+                            checkpoint_file=checkpoint_file,
+                            test_output=f"{recovery_output}\n{_report_output(report_path)}",
+                        )
+                    except RuntimeError:
+                        pass
+                    _write_checkpoint(
+                        checkpoint_file,
+                        "RECOVERY_FAILED",
+                        snapshot,
+                        state="IMPLEMENTATION INCOMPLETE",
+                        phase="RECOVERY_FAILED",
+                        last_command=" ".join(str(part) for part in recovery_command),
+                        last_output=recovery_output.strip(),
+                    )
+                    diagnostic["STDERR"] = (
+                        f"{diagnostic.get('STDERR', '')}\n"
+                        f"recovery failed: {recovery_error}"
+                    ).strip()
+                    command = recovery_command
             diagnostic["COMMAND"] = " ".join(str(part) for part in command)
             print(_render_incomplete(diagnostic, snapshot, checkpoint_file), file=sys.stderr)
             return exit_code
+    finally:
+        if heartbeat_thread is not None:
+            heartbeat_stop.set()
+            heartbeat_thread.join(timeout=max(1.0, heartbeat_interval))
+
+    if baseline_snapshot is not None and completed is not None:
+        final_snapshot = None
+        try:
+            final_snapshot = collect_workspace_snapshot(
+                cwd,
+                baseline_head=str(baseline_snapshot["head"]),
+                report_path=report_path,
+                checkpoint_file=checkpoint_file,
+                test_output="\n".join(
+                    part
+                    for part in (
+                        _text_output(completed.stdout),
+                        _text_output(completed.stderr),
+                        _report_output(report_path),
+                    )
+                    if part
+                ),
+            )
+        except RuntimeError:
+            final_snapshot = None
+        if final_snapshot is not None:
+            transaction_ready = (
+                completed.returncode == 0
+                and bool(final_snapshot["commits_since_baseline"])
+                and bool(final_snapshot["report_exists"])
+                and bool(final_snapshot["tests_detectable"])
+            )
+            if checkpoint_file:
+                _write_checkpoint(
+                    checkpoint_file,
+                    "FINISHED",
+                    final_snapshot,
+                    state=(
+                        "CHECKPOINT"
+                        if transaction_ready
+                        else "IMPLEMENTATION INCOMPLETE"
+                    ),
+                    phase="FINISHED",
+                    last_command=" ".join(str(part) for part in command),
+                    last_output="\n".join(
+                        part for part in (completed.stdout, completed.stderr) if part
+                    ),
+                )
+            if completed.returncode == 0 and not transaction_ready:
+                missing = [
+                    name
+                    for name, present in (
+                        ("commit", bool(final_snapshot["commits_since_baseline"])),
+                        ("report", bool(final_snapshot["report_exists"])),
+                        ("tests", bool(final_snapshot["tests_detectable"])),
+                    )
+                    if not present
+                ]
+                diagnostic = {
+                    "BLOCKER_CODE": "TRANSACTION_INCOMPLETE",
+                    "MESSAGE": "faltam evidências obrigatórias: " + ", ".join(missing),
+                    "COMMAND": "",
+                    "EXIT_CODE": "1",
+                    "STDERR": "",
+                    "ACTION": (
+                        "recuperar os artefatos faltantes antes de gerar o pacote de revisão"
+                    ),
+                }
+                exit_code = 1
 
     if diagnostic:
         diagnostic["COMMAND"] = " ".join(str(part) for part in command)
@@ -347,6 +672,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-turns", default=DEFAULT_MAX_TURNS, type=int)
     parser.add_argument("--cmd-bin", default="cmdc")
     parser.add_argument("--checkpoint-file", type=Path)
+    parser.add_argument("--heartbeat-interval", default=30.0, type=float)
+    parser.add_argument(
+        "--recovery-max-turns", default=DEFAULT_RECOVERY_MAX_TURNS, type=int
+    )
     return parser.parse_args()
 
 
@@ -358,6 +687,8 @@ def main() -> int:
         max_turns=args.max_turns,
         cmd_bin=args.cmd_bin,
         checkpoint_file=args.checkpoint_file,
+        heartbeat_interval=args.heartbeat_interval,
+        recovery_max_turns=args.recovery_max_turns,
     )
 
 

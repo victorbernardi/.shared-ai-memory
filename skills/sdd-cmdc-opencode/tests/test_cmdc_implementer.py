@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import subprocess
+import time
 from types import SimpleNamespace
 from pathlib import Path
 
@@ -364,6 +365,223 @@ def test_timeout_preserves_diagnostic_when_snapshot_collection_fails(
     assert "git status unavailable" in captured.err
 
 
+def test_success_writes_starting_and_finished_checkpoints(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-checkpoint-lifecycle")
+    report_path = repo / "task-report.md"
+    report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    real_run = MODULE.subprocess.run
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_run(command, **kwargs):
+        if command[0] == "cmdc":
+            (repo / "implemented.py").write_text(
+                "IMPLEMENTED = True\n", encoding="utf-8"
+            )
+            real_run(
+                ["git", "-C", str(repo), "add", "--", "implemented.py", "task-report.md"],
+                check=True,
+            )
+            real_run(
+                ["git", "-C", str(repo), "commit", "-qm", "implementation commit"],
+                check=True,
+            )
+            return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+        return real_run(command, **kwargs)
+
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+        )
+        == 0
+    )
+
+    checkpoints = [
+        json.loads(line)
+        for line in checkpoint_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [item["event"] for item in checkpoints] == ["STARTING", "FINISHED"]
+    assert checkpoints[0]["phase"] == "STARTING"
+    assert checkpoints[-1]["phase"] == "FINISHED"
+    assert checkpoints[-1]["state"] == "CHECKPOINT"
+    assert checkpoints[-1]["snapshot"]["report_exists"] is True
+    assert checkpoints[-1]["snapshot"]["tests_detectable"] is True
+    assert checkpoints[-1]["last_output"] == "pytest 1 passed"
+
+
+def test_git_success_without_commit_is_transaction_incomplete(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-success-without-commit")
+    report_path = repo / "task-report.md"
+    report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    real_run = MODULE.subprocess.run
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE.subprocess,
+        "run",
+        lambda command, **kwargs: SimpleNamespace(
+            returncode=0, stdout="pytest 1 passed", stderr=""
+        )
+        if command[0] == "cmdc"
+        else real_run(command, **kwargs),
+    )
+
+    assert MODULE.run_implementer(repo, prompt_path) == 1
+    assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_long_run_emits_heartbeat_with_command_and_workspace_snapshot(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-heartbeat")
+    report_path = repo / "task-report.md"
+    report_path.write_text("STATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    real_run = MODULE.subprocess.run
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_run(command, **kwargs):
+        if command[0] == "cmdc":
+            time.sleep(0.05)
+            (repo / "heartbeat.py").write_text(
+                "HEARTBEAT = True\n", encoding="utf-8"
+            )
+            real_run(
+                ["git", "-C", str(repo), "add", "--", "heartbeat.py", "task-report.md"],
+                check=True,
+            )
+            real_run(
+                ["git", "-C", str(repo), "commit", "-qm", "heartbeat commit"],
+                check=True,
+            )
+            return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+        return real_run(command, **kwargs)
+
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0.005,
+        )
+        == 0
+    )
+
+    checkpoints = [
+        json.loads(line)
+        for line in checkpoint_path.read_text(encoding="utf-8").splitlines()
+    ]
+    heartbeat = next(item for item in checkpoints if item["event"] == "HEARTBEAT")
+    assert heartbeat["phase"] == "RUNNING"
+    assert "cmdc" in heartbeat["last_command"]
+    assert "head" in heartbeat["snapshot"]
+
+
+def test_timeout_checkpoint_detects_test_output(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-timeout-tests")
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+    checkpoint_path = repo / "checkpoints.jsonl"
+    real_run = MODULE.subprocess.run
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    def fake_run(command, **kwargs):
+        if command[0] == "cmdc":
+            raise MODULE.subprocess.TimeoutExpired(
+                command,
+                timeout=0.01,
+                output="pytest: 14 passed",
+                stderr="max turns reached",
+            )
+        return real_run(command, **kwargs)
+
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+        )
+        == 8
+    )
+
+    checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8").splitlines()[-1])
+    assert checkpoint["event"] == "TIMED_OUT"
+    assert checkpoint["snapshot"]["tests_detectable"] is True
+
+
+def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-timeout-recovery")
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    real_run = MODULE.subprocess.run
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_run(command, **kwargs):
+        if command[0] != "cmdc":
+            return real_run(command, **kwargs)
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        report_path.write_text("Tests: pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+        subprocess.run(
+            ["git", "-C", str(repo), "add", "--", "partial.py", "task-report.md"],
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo), "commit", "-qm", "recovery commit"],
+            check=True,
+        )
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+        )
+        == 0
+    )
+
+    events = [
+        json.loads(line)["event"]
+        for line in checkpoint_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert events == ["STARTING", "TIMED_OUT", "RECOVERY_FINISHED"]
+    assert "STATUS: RECOVERED" in capsys.readouterr().out
+
+
 def test_run_implementer_accepts_success_with_report(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -377,6 +595,8 @@ def test_run_implementer_accepts_success_with_report(
     def fake_run(command, **kwargs):
         observed["command"] = command
         observed["kwargs"] = kwargs
+        if command[0] == "git":
+            return SimpleNamespace(returncode=128, stdout="", stderr="not a git repo")
         return SimpleNamespace(returncode=0, stdout="worker output", stderr="")
 
     monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
