@@ -8,6 +8,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import threading
@@ -18,6 +19,8 @@ MODEL_ID = "deepseek/deepseek-v4-flash"
 DEFAULT_MAX_TURNS = 100
 DEFAULT_WALL_TIMEOUT_SECONDS = 4 * 60 * 60
 MAX_WALL_TIMEOUT_SECONDS = 12 * 60 * 60
+DEFAULT_STALL_TIMEOUT_SECONDS = 15 * 60
+MAX_STALL_TIMEOUT_SECONDS = 2 * 60 * 60
 DEFAULT_RECOVERY_MAX_TURNS = 5
 TEST_EVIDENCE_RE = re.compile(
     r"(?:\b\d+\s+passed\b|"
@@ -34,6 +37,11 @@ COMMAND_FLAGS = (
     "--skip-onboarding",
     "--yolo",
 )
+
+
+def _stall_expired(last_activity: float, now: float, stall_timeout: float) -> bool:
+    """Return whether no observable activity occurred within the stall budget."""
+    return stall_timeout > 0 and now - last_activity >= stall_timeout
 
 
 def build_command(cmd_path: Path, max_turns: int = DEFAULT_MAX_TURNS) -> list[str]:
@@ -254,6 +262,197 @@ def collect_workspace_snapshot(
     }
 
 
+def _activity_fingerprint(snapshot: dict[str, object]) -> tuple[object, ...]:
+    return (
+        snapshot.get("head"),
+        tuple(snapshot.get("status", [])),
+        snapshot.get("report_exists"),
+    )
+
+
+def _record_activity(activity_state: dict[str, object], kind: str) -> None:
+    now = time.monotonic()
+    lock = activity_state["lock"]
+    with lock:
+        activity_state["last_activity"] = now
+        activity_state[f"last_{kind}"] = now
+        if kind == "event":
+            activity_state["events_seen"] = int(activity_state.get("events_seen", 0)) + 1
+
+
+def _activity_evidence(activity_state: dict[str, object]) -> dict[str, object]:
+    now = time.monotonic()
+    lock = activity_state["lock"]
+    with lock:
+        return {
+            "last_activity_seconds": round(now - float(activity_state["last_activity"]), 1),
+            "last_event_seconds": round(now - float(activity_state["last_event"]), 1),
+            "last_workspace_seconds": round(
+                now - float(activity_state["last_workspace"]), 1
+            ),
+            "events_seen": int(activity_state.get("events_seen", 0)),
+        }
+
+
+def _attach_activity_evidence(
+    snapshot: dict[str, object],
+    activity_state: dict[str, object],
+    event_log: Path | None,
+) -> None:
+    snapshot.update(_activity_evidence(activity_state))
+    if event_log is not None:
+        snapshot["event_log"] = str(event_log)
+
+
+def _drain_stream(
+    stream: object,
+    stream_name: str,
+    chunks: list[str],
+    activity_state: dict[str, object],
+    event_log: Path | None,
+) -> None:
+    reader = stream
+    try:
+        while True:
+            line = reader.readline()
+            if line == "" or line == b"":
+                break
+            text = _text_output(line)
+            chunks.append(text)
+            _record_activity(activity_state, "event")
+            if event_log is not None:
+                try:
+                    with event_log.open("a", encoding="utf-8", newline="\n") as handle:
+                        handle.write(
+                            json.dumps(
+                                {
+                                    "stream": stream_name,
+                                    "elapsed_seconds": round(
+                                        time.monotonic()
+                                        - float(activity_state["started"]),
+                                        1,
+                                    ),
+                                    "text": text,
+                                },
+                                ensure_ascii=False,
+                            )
+                            + "\n"
+                        )
+                except OSError:
+                    pass
+    finally:
+        close = getattr(reader, "close", None)
+        if close is not None:
+            close()
+
+
+def _terminate_process_tree(pid: int) -> None:
+    if os.name == "nt":
+        subprocess.run(
+            ["taskkill", "/PID", str(pid), "/T", "/F"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        return
+    try:
+        os.killpg(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+
+
+def _run_cmdc_process(
+    process_command: list[str],
+    prompt_text: str,
+    cwd: Path,
+    *,
+    wall_timeout_seconds: int,
+    stall_timeout_seconds: int,
+    activity_state: dict[str, object],
+    event_log: Path | None = None,
+) -> subprocess.CompletedProcess[str]:
+    """Run CMDc while streaming events and enforcing both watchdogs."""
+    process = subprocess.Popen(
+        process_command,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=str(cwd),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        creationflags=(
+            getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+            | getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        )
+        if os.name == "nt"
+        else 0,
+        start_new_session=os.name != "nt",
+    )
+    stdout_chunks: list[str] = []
+    stderr_chunks: list[str] = []
+    readers = [
+        threading.Thread(
+            target=_drain_stream,
+            args=(process.stdout, "stdout", stdout_chunks, activity_state, event_log),
+            daemon=True,
+        ),
+        threading.Thread(
+            target=_drain_stream,
+            args=(process.stderr, "stderr", stderr_chunks, activity_state, event_log),
+            daemon=True,
+        ),
+    ]
+    for reader in readers:
+        reader.start()
+    try:
+        if process.stdin is not None:
+            try:
+                process.stdin.write(prompt_text)
+                process.stdin.close()
+            except (BrokenPipeError, OSError):
+                pass
+        started = float(activity_state["started"])
+        while process.poll() is None:
+            now = time.monotonic()
+            last_activity = float(activity_state["last_activity"])
+            if now - started >= wall_timeout_seconds:
+                reason = "WALL_TIMEOUT"
+            elif _stall_expired(last_activity, now, stall_timeout_seconds):
+                reason = "STALLED"
+            else:
+                reason = ""
+            if reason:
+                _terminate_process_tree(process.pid)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
+                for reader in readers:
+                    reader.join(timeout=2)
+                error = subprocess.TimeoutExpired(
+                    process_command,
+                    timeout=wall_timeout_seconds
+                    if reason == "WALL_TIMEOUT"
+                    else stall_timeout_seconds,
+                    output="".join(stdout_chunks),
+                    stderr="".join(stderr_chunks),
+                )
+                error.watchdog_reason = reason  # type: ignore[attr-defined]
+                error.watchdog_pid = process.pid  # type: ignore[attr-defined]
+                raise error
+            time.sleep(0.2)
+    finally:
+        for reader in readers:
+            reader.join(timeout=2)
+    return subprocess.CompletedProcess(
+        process_command,
+        process.returncode,
+        "".join(stdout_chunks),
+        "".join(stderr_chunks),
+    )
+
+
 def _write_checkpoint(
     path: Path,
     event: str,
@@ -285,11 +484,12 @@ def _heartbeat_loop(
     cwd: Path,
     baseline_head: str,
     report_path: Path | None,
-    checkpoint_file: Path,
+    checkpoint_file: Path | None,
     command: str,
     interval: float,
     stop_event: threading.Event,
     started_monotonic: float | None = None,
+    activity_state: dict[str, object] | None = None,
 ) -> None:
     started_monotonic = started_monotonic or time.monotonic()
     while not stop_event.wait(interval):
@@ -301,25 +501,36 @@ def _heartbeat_loop(
                 checkpoint_file=checkpoint_file,
             )
         except RuntimeError as exc:
+            if checkpoint_file is not None:
+                _write_checkpoint(
+                    checkpoint_file,
+                    "HEARTBEAT_FAILED",
+                    {"state": "RUNNING", "error": str(exc)},
+                    state="RUNNING",
+                    phase="RUNNING",
+                    last_command=command,
+                    last_output=str(exc),
+                )
+            continue
+        if activity_state is not None:
+            fingerprint = _activity_fingerprint(snapshot)
+            lock = activity_state["lock"]
+            with lock:
+                if fingerprint != activity_state["workspace_fingerprint"]:
+                    activity_state["workspace_fingerprint"] = fingerprint
+                    activity_state["last_activity"] = time.monotonic()
+                    activity_state["last_workspace"] = activity_state["last_activity"]
+            _attach_activity_evidence(snapshot, activity_state, None)
+        snapshot["elapsed_seconds"] = round(time.monotonic() - started_monotonic, 1)
+        if checkpoint_file is not None:
             _write_checkpoint(
                 checkpoint_file,
-                "HEARTBEAT_FAILED",
-                {"state": "RUNNING", "error": str(exc)},
+                "HEARTBEAT",
+                snapshot,
                 state="RUNNING",
                 phase="RUNNING",
                 last_command=command,
-                last_output=str(exc),
             )
-            continue
-        snapshot["elapsed_seconds"] = round(time.monotonic() - started_monotonic, 1)
-        _write_checkpoint(
-            checkpoint_file,
-            "HEARTBEAT",
-            snapshot,
-            state="RUNNING",
-            phase="RUNNING",
-            last_command=command,
-        )
 
 
 def _render_incomplete(
@@ -339,6 +550,8 @@ def _render_incomplete(
             f"CHECKPOINT_FILE: {checkpoint_file or ''}",
         ]
     )
+    if snapshot.get("event_log"):
+        lines.append(f"EVENT_LOG: {snapshot['event_log']}")
     return "\n".join(lines)
 
 
@@ -382,6 +595,7 @@ def run_implementer(
     heartbeat_interval: float = 30.0,
     recovery_max_turns: int = DEFAULT_RECOVERY_MAX_TURNS,
     wall_timeout_seconds: int = DEFAULT_WALL_TIMEOUT_SECONDS,
+    stall_timeout_seconds: int = DEFAULT_STALL_TIMEOUT_SECONDS,
 ) -> int:
     """Run Command Code and return zero only after process/report success."""
     cwd = cwd.expanduser().resolve()
@@ -414,7 +628,24 @@ def run_implementer(
     wall_timeout_seconds = min(
         max(60, wall_timeout_seconds), MAX_WALL_TIMEOUT_SECONDS
     )
+    stall_timeout_seconds = min(
+        max(0, stall_timeout_seconds), MAX_STALL_TIMEOUT_SECONDS
+    )
     started_monotonic = time.monotonic()
+    activity_state: dict[str, object] = {
+        "lock": threading.Lock(),
+        "started": started_monotonic,
+        "last_activity": started_monotonic,
+        "last_event": started_monotonic,
+        "last_workspace": started_monotonic,
+        "events_seen": 0,
+        "workspace_fingerprint": _activity_fingerprint(baseline_snapshot),
+    }
+    event_log = (
+        checkpoint_file.with_name(checkpoint_file.stem + "-events.jsonl")
+        if checkpoint_file is not None
+        else None
+    )
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
@@ -430,30 +661,32 @@ def run_implementer(
                 phase="STARTING",
                 last_command=command_text,
             )
-            if heartbeat_interval > 0:
-                heartbeat_thread = threading.Thread(
-                    target=_heartbeat_loop,
-                    args=(
-                        cwd,
-                        str(baseline_snapshot["head"]),
-                        report_path,
-                        checkpoint_file,
-                        command_text,
-                        heartbeat_interval,
-                        heartbeat_stop,
-                        started_monotonic,
-                    ),
-                    daemon=True,
-                )
-                heartbeat_thread.start()
-        completed = subprocess.run(
+        if stall_timeout_seconds > 0:
+            monitor_interval = heartbeat_interval if heartbeat_interval > 0 else 30.0
+            heartbeat_thread = threading.Thread(
+                target=_heartbeat_loop,
+                args=(
+                    cwd,
+                    str(baseline_snapshot["head"]),
+                    report_path,
+                    checkpoint_file,
+                    command_text,
+                    monitor_interval,
+                    heartbeat_stop,
+                    started_monotonic,
+                    activity_state,
+                ),
+                daemon=True,
+            )
+            heartbeat_thread.start()
+        completed = _run_cmdc_process(
             process_command,
-            input=prompt_text,
-            text=True,
-            cwd=str(cwd),
-            capture_output=True,
-            check=False,
-            timeout=wall_timeout_seconds,
+            prompt_text,
+            cwd,
+            wall_timeout_seconds=wall_timeout_seconds,
+            stall_timeout_seconds=stall_timeout_seconds,
+            activity_state=activity_state,
+            event_log=event_log,
         )
         if completed.stdout:
             stdout = _text_output(completed.stdout)
@@ -483,7 +716,26 @@ def run_implementer(
         timeout_output = "\n".join(
             part for part in (timeout_stdout, timeout_stderr) if part
         )
-        diagnostic = classify_failure(8, timeout_stderr, report_exists=False)
+        watchdog_reason = getattr(exc, "watchdog_reason", "WALL_TIMEOUT")
+        if watchdog_reason == "STALLED":
+            diagnostic = {
+                "BLOCKER_CODE": "STALLED",
+                "MESSAGE": (
+                    "o CMDc não produziu eventos nem mudanças observáveis no workspace "
+                    f"por {stall_timeout_seconds}s"
+                ),
+                "COMMAND": "",
+                "EXIT_CODE": "8",
+                "STDERR": timeout_stderr,
+                "ACTION": (
+                    "inspecionar o event log e o prompt; não repetir automaticamente "
+                    "sem corrigir a falta de progresso"
+                ),
+            }
+            if event_log is not None:
+                diagnostic["EVENT_LOG"] = str(event_log)
+        else:
+            diagnostic = classify_failure(8, timeout_stderr, report_exists=False)
         exit_code = 8
 
         snapshot = None
@@ -501,6 +753,7 @@ def run_implementer(
                     f"{timeout_stderr}\nworkspace snapshot failed: {snapshot_error}"
                 )
         if snapshot is not None:
+            _attach_activity_evidence(snapshot, activity_state, event_log)
             # A timeout is never success. A diff (or commits) means partial
             # work exists and must be preserved deterministically; no diff
             # still produces a distinct timeout checkpoint when requested.
@@ -521,7 +774,7 @@ def run_implementer(
             partial_workspace = bool(
                 snapshot["diff_present"] or snapshot["commits_since_baseline"]
             )
-            if checkpoint_file and partial_workspace:
+            if checkpoint_file and partial_workspace and watchdog_reason != "STALLED":
                 heartbeat_stop.set()
                 if heartbeat_thread is not None:
                     heartbeat_thread.join(timeout=max(1.0, heartbeat_interval))
@@ -541,14 +794,15 @@ def run_implementer(
                         resolve_cmdc(cmd_bin), max_turns=recovery_max_turns
                     )
                     command = recovery_command
-                    recovery_completed = subprocess.run(
-                        _platform_command(recovery_command),
-                        input=recovery_text,
-                        text=True,
-                        cwd=str(cwd),
-                        capture_output=True,
-                        check=False,
-                        timeout=max(60, recovery_max_turns * 120),
+                    recovery_timeout = max(60, recovery_max_turns * 120)
+                    recovery_completed = _run_cmdc_process(
+                        recovery_command,
+                        recovery_text,
+                        cwd,
+                        wall_timeout_seconds=recovery_timeout,
+                        stall_timeout_seconds=min(stall_timeout_seconds, recovery_timeout),
+                        activity_state=activity_state,
+                        event_log=event_log,
                     )
                     recovery_output = "\n".join(
                         part
@@ -569,6 +823,7 @@ def run_implementer(
                         checkpoint_file=checkpoint_file,
                         test_output=f"{recovery_output}\n{_report_output(report_path)}",
                     )
+                    _attach_activity_evidence(recovery_snapshot, activity_state, event_log)
                     recovery_ready = _recovery_is_ready(
                         recovery_completed.returncode,
                         recovery_snapshot,
@@ -672,6 +927,7 @@ def run_implementer(
         except RuntimeError:
             final_snapshot = None
         if final_snapshot is not None:
+            _attach_activity_evidence(final_snapshot, activity_state, event_log)
             transaction_ready = (
                 completed.returncode == 0
                 and bool(final_snapshot["commits_since_baseline"])
@@ -738,6 +994,12 @@ def parse_args() -> argparse.Namespace:
         help="finite process watchdog; turn budget remains controlled by --max-turns",
     )
     parser.add_argument(
+        "--stall-timeout-seconds",
+        default=DEFAULT_STALL_TIMEOUT_SECONDS,
+        type=int,
+        help="stop after no streamed event or workspace activity; 0 disables it",
+    )
+    parser.add_argument(
         "--recovery-max-turns", default=DEFAULT_RECOVERY_MAX_TURNS, type=int
     )
     return parser.parse_args()
@@ -754,6 +1016,7 @@ def main() -> int:
         heartbeat_interval=args.heartbeat_interval,
         recovery_max_turns=args.recovery_max_turns,
         wall_timeout_seconds=args.wall_timeout_seconds,
+        stall_timeout_seconds=args.stall_timeout_seconds,
     )
 
 

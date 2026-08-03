@@ -241,21 +241,16 @@ def test_timeout_with_partial_diff_writes_incomplete_checkpoint(
     report_path = repo / "task-report.md"
     prompt_path = _write_prompt(repo, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
-    real_run = MODULE.subprocess.run
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            Path(kwargs["cwd"], "partial.py").write_text(
-                "PARTIAL = True\n", encoding="utf-8"
-            )
-            raise MODULE.subprocess.TimeoutExpired(
-                command, timeout=0.01, stderr="max turns reached"
-            )
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        Path(cwd, "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+        raise MODULE.subprocess.TimeoutExpired(
+            command, timeout=0.01, stderr="max turns reached"
+        )
 
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert (
         MODULE.run_implementer(
@@ -288,16 +283,12 @@ def test_timeout_without_diff_writes_distinct_timeout_checkpoint(
     checkpoint_path = repo / "checkpoints.jsonl"
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
-    real_run = MODULE.subprocess.run
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        raise MODULE.subprocess.TimeoutExpired(
+            command, timeout=0.01, stderr="max turns reached"
+        )
 
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            raise MODULE.subprocess.TimeoutExpired(
-                command, timeout=0.01, stderr="max turns reached"
-            )
-        return real_run(command, **kwargs)
-
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert (
         MODULE.run_implementer(
@@ -326,21 +317,15 @@ def test_timeout_with_diff_but_missing_report_is_incomplete(
     repo = _create_git_fixture(tmp_path / "fixture-diff-no-report")
     report_path = repo / "task-report.md"
     prompt_path = _write_prompt(repo, report_path)
-    real_run = MODULE.subprocess.run
-
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            Path(kwargs["cwd"], "partial.py").write_text(
-                "PARTIAL = True\n", encoding="utf-8"
-            )
-            raise MODULE.subprocess.TimeoutExpired(
-                command, timeout=0.01, stderr="max turns reached"
-            )
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        Path(cwd, "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+        raise MODULE.subprocess.TimeoutExpired(
+            command, timeout=0.01, stderr="max turns reached"
+        )
 
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert MODULE.run_implementer(repo, prompt_path, max_turns=1) == 8
 
@@ -348,6 +333,44 @@ def test_timeout_with_diff_but_missing_report_is_incomplete(
     assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
     assert "WORKSPACE_DIFF: true" in captured.err
     assert "REPORT_EXISTS: false" in captured.err
+
+
+def test_stall_is_incomplete_without_automatic_recovery(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-stall")
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+    checkpoint_path = repo / "checkpoints.jsonl"
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        Path(cwd, "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+        error = MODULE.subprocess.TimeoutExpired(command, timeout=0.01, stderr="stalled")
+        error.watchdog_reason = "STALLED"  # type: ignore[attr-defined]
+        raise error
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+        )
+        == 8
+    )
+
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: STALLED" in captured.err
+    assert "EVENT_LOG:" in captured.err
+    assert calls["cmdc"] == 1
+    checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8").splitlines()[-1])
+    assert checkpoint["event"] == "TIMED_OUT"
+    assert checkpoint["snapshot"]["event_log"].endswith("checkpoints-events.jsonl")
 
 
 def test_snapshot_with_commit_but_no_report_is_incomplete(
@@ -430,9 +453,9 @@ def test_timeout_preserves_diagnostic_when_snapshot_collection_fails(
     monkeypatch.setattr(MODULE, "collect_workspace_snapshot", collect_snapshot)
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
     monkeypatch.setattr(
-        MODULE.subprocess,
-        "run",
-        lambda command, **kwargs: (_ for _ in ()).throw(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: (_ for _ in ()).throw(
             MODULE.subprocess.TimeoutExpired(command, timeout=0.01, stderr="max turns")
         ),
     )
@@ -453,26 +476,23 @@ def test_success_writes_starting_and_finished_checkpoints(
     prompt_path = _write_prompt(tmp_path, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
     real_run = MODULE.subprocess.run
-
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            (repo / "implemented.py").write_text(
-                "IMPLEMENTED = True\n", encoding="utf-8"
-            )
-            real_run(
-                ["git", "-C", str(repo), "add", "--", "implemented.py", "task-report.md"],
-                check=True,
-            )
-            real_run(
-                ["git", "-C", str(repo), "commit", "-qm", "implementation commit"],
-                check=True,
-            )
-            return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        (repo / "implemented.py").write_text(
+            "IMPLEMENTED = True\n", encoding="utf-8"
+        )
+        real_run(
+            ["git", "-C", str(repo), "add", "--", "implemented.py", "task-report.md"],
+            check=True,
+        )
+        real_run(
+            ["git", "-C", str(repo), "commit", "-qm", "implementation commit"],
+            check=True,
+        )
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
 
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert (
         MODULE.run_implementer(
@@ -502,6 +522,140 @@ def test_default_wall_timeout_is_separate_from_turn_budget() -> None:
     assert MODULE.DEFAULT_WALL_TIMEOUT_SECONDS == 4 * 60 * 60
 
 
+def test_stall_expiry_is_separate_from_wall_timeout() -> None:
+    assert MODULE._stall_expired(100.0, 100.0 + 900.0, 900.0) is True
+    assert MODULE._stall_expired(100.0, 100.0 + 899.9, 900.0) is False
+
+
+def test_cmdc_process_streams_events_and_records_activity(tmp_path: Path, monkeypatch) -> None:
+    class FakeStream:
+        def __init__(self, lines: list[str]) -> None:
+            self.lines = iter(lines)
+
+        def readline(self) -> str:
+            return next(self.lines, "")
+
+        def close(self) -> None:
+            return None
+
+    class FakeStdin:
+        def __init__(self) -> None:
+            self.value = ""
+
+        def write(self, value: str) -> None:
+            self.value += value
+
+        def close(self) -> None:
+            return None
+
+    class FakeProcess:
+        pid = 1234
+        returncode = 0
+
+        def __init__(self) -> None:
+            self.stdin = FakeStdin()
+            self.stdout = FakeStream(["event one\n"])
+            self.stderr = FakeStream(["warning\n"])
+
+        def poll(self) -> int:
+            return 0
+
+        def wait(self, timeout: float | None = None) -> int:
+            return self.returncode
+
+    process = FakeProcess()
+    monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: process)
+    started = time.monotonic()
+    activity_state = {
+        "lock": MODULE.threading.Lock(),
+        "started": started,
+        "last_activity": started,
+        "last_event": started,
+        "last_workspace": started,
+        "events_seen": 0,
+    }
+    event_log = tmp_path / "events.jsonl"
+
+    result = MODULE._run_cmdc_process(
+        ["cmdc"],
+        "prompt",
+        tmp_path,
+        wall_timeout_seconds=60,
+        stall_timeout_seconds=60,
+        activity_state=activity_state,
+        event_log=event_log,
+    )
+
+    assert result.returncode == 0
+    assert result.stdout == "event one\n"
+    assert result.stderr == "warning\n"
+    assert activity_state["events_seen"] == 2
+    assert len(event_log.read_text(encoding="utf-8").splitlines()) == 2
+
+
+def test_cmdc_process_stops_when_stream_and_workspace_stall(tmp_path: Path, monkeypatch) -> None:
+    class EmptyStream:
+        def readline(self) -> str:
+            return ""
+
+        def close(self) -> None:
+            return None
+
+    class FakeStdin:
+        def write(self, value: str) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    class FakeProcess:
+        pid = 5678
+        returncode = None
+
+        def __init__(self) -> None:
+            self.stdin = FakeStdin()
+            self.stdout = EmptyStream()
+            self.stderr = EmptyStream()
+
+        def poll(self) -> None:
+            return None
+
+        def wait(self, timeout: float | None = None) -> int:
+            self.returncode = 1
+            return self.returncode
+
+    process = FakeProcess()
+    terminated: list[int] = []
+    monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: process)
+    monkeypatch.setattr(MODULE, "_terminate_process_tree", terminated.append)
+    started = time.monotonic()
+    activity_state = {
+        "lock": MODULE.threading.Lock(),
+        "started": started,
+        "last_activity": started,
+        "last_event": started,
+        "last_workspace": started,
+        "events_seen": 0,
+    }
+
+    try:
+        MODULE._run_cmdc_process(
+            ["cmdc"],
+            "prompt",
+            tmp_path,
+            wall_timeout_seconds=60,
+            stall_timeout_seconds=0.01,
+            activity_state=activity_state,
+        )
+    except MODULE.subprocess.TimeoutExpired as error:
+        assert getattr(error, "watchdog_reason") == "STALLED"
+        assert getattr(error, "watchdog_pid") == 5678
+    else:
+        raise AssertionError("stall watchdog did not stop the process")
+
+    assert terminated == [5678]
+
+
 def test_git_success_without_commit_is_transaction_incomplete(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -509,17 +663,13 @@ def test_git_success_without_commit_is_transaction_incomplete(
     report_path = repo / "task-report.md"
     report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
-    real_run = MODULE.subprocess.run
-
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
     monkeypatch.setattr(
-        MODULE.subprocess,
-        "run",
-        lambda command, **kwargs: SimpleNamespace(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
             returncode=0, stdout="pytest 1 passed", stderr=""
-        )
-        if command[0] == "cmdc"
-        else real_run(command, **kwargs),
+        ),
     )
 
     assert MODULE.run_implementer(repo, prompt_path) == 1
@@ -535,27 +685,24 @@ def test_long_run_emits_heartbeat_with_command_and_workspace_snapshot(
     prompt_path = _write_prompt(tmp_path, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
     real_run = MODULE.subprocess.run
-
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            time.sleep(0.05)
-            (repo / "heartbeat.py").write_text(
-                "HEARTBEAT = True\n", encoding="utf-8"
-            )
-            real_run(
-                ["git", "-C", str(repo), "add", "--", "heartbeat.py", "task-report.md"],
-                check=True,
-            )
-            real_run(
-                ["git", "-C", str(repo), "commit", "-qm", "heartbeat commit"],
-                check=True,
-            )
-            return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        time.sleep(0.05)
+        (repo / "heartbeat.py").write_text(
+            "HEARTBEAT = True\n", encoding="utf-8"
+        )
+        real_run(
+            ["git", "-C", str(repo), "add", "--", "heartbeat.py", "task-report.md"],
+            check=True,
+        )
+        real_run(
+            ["git", "-C", str(repo), "commit", "-qm", "heartbeat commit"],
+            check=True,
+        )
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
 
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert (
         MODULE.run_implementer(
@@ -584,20 +731,17 @@ def test_timeout_checkpoint_detects_test_output(
     repo = _create_git_fixture(tmp_path / "fixture-timeout-tests")
     prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
     checkpoint_path = repo / "checkpoints.jsonl"
-    real_run = MODULE.subprocess.run
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            raise MODULE.subprocess.TimeoutExpired(
-                command,
-                timeout=0.01,
-                output="pytest: 14 passed",
-                stderr="max turns reached",
-            )
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        raise MODULE.subprocess.TimeoutExpired(
+            command,
+            timeout=0.01,
+            output="pytest: 14 passed",
+            stderr="max turns reached",
+        )
 
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert (
         MODULE.run_implementer(
@@ -621,14 +765,11 @@ def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
     report_path = repo / "task-report.md"
     prompt_path = _write_prompt(tmp_path, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
-    real_run = MODULE.subprocess.run
     calls = {"cmdc": 0}
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
-    def fake_run(command, **kwargs):
-        if command[0] != "cmdc":
-            return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
         calls["cmdc"] += 1
         if calls["cmdc"] == 1:
             (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
@@ -646,7 +787,7 @@ def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
         )
         return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
 
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert (
         MODULE.run_implementer(
@@ -680,18 +821,16 @@ def test_run_implementer_accepts_success_with_transaction_evidence(
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            observed["command"] = command
-            observed["kwargs"] = kwargs
-            (repo / "implemented.py").write_text("IMPLEMENTED = True\n", encoding="utf-8")
-            report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
-            real_run(["git", "-C", str(repo), "add", "--", "implemented.py", "report.md"], check=True)
-            real_run(["git", "-C", str(repo), "commit", "-qm", "implementation commit"], check=True)
-            return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        observed["command"] = command
+        observed["kwargs"] = kwargs
+        (repo / "implemented.py").write_text("IMPLEMENTED = True\n", encoding="utf-8")
+        report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+        real_run(["git", "-C", str(repo), "add", "--", "implemented.py", "report.md"], check=True)
+        real_run(["git", "-C", str(repo), "commit", "-qm", "implementation commit"], check=True)
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
 
-    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
     assert MODULE.run_implementer(repo, prompt_path) == 0
     assert observed["command"] == MODULE.build_command(Path("cmdc"))
@@ -706,19 +845,15 @@ def test_run_implementer_preserves_failed_process_diagnostics(
     prompt_dir.mkdir()
     prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
-    real_run = MODULE.subprocess.run
-
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            return SimpleNamespace(
-                returncode=4, stdout="partial output", stderr="MODEL_NOT_IN_PLAN"
-            )
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        return SimpleNamespace(
+            returncode=4, stdout="partial output", stderr="MODEL_NOT_IN_PLAN"
+        )
 
     monkeypatch.setattr(
-        MODULE.subprocess,
-        "run",
-        fake_run,
+        MODULE,
+        "_run_cmdc_process",
+        fake_process,
     )
 
     assert MODULE.run_implementer(repo, prompt_path) == 4
@@ -753,17 +888,13 @@ def test_run_implementer_reports_incomplete_transaction_after_zero_exit(
     prompt_dir.mkdir()
     prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
-    real_run = MODULE.subprocess.run
-
-    def fake_run(command, **kwargs):
-        if command[0] == "cmdc":
-            return SimpleNamespace(returncode=0, stdout="", stderr="")
-        return real_run(command, **kwargs)
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(
-        MODULE.subprocess,
-        "run",
-        fake_run,
+        MODULE,
+        "_run_cmdc_process",
+        fake_process,
     )
 
     assert MODULE.run_implementer(repo, prompt_path) == 1

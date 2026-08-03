@@ -196,7 +196,11 @@ conflicts that only emerge from implementation.
 - The adapter always passes `--model deepseek/deepseek-v4-flash` and defaults to
   `--max-turns 100`, matching the Command Code CLI default. The turn budget is
   separate from the finite wall-clock watchdog, which defaults to four hours
-  and is recorded in the heartbeat evidence.
+  and is recorded in the heartbeat evidence. A separate stall watchdog defaults
+  to 15 minutes without a streamed CMDc event or observable workspace change;
+  a stall is `IMPLEMENTATION INCOMPLETE`, produces an event log, and does not
+  trigger automatic recovery. Set `--stall-timeout-seconds 0` only when the
+  task's own contract requires disabling stall detection.
 - The adapter passes `--no-skills` so the implementation worker cannot load
   global orchestration/reviewer skills and recursively spend its turn budget
   planning the SDD workflow. Its only workflow context is the focused prompt,
@@ -271,21 +275,23 @@ $workspace = (Get-Location).Path
   --checkpoint-file "<checkpoint-file>" `
   --heartbeat-interval 30 `
   --wall-timeout-seconds 14400 `
+  --stall-timeout-seconds 900 `
   --recovery-max-turns 5
 ```
 
-The adapter's JSON event stream on stdout, stderr and exit code are part of the dispatch result. A
-non-zero result or missing report emits `STATUS: BLOCKED` with
+The adapter's JSON event log, stdout, stderr and exit code are part of the
+dispatch result. A non-zero result or missing report emits `STATUS: BLOCKED` with
 `BLOCKER_CODE`, `MESSAGE`, `COMMAND`, `EXIT_CODE`, `STDERR` and `ACTION`; write
-that reason into the ledger and do not generate a review package. A timeout
-with workspace evidence emits `STATUS: IMPLEMENTATION INCOMPLETE`, appends a
+that reason into the ledger and do not generate a review package. A wall-clock
+timeout or stall emits `STATUS: IMPLEMENTATION INCOMPLETE`, appends a
 `TIMED_OUT` JSONL checkpoint and blocks review/next-task progression until the
 workspace, report and commit are recovered deterministically. When a partial
-diff or commit is present, the adapter starts one fresh, bounded CMDc recovery
-phase. Recovery is accepted only when a new commit, the requested report and
-detectable test evidence all exist; otherwise it remains incomplete and blocks
-review. A successful recovery emits `STATUS: RECOVERED`; this permits package
-generation only after the normal delegated review gates are rechecked.
+diff or commit is present after a wall-clock timeout, the adapter starts one
+fresh, bounded CMDc recovery phase. Recovery is accepted only when a new commit,
+the requested report and detectable test evidence all exist; otherwise it
+remains incomplete and blocks review. A successful recovery emits
+`STATUS: RECOVERED`; this permits package generation only after the normal
+delegated review gates are rechecked.
 An exit code `4` is classified as `PERMISSION_DENIED`; the headless adapter
 does not wait for an interactive permission answer.
 
