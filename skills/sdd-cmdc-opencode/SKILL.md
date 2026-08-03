@@ -271,7 +271,7 @@ $workspace = (Get-Location).Path
   --recovery-max-turns 5
 ```
 
-The adapter's stdout/stderr and exit code are part of the dispatch result. A
+The adapter's JSON event stream on stdout, stderr and exit code are part of the dispatch result. A
 non-zero result or missing report emits `STATUS: BLOCKED` with
 `BLOCKER_CODE`, `MESSAGE`, `COMMAND`, `EXIT_CODE`, `STDERR` and `ACTION`; write
 that reason into the ledger and do not generate a review package. A timeout
@@ -283,6 +283,8 @@ phase. Recovery is accepted only when a new commit, the requested report and
 detectable test evidence all exist; otherwise it remains incomplete and blocks
 review. A successful recovery emits `STATUS: RECOVERED`; this permits package
 generation only after the normal delegated review gates are rechecked.
+An exit code `4` is classified as `PERMISSION_DENIED`; the headless adapter
+does not wait for an interactive permission answer.
 
 Template: [implementer-prompt.md](implementer-prompt.md)
 

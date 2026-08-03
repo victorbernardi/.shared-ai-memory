@@ -169,6 +169,7 @@ def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
     assert "--heartbeat-interval" in content
     assert "--recovery-max-turns" in content
     assert "STATUS: RECOVERED" in content
+    assert "PERMISSION_DENIED" in content
     assert "IMPLEMENTATION INCOMPLETE" in content
     assert "TIMED_OUT" in content
 

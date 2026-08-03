@@ -38,6 +38,8 @@ def build_command(cmd_path: Path, max_turns: int = DEFAULT_MAX_TURNS) -> list[st
         MODEL_ID,
         "--max-turns",
         str(max_turns),
+        "--output-format",
+        "json",
         *COMMAND_FLAGS,
     ]
 
@@ -98,6 +100,13 @@ def classify_failure(
         code = "MODEL_UNAVAILABLE"
         action = "executar cmdc --list-models e confirmar o modelo fixo"
         message = f"{MODEL_ID} não está disponível no plano atual"
+    elif returncode == 4 or "permission denied" in lowered:
+        code = "PERMISSION_DENIED"
+        action = (
+            "verificar --yolo, trust do workspace e regras de permissão; "
+            "não aguardar prompt interativo em modo headless"
+        )
+        message = "o Command Code negou uma operação por permissão"
     elif "rate limit" in lowered or "rate-limited" in lowered or "rate limited" in lowered:
         code = "RATE_LIMITED"
         action = "parar novas invocações e aguardar o limite ser liberado"

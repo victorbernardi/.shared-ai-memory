@@ -26,6 +26,8 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "deepseek/deepseek-v4-flash",
         "--max-turns",
         "20",
+        "--output-format",
+        "json",
         "--no-skills",
         "--trust",
         "--skip-onboarding",
@@ -56,6 +58,12 @@ def test_classify_failure_reports_unavailable_model() -> None:
     diagnostic = MODULE.classify_failure(4, "MODEL_NOT_IN_PLAN", report_exists=False)
 
     assert diagnostic["BLOCKER_CODE"] == "MODEL_UNAVAILABLE"
+
+
+def test_classify_failure_reports_permission_denied() -> None:
+    diagnostic = MODULE.classify_failure(4, "", report_exists=False)
+
+    assert diagnostic["BLOCKER_CODE"] == "PERMISSION_DENIED"
 
 
 def test_classify_failure_reports_rate_limit() -> None:
