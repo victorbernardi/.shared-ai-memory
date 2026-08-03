@@ -66,34 +66,31 @@ def test_implementation_files_exist() -> None:
         assert (SKILL / relative).is_file(), f"missing implementation file: {relative}"
 
 
-def test_review_templates_exist_and_are_distinct() -> None:
-    task_reviewer = SKILL / "task-reviewer-prompt.md"
-    re_review = SKILL / "re-review-prompt.md"
+def test_no_codex_reviewer_prompts_in_new_skill() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
-    assert task_reviewer.is_file(), "missing task-reviewer-prompt.md"
-    assert re_review.is_file(), "missing re-review-prompt.md"
-    assert digest(task_reviewer) != digest(re_review), (
-        "task-reviewer-prompt.md and re-review-prompt.md must be distinct templates"
+    # The brief replaces Codex reviews with the delegated flow: no review is
+    # routed to a Codex reviewer, and this skill ships no Codex reviewer
+    # prompts. Reviews run only through the open-code-review-delegate
+    # subskill (ocr delegate preview -> ocr delegate rule -> exact diff).
+    assert "open-code-review-delegate" in content
+    assert "ocr delegate preview" in content
+    assert "ocr delegate rule" in content
+    assert (
+        "no review is ever routed to a codex reviewer"
+        in content.lower().replace("\n", " ")
     )
+    assert "Never dispatch a Codex reviewer" in content
 
 
-def test_review_templates_are_separated_by_intent() -> None:
-    task_reviewer = (SKILL / "task-reviewer-prompt.md").read_text(encoding="utf-8")
-    re_review = (SKILL / "re-review-prompt.md").read_text(encoding="utf-8")
+def test_skill_does_not_reference_codex_reviewer_prompts() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
-    # The initial review covers BASE..HEAD; the re-review covers only
-    # FIX_BASE..HEAD, receives the previous findings, and verdicts each item
-    # ADDRESSED or NOT ADDRESSED.
-    assert "BASE..HEAD" in task_reviewer
-    assert "FIX_BASE" not in task_reviewer
-    assert "FIX_BASE..HEAD" in re_review
-    assert "[FINDINGS]" in re_review
-    assert "ADDRESSED" in re_review and "NOT ADDRESSED" in re_review
-    # Both are instruction templates for the clean host session launcher, not
-    # a new review backend and not Codex reviewer prompts.
-    assert "review-session.py" in task_reviewer and "review-session.py" in re_review
-    assert "not a Codex reviewer prompt" in task_reviewer
-    assert "not a Codex reviewer prompt" in re_review
+    # SKILL.md must not name or route reviews through Codex reviewer prompt
+    # templates; every review uses the delegated open-code-review-delegate
+    # flow instead.
+    assert "task-reviewer-prompt.md" not in content
+    assert "re-review-prompt.md" not in content
 
 
 def test_skill_documents_windows_shell_for_exact_range_ocr() -> None:
@@ -149,6 +146,32 @@ def test_skill_forbids_executable_llm_config_and_fallback() -> None:
     assert "não substituir" in content.lower() or "never replace" in content.lower()
 
 
+def test_skill_has_no_executable_llm_configuration() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # No executable LLM configuration: the forbidden strings may only appear
+    # inside documented prohibitions (outside this workflow / must never be
+    # executed or set / must not use / must not publish), never as an
+    # assignment, invocation, or configuration line. Prohibition text may span
+    # lines, so the whole paragraph containing the token is checked.
+    paragraphs = content.split("\n\n")
+    executable_markers = ("=", "export ", "set ", "run ", "exec ")
+    for token in ("ocr review", "ocr llm test", "OCR_LLM_", "OPENAI_API_KEY"):
+        matching = [p for p in paragraphs if token in p]
+        assert matching, f"expected a documented prohibition for {token!r}"
+        for paragraph in matching:
+            lower = paragraph.lower()
+            assert (
+                "must never be executed" in lower
+                or "must not use" in lower
+                or "outside this workflow" in lower
+                or "must not publish" in lower
+            ), f"paragraph containing {token!r} is not a documented prohibition"
+            assert not any(marker in lower for marker in executable_markers), (
+                f"paragraph containing {token!r} looks like executable config"
+            )
+
+
 def test_skill_governance_states_and_scope_rules() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
@@ -170,14 +193,18 @@ def test_skill_requires_tests_in_report_and_fresh_implementer_per_round() -> Non
     assert "tests" in content.lower() or "test" in content.lower()
 
 
-def test_skill_references_both_review_templates_by_name() -> None:
+def test_skill_review_flow_uses_preview_metadata_for_diffs() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
-    # SKILL.md must reference the versioned review templates by their exact
-    # filenames; the initial review renders task-reviewer-prompt.md and the
-    # re-review renders re-review-prompt.md.
-    assert "task-reviewer-prompt.md" in content
-    assert "re-review-prompt.md" in content
+    # Diffs must be obtained per the mode, merge_base, commit and `to`
+    # metadata returned by the preview (brief interface contract).
+    assert "ocr delegate preview" in content
+    assert "ocr delegate rule" in content
+    assert "mode" in content
+    assert "merge_base" in content
+    assert "commit" in content
+    assert "`to`" in content or "to`" in content
+    assert "diff" in content.lower()
 
 
 def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:

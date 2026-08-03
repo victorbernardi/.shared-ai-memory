@@ -550,14 +550,12 @@ selection and rule resolution.
 
 **Prompt templates.** The clean host session runs from a versioned
 instruction template, never from accumulated context. The initial review
-of `BASE..HEAD` renders `task-reviewer-prompt.md`; a re-review of only
-`FIX_BASE..HEAD` renders `re-review-prompt.md`, which receives the
+of `BASE..HEAD` and a re-review of only `FIX_BASE..HEAD` both follow the
+same delegated OCR flow in the host session — the re-review receives the
 previous findings list and verdicts every item `ADDRESSED` or
-`NOT ADDRESSED`. The two templates are distinct by intent, as in
-`subagent-driven-development`, and they do not create a new review
-backend: both are instruction templates for the clean host session run by
-the launcher, not Codex reviewer prompts and not a model selector. Both
-still require prior OCR and never re-derive the range.
+`NOT ADDRESSED`. Neither renders a Codex reviewer prompt: this skill ships
+no reviewer prompts and no model selector. Both still require prior OCR
+and never re-derive the range.
 
 **Host session launcher.** The clean host session is started through
 `scripts/review-session.py` (specified in the review-session hardening
