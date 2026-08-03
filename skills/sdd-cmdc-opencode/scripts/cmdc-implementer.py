@@ -17,8 +17,8 @@ MODEL_ID = "deepseek/deepseek-v4-flash"
 DEFAULT_MAX_TURNS = 20
 DEFAULT_RECOVERY_MAX_TURNS = 5
 TEST_EVIDENCE_RE = re.compile(
-    r"(?:\bpytest\b|\bunittest\b|\b\d+\s+(?:passed|failed|skipped|errors?)\b|"
-    r"\btests?\b.{0,80}\b(?:pass(?:ed)?|fail(?:ed|ure)?|error)\b)",
+    r"(?:\b\d+\s+passed\b|\btests?\b.{0,80}\bpassed\b|"
+    r"\b(?:all|full|focused)\s+tests?\s+(?:are\s+)?(?:green|ok|successful)\b)",
     flags=re.IGNORECASE | re.DOTALL,
 )
 COMMAND_FLAGS = (
@@ -276,7 +276,16 @@ def _heartbeat_loop(
                 report_path=report_path,
                 checkpoint_file=checkpoint_file,
             )
-        except RuntimeError:
+        except RuntimeError as exc:
+            _write_checkpoint(
+                checkpoint_file,
+                "HEARTBEAT_FAILED",
+                {"state": "RUNNING", "error": str(exc)},
+                state="RUNNING",
+                phase="RUNNING",
+                last_command=command,
+                last_output=str(exc),
+            )
             continue
         _write_checkpoint(
             checkpoint_file,

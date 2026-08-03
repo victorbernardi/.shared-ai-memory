@@ -66,6 +66,40 @@ def test_classify_failure_reports_permission_denied() -> None:
     assert diagnostic["BLOCKER_CODE"] == "PERMISSION_DENIED"
 
 
+def test_test_evidence_requires_a_positive_pass_result() -> None:
+    assert MODULE._has_test_evidence("pytest: 14 passed") is True
+    assert MODULE._has_test_evidence("pytest ran; 2 failed") is False
+    assert MODULE._has_test_evidence("pytest was not executed") is False
+
+
+def test_heartbeat_snapshot_failure_is_checkpointed(tmp_path: Path, monkeypatch) -> None:
+    checkpoint_path = tmp_path / "heartbeat.jsonl"
+    calls = {"count": 0}
+
+    def failing_snapshot(*args, **kwargs):
+        calls["count"] += 1
+        raise RuntimeError("git status unavailable")
+
+    class StopAfterOneHeartbeat:
+        def wait(self, interval: float) -> bool:
+            return calls["count"] > 0
+
+    monkeypatch.setattr(MODULE, "collect_workspace_snapshot", failing_snapshot)
+    MODULE._heartbeat_loop(
+        tmp_path,
+        "baseline",
+        None,
+        checkpoint_path,
+        "cmdc --output-format json",
+        0.01,
+        StopAfterOneHeartbeat(),
+    )
+
+    checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8").splitlines()[0])
+    assert checkpoint["event"] == "HEARTBEAT_FAILED"
+    assert checkpoint["last_output"] == "git status unavailable"
+
+
 def test_classify_failure_reports_rate_limit() -> None:
     diagnostic = MODULE.classify_failure(5, "rate limited", report_exists=False)
 
