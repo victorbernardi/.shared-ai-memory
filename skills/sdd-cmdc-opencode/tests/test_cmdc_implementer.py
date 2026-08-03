@@ -35,6 +35,24 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
     ]
 
 
+def test_configure_stdio_requests_utf8(monkeypatch) -> None:
+    calls: list[dict[str, str]] = []
+
+    class FakeStream:
+        def reconfigure(self, **kwargs: str) -> None:
+            calls.append(kwargs)
+
+    monkeypatch.setattr(MODULE.sys, "stdout", FakeStream())
+    monkeypatch.setattr(MODULE.sys, "stderr", FakeStream())
+
+    MODULE._configure_stdio()
+
+    assert calls == [
+        {"encoding": "utf-8", "errors": "replace"},
+        {"encoding": "utf-8", "errors": "replace"},
+    ]
+
+
 def test_build_command_accepts_a_task_specific_turn_limit() -> None:
     command = MODULE.build_command(Path("cmdc"), max_turns=7)
 

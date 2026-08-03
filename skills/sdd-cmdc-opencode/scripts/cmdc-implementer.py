@@ -189,6 +189,17 @@ def _text_output(value: object) -> str:
     return str(value)
 
 
+def _configure_stdio() -> None:
+    """Keep streamed CMDc output lossless on Windows' legacy console codecs."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except (OSError, ValueError):
+                pass
+
+
 def _has_test_evidence(output: str) -> bool:
     return not TEST_FAILURE_RE.search(output) and bool(TEST_EVIDENCE_RE.search(output))
 
@@ -1036,6 +1047,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    _configure_stdio()
     args = parse_args()
     return run_implementer(
         cwd=args.cwd,
