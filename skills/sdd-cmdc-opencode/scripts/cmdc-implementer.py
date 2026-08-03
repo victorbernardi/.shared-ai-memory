@@ -17,9 +17,13 @@ MODEL_ID = "deepseek/deepseek-v4-flash"
 DEFAULT_MAX_TURNS = 20
 DEFAULT_RECOVERY_MAX_TURNS = 5
 TEST_EVIDENCE_RE = re.compile(
-    r"(?:\b\d+\s+passed\b|\btests?\b.{0,80}\bpassed\b|"
+    r"(?:\b\d+\s+passed\b|"
     r"\b(?:all|full|focused)\s+tests?\s+(?:are\s+)?(?:green|ok|successful)\b)",
-    flags=re.IGNORECASE | re.DOTALL,
+    flags=re.IGNORECASE,
+)
+TEST_FAILURE_RE = re.compile(
+    r"\b[1-9]\d*\s+(?:failed|errors?)\b",
+    flags=re.IGNORECASE,
 )
 COMMAND_FLAGS = (
     "--no-skills",
@@ -174,7 +178,22 @@ def _text_output(value: object) -> str:
 
 
 def _has_test_evidence(output: str) -> bool:
-    return bool(TEST_EVIDENCE_RE.search(output))
+    return not TEST_FAILURE_RE.search(output) and bool(TEST_EVIDENCE_RE.search(output))
+
+
+def _recovery_is_ready(
+    returncode: int,
+    snapshot: dict[str, object],
+    recovery_start_head: str,
+) -> bool:
+    """Require recovery to create a commit after the recovery phase starts."""
+    return (
+        returncode == 0
+        and str(snapshot.get("head", "")) != recovery_start_head
+        and bool(snapshot.get("commits_since_baseline"))
+        and bool(snapshot.get("report_exists"))
+        and bool(snapshot.get("tests_detectable"))
+    )
 
 
 def _report_output(report_path: Path | None) -> str:
@@ -369,8 +388,17 @@ def run_implementer(
             report_path=report_path,
             checkpoint_file=checkpoint_file,
         )
-    except RuntimeError:
-        baseline_snapshot = None
+    except RuntimeError as exc:
+        diagnostic = {
+            "BLOCKER_CODE": "WORKSPACE_INSPECTION_FAILED",
+            "MESSAGE": "não foi possível estabelecer o baseline Git do workspace",
+            "COMMAND": " ".join([cmd_bin, *COMMAND_FLAGS]),
+            "EXIT_CODE": "1",
+            "STDERR": str(exc),
+            "ACTION": "corrigir a disponibilidade do Git antes de iniciar o CMDc",
+        }
+        print(render_blocked(diagnostic), file=sys.stderr)
+        return 1
 
     command: list[str] = [cmd_bin, *COMMAND_FLAGS]
     completed = None
@@ -485,6 +513,7 @@ def run_implementer(
                 heartbeat_stop.set()
                 if heartbeat_thread is not None:
                     heartbeat_thread.join(timeout=max(1.0, heartbeat_interval))
+                recovery_start_head = str(snapshot["head"])
                 recovery_command = [cmd_bin, *COMMAND_FLAGS]
                 recovery_text = (
                     f"{prompt_text}\n\n"
@@ -528,11 +557,10 @@ def run_implementer(
                         checkpoint_file=checkpoint_file,
                         test_output=f"{recovery_output}\n{_report_output(report_path)}",
                     )
-                    recovery_ready = (
-                        recovery_completed.returncode == 0
-                        and bool(recovery_snapshot["commits_since_baseline"])
-                        and bool(recovery_snapshot["report_exists"])
-                        and bool(recovery_snapshot["tests_detectable"])
+                    recovery_ready = _recovery_is_ready(
+                        recovery_completed.returncode,
+                        recovery_snapshot,
+                        recovery_start_head,
                     )
                     _write_checkpoint(
                         checkpoint_file,

@@ -70,6 +70,43 @@ def test_test_evidence_requires_a_positive_pass_result() -> None:
     assert MODULE._has_test_evidence("pytest: 14 passed") is True
     assert MODULE._has_test_evidence("pytest ran; 2 failed") is False
     assert MODULE._has_test_evidence("pytest was not executed") is False
+    assert MODULE._has_test_evidence("tests were not passed") is False
+    assert MODULE._has_test_evidence("pytest: 14 passed, 2 failed") is False
+
+
+def test_recovery_requires_a_new_commit_after_recovery_starts() -> None:
+    snapshot = {
+        "head": "same-head",
+        "commits_since_baseline": ["old-commit"],
+        "report_exists": True,
+        "tests_detectable": True,
+    }
+
+    assert MODULE._recovery_is_ready(0, snapshot, "same-head") is False
+    assert MODULE._recovery_is_ready(0, {**snapshot, "head": "new-head"}, "same-head") is True
+
+
+def test_initial_workspace_snapshot_failure_blocks_before_cmdc(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    prompt_path = _write_prompt(tmp_path, tmp_path / "task-report.md")
+    monkeypatch.setattr(
+        MODULE,
+        "collect_workspace_snapshot",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            RuntimeError("git root unavailable")
+        ),
+    )
+
+    def cmdc_must_not_run(*args, **kwargs):
+        raise AssertionError("cmdc must not run without a Git baseline")
+
+    monkeypatch.setattr(MODULE.subprocess, "run", cmdc_must_not_run)
+
+    assert MODULE.run_implementer(tmp_path, prompt_path) == 1
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: WORKSPACE_INSPECTION_FAILED" in captured.err
+    assert "git root unavailable" in captured.err
 
 
 def test_heartbeat_snapshot_failure_is_checkpointed(tmp_path: Path, monkeypatch) -> None:
@@ -624,44 +661,61 @@ def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
     assert "STATUS: RECOVERED" in capsys.readouterr().out
 
 
-def test_run_implementer_accepts_success_with_report(
+def test_run_implementer_accepts_success_with_transaction_evidence(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    report_path = tmp_path / "report.md"
-    report_path.write_text("STATUS: DONE\n", encoding="utf-8")
-    prompt_path = _write_prompt(tmp_path, report_path)
+    repo = _create_git_fixture(tmp_path / "repo")
+    report_path = repo / "report.md"
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, report_path)
     observed: dict[str, object] = {}
+    real_run = MODULE.subprocess.run
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
     def fake_run(command, **kwargs):
-        observed["command"] = command
-        observed["kwargs"] = kwargs
-        if command[0] == "git":
-            return SimpleNamespace(returncode=128, stdout="", stderr="not a git repo")
-        return SimpleNamespace(returncode=0, stdout="worker output", stderr="")
+        if command[0] == "cmdc":
+            observed["command"] = command
+            observed["kwargs"] = kwargs
+            (repo / "implemented.py").write_text("IMPLEMENTED = True\n", encoding="utf-8")
+            report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+            real_run(["git", "-C", str(repo), "add", "--", "implemented.py", "report.md"], check=True)
+            real_run(["git", "-C", str(repo), "commit", "-qm", "implementation commit"], check=True)
+            return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+        return real_run(command, **kwargs)
 
     monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
 
-    assert MODULE.run_implementer(tmp_path, prompt_path) == 0
+    assert MODULE.run_implementer(repo, prompt_path) == 0
     assert observed["command"] == MODULE.build_command(Path("cmdc"))
-    assert capsys.readouterr().out == "worker output\n"
+    assert capsys.readouterr().out == "pytest 1 passed\n"
 
 
 def test_run_implementer_preserves_failed_process_diagnostics(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    prompt_path = _write_prompt(tmp_path, tmp_path / "missing-report.md")
+    repo = _create_git_fixture(tmp_path / "repo")
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    real_run = MODULE.subprocess.run
+
+    def fake_run(command, **kwargs):
+        if command[0] == "cmdc":
+            return SimpleNamespace(
+                returncode=4, stdout="partial output", stderr="MODEL_NOT_IN_PLAN"
+            )
+        return real_run(command, **kwargs)
+
     monkeypatch.setattr(
         MODULE.subprocess,
         "run",
-        lambda command, **kwargs: SimpleNamespace(
-            returncode=4, stdout="partial output", stderr="MODEL_NOT_IN_PLAN"
-        ),
+        fake_run,
     )
 
-    assert MODULE.run_implementer(tmp_path, prompt_path) == 4
+    assert MODULE.run_implementer(repo, prompt_path) == 4
     captured = capsys.readouterr()
     assert "partial output" in captured.out
     assert "BLOCKER_CODE: MODEL_UNAVAILABLE" in captured.err
@@ -671,27 +725,40 @@ def test_run_implementer_preserves_failed_process_diagnostics(
 def test_run_implementer_reports_missing_command(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    prompt_path = _write_prompt(tmp_path, tmp_path / "missing-report.md")
+    repo = _create_git_fixture(tmp_path / "repo")
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
 
     def missing_command(cmd_bin="cmdc"):
         raise FileNotFoundError("cmdc binary not found")
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", missing_command)
 
-    assert MODULE.run_implementer(tmp_path, prompt_path) == 127
+    assert MODULE.run_implementer(repo, prompt_path) == 127
     assert "BLOCKER_CODE: CMD_NOT_FOUND" in capsys.readouterr().err
 
 
-def test_run_implementer_reports_missing_report_after_zero_exit(
+def test_run_implementer_reports_incomplete_transaction_after_zero_exit(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    prompt_path = _write_prompt(tmp_path, tmp_path / "missing-report.md")
+    repo = _create_git_fixture(tmp_path / "repo")
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    real_run = MODULE.subprocess.run
+
+    def fake_run(command, **kwargs):
+        if command[0] == "cmdc":
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+        return real_run(command, **kwargs)
+
     monkeypatch.setattr(
         MODULE.subprocess,
         "run",
-        lambda command, **kwargs: SimpleNamespace(returncode=0, stdout="", stderr=""),
+        fake_run,
     )
 
-    assert MODULE.run_implementer(tmp_path, prompt_path) == 1
-    assert "BLOCKER_CODE: REPORT_MISSING" in capsys.readouterr().err
+    assert MODULE.run_implementer(repo, prompt_path) == 1
+    assert "BLOCKER_CODE: TRANSACTION_INCOMPLETE" in capsys.readouterr().err
