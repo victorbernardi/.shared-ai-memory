@@ -479,6 +479,107 @@ Then mark the todo complete and move on. Never move to the next task while
 the review has open Critical/High issues that are neither fixed nor
 parked-with-ruling at the cap.
 
+## Review-only
+
+Review-only is the contract for reviewing implementation that is already
+finished — a committed range from a previous session — without invoking a
+Command Code implementer, without opening a fix round, and without
+re-running the implementation. It is the host-session boundary: a fresh,
+clean host session reviews the same worktree and the same exact range
+read-only, and reports findings and state only.
+
+**Required inputs.** Every review-only dispatch carries all of these
+explicitly:
+
+- the plan file;
+- `BASE` (or `MERGE_BASE` for a whole-branch review) and `HEAD` — the exact
+  range to review, never inferred from `HEAD~1`;
+- the review package path (generated with
+  `scripts/review-package PLAN_FILE BASE HEAD`);
+- the `ocr delegate preview` output for that exact range;
+- the resolved rule groups (from `ocr delegate rule`) for the reviewable
+  paths;
+- the exact diffs for the reviewable paths;
+- the report file path the host session must write.
+
+**Sequence.** Review-only follows the same delegated OCR flow, in this
+order:
+
+1. Generate the review package with `scripts/review-package PLAN_FILE BASE
+   HEAD` and record the printed path.
+2. Run `ocr delegate preview` for that exact repository and range; a failed
+   or partial preview is never approval.
+3. Validate the scope: every file changed by the range appears, and every
+   excluded file carries a recorded justification.
+4. Resolve the rule groups with `ocr delegate rule` for every reviewable
+   path.
+5. Read the exact diff for every reviewable path.
+6. Start a fresh, clean host session (new ephemeral process, no history
+   from the implementing session) with read-only access to the same
+   worktree and the same range.
+7. Record the verdict: findings and state only — never an approval derived
+   from a zero exit code alone.
+
+**Prohibitions.** Review-only never invokes the implementer, never fixes
+findings itself, and never starts a re-review without explicit authorization.
+It only reports findings and state. In particular, it never fixes findings
+directly:
+
+- it must not call `scripts/cmdc-implementer.py` or any Command Code
+  backend, and must not start a fix round;
+- it must not use an API/LLM fallback (`ocr review`, `ocr llm test`,
+  `OCR_LLM_*`, `OPENAI_API_KEY`) and must not publish GitHub comments;
+- it must not silently fall back to an ordinary Codex review.
+
+**Independence.** The clean host session is a new ephemeral process with no
+history from the implementing session, with read-only access to the same
+worktree and the same range. This is not a fallback for OCR: OCR
+(`ocr delegate preview`, `ocr delegate rule`, exact diff reading) remains a
+prerequisite before the host session starts. The host session performs the
+reasoning and writes the review report; OCR performs deterministic file
+selection and rule resolution.
+
+**Prompt templates.** The clean host session runs from a versioned
+instruction template, never from accumulated context. The initial review
+of `BASE..HEAD` renders `task-reviewer-prompt.md`; a re-review of only
+`FIX_BASE..HEAD` renders `re-review-prompt.md`, which receives the
+previous findings list and verdicts every item `ADDRESSED` or
+`NOT ADDRESSED`. The two templates are distinct by intent, as in
+`subagent-driven-development`, and they do not create a new review
+backend: both are instruction templates for the clean host session run by
+the launcher, not Codex reviewer prompts and not a model selector. Both
+still require prior OCR and never re-derive the range.
+
+**Host session launcher.** The clean host session is started through
+`scripts/review-session.py` (specified in the review-session hardening
+plan). The launcher is fail-closed: it resolves the Codex executable
+without accepting `C:\Windows\System32\cmd.exe` as the backend, builds the
+command with `codex exec --ephemeral --sandbox read-only --json
+--output-last-message REPORT_FILE -` receiving the prompt on stdin, applies
+a finite timeout, kills only the child process tree it created, and emits a
+final JSON summary with `status`. `REVIEW CLEAN` is emitted only when the
+host report declares that state and all deterministic evidence is present;
+a timeout or partial output is `REVIEW INCOMPLETE`; a failure to execute or
+missing evidence is `BLOCKED`. The launcher never executes OCR and never
+decides findings — it only guarantees the host-session boundary and
+lifecycle evidence; the controller-supplied prompt carries the `preview`,
+`rule`, diff, and rules results.
+
+**Report contract.** The host session's report must contain, with evidence:
+
+- `Files reviewed`;
+- `Excluded files`;
+- `Commands` and `Exit codes`;
+- findings by severity: `Critical/High` and `Medium`;
+- `Review status` (`REVIEW CLEAN`, `REVIEW INCOMPLETE`, or `BLOCKED`);
+- `BASE`/`HEAD` evidence for the reviewed range;
+- recommendations with `path`, `start_line`, and `end_line` when
+  applicable.
+
+A review-only report missing any of these fields, or a host session that
+times out, exits without a final message, or leaves orphaned evidence is
+`REVIEW INCOMPLETE` or `BLOCKED` — never `REVIEW CLEAN`.
+
 ## Governance States
 
 The fail-closed states below govern every review, re-review, and the final

@@ -27,6 +27,34 @@ The workflow must use Open Code Review's delegation mode exclusively:
 This reuses the ChatGPT-authenticated Codex session without treating the
 ChatGPT Pro subscription as an OpenAI API credential.
 
+## Host session boundary (review-only)
+
+The clean host session is a context boundary, not a review fallback. It is
+the mechanism for reviewing already-finished implementation in a fresh,
+ephemeral host session that has no history from the implementing session,
+with read-only access to the same worktree and the same exact range
+(`BASE`/`MERGE_BASE`..`HEAD`). It is started through
+`scripts/review-session.py` with `codex exec --ephemeral --sandbox
+read-only`, a finite timeout, and a verified process-tree cleanup.
+
+This must be distinguished from a Codex review fallback:
+
+- The clean host session runs **only after** the delegated OCR flow
+  (`ocr delegate preview`, `ocr delegate rule`, and exact diff reading) has
+  completed; OCR is a prerequisite, never replaced.
+- Review-only never invokes the Command Code implementer
+  (`scripts/cmdc-implementer.py`), never starts a fix round, and never
+  re-reviews without explicit authorization.
+- Review-only never publishes GitHub comments and never uses an API/LLM
+  fallback (`ocr review`, `ocr llm test`, `OCR_LLM_*`, `OPENAI_API_KEY`).
+- A missing final message, a timeout, partial output, an orphaned process,
+  or missing evidence is `REVIEW INCOMPLETE` or `BLOCKED` — never
+  `REVIEW CLEAN`.
+- The separate host-session prompt templates (`task-reviewer-prompt.md` and
+  `re-review-prompt.md`) do not create a new review backend: they are
+  instruction templates for the clean host session, not Codex reviewer
+  prompts, and both require prior OCR and run only through the launcher.
+
 ## Scope
 
 ### Preserved from `sdd-cmdc`

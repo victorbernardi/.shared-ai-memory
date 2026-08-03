@@ -66,11 +66,34 @@ def test_implementation_files_exist() -> None:
         assert (SKILL / relative).is_file(), f"missing implementation file: {relative}"
 
 
-def test_no_codex_reviewer_prompts_in_new_skill() -> None:
-    for filename in ("task-reviewer-prompt.md", "re-review-prompt.md"):
-        assert not (SKILL / filename).exists(), (
-            f"{filename} must not exist in the new skill directory"
-        )
+def test_review_templates_exist_and_are_distinct() -> None:
+    task_reviewer = SKILL / "task-reviewer-prompt.md"
+    re_review = SKILL / "re-review-prompt.md"
+
+    assert task_reviewer.is_file(), "missing task-reviewer-prompt.md"
+    assert re_review.is_file(), "missing re-review-prompt.md"
+    assert digest(task_reviewer) != digest(re_review), (
+        "task-reviewer-prompt.md and re-review-prompt.md must be distinct templates"
+    )
+
+
+def test_review_templates_are_separated_by_intent() -> None:
+    task_reviewer = (SKILL / "task-reviewer-prompt.md").read_text(encoding="utf-8")
+    re_review = (SKILL / "re-review-prompt.md").read_text(encoding="utf-8")
+
+    # The initial review covers BASE..HEAD; the re-review covers only
+    # FIX_BASE..HEAD, receives the previous findings, and verdicts each item
+    # ADDRESSED or NOT ADDRESSED.
+    assert "BASE..HEAD" in task_reviewer
+    assert "FIX_BASE" not in task_reviewer
+    assert "FIX_BASE..HEAD" in re_review
+    assert "[FINDINGS]" in re_review
+    assert "ADDRESSED" in re_review and "NOT ADDRESSED" in re_review
+    # Both are instruction templates for the clean host session launcher, not
+    # a new review backend and not Codex reviewer prompts.
+    assert "review-session.py" in task_reviewer and "review-session.py" in re_review
+    assert "not a Codex reviewer prompt" in task_reviewer
+    assert "not a Codex reviewer prompt" in re_review
 
 
 def test_skill_documents_windows_shell_for_exact_range_ocr() -> None:
@@ -147,13 +170,14 @@ def test_skill_requires_tests_in_report_and_fresh_implementer_per_round() -> Non
     assert "tests" in content.lower() or "test" in content.lower()
 
 
-def test_skill_does_not_reference_codex_reviewer_prompts() -> None:
+def test_skill_references_both_review_templates_by_name() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
-    for prompt_name in ("task-reviewer-prompt.md", "re-review-prompt.md"):
-        assert prompt_name not in content, (
-            f"{prompt_name} must not be referenced in SKILL.md"
-        )
+    # SKILL.md must reference the versioned review templates by their exact
+    # filenames; the initial review renders task-reviewer-prompt.md and the
+    # re-review renders re-review-prompt.md.
+    assert "task-reviewer-prompt.md" in content
+    assert "re-review-prompt.md" in content
 
 
 def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
@@ -279,3 +303,92 @@ def test_stout_registry_preserves_sdd_cmdc_entry() -> None:
     )
     assert sdd_cmdc_entries[0]["status"] == "active"
     assert sdd_cmdc_entries[0]["tier"] == 4
+
+
+def test_skill_defines_review_only_section() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    assert "## Review-only" in content
+
+
+def test_skill_review_only_requires_full_inputs_and_sequence() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # Review-only required inputs: plan, BASE (or MERGE_BASE), HEAD, review
+    # package, preview output, rule groups, diffs, report path.
+    assert "plan file" in content.lower()
+    assert "BASE" in content and "MERGE_BASE" in content and "HEAD" in content
+    assert "review package" in content.lower()
+    assert "preview" in content.lower()
+    assert "rule groups" in content.lower() or "resolved rule groups" in content.lower()
+    assert "diff" in content.lower()
+    assert "report file path" in content.lower()
+    # The review-only sequence: package, preview, scope validation, rules,
+    # diffs, clean host session, verdict.
+    assert "validate the scope" in content.lower()
+    assert "fresh, clean host session" in content.lower()
+    assert "record the verdict" in content.lower()
+
+
+def test_skill_review_only_never_runs_implementer_or_fix_round() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # Review-only must not invoke CMDc, fix findings, or start a re-review
+    # without explicit authorization.
+    assert "never invokes the implementer" in content
+    assert "never fixes findings" in content
+    assert "without explicit authorization" in content
+    assert "cmdc-implementer.py" in content
+    assert "start a fix round" in content.lower()
+
+
+def test_skill_review_only_is_independent_and_not_ocr_fallback() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # New ephemeral process, no history from the implementing session,
+    # read-only access to the same worktree and range. This is not a fallback
+    # for OCR; OCR remains a prerequisite.
+    assert "ephemeral" in content
+    assert "no history" in content.lower()
+    assert "read-only" in content.lower()
+    assert "same worktree" in content.lower()
+    assert "same range" in content.lower()
+    assert "not a fallback for OCR" in content
+    assert "prerequisite" in content.lower()
+
+
+def test_skill_review_only_report_contract() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # Report contract: Files reviewed, Excluded files, Commands, Exit codes,
+    # Critical/High, Medium, Review status, BASE/HEAD evidence, and
+    # recommendations with path/start_line/end_line.
+    assert "Files reviewed" in content
+    assert "Excluded files" in content
+    assert "Commands" in content and "Exit codes" in content
+    assert "Critical/High" in content
+    assert "Medium" in content
+    assert "Review status" in content
+    assert "start_line" in content and "end_line" in content
+
+
+def test_skill_review_only_forbids_fallback_and_github() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # Review-only must not use an API/LLM fallback and must not publish
+    # GitHub comments.
+    assert "fallback" in content.lower()
+    assert "OPENAI_API_KEY" in content
+    assert "never publish" in content.lower() or "must not publish" in content.lower()
+
+
+def test_skill_review_only_clean_host_launcher_reference() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # The clean host session launcher and its fail-closed flags/states.
+    assert "review-session.py" in content
+    assert "--ephemeral" in content
+    assert "--sandbox read-only" in content
+    assert "REVIEW INCOMPLETE" in content
+    assert "BLOCKED" in content
+    assert "REVIEW CLEAN" in content

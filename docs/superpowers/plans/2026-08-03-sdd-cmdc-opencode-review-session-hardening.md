@@ -50,6 +50,8 @@ auditável ou com `REVIEW INCOMPLETE`/`BLOCKED`; nunca com aprovação implícit
 | Caminho | Mudança |
 | --- | --- |
 | `skills/sdd-cmdc-opencode/scripts/review-session.py` | Novo launcher de uma sessão host limpa, com timeout, captura e limpeza verificável |
+| `skills/sdd-cmdc-opencode/task-reviewer-prompt.md` | Template canônico do review inicial do range `BASE..HEAD`, consumido pela sessão host e não por um reviewer Codex |
+| `skills/sdd-cmdc-opencode/re-review-prompt.md` | Template canônico do re-review restrito do range `FIX_BASE..HEAD`, com findings anteriores e vereditos `ADDRESSED`/`NOT ADDRESSED` |
 | `skills/sdd-cmdc-opencode/tests/test_review_session.py` | Testes unitários/integração controlada do launcher |
 | `skills/sdd-cmdc-opencode/SKILL.md` | Contrato explícito para `review-only`, sessão independente e estados de saída |
 | `skills/sdd-cmdc-opencode/tests/test_skill_contract.py` | Regressões estruturais do contrato novo |
@@ -95,6 +97,15 @@ da sessão host e a evidência de ciclo de vida; o prompt fornecido pelo
 controller contém os resultados de `preview`, `rule`, diffs e regras a serem
 revisados.
 
+Os prompts de review são separados por intenção, como na skill
+`subagent-driven-development`: `task-reviewer-prompt.md` define o review
+inicial e `re-review-prompt.md` define exclusivamente a verificação de uma
+correção. Eles são templates de instrução para a nova sessão host, não
+seletores de modelo nem autorização para usar um reviewer Codex. O controller
+renderiza cada template em um `PROMPT_FILE` dentro do workspace ignorado do
+plano; a sessão deve receber somente o template renderizado e as evidências
+do range correspondente.
+
 ## Tarefas
 
 ### Task 1 — Especificar o contrato de review-only e da sessão limpa
@@ -105,6 +116,10 @@ especificação de design.
 - Adicionar uma seção `Review-only` com entradas obrigatórias: plano, `BASE`
   (ou `MERGE_BASE`), `HEAD`, pacote de review, saída de `preview`, grupos de
   regras, diffs e caminho do relatório.
+- Criar `task-reviewer-prompt.md` e `re-review-prompt.md` como templates
+  versionados e distintos. O primeiro cobre o review inicial de `BASE..HEAD`;
+  o segundo cobre apenas `FIX_BASE..HEAD`, recebe a lista de findings anterior
+  e exige o veredito `ADDRESSED` ou `NOT ADDRESSED` para cada item.
 - Determinar a sequência: gerar pacote; executar preview; validar escopo;
   resolver regras; ler diffs; iniciar uma sessão host limpa; registrar o
   veredito.
@@ -120,8 +135,12 @@ especificação de design.
   `end_line` quando aplicável.
 - Atualizar o design para distinguir “host session boundary” de “Codex review
   fallback”; manter as proibições de API/LLM e GitHub.
+- Declarar que os templates separados não criam um backend de review novo:
+  ambos continuam exigindo OCR prévio e são executados somente pelo launcher
+  da sessão host limpa.
 - Adicionar asserções estruturais para `review-only`, `review-session.py`,
   `--ephemeral`, `--sandbox read-only`, `REVIEW INCOMPLETE`, `BLOCKED`,
+  existência dos dois templates, separação entre review e re-review,
   ausência de CMDc no caminho review-only e ausência de fallback.
 
 ### Task 2 — Implementar o launcher com fail-closed e limpeza de processos
@@ -182,7 +201,9 @@ frágeis sobre tempo exato, apenas sobre limite, estado e evidência.
 - Executar `ocr delegate rule` para cada arquivo reviewable; registrar
   excluídos e justificativas. Não omitir `SKILL.md` sem registrar a razão.
 - Montar o prompt da nova sessão limpa com apenas as evidências do range e
-  instrução de review, sem contexto acumulado e sem autorização para editar.
+  instrução de review, renderizando `task-reviewer-prompt.md` para review
+  inicial ou `re-review-prompt.md` para re-review, sem contexto acumulado e
+  sem autorização para editar.
 - Executar o launcher com timeout finito. Se terminar, verificar o relatório
   independentemente; se expirar, preservar `REVIEW INCOMPLETE` e não repetir
   automaticamente.
@@ -238,4 +259,3 @@ workspace do plano. O único resultado aceitável sem relatório final é:
 ```text
 REVIEW INCOMPLETE — CLEAN_HOST_TIMEOUT: sessão independente sem mensagem final
 ```
-
