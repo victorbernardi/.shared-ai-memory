@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -19,7 +20,6 @@ COMMAND_FLAGS = (
     "--skip-onboarding",
     "--yolo",
 )
-REPORT_MARKER = "Write your full report to "
 
 
 def build_command(cmd_path: Path, max_turns: int = DEFAULT_MAX_TURNS) -> list[str]:
@@ -134,11 +134,97 @@ def render_blocked(diagnostic: dict[str, str]) -> str:
     return "\n".join(f"{key}: {value}" for key, value in fields)
 
 
+def _run_git(cwd: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=str(cwd),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or f"git {' '.join(args)} failed")
+    return result.stdout.strip()
+
+
+def collect_workspace_snapshot(
+    cwd: Path,
+    *,
+    baseline_head: str | None = None,
+    report_path: Path | None = None,
+) -> dict[str, object]:
+    """Collect deterministic Git/report evidence without invoking a shell."""
+    git_root = _run_git(cwd, "rev-parse", "--show-toplevel")
+    head = _run_git(cwd, "rev-parse", "HEAD")
+    status = _run_git(cwd, "status", "--short", "--untracked-files=all")
+    status_lines = status.splitlines() if status else []
+    commits_since_baseline: list[str] = []
+    if baseline_head and baseline_head != head:
+        commits = _run_git(cwd, "rev-list", "--reverse", f"{baseline_head}..HEAD")
+        commits_since_baseline = commits.splitlines() if commits else []
+    report_exists = report_path is not None and report_path.is_file()
+    diff_present = bool(status_lines)
+    changed = diff_present or bool(commits_since_baseline)
+    state = "IMPLEMENTATION INCOMPLETE" if changed else "STARTING"
+    return {
+        "git_root": git_root,
+        "head": head,
+        "status": status_lines,
+        "diff_present": diff_present,
+        "commits_since_baseline": commits_since_baseline,
+        "report_exists": report_exists,
+        "report_path": str(report_path) if report_path else None,
+        "state": state,
+    }
+
+
+def _write_checkpoint(
+    path: Path,
+    event: str,
+    snapshot: dict[str, object],
+    state: str | None = None,
+) -> None:
+    """Append one JSONL checkpoint record; the snapshot never claims COMPLETE."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    state = state or str(snapshot["state"])
+    if state == "COMPLETE":
+        raise ValueError("a workspace snapshot cannot claim COMPLETE")
+    payload = {"event": event, "snapshot": snapshot, "state": state}
+    with path.open("a", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def _render_incomplete(
+    diagnostic: dict[str, str], snapshot: dict[str, object], checkpoint_file: Path | None
+) -> str:
+    lines = render_blocked(diagnostic).splitlines()
+    lines[0] = "STATUS: IMPLEMENTATION INCOMPLETE"
+    lines.extend(
+        [
+            f"WORKSPACE_ROOT: {snapshot['git_root']}",
+            f"WORKSPACE_HEAD: {snapshot['head']}",
+            f"WORKSPACE_DIFF: {'true' if snapshot['diff_present'] else 'false'}",
+            f"WORKSPACE_STATUS: {' | '.join(snapshot['status'])}",
+            f"WORKSPACE_COMMITS: {len(snapshot['commits_since_baseline'])}",
+            f"REPORT_EXISTS: {'true' if snapshot['report_exists'] else 'false'}",
+            f"CHECKPOINT_FILE: {checkpoint_file or ''}",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def _extract_report_path(prompt_text: str, cwd: Path) -> Path | None:
     for line in prompt_text.splitlines():
-        if REPORT_MARKER not in line:
+        match = re.search(
+            r"Write (?:your|the) full report to\s*:?[ \t]*(.+?)[ \t]*:?[ \t]*$",
+            line,
+            flags=re.IGNORECASE,
+        )
+        if not match:
             continue
-        candidate = line.split(REPORT_MARKER, 1)[1].strip().rstrip(":")
+        candidate = match.group(1).strip().rstrip(":").strip()
         if not candidate or candidate.startswith("["):
             return None
         path = Path(candidate).expanduser()
@@ -165,12 +251,18 @@ def run_implementer(
     prompt_file: Path,
     max_turns: int = DEFAULT_MAX_TURNS,
     cmd_bin: str = "cmdc",
+    checkpoint_file: Path | None = None,
 ) -> int:
     """Run Command Code and return zero only after process/report success."""
     cwd = cwd.expanduser().resolve()
     prompt_file = prompt_file.expanduser().resolve()
     prompt_text = prompt_file.read_text(encoding="utf-8")
     report_path = _extract_report_path(prompt_text, cwd)
+    baseline_snapshot: dict[str, object] | None = None
+    try:
+        baseline_snapshot = collect_workspace_snapshot(cwd, report_path=report_path)
+    except RuntimeError:
+        baseline_snapshot = None
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
@@ -206,8 +298,40 @@ def run_implementer(
         exit_code = 127
     except subprocess.TimeoutExpired as exc:
         command = build_command(Path(cmd_bin), max_turns=max_turns)
-        diagnostic = classify_failure(8, str(exc), report_exists=False)
+        timeout_stderr = str(exc.stderr or exc)
+        diagnostic = classify_failure(8, timeout_stderr, report_exists=False)
         exit_code = 8
+
+        snapshot = None
+        if baseline_snapshot is not None:
+            try:
+                snapshot = collect_workspace_snapshot(
+                    cwd,
+                    baseline_head=str(baseline_snapshot["head"]),
+                    report_path=report_path,
+                )
+            except RuntimeError as snapshot_error:
+                diagnostic["STDERR"] = (
+                    f"{timeout_stderr}\nworkspace snapshot failed: {snapshot_error}"
+                )
+        if snapshot is not None:
+            # A timeout is never success. A diff (or commits) means partial
+            # work exists and must be preserved deterministically; no diff
+            # still produces a distinct timeout checkpoint when requested.
+            if snapshot["diff_present"]:
+                diagnostic["ACTION"] = (
+                    "preservar o diff e executar a recuperação determinística antes de revisar"
+                )
+            if checkpoint_file:
+                _write_checkpoint(
+                    checkpoint_file,
+                    "TIMED_OUT",
+                    snapshot,
+                    state="IMPLEMENTATION INCOMPLETE",
+                )
+            diagnostic["COMMAND"] = " ".join(str(part) for part in command)
+            print(_render_incomplete(diagnostic, snapshot, checkpoint_file), file=sys.stderr)
+            return exit_code
 
     if diagnostic:
         diagnostic["COMMAND"] = " ".join(str(part) for part in command)
@@ -222,6 +346,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prompt-file", required=True, type=Path)
     parser.add_argument("--max-turns", default=DEFAULT_MAX_TURNS, type=int)
     parser.add_argument("--cmd-bin", default="cmdc")
+    parser.add_argument("--checkpoint-file", type=Path)
     return parser.parse_args()
 
 
@@ -232,6 +357,7 @@ def main() -> int:
         prompt_file=args.prompt_file,
         max_turns=args.max_turns,
         cmd_bin=args.cmd_bin,
+        checkpoint_file=args.checkpoint_file,
     )
 
 

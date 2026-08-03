@@ -165,11 +165,14 @@ def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
     assert "review-package" in content
     assert "cmdc-implementer.py" in content
     assert "implementer-prompt.md" in content
+    assert "--checkpoint-file" in content
+    assert "IMPLEMENTATION INCOMPLETE" in content
+    assert "TIMED_OUT" in content
 
 
-def test_implementation_files_match_sdd_cmdc_digests() -> None:
+def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:
+    # Files intentionally copied from the source skill must remain byte-identical.
     pairs = [
-        ("scripts/cmdc-implementer.py", "scripts/cmdc-implementer.py"),
         ("implementer-prompt.md", "implementer-prompt.md"),
         ("scripts/sdd-workspace", "scripts/sdd-workspace"),
         ("scripts/task-brief", "scripts/task-brief"),
@@ -180,6 +183,26 @@ def test_implementation_files_match_sdd_cmdc_digests() -> None:
         assert digest(SKILL / new_relative) == digest(SOURCE / source_relative), (
             f"digest mismatch for {new_relative}"
         )
+
+
+def test_evolving_adapter_keeps_contract_and_never_infers_completion() -> None:
+    # The target adapter evolves beyond the source adapter (recovery evidence);
+    # it must not be required to byte-match the sibling, but it must keep the
+    # fail-closed implementation contract and never claim completion from a
+    # commit or report alone.
+    adapter = (SKILL / "scripts" / "cmdc-implementer.py").read_text(encoding="utf-8")
+
+    assert "deepseek/deepseek-v4-flash" in adapter
+    assert "IMPLEMENTATION INCOMPLETE" in adapter
+    assert "collect_workspace_snapshot" in adapter
+    assert "_write_checkpoint" in adapter
+    # The only failure state the adapter may claim is IMPLEMENTATION INCOMPLETE.
+    # Completion requires validation evidence beyond the workspace snapshot, so
+    # the adapter must never assign a COMPLETE state itself; it may only guard
+    # against it.
+    assert "state == \"COMPLETE\"" in adapter
+    assert "state = \"COMPLETE\"" not in adapter
+    assert "raise ValueError" in adapter
 
 
 def test_source_skills_have_no_worktree_diff() -> None:

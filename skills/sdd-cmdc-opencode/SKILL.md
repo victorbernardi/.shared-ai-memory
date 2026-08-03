@@ -265,13 +265,17 @@ $workspace = (Get-Location).Path
 & python (Join-Path $skillDir "scripts\cmdc-implementer.py") `
   --cwd $workspace `
   --prompt-file "<cmdc-prompt-file>" `
-  --max-turns 20
+  --max-turns 20 `
+  --checkpoint-file "<checkpoint-file>"
 ```
 
 The adapter's stdout/stderr and exit code are part of the dispatch result. A
 non-zero result or missing report emits `STATUS: BLOCKED` with
 `BLOCKER_CODE`, `MESSAGE`, `COMMAND`, `EXIT_CODE`, `STDERR` and `ACTION`; write
-that reason into the ledger and do not generate a review package.
+that reason into the ledger and do not generate a review package. A timeout
+with workspace evidence emits `STATUS: IMPLEMENTATION INCOMPLETE`, appends a
+`TIMED_OUT` JSONL checkpoint and blocks review/next-task progression until the
+workspace, report and commit are recovered deterministically.
 
 Template: [implementer-prompt.md](implementer-prompt.md)
 
