@@ -37,18 +37,18 @@ KNOWN_FAILURE_DISPOSITION_RE = re.compile(
     flags=re.IGNORECASE,
 )
 KNOWN_FAILURE_ACCEPT_RE = re.compile(
-    r"(?i)\b(?:accept(?:ed|ing)?|acknowledge(?:d|ing)?|documented|"
-    r"approved|verified|unrelated to this task)\b",
+    r"(?i)\b(?:accept(?:ed|ing)?|acknowledge(?:d|ing)?|documented|approved|verified)\b",
 )
 KNOWN_FAILURE_REJECT_RE = re.compile(
     r"(?i)\b(?:fix(?:ed)?|resolve(?:d|ing)?|fail(?:ure)?s?\s+(?:in|from)|"
     r"introduced|new\s+failures?|regression|blocker|unresolved|"
-    r"unknown|undocumented|unrelated|not\s+(?:accepted|acknowledged))\b",
+    r"unknown|undocumented)\b",
 )
 KNOWN_FAILURE_ALLOWLIST: dict[str, str] = {
     "pre-existing": "an explicit disposition token is required",
     "known": "an explicit disposition token is required",
     "out-of-scope": "an explicit disposition token is required",
+    "out of scope": "an explicit disposition token is required",
 }
 COMMAND_FLAGS = (
     "--no-skills",
@@ -222,26 +222,120 @@ def _has_test_evidence(output: str) -> bool:
     return not TEST_FAILURE_RE.search(output) and bool(TEST_EVIDENCE_RE.search(output))
 
 
-def _has_known_failure_test_evidence(output: str) -> bool:
-    """Accept only an explicitly documented, validation-only failure set.
+def _known_failure_blocks(output: str) -> list[str]:
+    """Split the validation output into failure blocks.
 
-    The failure must be named by a disposition token from the allowlist
-    (pre-existing, known, out-of-scope), the report must positively declare
-    the failures accepted/acknowledged/documented, and no rejection language
-    (fixed, resolved, introduced, unrelated, unresolved, ...) may be present.
+    A failure record starts at a line naming at least one failure count (for
+    example ``7 failed``) and ends at the next such line. The full records
+    are returned (a prelude of lines before the first failure count is
+    dropped).
+    """
+    blocks: list[str] = []
+    current: list[str] = []
+    for line in output.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if TEST_FAILURE_RE.search(stripped):
+            if current:
+                blocks.append("\n".join(current))
+            current = [stripped]
+        elif current:
+            current.append(stripped)
+    if current:
+        blocks.append("\n".join(current))
+    return blocks
+
+
+def _scoped_known_failure_evidence(block: str) -> bool:
+    """Validate one scoped known-failure record.
+
+    A single failure record is accepted only when it (1) carries its own
+    failure counts, (2) names an allowlisted disposition tied to the failure
+    count itself, (3) declares the failures accepted/acknowledged/documented
+    in the same record, and (4) contains no rejection language. Failures
+    without an explicit disposition, unrelated records, and mixed records all
+    stay rejected: the acceptance must be scoped and explicit.
+    """
+    if not TEST_FAILURE_RE.search(block):
+        return False
+    if _contains_rejection_wording(block):
+        return False
+    if not KNOWN_FAILURE_ACCEPT_RE.search(block):
+        return False
+    disposition = None
+    disposition_match = KNOWN_FAILURE_DISPOSITION_RE.search(block)
+    if disposition_match:
+        disposition = disposition_match.group(0).lower().replace("_", " ")
+    if disposition not in KNOWN_FAILURE_ALLOWLIST:
+        return False
+    if not KNOWN_FAILURE_ACCEPT_RE.search(block):
+        return False
+    # The disposition must be anchored to the failure count itself, so a
+    # disposition token that appears in an unrelated part of the output
+    # cannot validate a different failure record.
+    anchor = None
+    for match in TEST_FAILURE_RE.finditer(block):
+        window = block[match.end() : match.end() + 80]
+        if disposition in window:
+            anchor = match
+            break
+    return anchor is not None
+
+
+def _contains_rejection_wording(block: str) -> bool:
+    """Return whether a known-failure record contains rejection wording.
+
+    The negation check is strict: ``not accepted`` and ``not acknowledged``
+    must not be claimed as acceptance by the ``accepted``/``acknowledged``
+    token. ``unrelated`` is rejected only when it qualifies the failure count
+    itself (``unrelated failures``); a standalone unrelated token inside a
+    scoped accepted record is not rejection evidence.
+    """
+    if re.search(r"(?i)\bnot\s+(?:accepted|acknowledged)\b", block):
+        return True
+    if re.search(r"(?i)\bunrelated\s+failures?\b", block):
+        return True
+    return bool(KNOWN_FAILURE_REJECT_RE.search(block))
+
+
+def _has_known_failure_test_evidence(output: str) -> bool:
+    """Accept only an explicitly scoped, validation-only failure record.
+
+    The whole output must contain test evidence, and every failure record in
+    it must be an accepted known-failure record or an unannotated summary
+    covered by one. Any failure that is not explicitly documented as accepted
+    (unrelated failures, mixed records, rejection wording) makes the whole
+    output fail closed.
     """
     if not (TEST_EVIDENCE_RE.search(output) and TEST_FAILURE_RE.search(output)):
         return False
-    dispositions = KNOWN_FAILURE_DISPOSITION_RE.findall(output)
-    if not dispositions:
+    blocks = _known_failure_blocks(output)
+    if not blocks:
         return False
-    if not any(
-        disposition in KNOWN_FAILURE_ALLOWLIST for disposition in dispositions
-    ):
+    accepted_counts = {
+        match.group(0).lower()
+        for block in blocks
+        if _scoped_known_failure_evidence(block)
+        for match in TEST_FAILURE_RE.finditer(block)
+    }
+    if not accepted_counts:
         return False
-    if KNOWN_FAILURE_REJECT_RE.search(output):
-        return False
-    return bool(KNOWN_FAILURE_ACCEPT_RE.search(output))
+    for block in blocks:
+        if _scoped_known_failure_evidence(block):
+            continue
+        if (
+            KNOWN_FAILURE_DISPOSITION_RE.search(block)
+            or KNOWN_FAILURE_ACCEPT_RE.search(block)
+            or _contains_rejection_wording(block)
+        ):
+            return False
+        if any(
+            match.group(0).lower() not in accepted_counts
+            for match in TEST_FAILURE_RE.finditer(block)
+        ):
+            return False
+    return True
 
 
 def _has_tracked_changes(status_lines: list[str]) -> bool:
@@ -515,12 +609,28 @@ def _windows_parent_pid(pid: int) -> int | None:
     return None
 
 
-def _process_tree_alive(pid: int) -> bool:
+def _capture_process_group(pid: int) -> int | None:
+    """Capture the POSIX process-group identity before the leader exits.
+
+    killpg(pid) keeps the group id equal to the leader pid, so the group is
+    captured before termination; after the leader exits os.getpgid(leader)
+    raises ProcessLookupError and the group identity is gone.
+    """
+    if os.name == "nt":
+        return None
+    try:
+        return os.getpgid(pid)
+    except (ProcessLookupError, PermissionError, OSError):
+        return None
+
+
+def _process_tree_alive(pid: int, group: int | None = None) -> bool:
     """Return True when any process of the group is still alive.
 
     killpg()/taskkill /T keep the group id equal to the leader pid, so the
-    whole tree is verified from the current process group instead of only the
-    leader. A surviving descendant makes the cleanup unverified.
+    whole tree is verified from the group captured before termination
+    instead of only the leader. A surviving descendant makes the cleanup
+    unverified; an uncaptured group identity counts as alive (fail closed).
     """
     if os.name == "nt":
         # On Windows, taskkill /T (used by _terminate_process_tree) kills the
@@ -531,20 +641,23 @@ def _process_tree_alive(pid: int) -> bool:
             _windows_pid_in_group(candidate_pid, pid)
             for candidate_pid in _windows_process_pids()
         )
-    try:
-        group = os.getpgid(pid)
-        os.kill(pid, 0)
-        for process in os.listdir("/proc"):
-            if not process.isdigit():
-                continue
-            try:
-                if os.getpgid(int(process)) == group:
-                    return True
-            except (ProcessLookupError, PermissionError, OSError):
-                continue
-        return False
-    except (ProcessLookupError, PermissionError, OSError):
-        return False
+    if group is None:
+        # The group identity was never captured (or could not be resolved).
+        # The tree cannot be verified absent, so it must count as alive:
+        # fail closed.
+        return True
+    for process in os.listdir("/proc"):
+        if not process.isdigit():
+            continue
+        try:
+            if os.getpgid(int(process)) == group:
+                return True
+        except (ProcessLookupError, PermissionError, OSError):
+            # A process that vanished mid-scan cannot be a survivor; a
+            # process that cannot be resolved is not evidence of a live
+            # group member. The group scan itself is authoritative.
+            continue
+    return False
 
 
 def _fresh_activity_state(
@@ -630,13 +743,18 @@ def _run_cmdc_process(
             else:
                 reason = ""
             if reason:
+                process_group = _capture_process_group(process.pid)
                 _terminate_process_tree(process.pid)
                 cleanup_verified = False
                 try:
                     process.wait(timeout=5)
                     cleanup_verified = not _process_tree_alive(process.pid)
+                    if process_group is not None:
+                        cleanup_verified = not _process_tree_alive(process.pid, process_group)
                 except subprocess.TimeoutExpired:
                     cleanup_verified = not _process_tree_alive(process.pid)
+                    if process_group is not None:
+                        cleanup_verified = not _process_tree_alive(process.pid, process_group)
                 for reader in readers:
                     reader.join(timeout=2)
                 error = subprocess.TimeoutExpired(
@@ -914,7 +1032,7 @@ def run_implementer(
         known_failure_evidence = (
             allow_no_change
             and allow_known_test_failures
-            and completed.returncode == 1
+            and completed.returncode in {0, 1}
             and _has_known_failure_test_evidence(
                 "\n".join(
                     part
