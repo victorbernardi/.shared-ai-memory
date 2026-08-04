@@ -32,6 +32,10 @@ TEST_FAILURE_RE = re.compile(
     r"\b[1-9]\d*\s+(?:failed|errors?)\b",
     flags=re.IGNORECASE,
 )
+KNOWN_FAILURE_DISPOSITION_RE = re.compile(
+    r"\b(?:pre-existing|known|out[- ]of[- ]scope)\b",
+    flags=re.IGNORECASE,
+)
 COMMAND_FLAGS = (
     "--no-skills",
     "--trust",
@@ -202,6 +206,13 @@ def _configure_stdio() -> None:
 
 def _has_test_evidence(output: str) -> bool:
     return not TEST_FAILURE_RE.search(output) and bool(TEST_EVIDENCE_RE.search(output))
+
+
+def _has_known_failure_test_evidence(output: str) -> bool:
+    """Accept an explicitly documented, validation-only pytest failure set."""
+    return bool(TEST_EVIDENCE_RE.search(output)) and bool(
+        TEST_FAILURE_RE.search(output)
+    ) and bool(KNOWN_FAILURE_DISPOSITION_RE.search(output))
 
 
 def _has_tracked_changes(status_lines: list[str]) -> bool:
@@ -647,6 +658,7 @@ def run_implementer(
     wall_timeout_seconds: int = DEFAULT_WALL_TIMEOUT_SECONDS,
     stall_timeout_seconds: int = DEFAULT_STALL_TIMEOUT_SECONDS,
     allow_no_change: bool = False,
+    allow_known_test_failures: bool = False,
 ) -> int:
     """Run Command Code and return zero only after process/report success."""
     cwd = cwd.expanduser().resolve()
@@ -750,12 +762,32 @@ def run_implementer(
             if not stderr.endswith("\n"):
                 sys.stderr.write("\n")
         report_exists = report_path is not None and report_path.is_file()
+        known_failure_evidence = (
+            allow_no_change
+            and allow_known_test_failures
+            and completed.returncode == 1
+            and _has_known_failure_test_evidence(
+                "\n".join(
+                    part
+                    for part in (
+                        _text_output(completed.stdout),
+                        _text_output(completed.stderr),
+                        _report_output(report_path),
+                    )
+                    if part
+                )
+            )
+        )
         diagnostic = classify_failure(
             completed.returncode,
             stderr if completed.stderr else "",
             report_exists=report_exists,
         )
-        exit_code = completed.returncode
+        if known_failure_evidence:
+            diagnostic = {}
+            exit_code = 0
+        else:
+            exit_code = completed.returncode
     except FileNotFoundError as exc:
         command = [cmd_bin, *COMMAND_FLAGS]
         diagnostic = classify_failure(127, str(exc), report_exists=False, cmd_found=False)
@@ -959,6 +991,7 @@ def run_implementer(
 
     if baseline_snapshot is not None and completed is not None:
         final_snapshot = None
+        known_failure_evidence = False
         try:
             final_snapshot = collect_workspace_snapshot(
                 cwd,
@@ -983,12 +1016,27 @@ def run_implementer(
             if allow_no_change:
                 no_commit = not bool(final_snapshot["commits_since_baseline"])
                 no_tracked = not has_tracked
+                test_output = "\n".join(
+                    part
+                    for part in (
+                        _text_output(completed.stdout),
+                        _text_output(completed.stderr),
+                        _report_output(report_path),
+                    )
+                    if part
+                )
+                test_evidence = bool(final_snapshot["tests_detectable"])
+                known_failure_evidence = (
+                    allow_known_test_failures
+                    and completed.returncode == 1
+                    and _has_known_failure_test_evidence(test_output)
+                )
                 transaction_ready = (
-                    completed.returncode == 0
+                    (completed.returncode == 0 or known_failure_evidence)
                     and no_commit
                     and no_tracked
                     and bool(final_snapshot["report_exists"])
-                    and bool(final_snapshot["tests_detectable"])
+                    and (test_evidence or known_failure_evidence)
                 )
             else:
                 transaction_ready = (
@@ -1015,7 +1063,7 @@ def run_implementer(
                         part for part in (completed.stdout, completed.stderr) if part
                     ),
                 )
-            if completed.returncode == 0 and not transaction_ready:
+            if (completed.returncode == 0 or known_failure_evidence) and not transaction_ready:
                 if allow_no_change:
                     missing = [
                         name
@@ -1029,7 +1077,11 @@ def run_implementer(
                                 not has_tracked,
                             ),
                             ("report", bool(final_snapshot["report_exists"])),
-                            ("tests", bool(final_snapshot["tests_detectable"])),
+                            (
+                                "tests",
+                                bool(final_snapshot["tests_detectable"])
+                                or known_failure_evidence,
+                            ),
                         )
                         if not present
                     ]
@@ -1092,6 +1144,13 @@ def parse_args() -> argparse.Namespace:
         help="succeed when CMDc exits zero with report and test evidence but "
         "makes no tracked changes or commits (validation-only runs)",
     )
+    parser.add_argument(
+        "--allow-known-test-failures",
+        action="store_true",
+        default=False,
+        help="in validation-only mode, accept pytest exit 1 only when the "
+        "report documents known or pre-existing out-of-scope failures",
+    )
     return parser.parse_args()
 
 
@@ -1109,6 +1168,7 @@ def main() -> int:
         wall_timeout_seconds=args.wall_timeout_seconds,
         stall_timeout_seconds=args.stall_timeout_seconds,
         allow_no_change=args.allow_no_change,
+        allow_known_test_failures=args.allow_known_test_failures,
     )
 
 

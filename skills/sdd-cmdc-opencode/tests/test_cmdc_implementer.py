@@ -990,6 +990,38 @@ def test_validation_only_succeeds_with_untracked_artifact_and_no_commit(
     assert checkpoint["snapshot"]["tests_detectable"] is True
 
 
+def test_validation_only_accepts_documented_known_test_failures(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-validation-known-failures")
+    report_path = repo / "task-report.md"
+    report_path.write_text(
+        "pytest: 77 passed, 7 failed\n"
+        "The 7 pre-existing failures are out-of-scope.\n",
+        encoding="utf-8",
+    )
+    prompt_path = _write_prompt(tmp_path, report_path)
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=1, stdout="pytest 77 passed, 7 failed", stderr=""
+        ),
+    )
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            allow_no_change=True,
+            allow_known_test_failures=True,
+        )
+        == 0
+    )
+    assert "TRANSACTION_INCOMPLETE" not in capsys.readouterr().err
+
+
 def test_validation_only_blocked_when_report_absent(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -1078,3 +1110,4 @@ def test_cli_help_exposes_allow_no_change_flag() -> None:
         check=False,
     )
     assert "--allow-no-change" in result.stdout
+    assert "--allow-known-test-failures" in result.stdout
