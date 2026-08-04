@@ -36,6 +36,20 @@ KNOWN_FAILURE_DISPOSITION_RE = re.compile(
     r"\b(?:pre-existing|known|out[- ]of[- ]scope)\b",
     flags=re.IGNORECASE,
 )
+KNOWN_FAILURE_ACCEPT_RE = re.compile(
+    r"(?i)\b(?:accept(?:ed|ing)?|acknowledge(?:d|ing)?|documented|"
+    r"approved|verified|unrelated to this task)\b",
+)
+KNOWN_FAILURE_REJECT_RE = re.compile(
+    r"(?i)\b(?:fix(?:ed)?|resolve(?:d|ing)?|fail(?:ure)?s?\s+(?:in|from)|"
+    r"introduced|new\s+failures?|regression|blocker|unresolved|"
+    r"unknown|undocumented|unrelated|not\s+(?:accepted|acknowledged))\b",
+)
+KNOWN_FAILURE_ALLOWLIST: dict[str, str] = {
+    "pre-existing": "an explicit disposition token is required",
+    "known": "an explicit disposition token is required",
+    "out-of-scope": "an explicit disposition token is required",
+}
 COMMAND_FLAGS = (
     "--no-skills",
     "--trust",
@@ -209,10 +223,25 @@ def _has_test_evidence(output: str) -> bool:
 
 
 def _has_known_failure_test_evidence(output: str) -> bool:
-    """Accept an explicitly documented, validation-only pytest failure set."""
-    return bool(TEST_EVIDENCE_RE.search(output)) and bool(
-        TEST_FAILURE_RE.search(output)
-    ) and bool(KNOWN_FAILURE_DISPOSITION_RE.search(output))
+    """Accept only an explicitly documented, validation-only failure set.
+
+    The failure must be named by a disposition token from the allowlist
+    (pre-existing, known, out-of-scope), the report must positively declare
+    the failures accepted/acknowledged/documented, and no rejection language
+    (fixed, resolved, introduced, unrelated, unresolved, ...) may be present.
+    """
+    if not (TEST_EVIDENCE_RE.search(output) and TEST_FAILURE_RE.search(output)):
+        return False
+    dispositions = KNOWN_FAILURE_DISPOSITION_RE.findall(output)
+    if not dispositions:
+        return False
+    if not any(
+        disposition in KNOWN_FAILURE_ALLOWLIST for disposition in dispositions
+    ):
+        return False
+    if KNOWN_FAILURE_REJECT_RE.search(output):
+        return False
+    return bool(KNOWN_FAILURE_ACCEPT_RE.search(output))
 
 
 def _has_tracked_changes(status_lines: list[str]) -> bool:
@@ -422,6 +451,123 @@ def _terminate_process_tree(pid: int) -> None:
         return
 
 
+def _windows_process_pids() -> list[int]:
+    """List every live PID from tasklist (Windows-only)."""
+    result = subprocess.run(
+        ["tasklist", "/FO", "CSV", "/NH"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    pids: list[int] = []
+    for line in result.stdout.splitlines():
+        columns = line.split(",")
+        if len(columns) >= 2:
+            candidate = columns[1].strip().strip('"')
+            if candidate.isdigit():
+                pids.append(int(candidate))
+    return pids
+
+
+def _windows_pid_in_group(pid: int, leader: int) -> bool:
+    """Return whether a Windows process belongs to the tree rooted at leader.
+
+    On Windows the process group is not exposed to Python, so the tree is
+    approximated by walking parent links: every process whose ancestor chain
+    reaches the leader is a member. A process that cannot be resolved is
+    treated as a member so the check stays fail-closed.
+    """
+    if pid == leader:
+        return True
+    seen: set[int] = set()
+    current = pid
+    while current not in seen:
+        seen.add(current)
+        parent = _windows_parent_pid(current)
+        if parent is None:
+            # The process's parent could not be resolved (wmic failed or the
+            # process vanished); treat it as a member so cleanup verification
+            # fails closed instead of declaring a false clean tree.
+            return True
+        if parent == 0:
+            # A known root that is not the leader: the chain is fully
+            # resolved and never reaches the leader, so this process is a
+            # known non-member of the tree.
+            return False
+        if parent == leader:
+            return True
+        current = parent
+    return False
+
+
+def _windows_parent_pid(pid: int) -> int | None:
+    """Return the PPID of a Windows process via wmic, or None when unknown."""
+    result = subprocess.run(
+        ["wmic", "process", "where", f"ProcessId={pid}", "get", "ParentProcessId"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line.isdigit():
+            return int(line)
+    return None
+
+
+def _process_tree_alive(pid: int) -> bool:
+    """Return True when any process of the group is still alive.
+
+    killpg()/taskkill /T keep the group id equal to the leader pid, so the
+    whole tree is verified from the current process group instead of only the
+    leader. A surviving descendant makes the cleanup unverified.
+    """
+    if os.name == "nt":
+        # On Windows, taskkill /T (used by _terminate_process_tree) kills the
+        # whole tree rooted at pid. Verify absence by scanning the full
+        # process list for any surviving member of that tree rather than
+        # trusting the leader alone.
+        return any(
+            _windows_pid_in_group(candidate_pid, pid)
+            for candidate_pid in _windows_process_pids()
+        )
+    try:
+        group = os.getpgid(pid)
+        os.kill(pid, 0)
+        for process in os.listdir("/proc"):
+            if not process.isdigit():
+                continue
+            try:
+                if os.getpgid(int(process)) == group:
+                    return True
+            except (ProcessLookupError, PermissionError, OSError):
+                continue
+        return False
+    except (ProcessLookupError, PermissionError, OSError):
+        return False
+
+
+def _fresh_activity_state(
+    baseline_fingerprint: tuple[object, ...] | None = None,
+) -> dict[str, object]:
+    """Build an activity state with an independent wall-clock baseline.
+
+    The wall deadline is derived from ``started``, so reusing the primary
+    state for recovery would let a recovery that starts near the primary
+    timeout exceed its budget immediately. Recovery gets a fresh baseline.
+    """
+    now = time.monotonic()
+    return {
+        "lock": threading.Lock(),
+        "started": now,
+        "last_activity": now,
+        "last_event": now,
+        "last_workspace": now,
+        "events_seen": 0,
+        "workspace_fingerprint": baseline_fingerprint,
+    }
+
+
 def _run_cmdc_process(
     process_command: list[str],
     prompt_text: str,
@@ -485,10 +631,12 @@ def _run_cmdc_process(
                 reason = ""
             if reason:
                 _terminate_process_tree(process.pid)
+                cleanup_verified = False
                 try:
                     process.wait(timeout=5)
+                    cleanup_verified = not _process_tree_alive(process.pid)
                 except subprocess.TimeoutExpired:
-                    pass
+                    cleanup_verified = not _process_tree_alive(process.pid)
                 for reader in readers:
                     reader.join(timeout=2)
                 error = subprocess.TimeoutExpired(
@@ -501,6 +649,7 @@ def _run_cmdc_process(
                 )
                 error.watchdog_reason = reason  # type: ignore[attr-defined]
                 error.watchdog_pid = process.pid  # type: ignore[attr-defined]
+                error.watchdog_cleanup_verified = cleanup_verified  # type: ignore[attr-defined]
                 raise error
             time.sleep(0.2)
     finally:
@@ -800,6 +949,28 @@ def run_implementer(
             part for part in (timeout_stdout, timeout_stderr) if part
         )
         watchdog_reason = getattr(exc, "watchdog_reason", "WALL_TIMEOUT")
+        watchdog_cleanup_verified = getattr(
+            exc, "watchdog_cleanup_verified", True
+        )
+        # Fail closed before any recovery: a live CMDc tree could still mutate
+        # the workspace, so it must never be followed by a recovery attempt.
+        if not watchdog_cleanup_verified:
+            diagnostic = {
+                "BLOCKER_CODE": "WATCHDOG_CLEANUP_UNVERIFIED",
+                "MESSAGE": (
+                    "o processo CMDc não foi verificado ausente após o watchdog; "
+                    "a árvore de processos pode continuar alterando o workspace"
+                ),
+                "COMMAND": "",
+                "EXIT_CODE": "8",
+                "STDERR": timeout_stderr,
+                "ACTION": (
+                    "inspecionar e encerrar manualmente os processos CMDc "
+                    "remanescentes antes de qualquer nova invocação"
+                ),
+            }
+            print(render_blocked(diagnostic), file=sys.stderr)
+            return 8
         if watchdog_reason == "STALLED":
             diagnostic = {
                 "BLOCKER_CODE": "STALLED",
@@ -878,13 +1049,16 @@ def run_implementer(
                     )
                     command = recovery_command
                     recovery_timeout = max(60, recovery_max_turns * 120)
+                    recovery_activity = _fresh_activity_state(
+                        _activity_fingerprint(snapshot)
+                    )
                     recovery_completed = _run_cmdc_process(
                         recovery_command,
                         recovery_text,
                         cwd,
                         wall_timeout_seconds=recovery_timeout,
                         stall_timeout_seconds=min(stall_timeout_seconds, recovery_timeout),
-                        activity_state=activity_state,
+                        activity_state=recovery_activity,
                         event_log=event_log,
                     )
                     recovery_output = "\n".join(
@@ -906,7 +1080,9 @@ def run_implementer(
                         checkpoint_file=checkpoint_file,
                         test_output=f"{recovery_output}\n{_report_output(report_path)}",
                     )
-                    _attach_activity_evidence(recovery_snapshot, activity_state, event_log)
+                    _attach_activity_evidence(
+                        recovery_snapshot, recovery_activity, event_log
+                    )
                     recovery_ready = _recovery_is_ready(
                         recovery_completed.returncode,
                         recovery_snapshot,

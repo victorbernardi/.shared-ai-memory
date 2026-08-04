@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 import time
@@ -15,6 +16,17 @@ SPEC = importlib.util.spec_from_file_location("cmdc_implementer", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
+
+REVIEW_SESSION_PATH = (
+    REPO_ROOT / "skills" / "sdd-cmdc-opencode" / "scripts" / "review-session.py"
+)
+REVIEW_SPEC = importlib.util.spec_from_file_location(
+    "review_session", REVIEW_SESSION_PATH
+)
+assert REVIEW_SPEC is not None and REVIEW_SPEC.loader is not None
+REVIEW = importlib.util.module_from_spec(REVIEW_SPEC)
+sys.modules[REVIEW_SPEC.name] = REVIEW
+REVIEW_SPEC.loader.exec_module(REVIEW)
 
 
 def test_build_command_uses_fixed_model_and_edit_flags() -> None:
@@ -661,6 +673,7 @@ def test_cmdc_process_stops_when_stream_and_workspace_stall(tmp_path: Path, monk
     terminated: list[int] = []
     monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: process)
     monkeypatch.setattr(MODULE, "_terminate_process_tree", terminated.append)
+    monkeypatch.setattr(MODULE, "_process_tree_alive", lambda pid: False)
     started = time.monotonic()
     activity_state = {
         "lock": MODULE.threading.Lock(),
@@ -997,7 +1010,7 @@ def test_validation_only_accepts_documented_known_test_failures(
     report_path = repo / "task-report.md"
     report_path.write_text(
         "pytest: 77 passed, 7 failed\n"
-        "The 7 pre-existing failures are out-of-scope.\n",
+        "The 7 pre-existing failures are accepted as out-of-scope.\n",
         encoding="utf-8",
     )
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -1020,6 +1033,414 @@ def test_validation_only_accepts_documented_known_test_failures(
         == 0
     )
     assert "TRANSACTION_INCOMPLETE" not in capsys.readouterr().err
+
+
+def test_known_failure_acceptance_requires_positive_disposition() -> None:
+    accepted = (
+        "pytest: 77 passed, 7 failed\n"
+        "The 7 pre-existing failures are accepted as out-of-scope.\n"
+    )
+    assert MODULE._has_known_failure_test_evidence(accepted) is True
+
+    # A bare disposition token without a positive declaration is not enough.
+    bare = "pytest: 77 passed, 7 failed\n7 pre-existing failures\n"
+    assert MODULE._has_known_failure_test_evidence(bare) is False
+
+    # Positive declaration without a disposition token is not enough.
+    no_disposition = "pytest: 77 passed, 7 failed\nfailures accepted\n"
+    assert MODULE._has_known_failure_test_evidence(no_disposition) is False
+
+    # A passing run is not a known-failure run.
+    passing = "pytest: 77 passed\npre-existing failures accepted\n"
+    assert MODULE._has_known_failure_test_evidence(passing) is False
+
+    # An unrelated failure with an accepted marker is not a documented known
+    # failure: the failure must be tied to the disposition token.
+    unrelated = (
+        "pytest: 77 passed, 7 failed\n"
+        "The 7 unrelated failures are accepted.\n"
+    )
+    assert MODULE._has_known_failure_test_evidence(unrelated) is False
+
+
+def test_validation_only_rejects_unrelated_known_token_failures(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-validation-unrelated-failures")
+    report_path = repo / "task-report.md"
+    report_path.write_text(
+        "pytest: 77 passed, 7 failed\n"
+        "The 7 unrelated failures are not accepted as out-of-scope.\n",
+        encoding="utf-8",
+    )
+    prompt_path = _write_prompt(tmp_path, report_path)
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=0, stdout="pytest 77 passed, 7 failed", stderr=""
+        ),
+    )
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            allow_no_change=True,
+            allow_known_test_failures=True,
+        )
+        == 1
+    )
+    assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_recovery_uses_fresh_activity_deadline(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-fresh-deadline")
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    observed: dict[str, object] = {}
+    process_calls: list[int] = []
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        process_calls.append(1)
+        call = len(process_calls)
+        observed[f"call{call}_activity_started"] = float(
+            kwargs["activity_state"]["started"]
+        )
+        if call == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        report_path.write_text("Tests: pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+        subprocess.run(
+            ["git", "-C", str(repo), "add", "--", "partial.py", "task-report.md"],
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo), "commit", "-qm", "recovery commit"],
+            check=True,
+        )
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+        )
+        == 0
+    )
+
+    assert "STATUS: RECOVERED" in capsys.readouterr().out
+    # The recovery process received an activity state with a fresh started
+    # baseline, not the primary run's wall-clock origin.
+    assert observed["call1_activity_started"] != observed["call2_activity_started"]
+
+
+def test_recovery_receives_its_own_activity_state_and_fingerprint(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-fresh-state")
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    observed: dict[str, object] = {}
+    process_calls: list[int] = []
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        process_calls.append(1)
+        call = len(process_calls)
+        observed[f"call{call}_activity"] = kwargs["activity_state"]
+        observed[f"call{call}_activity_events"] = int(
+            kwargs["activity_state"].get("events_seen", 0)
+        )
+        if call == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        report_path.write_text("Tests: pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+        subprocess.run(
+            ["git", "-C", str(repo), "add", "--", "partial.py", "task-report.md"],
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo), "commit", "-qm", "recovery commit"],
+            check=True,
+        )
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    # The recovery phase collects a fresh snapshot with the partial file and
+    # the recovery commit, so the recovered checkpoint records the commit.
+    snapshots = iter(
+        [
+            {
+                "git_root": str(repo),
+                "head": "timeout-head",
+                "status": [f" M {repo / 'partial.py'}"],
+                "diff_present": True,
+                "commits_since_baseline": [],
+                "report_exists": False,
+                "report_path": str(report_path),
+                "tests_detectable": True,
+                "state": "IMPLEMENTATION INCOMPLETE",
+            },
+            {
+                "git_root": str(repo),
+                "head": "timeout-head",
+                "status": [f" M {repo / 'partial.py'}"],
+                "diff_present": True,
+                "commits_since_baseline": [],
+                "report_exists": False,
+                "report_path": str(report_path),
+                "tests_detectable": True,
+                "state": "IMPLEMENTATION INCOMPLETE",
+            },
+            {
+                "git_root": str(repo),
+                "head": "recovery-head-2",
+                "status": [],
+                "diff_present": False,
+                "commits_since_baseline": ["recovery-commit"],
+                "report_exists": True,
+                "report_path": str(report_path),
+                "tests_detectable": True,
+                "state": "IMPLEMENTATION INCOMPLETE",
+            },
+        ]
+    )
+
+    def collect_snapshot(*args, **kwargs):
+        return next(snapshots)
+
+    monkeypatch.setattr(MODULE, "collect_workspace_snapshot", collect_snapshot)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+        )
+        == 0
+    )
+
+    primary_state = observed["call1_activity"]
+    recovery_state = observed["call2_activity"]
+    assert recovery_state is not primary_state
+    # The recovery state is a fresh, empty activity baseline: no events carried
+    # over from the primary run.
+    assert observed["call1_activity_events"] == 0
+    assert observed["call2_activity_events"] == 0
+    assert float(recovery_state["started"]) >= float(primary_state["started"])
+
+
+def test_unverified_watchdog_cleanup_blocks_before_recovery(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-unverified-cleanup")
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    calls = {"cmdc": 0}
+    real_run = MODULE.subprocess.run
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            error = MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+            error.watchdog_reason = "WALL_TIMEOUT"  # type: ignore[attr-defined]
+            error.watchdog_pid = 9999  # type: ignore[attr-defined]
+            error.watchdog_cleanup_verified = False  # type: ignore[attr-defined]
+            raise error
+        raise AssertionError("recovery must not run while the tree is unverified")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+    monkeypatch.setattr(
+        MODULE,
+        "collect_workspace_snapshot",
+        lambda *args, **kwargs: {
+            "head": "h1",
+            "git_root": str(repo),
+            "status": [],
+            "diff_present": True,
+            "commits_since_baseline": [],
+            "report_exists": False,
+            "tests_detectable": True,
+            "state": "IMPLEMENTATION INCOMPLETE",
+        },
+    )
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+        )
+        == 8
+    )
+
+    captured = capsys.readouterr()
+    assert "STATUS: BLOCKED" in captured.err
+    assert "BLOCKER_CODE: WATCHDOG_CLEANUP_UNVERIFIED" in captured.err
+    assert calls["cmdc"] == 1
+    if checkpoint_path.exists():
+        events = [
+            json.loads(line)["event"]
+            for line in checkpoint_path.read_text(encoding="utf-8").splitlines()
+        ]
+        assert events == ["STARTING"], (
+            "no TIMED_OUT/recovery checkpoint may exist after an unverified kill"
+        )
+
+
+def test_watchdog_tree_verification_is_fail_closed_with_live_descendant(
+    tmp_path: Path, monkeypatch
+) -> None:
+    class EmptyStream:
+        def readline(self) -> str:
+            return ""
+
+        def close(self) -> None:
+            return None
+
+    class FakeStdin:
+        def write(self, value: str) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    class FakeProcess:
+        pid = 4242
+        returncode = None
+
+        def __init__(self) -> None:
+            self.stdin = FakeStdin()
+            self.stdout = EmptyStream()
+            self.stderr = EmptyStream()
+
+        def poll(self) -> None:
+            return None
+
+        def wait(self, timeout: float | None = None) -> int:
+            self.returncode = 1
+            return self.returncode
+
+    process = FakeProcess()
+    monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: process)
+    monkeypatch.setattr(MODULE, "_terminate_process_tree", lambda pid: None)
+    monkeypatch.setattr(MODULE, "_process_tree_alive", lambda pid: True)
+    started = time.monotonic()
+    activity_state = {
+        "lock": MODULE.threading.Lock(),
+        "started": started,
+        "last_activity": started,
+        "last_event": started,
+        "last_workspace": started,
+        "events_seen": 0,
+    }
+
+    try:
+        MODULE._run_cmdc_process(
+            ["cmdc"],
+            "prompt",
+            tmp_path,
+            wall_timeout_seconds=0.01,
+            stall_timeout_seconds=60,
+            activity_state=activity_state,
+        )
+    except MODULE.subprocess.TimeoutExpired as error:
+        assert getattr(error, "watchdog_reason") == "WALL_TIMEOUT"
+        assert getattr(error, "watchdog_cleanup_verified") is False
+    else:
+        raise AssertionError("watchdog did not stop the process")
+
+
+def test_clean_watchdog_tree_verification_is_verified(
+    tmp_path: Path, monkeypatch
+) -> None:
+    class EmptyStream:
+        def readline(self) -> str:
+            return ""
+
+        def close(self) -> None:
+            return None
+
+    class FakeStdin:
+        def write(self, value: str) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    class FakeProcess:
+        pid = 4243
+        returncode = None
+
+        def __init__(self) -> None:
+            self.stdin = FakeStdin()
+            self.stdout = EmptyStream()
+            self.stderr = EmptyStream()
+
+        def poll(self) -> None:
+            return None
+
+        def wait(self, timeout: float | None = None) -> int:
+            self.returncode = 1
+            return self.returncode
+
+    process = FakeProcess()
+    monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: process)
+    monkeypatch.setattr(MODULE, "_terminate_process_tree", lambda pid: None)
+    monkeypatch.setattr(MODULE, "_process_tree_alive", lambda pid: False)
+    started = time.monotonic()
+    activity_state = {
+        "lock": MODULE.threading.Lock(),
+        "started": started,
+        "last_activity": started,
+        "last_event": started,
+        "last_workspace": started,
+        "events_seen": 0,
+    }
+
+    try:
+        MODULE._run_cmdc_process(
+            ["cmdc"],
+            "prompt",
+            tmp_path,
+            wall_timeout_seconds=0.01,
+            stall_timeout_seconds=60,
+            activity_state=activity_state,
+        )
+    except MODULE.subprocess.TimeoutExpired as error:
+        assert getattr(error, "watchdog_reason") == "WALL_TIMEOUT"
+        assert getattr(error, "watchdog_cleanup_verified") is True
+    else:
+        raise AssertionError("watchdog did not stop the process")
 
 
 def test_validation_only_blocked_when_report_absent(
@@ -1111,3 +1532,196 @@ def test_cli_help_exposes_allow_no_change_flag() -> None:
     )
     assert "--allow-no-change" in result.stdout
     assert "--allow-known-test-failures" in result.stdout
+
+
+def test_windows_tree_verification_is_fail_closed(monkeypatch) -> None:
+    """The Windows process-group helper walks parent links and stays
+    fail-closed when a process cannot be resolved."""
+    # A chain ending at a known root (parent 0). A PID with no entry is
+    # unknown (returns None from _windows_parent_pid).
+    parent_map = {500: 400, 400: 300, 300: 200, 200: 0}
+    monkeypatch.setattr(
+        MODULE, "_windows_parent_pid", lambda pid: parent_map.get(pid)
+    )
+
+    # A descendant whose ancestor chain reaches the leader is a member.
+    assert MODULE._windows_pid_in_group(500, 300) is True
+    # The leader itself is always a member.
+    assert MODULE._windows_pid_in_group(300, 300) is True
+    # A process on a fully-resolved chain that never reaches the leader is a
+    # known non-member.
+    assert MODULE._windows_pid_in_group(500, 600) is False
+    # A process whose parent cannot be resolved is treated as a member so
+    # cleanup verification fails closed.
+    assert MODULE._windows_pid_in_group(900, 300) is True
+
+
+def test_review_windows_tree_verification_is_fail_closed(monkeypatch) -> None:
+    """The review launcher's Windows helper has the same fail-closed semantics."""
+    parent_map = {500: 400, 400: 300, 300: 200, 200: 0}
+    monkeypatch.setattr(
+        REVIEW, "_windows_parent_pid", lambda pid: parent_map.get(pid)
+    )
+
+    assert REVIEW._windows_pid_in_group(500, 300) is True
+    assert REVIEW._windows_pid_in_group(300, 300) is True
+    assert REVIEW._windows_pid_in_group(500, 600) is False
+    assert REVIEW._windows_pid_in_group(900, 300) is True
+
+
+def test_review_timeout_cleanup_verifies_full_process_tree(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A leader that exits while a descendant survives is ORPHANED, not clean."""
+
+    class FakeStream:
+        def readline(self) -> str:
+            return ""
+
+        def close(self) -> None:
+            return None
+
+    class FakeStdin:
+        def write(self, value: str) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    class FakeProcess:
+        pid = 7777
+        returncode = None
+
+        def __init__(self) -> None:
+            self.stdin = FakeStdin()
+            self.stdout = FakeStream()
+            self.stderr = FakeStream()
+
+        def communicate(self, input=None, timeout=None):
+            if timeout is not None:
+                raise REVIEW.subprocess.TimeoutExpired("cmd", timeout)
+            return ("", "")
+
+    process = FakeProcess()
+    # The leader is gone but the tree check still finds a descendant.
+    monkeypatch.setattr(REVIEW, "_terminate_tree", lambda pid: None)
+    monkeypatch.setattr(REVIEW, "_process_tree_alive", lambda pid: True)
+    monkeypatch.setattr(REVIEW.subprocess, "Popen", lambda *a, **k: process)
+
+    result = REVIEW._run_process(
+        ["codex"],
+        "prompt",
+        timeout_seconds=0.01,
+    )
+
+    assert result.timed_out is True
+    assert result.orphaned is True
+    assert result.cleanup_failed is False
+    assert result.drain_verified is False
+
+
+def test_review_timeout_cleanup_verified_with_clean_tree(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A fully absent tree yields a verified clean cleanup."""
+
+    class FakeStream:
+        def readline(self) -> str:
+            return ""
+
+        def close(self) -> None:
+            return None
+
+    class FakeStdin:
+        def write(self, value: str) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    class FakeProcess:
+        pid = 7778
+        returncode = None
+
+        def __init__(self) -> None:
+            self.stdin = FakeStdin()
+            self.stdout = FakeStream()
+            self.stderr = FakeStream()
+            self.calls = 0
+
+        def communicate(self, input=None, timeout=None):
+            self.calls += 1
+            if self.calls == 1:
+                raise REVIEW.subprocess.TimeoutExpired("cmd", timeout)
+            return ("drained-out", "drained-err")
+
+    process = FakeProcess()
+    monkeypatch.setattr(REVIEW, "_terminate_tree", lambda pid: None)
+    monkeypatch.setattr(REVIEW, "_process_tree_alive", lambda pid: False)
+    monkeypatch.setattr(REVIEW.subprocess, "Popen", lambda *a, **k: process)
+
+    result = REVIEW._run_process(
+        ["codex"],
+        "prompt",
+        timeout_seconds=0.01,
+    )
+
+    assert result.timed_out is True
+    assert result.orphaned is False
+    assert result.cleanup_failed is False
+    assert result.drain_verified is True
+    assert "drained-out" in result.stdout
+    assert "drained-err" in result.stderr
+
+
+def test_review_timeout_preserves_final_drain_output(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Output produced after the timeout is drained and preserved."""
+    captured: dict[str, str] = {}
+
+    class FakeStream:
+        def readline(self) -> str:
+            return ""
+
+        def close(self) -> None:
+            return None
+
+    class FakeStdin:
+        def write(self, value: str) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    class FakeProcess:
+        pid = 7779
+        returncode = None
+
+        def __init__(self) -> None:
+            self.stdin = FakeStdin()
+            self.stdout = FakeStream()
+            self.stderr = FakeStream()
+
+        def communicate(self, input=None, timeout=None):
+            if timeout is not None:
+                raise REVIEW.subprocess.TimeoutExpired(
+                    "cmd", timeout, output="drained-out", stderr="drained-err"
+                )
+            return ("", "")
+
+    process = FakeProcess()
+    monkeypatch.setattr(REVIEW, "_terminate_tree", lambda pid: None)
+    monkeypatch.setattr(REVIEW, "_process_tree_alive", lambda pid: False)
+    monkeypatch.setattr(REVIEW.subprocess, "Popen", lambda *a, **k: process)
+
+    result = REVIEW._run_process(
+        ["codex"],
+        "prompt",
+        timeout_seconds=0.01,
+    )
+
+    # The exc already carried some partial output; the final drain bytes are
+    # appended to it instead of being discarded.
+    assert "drained-out" in result.stdout
+    assert "drained-err" in result.stderr

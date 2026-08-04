@@ -60,6 +60,7 @@ class ProcessResult:
     timed_out: bool = False
     orphaned: bool = False
     cleanup_failed: bool = False
+    drain_verified: bool = False
 
 
 def build_command(codex_path: Path, repo: Path, report_file: Path) -> list[str]:
@@ -222,15 +223,26 @@ def _run_process(
         stderr = _text(exc.stderr)
         cleanup_failed = False
         orphaned = False
+        drain_verified = False
         try:
             _terminate_tree(pid)
             time.sleep(0.1)
-            orphaned = _process_alive(pid)
+            orphaned = _process_tree_alive(pid)
             if not orphaned:
                 try:
-                    process.communicate(timeout=1)
-                except (subprocess.TimeoutExpired, OSError):
+                    drained_stdout, drained_stderr = process.communicate(timeout=1)
+                    drain_verified = True
+                except subprocess.TimeoutExpired as drain_timeout:
+                    # The final drain may itself time out; every byte read so
+                    # far is still partial evidence and must be preserved.
+                    drain_verified = False
+                    stdout += _text(drain_timeout.output)
+                    stderr += _text(drain_timeout.stderr)
+                except OSError:
                     cleanup_failed = True
+                else:
+                    stdout += _text(drained_stdout)
+                    stderr += _text(drained_stderr)
         except OSError:
             cleanup_failed = True
         return ProcessResult(
@@ -241,6 +253,7 @@ def _run_process(
             timed_out=True,
             orphaned=orphaned,
             cleanup_failed=cleanup_failed,
+            drain_verified=drain_verified,
         )
 
 
@@ -284,6 +297,104 @@ def _terminate_tree(pid: int) -> None:
         os.killpg(pid, signal.SIGTERM)
     except ProcessLookupError:
         return
+
+
+def _windows_process_pids() -> list[int]:
+    """List every live PID from tasklist (Windows-only)."""
+    result = subprocess.run(
+        ["tasklist", "/FO", "CSV", "/NH"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    pids: list[int] = []
+    for line in result.stdout.splitlines():
+        columns = line.split(",")
+        if len(columns) >= 2:
+            candidate = columns[1].strip().strip('"')
+            if candidate.isdigit():
+                pids.append(int(candidate))
+    return pids
+
+
+def _windows_pid_in_group(pid: int, leader: int) -> bool:
+    """Return whether a Windows process belongs to the tree rooted at leader.
+
+    On Windows the process group is not exposed to Python, so the tree is
+    approximated by walking parent links: every process whose ancestor chain
+    reaches the leader is a member. A process that cannot be resolved is
+    treated as a member so the check stays fail-closed.
+    """
+    if pid == leader:
+        return True
+    seen: set[int] = set()
+    current = pid
+    while current not in seen:
+        seen.add(current)
+        parent = _windows_parent_pid(current)
+        if parent is None:
+            # The process's parent could not be resolved (wmic failed or the
+            # process vanished); treat it as a member so cleanup verification
+            # fails closed instead of declaring a false clean tree.
+            return True
+        if parent == 0:
+            # A known root that is not the leader: the chain is fully
+            # resolved and never reaches the leader, so this process is a
+            # known non-member of the tree.
+            return False
+        if parent == leader:
+            return True
+        current = parent
+    return False
+
+
+def _windows_parent_pid(pid: int) -> int | None:
+    """Return the PPID of a Windows process via wmic, or None when unknown."""
+    result = subprocess.run(
+        ["wmic", "process", "where", f"ProcessId={pid}", "get", "ParentProcessId"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line.isdigit():
+            return int(line)
+    return None
+
+
+def _process_tree_alive(pid: int) -> bool:
+    """Verify the whole process tree is absent, not just the leader.
+
+    A descendant can survive after the leader exits, which would make the
+    leader-only check report a false clean cleanup. The tree is always
+    traversed from the current process group because killpg(pid) and
+    taskkill /T keep the group id equal to the leader pid.
+    """
+    if os.name == "nt":
+        # On Windows, taskkill /T (used by _terminate_tree) kills the whole
+        # job/tree rooted at pid, and CREATE_NEW_PROCESS_GROUP makes the
+        # children share the leader's group. Verify absence by scanning the
+        # full process list for any surviving member of that group rather than
+        # trusting the leader alone.
+        return any(
+            _windows_pid_in_group(candidate_pid, pid)
+            for candidate_pid in _windows_process_pids()
+        )
+    try:
+        group = os.getpgid(pid)
+        os.kill(pid, 0)
+        for process in os.listdir("/proc"):
+            if not process.isdigit():
+                continue
+            try:
+                if os.getpgid(int(process)) == group:
+                    return True
+            except (ProcessLookupError, PermissionError, OSError):
+                continue
+        return False
+    except (ProcessLookupError, PermissionError, OSError):
+        return False
 
 
 def _process_alive(pid: int) -> bool:
@@ -392,6 +503,7 @@ def run_session(
                 "timed_out": result.timed_out,
                 "orphaned": result.orphaned,
                 "cleanup_failed": result.cleanup_failed,
+                "drain_verified": result.drain_verified,
                 "stdout": result.stdout,
                 "stderr": result.stderr,
                 "report_exists": report_file.is_file(),
