@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import subprocess
+import sys
 import time
 from types import SimpleNamespace
 from pathlib import Path
@@ -931,3 +932,149 @@ def test_run_implementer_reports_incomplete_transaction_after_zero_exit(
 
     assert MODULE.run_implementer(repo, prompt_path) == 1
     assert "BLOCKER_CODE: TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_strict_no_commit_still_transaction_incomplete(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-strict-no-commit")
+    report_path = repo / "task-report.md"
+    report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=0, stdout="pytest 1 passed", stderr=""
+        ),
+    )
+
+    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=False) == 1
+    assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_validation_only_succeeds_with_untracked_artifact_and_no_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-validation-only")
+    report_path = repo / "task-report.md"
+    report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        (repo / "scratch-note.txt").write_text("untracked\n", encoding="utf-8")
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            allow_no_change=True,
+        )
+        == 0
+    )
+    captured = capsys.readouterr()
+    assert "TRANSACTION_INCOMPLETE" not in captured.err
+    assert checkpoint_path.is_file()
+    checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8").splitlines()[-1])
+    assert checkpoint["state"] == "CHECKPOINT"
+    assert checkpoint["snapshot"]["validation_only"] is True
+    assert checkpoint["snapshot"]["commits_since_baseline"] == []
+    assert checkpoint["snapshot"]["report_exists"] is True
+    assert checkpoint["snapshot"]["tests_detectable"] is True
+
+
+def test_validation_only_blocked_when_report_absent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-validation-no-report")
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=0, stdout="pytest 1 passed", stderr=""
+        ),
+    )
+
+    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_validation_only_blocked_when_test_evidence_absent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-validation-no-tests")
+    report_path = repo / "task-report.md"
+    report_path.write_text("STATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=0, stdout="no test output", stderr=""
+        ),
+    )
+
+    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_validation_only_blocked_when_tracked_change_exists(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-validation-tracked")
+    report_path = repo / "task-report.md"
+    report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        (repo / "tracked.py").write_text("VALUE = 99\n", encoding="utf-8")
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_validation_only_blocked_when_commit_exists(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-validation-commit")
+    report_path = repo / "task-report.md"
+    report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
+    prompt_path = _write_prompt(tmp_path, report_path)
+    real_run = MODULE.subprocess.run
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        (repo / "extra.py").write_text("X = 1\n", encoding="utf-8")
+        real_run(["git", "-C", str(repo), "add", "--", "extra.py", "task-report.md"], check=True)
+        real_run(["git", "-C", str(repo), "commit", "-qm", "should not happen"], check=True)
+        return SimpleNamespace(returncode=0, stdout="pytest 1 passed", stderr="")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_cli_help_exposes_allow_no_change_flag() -> None:
+    import subprocess
+    result = subprocess.run(
+        [sys.executable, str(MODULE_PATH), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert "--allow-no-change" in result.stdout

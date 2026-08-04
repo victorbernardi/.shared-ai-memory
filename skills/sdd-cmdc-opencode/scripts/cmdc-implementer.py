@@ -204,6 +204,15 @@ def _has_test_evidence(output: str) -> bool:
     return not TEST_FAILURE_RE.search(output) and bool(TEST_EVIDENCE_RE.search(output))
 
 
+def _has_tracked_changes(status_lines: list[str]) -> bool:
+    """Return True when any status line indicates a tracked or staged change."""
+    for line in status_lines:
+        code = line[:2] if len(line) >= 2 else ""
+        if code.strip(" ") and "?? " not in line:
+            return True
+    return False
+
+
 def _recovery_is_ready(
     returncode: int,
     snapshot: dict[str, object],
@@ -637,6 +646,7 @@ def run_implementer(
     recovery_max_turns: int = DEFAULT_RECOVERY_MAX_TURNS,
     wall_timeout_seconds: int = DEFAULT_WALL_TIMEOUT_SECONDS,
     stall_timeout_seconds: int = DEFAULT_STALL_TIMEOUT_SECONDS,
+    allow_no_change: bool = False,
 ) -> int:
     """Run Command Code and return zero only after process/report success."""
     cwd = cwd.expanduser().resolve()
@@ -969,22 +979,36 @@ def run_implementer(
             final_snapshot = None
         if final_snapshot is not None:
             _attach_activity_evidence(final_snapshot, activity_state, event_log)
-            transaction_ready = (
-                completed.returncode == 0
-                and bool(final_snapshot["commits_since_baseline"])
-                and bool(final_snapshot["report_exists"])
-                and bool(final_snapshot["tests_detectable"])
+            has_tracked = _has_tracked_changes(final_snapshot.get("status", []))
+            if allow_no_change:
+                no_commit = not bool(final_snapshot["commits_since_baseline"])
+                no_tracked = not has_tracked
+                transaction_ready = (
+                    completed.returncode == 0
+                    and no_commit
+                    and no_tracked
+                    and bool(final_snapshot["report_exists"])
+                    and bool(final_snapshot["tests_detectable"])
+                )
+            else:
+                transaction_ready = (
+                    completed.returncode == 0
+                    and bool(final_snapshot["commits_since_baseline"])
+                    and bool(final_snapshot["report_exists"])
+                    and bool(final_snapshot["tests_detectable"])
+                )
+            checkpoint_state = (
+                "CHECKPOINT" if transaction_ready else "IMPLEMENTATION INCOMPLETE"
             )
             if checkpoint_file:
+                ckpt_snapshot = dict(final_snapshot)
+                if allow_no_change:
+                    ckpt_snapshot["validation_only"] = True
                 _write_checkpoint(
                     checkpoint_file,
                     "FINISHED",
-                    final_snapshot,
-                    state=(
-                        "CHECKPOINT"
-                        if transaction_ready
-                        else "IMPLEMENTATION INCOMPLETE"
-                    ),
+                    ckpt_snapshot,
+                    state=checkpoint_state,
                     phase="FINISHED",
                     last_command=" ".join(str(part) for part in command),
                     last_output="\n".join(
@@ -992,15 +1016,33 @@ def run_implementer(
                     ),
                 )
             if completed.returncode == 0 and not transaction_ready:
-                missing = [
-                    name
-                    for name, present in (
-                        ("commit", bool(final_snapshot["commits_since_baseline"])),
-                        ("report", bool(final_snapshot["report_exists"])),
-                        ("tests", bool(final_snapshot["tests_detectable"])),
-                    )
-                    if not present
-                ]
+                if allow_no_change:
+                    missing = [
+                        name
+                        for name, present in (
+                            (
+                                "no-new-commit",
+                                not bool(final_snapshot["commits_since_baseline"]),
+                            ),
+                            (
+                                "no-tracked-changes",
+                                not has_tracked,
+                            ),
+                            ("report", bool(final_snapshot["report_exists"])),
+                            ("tests", bool(final_snapshot["tests_detectable"])),
+                        )
+                        if not present
+                    ]
+                else:
+                    missing = [
+                        name
+                        for name, present in (
+                            ("commit", bool(final_snapshot["commits_since_baseline"])),
+                            ("report", bool(final_snapshot["report_exists"])),
+                            ("tests", bool(final_snapshot["tests_detectable"])),
+                        )
+                        if not present
+                    ]
                 diagnostic = {
                     "BLOCKER_CODE": "TRANSACTION_INCOMPLETE",
                     "MESSAGE": "faltam evidências obrigatórias: " + ", ".join(missing),
@@ -1043,6 +1085,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--recovery-max-turns", default=DEFAULT_RECOVERY_MAX_TURNS, type=int
     )
+    parser.add_argument(
+        "--allow-no-change",
+        action="store_true",
+        default=False,
+        help="succeed when CMDc exits zero with report and test evidence but "
+        "makes no tracked changes or commits (validation-only runs)",
+    )
     return parser.parse_args()
 
 
@@ -1059,6 +1108,7 @@ def main() -> int:
         recovery_max_turns=args.recovery_max_turns,
         wall_timeout_seconds=args.wall_timeout_seconds,
         stall_timeout_seconds=args.stall_timeout_seconds,
+        allow_no_change=args.allow_no_change,
     )
 
 
