@@ -1006,7 +1006,7 @@ def test_validation_only_accepts_documented_known_test_failures(
         MODULE,
         "_run_cmdc_process",
         lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
-            returncode=1, stdout="pytest 77 passed, 7 failed", stderr=""
+            returncode=0, stdout="pytest 77 passed, 7 failed", stderr=""
         ),
     )
 

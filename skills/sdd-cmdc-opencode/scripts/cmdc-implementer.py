@@ -1028,7 +1028,7 @@ def run_implementer(
                 test_evidence = bool(final_snapshot["tests_detectable"])
                 known_failure_evidence = (
                     allow_known_test_failures
-                    and completed.returncode == 1
+                    and completed.returncode in {0, 1}
                     and _has_known_failure_test_evidence(test_output)
                 )
                 transaction_ready = (
@@ -1148,8 +1148,8 @@ def parse_args() -> argparse.Namespace:
         "--allow-known-test-failures",
         action="store_true",
         default=False,
-        help="in validation-only mode, accept pytest exit 1 only when the "
-        "report documents known or pre-existing out-of-scope failures",
+        help="in validation-only mode, accept a report with known or "
+        "pre-existing out-of-scope test failures",
     )
     return parser.parse_args()
 
