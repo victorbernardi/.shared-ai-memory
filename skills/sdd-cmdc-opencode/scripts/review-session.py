@@ -607,17 +607,28 @@ def _process_tree_alive(pid: int, group: int | None = None) -> bool:
     if os.name == "nt":
         if _WINDOW_PROCESS_TREE is None:
             return True
-        result = subprocess.run(
-            ["tasklist", "/FO", "CSV", "/NH"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        try:
+            result = subprocess.run(
+                ["tasklist", "/FO", "CSV", "/NH"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except OSError:
+            # tasklist could not be launched; the tree cannot be verified
+            # absent, so it must count as alive: fail closed.
+            return True
+        if result.returncode != 0 or not result.stdout.strip():
+            # A failed inventory cannot prove the tree is absent.
+            return True
         live_pids: set[int] = set()
         for line in result.stdout.splitlines():
             columns = line.split(",")
             if len(columns) >= 2 and columns[1].strip().strip('"').isdigit():
                 live_pids.add(int(columns[1].strip().strip('"')))
+        if not live_pids:
+            # Unusable output; the tree cannot be verified absent.
+            return True
         return bool(_WINDOW_PROCESS_TREE & live_pids)
     if group is None:
         # The group identity was never captured (or could not be resolved).

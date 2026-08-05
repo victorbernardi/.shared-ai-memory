@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import time
+import types
 from pathlib import Path
 
 import pytest
@@ -481,6 +482,40 @@ def test_uncertain_cleanup_is_blocked_with_diagnosis(
     assert summary["status"] == "BLOCKED"
     assert summary["blocker_code"] == "ORPHANED_PROCESS"
     assert "not verified absent" in summary["message"]
+
+
+def test_windows_tasklist_nonzero_is_alive(
+    monkeypatch, capsys, tmp_path: Path, valid_repo: Path
+) -> None:
+    """A non-zero tasklist exit cannot verify the tree absent (fail closed)."""
+    if os.name != "nt":
+        monkeypatch.setattr(REVIEW, "os", types.SimpleNamespace(name="nt"))
+        monkeypatch.setattr(REVIEW, "_WINDOW_PROCESS_TREE", {1234, 5678})
+    monkeypatch.setattr(
+        REVIEW,
+        "subprocess",
+        types.SimpleNamespace(
+            run=lambda *args, **kwargs: types.SimpleNamespace(returncode=1, stdout="")
+        ),
+    )
+    assert REVIEW._process_tree_alive(1234) is True
+
+
+def test_windows_tasklist_oserror_is_alive(
+    monkeypatch, tmp_path: Path
+) -> None:
+    """A tasklist OSError is indeterminate, never an uncaught exception."""
+    if os.name != "nt":
+        monkeypatch.setattr(REVIEW, "os", types.SimpleNamespace(name="nt"))
+        monkeypatch.setattr(REVIEW, "_WINDOW_PROCESS_TREE", {1234})
+    def _fail_launch(*args, **kwargs):
+        raise OSError("tasklist unavailable")
+    monkeypatch.setattr(
+        REVIEW,
+        "subprocess",
+        types.SimpleNamespace(run=_fail_launch),
+    )
+    assert REVIEW._process_tree_alive(1234) is True
 def test_blocked_before_start_without_codex_or_bad_ref_or_missing_file(
     tmp_path: Path, valid_repo: Path
 ) -> None:
