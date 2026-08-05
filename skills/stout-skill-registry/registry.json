@@ -918,6 +918,46 @@
       "notes": "Descoberta física e adicionada automaticamente ao ledger."
     },
     {
+      "name": "sdd-cmdc",
+      "path": "skills/sdd-cmdc",
+      "tier": 4,
+      "category": "meta-factory",
+      "role": "Execução de planos de implementação com delegação de tarefas, revisão por tarefa e revisão final via Command Code",
+      "triggers": [
+        "sdd-cmdc",
+        "command-code",
+        "executar plano",
+        "delegar implementação",
+        "revisão por tarefa"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-07-30",
+      "updated_at": "2026-07-30",
+      "author": "Victor",
+      "notes": "Implementador via cmdc/deepseek-v4-flash; reviewers permanecem Codex."
+    },
+    {
+      "name": "sdd-cmdc-opencode",
+      "path": "skills/sdd-cmdc-opencode",
+      "tier": 4,
+      "category": "meta-factory",
+      "role": "Execução de planos de implementação com delegação de tarefas ao Command Code, revisão por tarefa, re-review e revisão final via Open Code Review Delegation Mode",
+      "triggers": [
+        "sdd-cmdc-opencode",
+        "open-code-review",
+        "revisão delegada",
+        "revisão por tarefa",
+        "executar plano"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-08-02",
+      "updated_at": "2026-08-02",
+      "author": "Victor",
+      "notes": "Implementador via cmdc; revisão por tarefa, re-review e revisão final via Open Code Review Delegation Mode; sem OPENAI_API_KEY."
+    },
+    {
       "name": "systematic-debugging",
       "path": "skills/systematic-debugging",
       "tier": 2,
@@ -1401,8 +1441,26 @@
       "author": "Victor",
       "notes": "Criada via stout-skill-manager + stout-create-skill. Auditor APPROVED (overlaps=0). Quality Gate OK. Skill-sentinel 84/100.",
       "promoted_at": "2026-06-23"
-    }
-  ],
+    },
+    {
+      "name": "inova-parquet-to-excel",
+      "path": ".shared-ai-memory/skills/inova-parquet-to-excel",
+      "tier": 1,
+      "category": "utility",
+      "role": "Converte Parquet em Excel de aba única com resolução de caminhos",
+      "triggers": [
+        "converter parquet para excel",
+        "parquet xlsx",
+        "parquet to excel",
+        "inova-parquet-to-excel"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-07-17",
+      "updated_at": "2026-07-17",
+      "author": "Victor",
+      "notes": "Criada após auditoria APPROVED; compatível com Codex/GPT, Claude Code e CommandCode."
+    }  ],
   "deprecated": [
     {
       "name": "stout-governance-orchestration-engine",

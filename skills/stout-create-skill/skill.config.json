@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "author": "Victor",
   "platforms": {
+    "codex": {
+      "enabled": true,
+      "output": ".codex/skills"
+    },
     "claude-code": {
       "enabled": true,
       "output": ".claude/skills"
-    },
-    "antigravity": {
-      "enabled": true,
-      "output": ".gemini/antigravity-cli/skills"
     },
     "commandcode": {
       "enabled": true,
@@ -26,7 +26,7 @@
       "claude": [
         "all"
       ],
-      "antigravity": [
+      "codex": [
         "Objetivo",
         "Fluxo",
         "Constraints"

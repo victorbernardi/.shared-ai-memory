@@ -69,3 +69,4 @@ docs/*.rar
 docs/*.zip  
 docs/__pycache__/  
 docs/*.pyc 
+.worktrees/
