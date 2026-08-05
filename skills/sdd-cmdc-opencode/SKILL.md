@@ -204,6 +204,26 @@ conflicts that only emerge from implementation.
   a stall is `IMPLEMENTATION INCOMPLETE`, produces an event log, and does not
   trigger automatic recovery. Set `--stall-timeout-seconds 0` only when the
   task's own contract requires disabling stall detection.
+- Every invocation must supply `--plan-file`; the adapter validates the
+  canonical repository root, the cwd/plan containment inside it, and the
+  initial Git snapshot before any child process starts. A blocked boundary
+  emits the stable structured `BLOCKED` diagnostic and never spawns Command
+  Code.
+- The initial snapshot records the canonical repository root, branch, HEAD,
+  and the raw `git status --short --untracked-files=all` lines verbatim —
+  leading status-column whitespace is preserved, never erased or normalized.
+  Blocked results keep the captured `initial_git_state` when Git state was
+  captured (protected branch, dirty worktree, deployed/server path).
+- On `main`/`master` the adapter requires both `--allow-protected-branch`
+  and a ledger entry containing `ALLOW_PROTECTED_BRANCH`; the adapter option
+  alone is never enough.
+- Normal invocations omit `--yolo`; only the explicit `--allow-cmdc-yolo`
+  adapter option adds it. Name the resulting mode (`normal` or `yolo`) in
+  diagnostics and report context so the orchestrator sees how Command Code
+  was invoked.
+- The report/checkpoint context carries the preflight snapshot, and failures
+  remain fail-closed: a boundary failure blocks before any child process,
+  and a timed-out child never claims success.
 - The adapter passes `--no-skills` so the implementation worker cannot load
   global orchestration/reviewer skills and recursively spend its turn budget
   planning the SDD workflow. Its only workflow context is the focused prompt,
@@ -274,6 +294,7 @@ $workspace = (Get-Location).Path
 & python (Join-Path $skillDir "scripts\cmdc-implementer.py") `
   --cwd $workspace `
   --prompt-file "<cmdc-prompt-file>" `
+  --plan-file "<plan-file>" `
   --max-turns 100 `
   --checkpoint-file "<checkpoint-file>" `
   --heartbeat-interval 30 `

@@ -46,6 +46,14 @@ Command Code implementer:
     Do not change the model, bypass the report contract, or silently claim
     success when the task is incomplete.
 
+    The adapter preflighted the execution boundary before this process
+    started: it validated the repository root, the cwd/plan containment and
+    the initial Git snapshot, and it recorded that snapshot (canonical root,
+    branch, HEAD and raw `git status --short --untracked-files=all` lines)
+    in the report/checkpoint context. Do not change the mode, add or remove
+    `--yolo`, or mutate the snapshot; the mode is `normal` unless the
+    controller explicitly passed `--allow-cmdc-yolo`.
+
     While iterating, run the focused tests for the changed code and commit
     with the report before starting broad suite/Ruff/review work when the
     brief assigns those checks to the host. Keep each file within the plan's
