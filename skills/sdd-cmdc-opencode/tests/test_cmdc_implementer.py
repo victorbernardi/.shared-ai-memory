@@ -1062,6 +1062,13 @@ def test_known_failure_acceptance_requires_positive_disposition() -> None:
     )
     assert MODULE._has_known_failure_test_evidence(unrelated) is False
 
+    same_count_unscoped = (
+        "pytest: 77 passed, 7 failed\n"
+        "The 7 pre-existing failures are accepted as out-of-scope.\n"
+        "pytest: 77 passed, 7 failed\n"
+    )
+    assert MODULE._has_known_failure_test_evidence(same_count_unscoped) is False
+
 
 def test_validation_only_rejects_unrelated_known_token_failures(
     tmp_path: Path, monkeypatch, capsys

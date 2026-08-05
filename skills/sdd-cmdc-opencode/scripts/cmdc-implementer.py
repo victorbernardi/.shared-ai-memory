@@ -32,6 +32,10 @@ TEST_FAILURE_RE = re.compile(
     r"\b[1-9]\d*\s+(?:failed|errors?)\b",
     flags=re.IGNORECASE,
 )
+TEST_RESULT_COUNT_RE = re.compile(
+    r"\b\d+\s+(?:passed|failed|errors?)\b",
+    flags=re.IGNORECASE,
+)
 KNOWN_FAILURE_DISPOSITION_RE = re.compile(
     r"\b(?:pre-existing|known|out[- ]of[- ]scope)\b",
     flags=re.IGNORECASE,
@@ -247,6 +251,13 @@ def _known_failure_blocks(output: str) -> list[str]:
     return blocks
 
 
+def _test_result_signature(block: str) -> tuple[str, ...]:
+    return tuple(
+        match.group(0).lower()
+        for match in TEST_RESULT_COUNT_RE.finditer(block)
+    )
+
+
 def _scoped_known_failure_evidence(block: str) -> bool:
     """Validate one scoped known-failure record.
 
@@ -300,28 +311,21 @@ def _contains_rejection_wording(block: str) -> bool:
 
 
 def _has_known_failure_test_evidence(output: str) -> bool:
-    """Accept only an explicitly scoped, validation-only failure record.
-
-    The whole output must contain test evidence, and every failure record in
-    it must be an accepted known-failure record or an unannotated summary
-    covered by one. Any failure that is not explicitly documented as accepted
-    (unrelated failures, mixed records, rejection wording) makes the whole
-    output fail closed.
-    """
+    """Accept only explicitly scoped, validation-only failure records."""
     if not (TEST_EVIDENCE_RE.search(output) and TEST_FAILURE_RE.search(output)):
         return False
     blocks = _known_failure_blocks(output)
-    if not blocks:
-        return False
-    accepted_counts = {
-        match.group(0).lower()
-        for block in blocks
+    scoped = [
+        (index, _test_result_signature(block))
+        for index, block in enumerate(blocks)
         if _scoped_known_failure_evidence(block)
-        for match in TEST_FAILURE_RE.finditer(block)
-    }
-    if not accepted_counts:
+    ]
+    if not scoped:
         return False
-    for block in blocks:
+    first_scoped_index = scoped[0][0]
+    accepted_signatures = {signature for _, signature in scoped}
+    unscoped = []
+    for index, block in enumerate(blocks):
         if _scoped_known_failure_evidence(block):
             continue
         if (
@@ -330,9 +334,15 @@ def _has_known_failure_test_evidence(output: str) -> bool:
             or _contains_rejection_wording(block)
         ):
             return False
-        if any(
-            match.group(0).lower() not in accepted_counts
-            for match in TEST_FAILURE_RE.finditer(block)
+        unscoped.append((index, _test_result_signature(block)))
+    if len(unscoped) > 1:
+        return False
+    if unscoped:
+        index, signature = unscoped[0]
+        if (
+            index != first_scoped_index - 1
+            or not signature
+            or signature not in accepted_signatures
         ):
             return False
     return True
@@ -646,17 +656,20 @@ def _process_tree_alive(pid: int, group: int | None = None) -> bool:
         # The tree cannot be verified absent, so it must count as alive:
         # fail closed.
         return True
-    for process in os.listdir("/proc"):
+    try:
+        processes = os.listdir("/proc")
+    except (PermissionError, OSError):
+        return True
+    for process in processes:
         if not process.isdigit():
             continue
         try:
             if os.getpgid(int(process)) == group:
                 return True
-        except (ProcessLookupError, PermissionError, OSError):
-            # A process that vanished mid-scan cannot be a survivor; a
-            # process that cannot be resolved is not evidence of a live
-            # group member. The group scan itself is authoritative.
+        except ProcessLookupError:
             continue
+        except (PermissionError, OSError):
+            return True
     return False
 
 
