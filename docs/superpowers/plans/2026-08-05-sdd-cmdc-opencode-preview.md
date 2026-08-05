@@ -152,13 +152,23 @@ Interfaces:
 Cover a trusted feature branch, main, master, a missing plan, a plan outside the repository, an invalid cwd, a dirty worktree, and a trusted worktree with pre-existing changes. The protected-branch test must require an explicit ledger entry containing ALLOW_PROTECTED_BRANCH before continuing. Assert that the snapshot preserves each status line verbatim.
 
     def test_preflight_blocks_master_without_recorded_consent(tmp_path: Path) -> None:
+        repo = tmp_path / "repo"
+        subprocess.run(["git", "init", "-b", "master", str(repo)], check=True, capture_output=True)
+        plan = repo / "plan.md"
+        plan.write_text("# Plan\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(repo), "add", "plan.md"], check=True)
+        subprocess.run(
+            ["git", "-C", str(repo), "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-m", "baseline"],
+            check=True,
+            capture_output=True,
+        )
         result = validate_execution_boundary(
-            tmp_path,
-            tmp_path / "plan.md",
+            repo,
+            plan,
             allow_protected_branch=False,
             ledger_file=None,
         )
-        assert result["BLOCKER_CODE"] in {"CWD_INVALID", "BRANCH_PROTECTED"}
+        assert result["BLOCKER_CODE"] == "BRANCH_PROTECTED"
 
 The fixture must use a real temporary Git repository and a committed plan; do not inspect the controller's current dirty checkout as a test fixture.
 
