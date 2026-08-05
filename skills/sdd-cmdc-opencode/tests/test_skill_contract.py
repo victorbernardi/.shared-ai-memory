@@ -13,7 +13,12 @@ REGISTRY = REPO_ROOT / "skills" / "stout-skill-registry" / "registry.json"
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # Canonical digest for the copied-file contract: the sibling skill is
+    # checked out with CRLF by Windows core.autocrlf (i/lf w/crlf), while
+    # this package is forced LF by its scoped eol=lf attributes. The
+    # comparison is on canonicalized text (CRLF -> LF), so it is stable
+    # across checkout line endings yet still detects real content drift.
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def test_frontmatter_identifies_sdd_cmdc_opencode() -> None:
@@ -266,11 +271,13 @@ def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
 
 
 def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:
-    # Files intentionally copied from the source skill must remain byte-identical.
+    # Files intentionally copied from the source skill must remain identical
+    # once checkout line endings are canonicalized (CRLF -> LF): the shared
+    # support scripts must remain the same canonical content.
     # Exception: the implementer prompt is the evolving issue-131 prompt
     # contract. It is allowed to diverge from the source sdd-cmdc copy when
     # the issue-131 sequencing change is owned by this skill; the shared
-    # support scripts must remain byte-identical.
+    # support scripts must remain canonical-identical.
     pairs = [
         ("scripts/sdd-workspace", "scripts/sdd-workspace"),
         ("scripts/task-brief", "scripts/task-brief"),
