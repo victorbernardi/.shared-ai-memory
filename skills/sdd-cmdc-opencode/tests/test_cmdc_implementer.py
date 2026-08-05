@@ -1626,6 +1626,34 @@ def test_cli_accepts_timeout_seconds_alias_and_rejects_non_positive_values() -> 
         assert "must be a positive integer" in rejected.stderr
 
 
+def test_cli_alias_populates_shared_wall_timeout_destination(monkeypatch) -> None:
+    """Both spellings populate the argparse destination main() forwards into
+    the process-runner watchdog, with the exact value from the command line.
+
+    Unlike the --help checks, this drives the real parser and main() entry
+    point, so it fails when the alias registration is absent instead of only
+    proving option recognition.
+    """
+    received: list[int] = []
+
+    def fake_run_implementer(*args, **kwargs):
+        received.append(int(kwargs["wall_timeout_seconds"]))
+        return 0
+
+    monkeypatch.setattr(MODULE, "run_implementer", fake_run_implementer)
+    for flag in ("--timeout-seconds", "--wall-timeout-seconds"):
+        monkeypatch.setattr(
+            MODULE.sys,
+            "argv",
+            ["cmdc-implementer.py", "--prompt-file", "prompt.md", flag, "1234"],
+        )
+        assert MODULE.main() == 0
+
+    # Both spellings reach the single watchdog destination used by the
+    # process runner, carrying the exact command-line value.
+    assert received == [1234, 1234]
+
+
 def test_windows_tree_verification_is_fail_closed(monkeypatch) -> None:
     """The Windows process-group helper walks parent links and stays
     fail-closed when a process cannot be resolved."""
