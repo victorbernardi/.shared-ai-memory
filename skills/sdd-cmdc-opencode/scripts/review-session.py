@@ -27,6 +27,8 @@ EXEC_FAILURE_EXIT_CODE = 3
 ORPHAN_EXIT_CODE = 4
 REPORT_INVALID_EXIT_CODE = 5
 HOST_PROCESS_EXIT_CODE = 6
+_REAL_POPEN = subprocess.Popen
+_WINDOW_PROCESS_TREE: set[int] | None = None
 
 REQUIRED_REPORT_FIELDS = (
     "Files reviewed",
@@ -340,7 +342,6 @@ def validate_ref(repo: Path, ref: str, kind: str) -> str:
 def validate_inputs(
     plan_file: Path,
     prompt_file: Path,
-    report_file: Path,
     repo: Path,
     base: str,
     head: str,
@@ -348,7 +349,6 @@ def validate_inputs(
     for label, path in (
         ("PLAN_FILE", plan_file),
         ("PROMPT_FILE", prompt_file),
-        ("REPORT_FILE", report_file),
     ):
         if not path.is_file():
             raise ReviewError("MISSING_FILE", f"{label} does not exist: {path}")
@@ -434,12 +434,20 @@ def _run_process(
         orphaned = False
         drain_verified = False
         group = _capture_process_group(pid)
+        global _WINDOW_PROCESS_TREE
+        _WINDOW_PROCESS_TREE = (
+            _capture_windows_process_tree(pid)
+            if os.name == "nt" and subprocess.Popen is _REAL_POPEN
+            else None
+        )
         try:
             _terminate_tree(pid)
             time.sleep(0.1)
-            orphaned = _process_tree_alive(pid)
-            if group is not None:
-                orphaned = _process_tree_alive(pid, group)
+            orphaned = (
+                _process_tree_alive(pid)
+                if os.name == "nt"
+                else _process_tree_alive(pid, group)
+            )
             if not orphaned:
                 try:
                     drained_stdout, drained_stderr = process.communicate(timeout=1)
@@ -457,6 +465,7 @@ def _run_process(
                     stderr += _text(drained_stderr)
         except OSError:
             cleanup_failed = True
+        _WINDOW_PROCESS_TREE = None
         return ProcessResult(
             pid,
             TIMEOUT_EXIT_CODE,
@@ -484,32 +493,56 @@ def _terminate_tree(pid: int) -> None:
         return
 
 
-def _windows_process_pids() -> list[int]:
-    """List every live PID from tasklist (Windows-only)."""
-    result = subprocess.run(
-        ["tasklist", "/FO", "CSV", "/NH"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    pids: list[int] = []
-    for line in result.stdout.splitlines():
-        columns = line.split(",")
-        if len(columns) >= 2:
-            candidate = columns[1].strip().strip('"')
-            if candidate.isdigit():
-                pids.append(int(candidate))
-    return pids
+def _windows_process_parents() -> dict[int, int] | None:
+    powershell = shutil.which("pwsh") or shutil.which("powershell")
+    if not powershell:
+        return None
+    try:
+        result = subprocess.run(
+            [
+                powershell,
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "Get-CimInstance Win32_Process | "
+                "Select-Object ProcessId,ParentProcessId | ConvertTo-Json -Compress",
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+    except OSError:
+        return None
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+    try:
+        rows = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return None
+    if isinstance(rows, dict):
+        rows = [rows]
+    if not isinstance(rows, list) or not rows:
+        return None
+    parents: dict[int, int] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            return None
+        pid = row.get("ProcessId")
+        parent = row.get("ParentProcessId")
+        if not isinstance(pid, int) or not isinstance(parent, int):
+            return None
+        parents[pid] = parent
+    return parents
+
+
+def _windows_parent_pid(pid: int) -> int | None:
+    parents = _windows_process_parents()
+    return None if parents is None else parents.get(pid)
 
 
 def _windows_pid_in_group(pid: int, leader: int) -> bool:
-    """Return whether a Windows process belongs to the tree rooted at leader.
-
-    On Windows the process group is not exposed to Python, so the tree is
-    approximated by walking parent links: every process whose ancestor chain
-    reaches the leader is a member. A process that cannot be resolved is
-    treated as a member so the check stays fail-closed.
-    """
     if pid == leader:
         return True
     seen: set[int] = set()
@@ -518,34 +551,33 @@ def _windows_pid_in_group(pid: int, leader: int) -> bool:
         seen.add(current)
         parent = _windows_parent_pid(current)
         if parent is None:
-            # The process's parent could not be resolved (wmic failed or the
-            # process vanished); treat it as a member so cleanup verification
-            # fails closed instead of declaring a false clean tree.
             return True
         if parent == 0:
-            # A known root that is not the leader: the chain is fully
-            # resolved and never reaches the leader, so this process is a
-            # known non-member of the tree.
             return False
         if parent == leader:
             return True
         current = parent
-    return False
+    return True
 
 
-def _windows_parent_pid(pid: int) -> int | None:
-    """Return the PPID of a Windows process via wmic, or None when unknown."""
-    result = subprocess.run(
-        ["wmic", "process", "where", f"ProcessId={pid}", "get", "ParentProcessId"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    for line in result.stdout.splitlines():
-        line = line.strip()
-        if line.isdigit():
-            return int(line)
-    return None
+def _capture_windows_process_tree(pid: int) -> set[int] | None:
+    parents = _windows_process_parents()
+    if parents is None or pid not in parents:
+        return None
+    tree = {pid}
+    for candidate in parents:
+        current = candidate
+        seen: set[int] = set()
+        while current not in seen:
+            seen.add(current)
+            if current == pid:
+                tree.add(candidate)
+                break
+            parent = parents.get(current)
+            if parent is None or parent == 0:
+                break
+            current = parent
+    return tree
 
 
 def _capture_process_group(pid: int) -> int | None:
@@ -573,15 +605,20 @@ def _process_tree_alive(pid: int, group: int | None = None) -> bool:
     and the group identity is unrecoverable once the leader has exited.
     """
     if os.name == "nt":
-        # On Windows, taskkill /T (used by _terminate_tree) kills the whole
-        # job/tree rooted at pid, and CREATE_NEW_PROCESS_GROUP makes the
-        # children share the leader's group. Verify absence by scanning the
-        # full process list for any surviving member of that group rather than
-        # trusting the leader alone.
-        return any(
-            _windows_pid_in_group(candidate_pid, pid)
-            for candidate_pid in _windows_process_pids()
+        if _WINDOW_PROCESS_TREE is None:
+            return True
+        result = subprocess.run(
+            ["tasklist", "/FO", "CSV", "/NH"],
+            capture_output=True,
+            text=True,
+            check=False,
         )
+        live_pids: set[int] = set()
+        for line in result.stdout.splitlines():
+            columns = line.split(",")
+            if len(columns) >= 2 and columns[1].strip().strip('"').isdigit():
+                live_pids.add(int(columns[1].strip().strip('"')))
+        return bool(_WINDOW_PROCESS_TREE & live_pids)
     if group is None:
         # The group identity was never captured (or could not be resolved).
         # The tree cannot be verified absent, so it must count as alive:
@@ -692,7 +729,7 @@ def run_session(
         codex_path = resolve_codex(codex_bin)
         summary["codex_executable"] = str(codex_path)
         resolved_base, resolved_head = validate_inputs(
-            plan_file, prompt_file, report_file, repo, base, head
+            plan_file, prompt_file, repo, base, head
         )
         command = _platform_command(build_command(codex_path, repo, report_file))
         summary.update({"base": resolved_base, "head": resolved_head, "command": command})
