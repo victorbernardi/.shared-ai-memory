@@ -17,6 +17,9 @@ import time
 from pathlib import Path
 
 MODEL_ID = "deepseek/deepseek-v4-flash"
+PROTECTED_BRANCHES = ("main", "master")
+LEDGER_CONSENT_MARKER = "ALLOW_PROTECTED_BRANCH"
+DEPLOYED_CONSENT_MARKER = "ALLOW_DEPLOYED_EXECUTION"
 DEFAULT_MAX_TURNS = 100
 DEFAULT_WALL_TIMEOUT_SECONDS = 4 * 60 * 60
 MAX_WALL_TIMEOUT_SECONDS = 12 * 60 * 60
@@ -67,9 +70,18 @@ def _stall_expired(last_activity: float, now: float, stall_timeout: float) -> bo
     return stall_timeout > 0 and now - last_activity >= stall_timeout
 
 
-def build_command(cmd_path: Path, max_turns: int = DEFAULT_MAX_TURNS) -> list[str]:
-    """Build the Command Code invocation before any platform launcher is added."""
-    return [
+def build_command(
+    cmd_path: Path,
+    max_turns: int = DEFAULT_MAX_TURNS,
+    allow_cmdc_yolo: bool = False,
+) -> list[str]:
+    """Build the Command Code invocation before any platform launcher is added.
+
+    The explicit --allow-cmdc-yolo adapter option is the only gate that adds
+    the unrestricted --yolo flag; the default command keeps the normal
+    permission boundary and never assumes consent.
+    """
+    command = [
         str(cmd_path),
         "-p",
         "--model",
@@ -78,8 +90,264 @@ def build_command(cmd_path: Path, max_turns: int = DEFAULT_MAX_TURNS) -> list[st
         str(max_turns),
         "--output-format",
         "json",
-        *COMMAND_FLAGS,
     ]
+    if allow_cmdc_yolo:
+        command.append("--yolo")
+    command.extend(("--no-skills", "--trust", "--skip-onboarding"))
+    return command
+
+
+def _is_deployed_server_path(path: Path) -> bool:
+    """Return whether a canonical path looks like a deployed/server location.
+
+    Conservative pattern match on canonical absolute paths so production
+    contexts stay fail-closed. Any directory under the canonical checkout
+    (this repository or its worktrees) is never treated as deployed.
+    """
+    lowered = str(path).lower().replace("/", "\\")
+    return any(
+        marker in lowered
+        for marker in (
+            "\\www\\",
+            "\\wwwroot\\",
+            "\\inetpub\\",
+            "\\var\\www\\",
+            "\\srv\\",
+            "\\deploy\\",
+            "\\production\\",
+            "\\prod\\",
+            "c:\\windows\\system32\\",
+        )
+    )
+
+
+def _ledger_authorizes(marker: str, ledger_file: Path | None) -> bool:
+    """Require an explicit recorded ledger entry before continuing."""
+    if ledger_file is None:
+        return False
+    try:
+        content = ledger_file.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    return any(
+        line.strip().startswith(f"{marker}:")
+        or line.strip().startswith(f"{marker} ")
+        for line in content.splitlines()
+    )
+
+
+def _preflight_blocked(
+    code: str,
+    message: str,
+    action: str,
+    *,
+    cwd: Path,
+    plan_file: Path,
+    mode: str,
+    initial_git_state: dict[str, object] | None = None,
+) -> dict[str, object]:
+    blocked: dict[str, object] = {
+        "STATUS": "BLOCKED",
+        "BLOCKER_CODE": code,
+        "MESSAGE": message,
+        "ACTION": action,
+        "MODE": mode,
+        "CWD": str(cwd),
+        "PLAN_FILE": str(plan_file),
+    }
+    if initial_git_state is not None:
+        blocked["initial_git_state"] = initial_git_state
+    return blocked
+
+
+def capture_initial_git_state(cwd: Path) -> dict[str, object]:
+    """Capture canonical worktree, branch, HEAD, and exact status lines."""
+    git_root = _run_git(cwd, "rev-parse", "--show-toplevel")
+    if not git_root:
+        raise RuntimeError("git root was empty")
+    branch = _run_git(cwd, "symbolic-ref", "--short", "-q", "HEAD") or None
+    head = _run_git(cwd, "rev-parse", "HEAD")
+    status = _run_git(cwd, "status", "--short", "--untracked-files=all")
+    status_lines = status.splitlines() if status else []
+    return {
+        "git_root": str(Path(git_root).resolve()),
+        "branch": branch,
+        "head": head,
+        "status": status_lines,
+    }
+
+
+def validate_execution_boundary(
+    cwd: Path,
+    plan_file: Path,
+    *,
+    allow_protected_branch: bool,
+    ledger_file: Path | None,
+    allow_dirty: bool = False,
+    allow_cmdc_yolo: bool = False,
+) -> dict[str, object]:
+    """Fail-closed preflight: repository, cwd, plan, branch, status, mode.
+
+    The checks run in the brief's order: canonical repository root, cwd
+    directory and descendant relationship, plan regular file and descendant
+    relationship, Git branch/HEAD/status, protected-branch policy, and
+    explicit mode consent. The initial Git snapshot preserves every
+    ``git status --short`` line verbatim and is never erased or normalized.
+    """
+    mode = "yolo" if allow_cmdc_yolo else "normal"
+
+    # 1. Canonical repository root; the cwd must be a real directory that is
+    #    a descendant of the repository root.
+    if not cwd.is_dir():
+        return _preflight_blocked(
+            "CWD_NOT_DIRECTORY",
+            f"the working directory does not exist: {cwd}",
+            "create the directory or pass an existing --cwd",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+    try:
+        git_root = Path(_run_git(cwd, "rev-parse", "--show-toplevel")).resolve()
+    except (RuntimeError, OSError):
+        return _preflight_blocked(
+            "CWD_OUTSIDE_REPOSITORY",
+            "the working directory is not inside a Git repository",
+            "run the implementer from inside the repository worktree",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+    try:
+        cwd.resolve().relative_to(git_root)
+    except ValueError:
+        return _preflight_blocked(
+            "CWD_OUTSIDE_REPOSITORY",
+            f"the working directory {cwd} is outside the repository {git_root}",
+            "run the implementer from inside the repository worktree",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+
+    # 2. The plan must be a regular file inside the repository, and it must
+    #    be committed before execution starts.
+    if not plan_file.is_file():
+        return _preflight_blocked(
+            "PLAN_NOT_FOUND",
+            f"the plan file does not exist: {plan_file}",
+            "create the plan or pass the correct --plan-file",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+    if plan_file.is_dir():
+        return _preflight_blocked(
+            "PLAN_NOT_FOUND",
+            f"the plan path is a directory: {plan_file}",
+            "pass the plan markdown file, not a directory",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+    try:
+        plan_file.resolve().relative_to(git_root)
+    except ValueError:
+        return _preflight_blocked(
+            "PLAN_OUTSIDE_REPOSITORY",
+            f"the plan file {plan_file} is outside the repository {git_root}",
+            "keep the plan inside the repository worktree",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+    try:
+        committed = _run_git(
+            cwd, "ls-files", "--error-unmatch", "--", str(plan_file.resolve())
+        )
+    except RuntimeError:
+        committed = ""
+    if not committed:
+        return _preflight_blocked(
+            "PLAN_NOT_FOUND",
+            f"the plan file is not committed to the repository: {plan_file}",
+            "commit the plan before starting execution",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+
+    # 3. Initial Git snapshot before any child process starts.
+    try:
+        initial_git_state = capture_initial_git_state(cwd)
+    except RuntimeError as exc:
+        return _preflight_blocked(
+            "HEAD_UNAVAILABLE",
+            f"the repository has no commit yet: {exc}",
+            "create an initial commit before executing",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+        )
+    branch = initial_git_state["branch"]
+
+    # 4. Protected-branch policy: main/master need explicit consent recorded
+    #    in the ledger, not merely the adapter option.
+    if branch in PROTECTED_BRANCHES and not (
+        allow_protected_branch and _ledger_authorizes(LEDGER_CONSENT_MARKER, ledger_file)
+    ):
+        return _preflight_blocked(
+            "BRANCH_PROTECTED",
+            f"branch {branch!r} is protected; a ledger entry containing "
+            f"{LEDGER_CONSENT_MARKER} is required before execution",
+            "record ALLOW_PROTECTED_BRANCH in the ledger and pass "
+            "--allow-protected-branch",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+            initial_git_state=initial_git_state,
+        )
+
+    # 5. Dirty state is recorded and blocked unless explicitly tolerated.
+    dirty = bool(initial_git_state["status"])
+    if dirty and not allow_dirty:
+        return _preflight_blocked(
+            "DIRTY_WORKTREE",
+            "the repository has pre-existing changes; refusing to run over "
+            "an uncommitted worktree",
+            "commit or stash the changes, or pass an explicit allow-dirty "
+            "consent",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+            initial_git_state=initial_git_state,
+        )
+
+    # 6. Deployed/server paths stay fail-closed unless a separate explicit
+    #    authorization is recorded in the ledger.
+    if _is_deployed_server_path(git_root) and not _ledger_authorizes(
+        DEPLOYED_CONSENT_MARKER, ledger_file
+    ):
+        return _preflight_blocked(
+            "DEPLOYED_SERVER_PATH",
+            "the repository root looks like a deployed/server path; direct "
+            "execution there is refused without recorded authorization",
+            "record ALLOW_DEPLOYED_EXECUTION in the ledger explicitly",
+            cwd=cwd,
+            plan_file=plan_file,
+            mode=mode,
+            initial_git_state=initial_git_state,
+        )
+
+    return {
+        "git_root": str(git_root),
+        "branch": branch,
+        "head": initial_git_state["head"],
+        "dirty": dirty,
+        "mode": mode,
+        "yolo_consent": allow_cmdc_yolo,
+        "initial_git_state": initial_git_state,
+    }
 
 
 def _is_native_windows_cmd(path: Path) -> bool:
@@ -200,7 +468,10 @@ def _run_git(cwd: Path, *args: str) -> str:
     )
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or f"git {' '.join(args)} failed")
-    return result.stdout.strip()
+    # Preserve every output line verbatim. Only the terminal line ending is
+    # removed; leading column whitespace (for example the first space of a
+    # ``git status --short`` line) is never stripped.
+    return result.stdout.rstrip("\r\n")
 
 
 def _text_output(value: object) -> str:
@@ -803,6 +1074,8 @@ def _write_checkpoint(
     phase: str | None = None,
     last_command: str = "",
     last_output: str = "",
+    preflight_snapshot: dict[str, object] | None = None,
+    mode: str = "normal",
 ) -> None:
     """Append one JSONL checkpoint record; the snapshot never claims COMPLETE."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -816,7 +1089,10 @@ def _write_checkpoint(
         "phase": phase or event,
         "snapshot": snapshot,
         "state": state,
+        "mode": mode,
     }
+    if preflight_snapshot is not None:
+        payload["preflight_snapshot"] = preflight_snapshot
     with path.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
 
@@ -831,6 +1107,8 @@ def _heartbeat_loop(
     stop_event: threading.Event,
     started_monotonic: float | None = None,
     activity_state: dict[str, object] | None = None,
+    preflight_snapshot: dict[str, object] | None = None,
+    mode: str = "normal",
 ) -> None:
     started_monotonic = started_monotonic or time.monotonic()
     while not stop_event.wait(interval):
@@ -851,6 +1129,8 @@ def _heartbeat_loop(
                     phase="RUNNING",
                     last_command=command,
                     last_output=str(exc),
+                    preflight_snapshot=preflight_snapshot,
+                    mode=mode,
                 )
             continue
         if activity_state is not None:
@@ -871,6 +1151,8 @@ def _heartbeat_loop(
                 state="RUNNING",
                 phase="RUNNING",
                 last_command=command,
+                preflight_snapshot=preflight_snapshot,
+                mode=mode,
             )
 
 
@@ -939,12 +1221,45 @@ def run_implementer(
     stall_timeout_seconds: int = DEFAULT_STALL_TIMEOUT_SECONDS,
     allow_no_change: bool = False,
     allow_known_test_failures: bool = False,
+    plan_file: Path | None = None,
+    allow_protected_branch: bool = False,
+    ledger_file: Path | None = None,
+    allow_cmdc_yolo: bool = False,
+    allow_dirty: bool = False,
 ) -> int:
-    """Run Command Code and return zero only after process/report success."""
+    """Run Command Code and return zero only after process/report success.
+
+    The preflight runs before any child process starts. A blocked boundary
+    emits the stable seven-field diagnostic and never spawns Command Code.
+    """
     cwd = cwd.expanduser().resolve()
     prompt_file = prompt_file.expanduser().resolve()
+    mode = "yolo" if allow_cmdc_yolo else "normal"
     prompt_text = prompt_file.read_text(encoding="utf-8")
     report_path = _extract_report_path(prompt_text, cwd)
+    preflight_snapshot: dict[str, object] | None = None
+    if plan_file is not None:
+        preflight = validate_execution_boundary(
+            cwd,
+            plan_file.expanduser().resolve(),
+            allow_protected_branch=allow_protected_branch,
+            ledger_file=ledger_file,
+            allow_dirty=allow_dirty,
+            allow_cmdc_yolo=allow_cmdc_yolo,
+        )
+        if "BLOCKER_CODE" in preflight:
+            diagnostic = {
+                "BLOCKER_CODE": str(preflight["BLOCKER_CODE"]),
+                "MESSAGE": str(preflight["MESSAGE"]),
+                "COMMAND": "",
+                "EXIT_CODE": "1",
+                "STDERR": "",
+                "ACTION": str(preflight["ACTION"]),
+            }
+            diagnostic["MODE"] = str(preflight["MODE"])
+            print(render_blocked(diagnostic), file=sys.stderr)
+            return 1
+        preflight_snapshot = preflight
     baseline_snapshot: dict[str, object] | None = None
     try:
         baseline_snapshot = collect_workspace_snapshot(
@@ -992,7 +1307,11 @@ def run_implementer(
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
-        command = build_command(cmd_path, max_turns=max_turns)
+        command = build_command(
+            cmd_path,
+            max_turns=max_turns,
+            allow_cmdc_yolo=allow_cmdc_yolo,
+        )
         process_command = _platform_command(command)
         command_text = " ".join(str(part) for part in command)
         if checkpoint_file and baseline_snapshot is not None:
@@ -1003,6 +1322,8 @@ def run_implementer(
                 state="STARTING",
                 phase="STARTING",
                 last_command=command_text,
+                preflight_snapshot=preflight_snapshot,
+                mode=mode,
             )
         if stall_timeout_seconds > 0:
             monitor_interval = heartbeat_interval if heartbeat_interval > 0 else 30.0
@@ -1018,6 +1339,8 @@ def run_implementer(
                     heartbeat_stop,
                     started_monotonic,
                     activity_state,
+                    preflight_snapshot,
+                    mode,
                 ),
                 daemon=True,
             )
@@ -1073,7 +1396,9 @@ def run_implementer(
         diagnostic = classify_failure(127, str(exc), report_exists=False, cmd_found=False)
         exit_code = 127
     except subprocess.TimeoutExpired as exc:
-        command = build_command(Path(cmd_bin), max_turns=max_turns)
+        command = build_command(
+            Path(cmd_bin), max_turns=max_turns, allow_cmdc_yolo=allow_cmdc_yolo
+        )
         timeout_stdout = _text_output(exc.stdout)
         timeout_stderr = _text_output(exc.stderr) or str(exc)
         timeout_output = "\n".join(
@@ -1083,6 +1408,10 @@ def run_implementer(
         watchdog_cleanup_verified = getattr(
             exc, "watchdog_cleanup_verified", True
         )
+        # A timeout is never success. A diff (or commits) means partial work
+        # exists and must be preserved deterministically; the diagnostic keeps
+        # the explicit mode so the orchestrator can see how CMDc was invoked.
+        watchdog_mode = "yolo" if allow_cmdc_yolo else "normal"
         # Fail closed before any recovery: a live CMDc tree could still mutate
         # the workspace, so it must never be followed by a recovery attempt.
         if not watchdog_cleanup_verified:
@@ -1100,6 +1429,7 @@ def run_implementer(
                     "remanescentes antes de qualquer nova invocação"
                 ),
             }
+            diagnostic["MODE"] = watchdog_mode
             print(render_blocked(diagnostic), file=sys.stderr)
             return 8
         if watchdog_reason == "STALLED":
@@ -1117,10 +1447,12 @@ def run_implementer(
                     "sem corrigir a falta de progresso"
                 ),
             }
+            diagnostic["MODE"] = watchdog_mode
             if event_log is not None:
                 diagnostic["EVENT_LOG"] = str(event_log)
         else:
             diagnostic = classify_failure(8, timeout_stderr, report_exists=False)
+            diagnostic["MODE"] = watchdog_mode
         exit_code = 8
 
         snapshot = None
@@ -1155,6 +1487,8 @@ def run_implementer(
                     phase="TIMED_OUT",
                     last_command=" ".join(str(part) for part in command),
                     last_output=timeout_output,
+                    preflight_snapshot=preflight_snapshot,
+                    mode=watchdog_mode,
                 )
             partial_workspace = bool(
                 snapshot["diff_present"] or snapshot["commits_since_baseline"]
@@ -1176,7 +1510,9 @@ def run_implementer(
                 )
                 try:
                     recovery_command = build_command(
-                        resolve_cmdc(cmd_bin), max_turns=recovery_max_turns
+                        resolve_cmdc(cmd_bin),
+                        max_turns=recovery_max_turns,
+                        allow_cmdc_yolo=allow_cmdc_yolo,
                     )
                     command = recovery_command
                     recovery_timeout = max(60, recovery_max_turns * 120)
@@ -1231,6 +1567,8 @@ def run_implementer(
                         phase="RECOVERY_FINISHED",
                         last_command=" ".join(str(part) for part in recovery_command),
                         last_output=recovery_output,
+                        preflight_snapshot=preflight_snapshot,
+                        mode=watchdog_mode,
                     )
                     if recovery_ready:
                         print("STATUS: RECOVERED")
@@ -1282,6 +1620,8 @@ def run_implementer(
                         phase="RECOVERY_FAILED",
                         last_command=" ".join(str(part) for part in recovery_command),
                         last_output=recovery_output.strip(),
+                        preflight_snapshot=preflight_snapshot,
+                        mode=watchdog_mode,
                     )
                     diagnostic["STDERR"] = (
                         f"{diagnostic.get('STDERR', '')}\n"
@@ -1319,6 +1659,9 @@ def run_implementer(
             final_snapshot = None
         if final_snapshot is not None:
             _attach_activity_evidence(final_snapshot, activity_state, event_log)
+            final_snapshot["mode"] = mode
+            if preflight_snapshot is not None:
+                final_snapshot["preflight_snapshot"] = preflight_snapshot
             has_tracked = _has_tracked_changes(final_snapshot.get("status", []))
             if allow_no_change:
                 no_commit = not bool(final_snapshot["commits_since_baseline"])
@@ -1369,6 +1712,8 @@ def run_implementer(
                     last_output="\n".join(
                         part for part in (completed.stdout, completed.stderr) if part
                     ),
+                    preflight_snapshot=preflight_snapshot,
+                    mode=mode,
                 )
             if (completed.returncode == 0 or known_failure_evidence) and not transaction_ready:
                 if allow_no_change:
@@ -1468,6 +1813,35 @@ def parse_args() -> argparse.Namespace:
         help="in validation-only mode, accept a report with known or "
         "pre-existing out-of-scope test failures",
     )
+    parser.add_argument(
+        "--plan-file",
+        type=Path,
+        default=None,
+        help="plan file the implementation belongs to; when supplied, the "
+        "execution boundary preflight runs before any child process starts",
+    )
+    parser.add_argument(
+        "--allow-protected-branch",
+        action="store_true",
+        default=False,
+        help="allow execution on main/master only when the ledger records "
+        "ALLOW_PROTECTED_BRANCH for the branch",
+    )
+    parser.add_argument(
+        "--allow-cmdc-yolo",
+        action="store_true",
+        default=False,
+        help="add --yolo to the Command Code invocation only when this "
+        "explicit consent is supplied; the default keeps the normal "
+        "permission boundary",
+    )
+    parser.add_argument(
+        "--ledger-file",
+        type=Path,
+        default=None,
+        help="ledger file consulted for recorded consent entries such as "
+        "ALLOW_PROTECTED_BRANCH or ALLOW_DEPLOYED_EXECUTION",
+    )
     return parser.parse_args()
 
 
@@ -1486,6 +1860,10 @@ def main() -> int:
         stall_timeout_seconds=args.stall_timeout_seconds,
         allow_no_change=args.allow_no_change,
         allow_known_test_failures=args.allow_known_test_failures,
+        plan_file=args.plan_file,
+        allow_protected_branch=args.allow_protected_branch,
+        ledger_file=args.ledger_file,
+        allow_cmdc_yolo=args.allow_cmdc_yolo,
     )
 
 

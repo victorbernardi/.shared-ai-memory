@@ -44,8 +44,28 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "--no-skills",
         "--trust",
         "--skip-onboarding",
-        "--yolo",
     ]
+
+
+def test_build_command_includes_yolo_only_for_explicit_consent() -> None:
+    command = MODULE.build_command(Path("cmdc"), allow_cmdc_yolo=True)
+
+    assert command == [
+        "cmdc",
+        "-p",
+        "--model",
+        "deepseek/deepseek-v4-flash",
+        "--max-turns",
+        "100",
+        "--output-format",
+        "json",
+        "--yolo",
+        "--no-skills",
+        "--trust",
+        "--skip-onboarding",
+    ]
+    # The default command never assumes consent.
+    assert "--yolo" not in MODULE.build_command(Path("cmdc"))
 
 
 def test_configure_stdio_requests_utf8(monkeypatch) -> None:
