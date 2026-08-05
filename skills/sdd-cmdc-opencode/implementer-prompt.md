@@ -33,10 +33,12 @@ Command Code implementer:
     Once the requirements are clear:
     1. Implement exactly what the brief specifies.
     2. Write tests following TDD when the brief requires it.
-    3. Verify the implementation and inspect the diff.
-    4. Commit the work with an intentional message.
+    3. Run the focused tests for the changed code, commit the work with an
+       intentional message, and write the full report before broad
+       suite/Ruff/review work that the brief assigns to the host.
+    4. Verify the implementation and inspect the diff.
     5. Self-review completeness, quality, scope and test evidence.
-    6. Write the full report and return the short status contract below.
+    6. Return the short status contract below.
 
     Work from: [directory]
 
@@ -44,8 +46,9 @@ Command Code implementer:
     Do not change the model, bypass the report contract, or silently claim
     success when the task is incomplete.
 
-    While iterating, run the focused tests for the changed code and run the
-    relevant full suite before committing. Keep each file within the plan's
+    While iterating, run the focused tests for the changed code and commit
+    with the report before starting broad suite/Ruff/review work when the
+    brief assigns those checks to the host. Keep each file within the plan's
     stated responsibility. Do not restructure unrelated files.
 
     ## Escalation

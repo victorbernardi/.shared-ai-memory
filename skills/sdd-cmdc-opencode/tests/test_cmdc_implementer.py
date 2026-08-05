@@ -909,6 +909,43 @@ def test_run_implementer_preserves_failed_process_diagnostics(
     assert "STDERR: MODEL_NOT_IN_PLAN" in captured.err
 
 
+def test_run_implementer_routes_timeout_seconds_through_wall_watchdog(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The alias feeds the same finite watchdog as --wall-timeout-seconds."""
+    repo = _create_git_fixture(tmp_path / "repo")
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "task-report.md")
+    observed: dict[str, object] = {}
+    calls = {"cmdc": 0}
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        observed[f"call{calls['cmdc']}"] = kwargs
+        error = MODULE.subprocess.TimeoutExpired(command, timeout=0.01, stderr="max turns reached")
+        error.watchdog_reason = "WALL_TIMEOUT"  # type: ignore[attr-defined]
+        error.watchdog_cleanup_verified = True  # type: ignore[attr-defined]
+        raise error
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=repo / "checkpoints.jsonl",
+            heartbeat_interval=0,
+            wall_timeout_seconds=1234,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 1
+    kwargs = observed["call1"]
+    assert kwargs["wall_timeout_seconds"] == 1234
+
+
 def test_run_implementer_reports_missing_command(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -1539,6 +1576,54 @@ def test_cli_help_exposes_allow_no_change_flag() -> None:
     )
     assert "--allow-no-change" in result.stdout
     assert "--allow-known-test-failures" in result.stdout
+
+
+def test_cli_help_exposes_timeout_seconds_alias() -> None:
+    import subprocess
+    result = subprocess.run(
+        [sys.executable, str(MODULE_PATH), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert "--wall-timeout-seconds" in result.stdout
+    assert "--timeout-seconds" in result.stdout
+    assert "--wall-timeout-seconds" in result.stdout.split(
+        "--timeout-seconds"
+    )[0], "the alias must be listed next to the canonical wall-timeout option"
+
+
+def test_cli_accepts_timeout_seconds_alias_and_rejects_non_positive_values() -> None:
+    import subprocess
+    result = subprocess.run(
+        [sys.executable, str(MODULE_PATH), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert "--timeout-seconds" in result.stdout
+    # An explicit alias value parses; the same value also parses through the
+    # canonical spelling, proving both flags share one parsing destination.
+    for flag in ("--timeout-seconds", "--wall-timeout-seconds"):
+        parsed = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--prompt-file", "prompt.md", flag, "3600", "--help"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert parsed.returncode == 0, f"{flag} did not parse"
+    # Non-positive values are rejected by the shared argparse constraint.
+    for value in ("0", "-1", "-900"):
+        rejected = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--prompt-file", "prompt.md", "--timeout-seconds", value],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert rejected.returncode == 2, f"--timeout-seconds {value} was accepted"
+        assert "must be a positive integer" in rejected.stderr
 
 
 def test_windows_tree_verification_is_fail_closed(monkeypatch) -> None:

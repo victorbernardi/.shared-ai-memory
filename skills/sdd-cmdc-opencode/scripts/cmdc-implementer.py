@@ -1421,6 +1421,14 @@ def run_implementer(
     return 0
 
 
+def _positive_int(value: str) -> int:
+    """Parse a CLI integer that must be strictly positive."""
+    parsed = int(value)
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cwd", default=".", type=Path)
@@ -1431,8 +1439,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--heartbeat-interval", default=30.0, type=float)
     parser.add_argument(
         "--wall-timeout-seconds",
+        "--timeout-seconds",
+        dest="wall_timeout_seconds",
         default=DEFAULT_WALL_TIMEOUT_SECONDS,
-        type=int,
+        type=_positive_int,
         help="finite process watchdog; turn budget remains controlled by --max-turns",
     )
     parser.add_argument(

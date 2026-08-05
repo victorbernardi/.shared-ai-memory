@@ -196,7 +196,10 @@ conflicts that only emerge from implementation.
 - The adapter always passes `--model deepseek/deepseek-v4-flash` and defaults to
   `--max-turns 100`, matching the Command Code CLI default. The turn budget is
   separate from the finite wall-clock watchdog, which defaults to four hours
-  and is recorded in the heartbeat evidence. A separate stall watchdog defaults
+  and is recorded in the heartbeat evidence. `--timeout-seconds` is accepted
+  as the explicit alias for `--wall-timeout-seconds`; both spellings bound the
+  same finite child-process watchdog, and the caller's outer process window
+  must not be shorter than that watchdog. A separate stall watchdog defaults
   to 15 minutes without a streamed CMDc event or observable workspace change;
   a stall is `IMPLEMENTATION INCOMPLETE`, produces an event log, and does not
   trigger automatic recovery. Set `--stall-timeout-seconds 0` only when the
@@ -274,10 +277,17 @@ $workspace = (Get-Location).Path
   --max-turns 100 `
   --checkpoint-file "<checkpoint-file>" `
   --heartbeat-interval 30 `
-  --wall-timeout-seconds 14400 `
+  --timeout-seconds 14400 `
   --stall-timeout-seconds 900 `
   --recovery-max-turns 5
 ```
+
+`--timeout-seconds` is the explicit spelling of the same finite process
+watchdog as `--wall-timeout-seconds` (the two flags are aliases; the adapter
+window defaults to four hours). The caller's outer process window that owns
+this dispatch must be at least as long as the adapter window — the adapter
+can only bound its own child process, never a parent process that would kill
+it before the commit and report exist.
 
 The adapter's JSON event log, stdout, stderr and exit code are part of the
 dispatch result. A non-zero result or missing report emits `STATUS: BLOCKED` with
