@@ -6,7 +6,6 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILL = REPO_ROOT / "skills" / "sdd-cmdc-opencode"
-SOURCE = REPO_ROOT / "skills" / "sdd-cmdc"
 
 EXECUTABLE_SHELLS = {
     Path("scripts/review-package"),
