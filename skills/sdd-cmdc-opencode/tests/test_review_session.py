@@ -214,7 +214,14 @@ def _assert_no_children(launcher_pid: int) -> None:
     """Assert the fake-codex child is no longer alive after teardown."""
     if os.name == "nt":
         tasklist = subprocess.run(
-            ["tasklist", "/FO", "CSV", "/NH"],
+            [
+                "tasklist",
+                "/FI",
+                f"PID eq {launcher_pid}",
+                "/FO",
+                "CSV",
+                "/NH",
+            ],
             capture_output=True,
             text=True,
             check=False,
@@ -516,6 +523,74 @@ def test_windows_tasklist_oserror_is_alive(
         types.SimpleNamespace(run=_fail_launch),
     )
     assert REVIEW._process_tree_alive(1234) is True
+
+
+def test_windows_tasklist_reports_absent_tree_as_clean(monkeypatch) -> None:
+    """A successful no-match query proves the captured tree is absent."""
+    if os.name != "nt":
+        monkeypatch.setattr(REVIEW, "os", types.SimpleNamespace(name="nt"))
+    monkeypatch.setattr(REVIEW, "_WINDOW_PROCESS_TREE", {1234, 5678})
+    calls: list[list[str]] = []
+
+    def _no_matching_processes(command, **kwargs):
+        calls.append(command)
+        return types.SimpleNamespace(
+            returncode=0,
+            stdout="INFORMAÇÕES: nenhuma tarefa em execução correspondente aos critérios\n",
+        )
+
+    monkeypatch.setattr(
+        REVIEW,
+        "subprocess",
+        types.SimpleNamespace(run=_no_matching_processes),
+    )
+
+    assert REVIEW._process_tree_alive(1234) is False
+    assert calls
+    assert all(
+        command[:2] == ["tasklist", "/FI"]
+        for command in calls
+    )
+
+
+def test_windows_process_inventory_timeout_is_unavailable(monkeypatch) -> None:
+    """A hung process inventory cannot be used as cleanup evidence."""
+    def _timeout(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs.get("timeout", 0))
+
+    monkeypatch.setattr(
+        REVIEW,
+        "subprocess",
+        types.SimpleNamespace(
+            run=_timeout,
+            TimeoutExpired=subprocess.TimeoutExpired,
+        ),
+    )
+
+    assert REVIEW._windows_process_parents() is None
+
+
+def test_windows_tasklist_timeout_is_alive(monkeypatch) -> None:
+    """A hung filtered query cannot prove that a process tree is absent."""
+    if os.name != "nt":
+        monkeypatch.setattr(REVIEW, "os", types.SimpleNamespace(name="nt"))
+
+    def _timeout(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs.get("timeout", 0))
+
+    monkeypatch.setattr(REVIEW, "_WINDOW_PROCESS_TREE", {1234})
+    monkeypatch.setattr(
+        REVIEW,
+        "subprocess",
+        types.SimpleNamespace(
+            run=_timeout,
+            TimeoutExpired=subprocess.TimeoutExpired,
+        ),
+    )
+
+    assert REVIEW._process_tree_alive(1234) is True
+
+
 def test_blocked_before_start_without_codex_or_bad_ref_or_missing_file(
     tmp_path: Path, valid_repo: Path
 ) -> None:

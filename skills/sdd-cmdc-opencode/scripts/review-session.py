@@ -27,6 +27,7 @@ EXEC_FAILURE_EXIT_CODE = 3
 ORPHAN_EXIT_CODE = 4
 REPORT_INVALID_EXIT_CODE = 5
 HOST_PROCESS_EXIT_CODE = 6
+PROCESS_QUERY_TIMEOUT_SECONDS = 5
 _REAL_POPEN = subprocess.Popen
 _WINDOW_PROCESS_TREE: set[int] | None = None
 
@@ -512,8 +513,9 @@ def _windows_process_parents() -> dict[int, int] | None:
             encoding="utf-8",
             errors="replace",
             check=False,
+            timeout=PROCESS_QUERY_TIMEOUT_SECONDS,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
     if result.returncode != 0 or not result.stdout.strip():
         return None
@@ -595,6 +597,36 @@ def _capture_process_group(pid: int) -> int | None:
         return None
 
 
+def _windows_tasklist_pid_state(pid: int) -> bool | None:
+    """Return whether a filtered tasklist query proves one PID is alive."""
+    try:
+        result = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=PROCESS_QUERY_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+
+    rows: list[int] = []
+    for line in result.stdout.splitlines():
+        columns = line.split(",")
+        if len(columns) < 2:
+            continue
+        candidate = columns[1].strip().strip('"')
+        if candidate.isdigit():
+            rows.append(int(candidate))
+    if not rows:
+        return False
+    if any(candidate != pid for candidate in rows):
+        return None
+    return True
+
+
 def _process_tree_alive(pid: int, group: int | None = None) -> bool:
     """Verify the whole process tree is absent, not just the leader.
 
@@ -607,29 +639,11 @@ def _process_tree_alive(pid: int, group: int | None = None) -> bool:
     if os.name == "nt":
         if _WINDOW_PROCESS_TREE is None:
             return True
-        try:
-            result = subprocess.run(
-                ["tasklist", "/FO", "CSV", "/NH"],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-        except OSError:
-            # tasklist could not be launched; the tree cannot be verified
-            # absent, so it must count as alive: fail closed.
-            return True
-        if result.returncode != 0 or not result.stdout.strip():
-            # A failed inventory cannot prove the tree is absent.
-            return True
-        live_pids: set[int] = set()
-        for line in result.stdout.splitlines():
-            columns = line.split(",")
-            if len(columns) >= 2 and columns[1].strip().strip('"').isdigit():
-                live_pids.add(int(columns[1].strip().strip('"')))
-        if not live_pids:
-            # Unusable output; the tree cannot be verified absent.
-            return True
-        return bool(_WINDOW_PROCESS_TREE & live_pids)
+        for candidate in sorted(_WINDOW_PROCESS_TREE):
+            state = _windows_tasklist_pid_state(candidate)
+            if state is None or state:
+                return True
+        return False
     if group is None:
         # The group identity was never captured (or could not be resolved).
         # The tree cannot be verified absent, so it must count as alive:
