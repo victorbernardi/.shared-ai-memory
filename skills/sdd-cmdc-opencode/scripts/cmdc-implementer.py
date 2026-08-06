@@ -61,7 +61,6 @@ COMMAND_FLAGS = (
     "--no-skills",
     "--trust",
     "--skip-onboarding",
-    "--yolo",
 )
 
 
@@ -443,7 +442,12 @@ def classify_failure(
 
 
 def render_blocked(diagnostic: dict[str, str]) -> str:
-    """Render the stable seven-field diagnostic consumed by the orchestrator."""
+    """Render the stable seven-field diagnostic consumed by the orchestrator.
+
+    The explicit mode and any captured initial Git state ride along so a
+    blocked boundary still exposes root, branch, HEAD, and raw status lines
+    without leaking secrets (the snapshot holds only Git-derived fields).
+    """
     fields = [
         ("STATUS", "BLOCKED"),
         ("BLOCKER_CODE", diagnostic.get("BLOCKER_CODE", "PROCESS_FAILED")),
@@ -452,8 +456,15 @@ def render_blocked(diagnostic: dict[str, str]) -> str:
         ("EXIT_CODE", diagnostic.get("EXIT_CODE", "N/A")),
         ("STDERR", diagnostic.get("STDERR", "")),
         ("ACTION", diagnostic.get("ACTION", "")),
+        ("MODE", diagnostic.get("MODE", "")),
     ]
-    return "\n".join(f"{key}: {value}" for key, value in fields)
+    initial_git_state = diagnostic.get("INITIAL_GIT_STATE")
+    if initial_git_state:
+        fields.append(("INITIAL_GIT_STATE", str(initial_git_state)))
+    return "\n".join(
+        f"{key}: {value}" if value else f"{key}:"
+        for key, value in fields
+    )
 
 
 def _run_git(cwd: Path, *args: str) -> str:
@@ -1238,28 +1249,51 @@ def run_implementer(
     prompt_text = prompt_file.read_text(encoding="utf-8")
     report_path = _extract_report_path(prompt_text, cwd)
     preflight_snapshot: dict[str, object] | None = None
-    if plan_file is not None:
-        preflight = validate_execution_boundary(
-            cwd,
-            plan_file.expanduser().resolve(),
-            allow_protected_branch=allow_protected_branch,
-            ledger_file=ledger_file,
-            allow_dirty=allow_dirty,
-            allow_cmdc_yolo=allow_cmdc_yolo,
-        )
-        if "BLOCKER_CODE" in preflight:
-            diagnostic = {
-                "BLOCKER_CODE": str(preflight["BLOCKER_CODE"]),
-                "MESSAGE": str(preflight["MESSAGE"]),
-                "COMMAND": "",
-                "EXIT_CODE": "1",
-                "STDERR": "",
-                "ACTION": str(preflight["ACTION"]),
-            }
-            diagnostic["MODE"] = str(preflight["MODE"])
-            print(render_blocked(diagnostic), file=sys.stderr)
-            return 1
-        preflight_snapshot = preflight
+    if plan_file is None:
+        # Fail closed: without a supplied plan there is no execution boundary
+        # to preflight, so Command Code must never start.
+        diagnostic = {
+            "BLOCKER_CODE": "PLAN_REQUIRED",
+            "MESSAGE": (
+                "an explicit --plan-file is required so the execution boundary "
+                "preflight can run before any child process starts"
+            ),
+            "COMMAND": "",
+            "EXIT_CODE": "1",
+            "STDERR": "",
+            "ACTION": "pass --plan-file and re-run the implementer",
+        }
+        diagnostic["MODE"] = mode
+        print(render_blocked(diagnostic), file=sys.stderr)
+        return 1
+    preflight = validate_execution_boundary(
+        cwd,
+        plan_file.expanduser().resolve(),
+        allow_protected_branch=allow_protected_branch,
+        ledger_file=ledger_file,
+        allow_dirty=allow_dirty,
+        allow_cmdc_yolo=allow_cmdc_yolo,
+    )
+    if "BLOCKER_CODE" in preflight:
+        diagnostic = {
+            "BLOCKER_CODE": str(preflight["BLOCKER_CODE"]),
+            "MESSAGE": str(preflight["MESSAGE"]),
+            "COMMAND": "",
+            "EXIT_CODE": "1",
+            "STDERR": "",
+            "ACTION": str(preflight["ACTION"]),
+        }
+        diagnostic["MODE"] = str(preflight["MODE"])
+        initial_git_state = preflight.get("initial_git_state")
+        if initial_git_state is not None:
+            diagnostic["INITIAL_GIT_STATE"] = json.dumps(
+                initial_git_state,
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+        print(render_blocked(diagnostic), file=sys.stderr)
+        return 1
+    preflight_snapshot = preflight
     baseline_snapshot: dict[str, object] | None = None
     try:
         baseline_snapshot = collect_workspace_snapshot(
@@ -1276,6 +1310,7 @@ def run_implementer(
             "STDERR": str(exc),
             "ACTION": "corrigir a disponibilidade do Git antes de iniciar o CMDc",
         }
+        diagnostic["MODE"] = mode
         print(render_blocked(diagnostic), file=sys.stderr)
         return 1
 
@@ -1757,6 +1792,7 @@ def run_implementer(
                         "recuperar os artefatos faltantes antes de gerar o pacote de revisão"
                     ),
                 }
+                diagnostic["MODE"] = mode
                 exit_code = 1
 
     if diagnostic:
@@ -1815,10 +1851,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--plan-file",
+        required=True,
         type=Path,
-        default=None,
-        help="plan file the implementation belongs to; when supplied, the "
-        "execution boundary preflight runs before any child process starts",
+        help="plan file the implementation belongs to; the execution boundary "
+        "preflight always runs before any child process starts",
     )
     parser.add_argument(
         "--allow-protected-branch",

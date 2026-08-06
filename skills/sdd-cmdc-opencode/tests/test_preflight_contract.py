@@ -7,6 +7,7 @@ files. The controller's own checkout is never used as a fixture.
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -456,3 +457,86 @@ def test_preflight_returns_a_structured_diagnostic_contract(tmp_path: Path) -> N
     assert set(
         ("STATUS", "BLOCKER_CODE", "MESSAGE", "ACTION", "MODE", "CWD", "PLAN_FILE")
     ) <= set(result)
+    # A blocked result keeps the canonical root, branch, HEAD, and raw status
+    # snapshot; the raw lines are never normalized or stripped.
+    initial = result["initial_git_state"]
+    assert initial["git_root"] == str(repo.resolve())
+    assert initial["branch"] == "master"
+    assert initial["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert initial["status"] == []
+
+
+def test_run_implementer_fails_closed_when_no_plan_is_supplied(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Without a plan there is no execution boundary, so Command Code must
+    never start and the public contract fails closed with PLAN_REQUIRED."""
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text(
+        "Write your full report to task-report.md:\n",
+        encoding="utf-8",
+    )
+
+    def cmdc_must_not_run(*args, **kwargs):
+        raise AssertionError("Command Code must not run without a plan")
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", cmdc_must_not_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", cmdc_must_not_run)
+
+    assert MODULE.run_implementer(tmp_path, prompt_path) == 1
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: PLAN_REQUIRED" in captured.err
+    assert "MODE: normal" in captured.err
+
+
+def test_run_implementer_blocked_preflight_keeps_initial_git_state_and_mode(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A blocked boundary through the public path reports the canonical root,
+    branch, HEAD, and raw status lines verbatim plus the explicit mode, and
+    never starts Command Code."""
+    repo = _init_repo(tmp_path / "repo", branch="master")
+    plan = _commit_plan(repo)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text(
+        "Write your full report to task-report.md:\n",
+        encoding="utf-8",
+    )
+
+    def cmdc_must_not_run(*args, **kwargs):
+        raise AssertionError("Command Code must not run on a blocked boundary")
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", cmdc_must_not_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", cmdc_must_not_run)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            plan_file=plan,
+            allow_protected_branch=False,
+            ledger_file=None,
+        )
+        == 1
+    )
+
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: BRANCH_PROTECTED" in captured.err
+    assert "MODE: normal" in captured.err
+    assert "INITIAL_GIT_STATE:" in captured.err
+    state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "master"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    # Raw status lines keep leading status-column whitespace verbatim.
+    assert state["status"] == []
