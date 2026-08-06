@@ -44,8 +44,28 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "--no-skills",
         "--trust",
         "--skip-onboarding",
-        "--yolo",
     ]
+
+
+def test_build_command_includes_yolo_only_for_explicit_consent() -> None:
+    command = MODULE.build_command(Path("cmdc"), allow_cmdc_yolo=True)
+
+    assert command == [
+        "cmdc",
+        "-p",
+        "--model",
+        "deepseek/deepseek-v4-flash",
+        "--max-turns",
+        "100",
+        "--output-format",
+        "json",
+        "--yolo",
+        "--no-skills",
+        "--trust",
+        "--skip-onboarding",
+    ]
+    # The default command never assumes consent.
+    assert "--yolo" not in MODULE.build_command(Path("cmdc"))
 
 
 def test_configure_stdio_requests_utf8(monkeypatch) -> None:
@@ -120,6 +140,15 @@ def test_recovery_requires_a_new_commit_after_recovery_starts() -> None:
 def test_initial_workspace_snapshot_failure_blocks_before_cmdc(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
+    repo = _create_git_fixture(tmp_path / "repo")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_path = _write_prompt(tmp_path, tmp_path / "task-report.md")
     monkeypatch.setattr(
         MODULE,
@@ -129,15 +158,22 @@ def test_initial_workspace_snapshot_failure_blocks_before_cmdc(
         ),
     )
 
+    real_run = MODULE.subprocess.run
+
     def cmdc_must_not_run(*args, **kwargs):
-        raise AssertionError("cmdc must not run without a Git baseline")
+        # Only the child Command Code process is forbidden; the preflight's
+        # real Git plumbing must still run.
+        if args and Path(str(args[0][0])).name != "git":
+            raise AssertionError("cmdc must not run without a Git baseline")
+        return real_run(*args, **kwargs)
 
     monkeypatch.setattr(MODULE.subprocess, "run", cmdc_must_not_run)
 
-    assert MODULE.run_implementer(tmp_path, prompt_path) == 1
+    assert MODULE.run_implementer(repo, prompt_path, plan_file=plan) == 1
     captured = capsys.readouterr()
     assert "BLOCKER_CODE: WORKSPACE_INSPECTION_FAILED" in captured.err
     assert "git root unavailable" in captured.err
+    assert "MODE: normal" in captured.err
 
 
 def test_heartbeat_snapshot_failure_is_checkpointed(tmp_path: Path, monkeypatch) -> None:
@@ -211,6 +247,7 @@ def test_render_blocked_emits_the_structured_contract() -> None:
             "EXIT_CODE: 4",
             "STDERR: MODEL_NOT_IN_PLAN",
             "ACTION: executar cmdc --list-models e interromper a tarefa",
+            "MODE:",
         ]
     )
 
@@ -226,7 +263,10 @@ def _write_prompt(tmp_path: Path, report_path: Path) -> Path:
 
 def _create_git_fixture(path: Path) -> Path:
     path.mkdir(parents=True)
-    subprocess.run(["git", "init", "-q", str(path)], check=True)
+    # Init on a non-protected branch: the preflight refuses main/master
+    # without ledger consent, and these fixtures exercise the run paths,
+    # not the protected-branch gate.
+    subprocess.run(["git", "init", "-q", "-b", "feature", str(path)], check=True)
     subprocess.run(
         ["git", "-C", str(path), "config", "user.name", "Fixture User"],
         check=True,
@@ -283,8 +323,18 @@ def test_timeout_with_partial_diff_writes_incomplete_checkpoint(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-ação & timeout")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
-    prompt_path = _write_prompt(repo, report_path)
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
@@ -303,6 +353,7 @@ def test_timeout_with_partial_diff_writes_incomplete_checkpoint(
             prompt_path,
             max_turns=1,
             checkpoint_file=checkpoint_path,
+            plan_file=plan,
         )
         != 0
     )
@@ -320,8 +371,16 @@ def test_timeout_without_diff_writes_distinct_timeout_checkpoint(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-timeout-no-diff")
-    # Keep the tracked workspace clean: write the prompt outside the repo so
-    # the only signal is the timeout itself, not an untracked prompt file.
+    # Keep the tracked workspace clean: write the plan and prompt outside the
+    # repo so the only signal is the timeout itself, not an untracked file.
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_dir = tmp_path / "prompt-dir"
     prompt_dir.mkdir(parents=True)
     prompt_path = _write_prompt(prompt_dir, repo / "task-report.md")
@@ -341,6 +400,7 @@ def test_timeout_without_diff_writes_distinct_timeout_checkpoint(
             prompt_path,
             max_turns=1,
             checkpoint_file=checkpoint_path,
+            plan_file=plan,
         )
         == 8
     )
@@ -360,8 +420,18 @@ def test_timeout_with_diff_but_missing_report_is_incomplete(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-diff-no-report")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
-    prompt_path = _write_prompt(repo, report_path)
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, report_path)
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
 
     def fake_process(command, prompt_text, cwd, **kwargs):
@@ -372,7 +442,7 @@ def test_timeout_with_diff_but_missing_report_is_incomplete(
 
     monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
-    assert MODULE.run_implementer(repo, prompt_path, max_turns=1) == 8
+    assert MODULE.run_implementer(repo, prompt_path, max_turns=1, plan_file=plan) == 8
 
     captured = capsys.readouterr()
     assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
@@ -384,6 +454,14 @@ def test_stall_is_incomplete_without_automatic_recovery(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-stall")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
     checkpoint_path = repo / "checkpoints.jsonl"
     calls = {"cmdc": 0}
@@ -405,6 +483,7 @@ def test_stall_is_incomplete_without_automatic_recovery(
             prompt_path,
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0,
+            plan_file=plan,
         )
         == 8
     )
@@ -481,7 +560,18 @@ def test_report_path_accepts_colon_marker_variant(tmp_path: Path) -> None:
 def test_timeout_preserves_diagnostic_when_snapshot_collection_fails(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    prompt_path = _write_prompt(tmp_path, tmp_path / "task-report.md")
+    repo = _create_git_fixture(tmp_path / "fixture-snapshot-fail")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "task-report.md")
     snapshots = iter(
         [
             {"head": "baseline"},
@@ -505,17 +595,31 @@ def test_timeout_preserves_diagnostic_when_snapshot_collection_fails(
         ),
     )
 
-    assert MODULE.run_implementer(tmp_path, prompt_path, max_turns=1) == 8
+    assert (
+        MODULE.run_implementer(
+            repo, prompt_path, max_turns=1, plan_file=plan
+        )
+        == 8
+    )
     captured = capsys.readouterr()
     assert "STATUS: BLOCKED" in captured.err
     assert "BLOCKER_CODE: TIMEOUT" in captured.err
     assert "git status unavailable" in captured.err
+    assert "MODE: normal" in captured.err
 
 
 def test_success_writes_starting_and_finished_checkpoints(
     tmp_path: Path, monkeypatch
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-checkpoint-lifecycle")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -545,6 +649,8 @@ def test_success_writes_starting_and_finished_checkpoints(
             prompt_path,
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0,
+            plan_file=plan,
+            allow_dirty=True,
         )
         == 0
     )
@@ -706,6 +812,14 @@ def test_git_success_without_commit_is_transaction_incomplete(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-success-without-commit")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -718,7 +832,7 @@ def test_git_success_without_commit_is_transaction_incomplete(
         ),
     )
 
-    assert MODULE.run_implementer(repo, prompt_path) == 1
+    assert MODULE.run_implementer(repo, prompt_path, plan_file=plan, allow_dirty=True) == 1
     assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
 
 
@@ -726,6 +840,14 @@ def test_long_run_emits_heartbeat_with_command_and_workspace_snapshot(
     tmp_path: Path, monkeypatch
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-heartbeat")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("STATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -756,6 +878,8 @@ def test_long_run_emits_heartbeat_with_command_and_workspace_snapshot(
             prompt_path,
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0.005,
+            plan_file=plan,
+            allow_dirty=True,
         )
         == 0
     )
@@ -775,6 +899,14 @@ def test_timeout_checkpoint_detects_test_output(
     tmp_path: Path, monkeypatch
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-timeout-tests")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
     checkpoint_path = repo / "checkpoints.jsonl"
 
@@ -795,6 +927,7 @@ def test_timeout_checkpoint_detects_test_output(
             prompt_path,
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0,
+            plan_file=plan,
         )
         == 8
     )
@@ -808,6 +941,14 @@ def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-timeout-recovery")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     prompt_path = _write_prompt(tmp_path, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
@@ -842,6 +983,7 @@ def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0,
             recovery_max_turns=2,
+            plan_file=plan,
         )
         == 0
     )
@@ -854,10 +996,264 @@ def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
     assert "STATUS: RECOVERED" in capsys.readouterr().out
 
 
+def test_unsuccessful_recovery_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A bounded recovery that ends without transactional evidence renders
+    through the real public path as IMPLEMENTATION INCOMPLETE and still
+    carries the selected mode and the complete initial Git snapshot."""
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-failed-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        # Recovery exits nonzero without committing or writing the report:
+        # not ready, so the diagnostic rides the classify_failure path.
+        return SimpleNamespace(returncode=3, stdout="", stderr="recovery failure")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+            plan_file=plan,
+            allow_dirty=True,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 2
+
+    captured = capsys.readouterr()
+    assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
+    assert "BLOCKER_CODE: PROCESS_FAILED" in captured.err
+    assert "MODE: normal" in captured.err
+    # The full initial snapshot rides in the rendered diagnostic, including
+    # the canonical root, branch, HEAD, and every raw status line. Only the
+    # single line carrying the snapshot is parsed, so the EVENT_LOG line
+    # emitted after it by _render_incomplete stays intact.
+    initial_state_line = next(
+        line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
+    )
+    state = json.loads(initial_state_line.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+    assert "EVENT_LOG: " in captured.err
+
+
+def test_recovery_incomplete_fallback_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A bounded recovery that ends without transactional evidence and
+    without a classifying failure falls back to RECOVERY_INCOMPLETE, which
+    still carries the selected mode and the complete initial Git snapshot
+    through the real public path."""
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-incomplete-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        # Recovery exits zero but never commits: not ready (head unchanged,
+        # no commits), and no classification matches because the report now
+        # exists, so the diagnostic falls back to the RECOVERY_INCOMPLETE
+        # contract.
+        report_path.write_text("STATUS: DONE\n", encoding="utf-8")
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+            plan_file=plan,
+            allow_dirty=True,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 2
+
+    captured = capsys.readouterr()
+    assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
+    assert "BLOCKER_CODE: RECOVERY_INCOMPLETE" in captured.err
+    assert "MODE: normal" in captured.err
+    state = json.loads(
+        next(
+            line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
+        ).split("INITIAL_GIT_STATE: ", 1)[1].strip()
+    )
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+
+
+def test_recovery_exception_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """When the bounded recovery itself raises, the RECOVERY_FAILED
+    diagnostic rendered through the real public path still carries the
+    selected mode and the complete initial Git snapshot."""
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-exception-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        raise MODULE.subprocess.TimeoutExpired(
+            command, timeout=0.01, stderr="recovery watchdog stopped it"
+        )
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+            plan_file=plan,
+            allow_dirty=True,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 2
+
+    captured = capsys.readouterr()
+    assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
+    assert "BLOCKER_CODE: TIMEOUT" in captured.err
+    assert "recovery failed: " in captured.err
+    assert "MODE: normal" in captured.err
+    state = json.loads(
+        next(
+            line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
+        ).split("INITIAL_GIT_STATE: ", 1)[1].strip()
+    )
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+
+
 def test_run_implementer_accepts_success_with_transaction_evidence(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "repo")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "report.md"
     prompt_dir = tmp_path / "prompt"
     prompt_dir.mkdir()
@@ -878,7 +1274,7 @@ def test_run_implementer_accepts_success_with_transaction_evidence(
 
     monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
-    assert MODULE.run_implementer(repo, prompt_path) == 0
+    assert MODULE.run_implementer(repo, prompt_path, plan_file=plan) == 0
     assert observed["command"] == MODULE.build_command(Path("cmdc"))
     assert capsys.readouterr().out == "pytest 1 passed\n"
 
@@ -887,6 +1283,14 @@ def test_run_implementer_preserves_failed_process_diagnostics(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "repo")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_dir = tmp_path / "prompt"
     prompt_dir.mkdir()
     prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
@@ -902,17 +1306,71 @@ def test_run_implementer_preserves_failed_process_diagnostics(
         fake_process,
     )
 
-    assert MODULE.run_implementer(repo, prompt_path) == 4
+    assert MODULE.run_implementer(repo, prompt_path, plan_file=plan) == 4
     captured = capsys.readouterr()
     assert "partial output" in captured.out
     assert "BLOCKER_CODE: MODEL_UNAVAILABLE" in captured.err
     assert "STDERR: MODEL_NOT_IN_PLAN" in captured.err
 
 
+def test_run_implementer_routes_timeout_seconds_through_wall_watchdog(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The alias feeds the same finite watchdog as --wall-timeout-seconds."""
+    repo = _create_git_fixture(tmp_path / "repo")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "task-report.md")
+    observed: dict[str, object] = {}
+    calls = {"cmdc": 0}
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        observed[f"call{calls['cmdc']}"] = kwargs
+        error = MODULE.subprocess.TimeoutExpired(command, timeout=0.01, stderr="max turns reached")
+        error.watchdog_reason = "WALL_TIMEOUT"  # type: ignore[attr-defined]
+        error.watchdog_cleanup_verified = True  # type: ignore[attr-defined]
+        raise error
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=repo / "checkpoints.jsonl",
+            heartbeat_interval=0,
+            wall_timeout_seconds=1234,
+            plan_file=plan,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 1
+    kwargs = observed["call1"]
+    assert kwargs["wall_timeout_seconds"] == 1234
+
+
 def test_run_implementer_reports_missing_command(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "repo")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_dir = tmp_path / "prompt"
     prompt_dir.mkdir()
     prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
@@ -922,7 +1380,7 @@ def test_run_implementer_reports_missing_command(
 
     monkeypatch.setattr(MODULE, "resolve_cmdc", missing_command)
 
-    assert MODULE.run_implementer(repo, prompt_path) == 127
+    assert MODULE.run_implementer(repo, prompt_path, plan_file=plan) == 127
     assert "BLOCKER_CODE: CMD_NOT_FOUND" in capsys.readouterr().err
 
 
@@ -930,6 +1388,14 @@ def test_run_implementer_reports_incomplete_transaction_after_zero_exit(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "repo")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_dir = tmp_path / "prompt"
     prompt_dir.mkdir()
     prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
@@ -943,7 +1409,7 @@ def test_run_implementer_reports_incomplete_transaction_after_zero_exit(
         fake_process,
     )
 
-    assert MODULE.run_implementer(repo, prompt_path) == 1
+    assert MODULE.run_implementer(repo, prompt_path, plan_file=plan) == 1
     assert "BLOCKER_CODE: TRANSACTION_INCOMPLETE" in capsys.readouterr().err
 
 
@@ -951,6 +1417,14 @@ def test_strict_no_commit_still_transaction_incomplete(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-strict-no-commit")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -963,7 +1437,12 @@ def test_strict_no_commit_still_transaction_incomplete(
         ),
     )
 
-    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=False) == 1
+    assert (
+        MODULE.run_implementer(
+            repo, prompt_path, plan_file=plan, allow_no_change=False, allow_dirty=True
+        )
+        == 1
+    )
     assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
 
 
@@ -971,6 +1450,14 @@ def test_validation_only_succeeds_with_untracked_artifact_and_no_commit(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-validation-only")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -989,6 +1476,8 @@ def test_validation_only_succeeds_with_untracked_artifact_and_no_commit(
             prompt_path,
             checkpoint_file=checkpoint_path,
             allow_no_change=True,
+            plan_file=plan,
+            allow_dirty=True,
         )
         == 0
     )
@@ -1007,6 +1496,14 @@ def test_validation_only_accepts_documented_known_test_failures(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-validation-known-failures")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text(
         "pytest: 77 passed, 7 failed\n"
@@ -1029,6 +1526,8 @@ def test_validation_only_accepts_documented_known_test_failures(
             prompt_path,
             allow_no_change=True,
             allow_known_test_failures=True,
+            plan_file=plan,
+            allow_dirty=True,
         )
         == 0
     )
@@ -1074,6 +1573,14 @@ def test_validation_only_rejects_unrelated_known_token_failures(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-validation-unrelated-failures")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text(
         "pytest: 77 passed, 7 failed\n"
@@ -1096,6 +1603,8 @@ def test_validation_only_rejects_unrelated_known_token_failures(
             prompt_path,
             allow_no_change=True,
             allow_known_test_failures=True,
+            plan_file=plan,
+            allow_dirty=True,
         )
         == 1
     )
@@ -1106,6 +1615,14 @@ def test_recovery_uses_fresh_activity_deadline(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-recovery-fresh-deadline")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     prompt_path = _write_prompt(tmp_path, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
@@ -1145,10 +1662,16 @@ def test_recovery_uses_fresh_activity_deadline(
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0,
             recovery_max_turns=2,
+            plan_file=plan,
         )
         == 0
     )
 
+    events = [
+        json.loads(line)["event"]
+        for line in checkpoint_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert events == ["STARTING", "TIMED_OUT", "RECOVERY_FINISHED"]
     assert "STATUS: RECOVERED" in capsys.readouterr().out
     # The recovery process received an activity state with a fresh started
     # baseline, not the primary run's wall-clock origin.
@@ -1159,6 +1682,14 @@ def test_recovery_receives_its_own_activity_state_and_fingerprint(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-recovery-fresh-state")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     prompt_path = _write_prompt(tmp_path, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
@@ -1244,6 +1775,7 @@ def test_recovery_receives_its_own_activity_state_and_fingerprint(
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0,
             recovery_max_turns=2,
+            plan_file=plan,
         )
         == 0
     )
@@ -1262,6 +1794,14 @@ def test_unverified_watchdog_cleanup_blocks_before_recovery(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-unverified-cleanup")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     prompt_path = _write_prompt(tmp_path, report_path)
     checkpoint_path = repo / "checkpoints.jsonl"
@@ -1306,6 +1846,7 @@ def test_unverified_watchdog_cleanup_blocks_before_recovery(
             checkpoint_file=checkpoint_path,
             heartbeat_interval=0,
             recovery_max_turns=2,
+            plan_file=plan,
         )
         == 8
     )
@@ -1454,6 +1995,14 @@ def test_validation_only_blocked_when_report_absent(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-validation-no-report")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
     monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
     monkeypatch.setattr(
@@ -1464,7 +2013,12 @@ def test_validation_only_blocked_when_report_absent(
         ),
     )
 
-    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert (
+        MODULE.run_implementer(
+            repo, prompt_path, allow_no_change=True, plan_file=plan, allow_dirty=True
+        )
+        == 1
+    )
     assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
 
 
@@ -1472,6 +2026,14 @@ def test_validation_only_blocked_when_test_evidence_absent(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-validation-no-tests")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("STATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -1484,7 +2046,12 @@ def test_validation_only_blocked_when_test_evidence_absent(
         ),
     )
 
-    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert (
+        MODULE.run_implementer(
+            repo, prompt_path, allow_no_change=True, plan_file=plan, allow_dirty=True
+        )
+        == 1
+    )
     assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
 
 
@@ -1492,6 +2059,14 @@ def test_validation_only_blocked_when_tracked_change_exists(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-validation-tracked")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -1503,7 +2078,12 @@ def test_validation_only_blocked_when_tracked_change_exists(
 
     monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
-    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert (
+        MODULE.run_implementer(
+            repo, prompt_path, allow_no_change=True, plan_file=plan, allow_dirty=True
+        )
+        == 1
+    )
     assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
 
 
@@ -1511,6 +2091,14 @@ def test_validation_only_blocked_when_commit_exists(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     repo = _create_git_fixture(tmp_path / "fixture-validation-commit")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
     report_path = repo / "task-report.md"
     report_path.write_text("pytest 1 passed\nSTATUS: DONE\n", encoding="utf-8")
     prompt_path = _write_prompt(tmp_path, report_path)
@@ -1525,7 +2113,12 @@ def test_validation_only_blocked_when_commit_exists(
 
     monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
-    assert MODULE.run_implementer(repo, prompt_path, allow_no_change=True) == 1
+    assert (
+        MODULE.run_implementer(
+            repo, prompt_path, allow_no_change=True, plan_file=plan, allow_dirty=True
+        )
+        == 1
+    )
     assert "TRANSACTION_INCOMPLETE" in capsys.readouterr().err
 
 
@@ -1539,6 +2132,90 @@ def test_cli_help_exposes_allow_no_change_flag() -> None:
     )
     assert "--allow-no-change" in result.stdout
     assert "--allow-known-test-failures" in result.stdout
+
+
+def test_cli_help_exposes_timeout_seconds_alias() -> None:
+    import subprocess
+    result = subprocess.run(
+        [sys.executable, str(MODULE_PATH), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert "--wall-timeout-seconds" in result.stdout
+    assert "--timeout-seconds" in result.stdout
+    assert "--wall-timeout-seconds" in result.stdout.split(
+        "--timeout-seconds"
+    )[0], "the alias must be listed next to the canonical wall-timeout option"
+
+
+def test_cli_accepts_timeout_seconds_alias_and_rejects_non_positive_values() -> None:
+    import subprocess
+    result = subprocess.run(
+        [sys.executable, str(MODULE_PATH), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert "--timeout-seconds" in result.stdout
+    # An explicit alias value parses; the same value also parses through the
+    # canonical spelling, proving both flags share one parsing destination.
+    for flag in ("--timeout-seconds", "--wall-timeout-seconds"):
+        parsed = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--prompt-file", "prompt.md", flag, "3600", "--help"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert parsed.returncode == 0, f"{flag} did not parse"
+    # Non-positive values are rejected by the shared argparse constraint.
+    for value in ("0", "-1", "-900"):
+        rejected = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--prompt-file", "prompt.md", "--timeout-seconds", value],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert rejected.returncode == 2, f"--timeout-seconds {value} was accepted"
+        assert "must be a positive integer" in rejected.stderr
+
+
+def test_cli_alias_populates_shared_wall_timeout_destination(monkeypatch) -> None:
+    """Both spellings populate the argparse destination main() forwards into
+    the process-runner watchdog, with the exact value from the command line.
+
+    Unlike the --help checks, this drives the real parser and main() entry
+    point, so it fails when the alias registration is absent instead of only
+    proving option recognition.
+    """
+    received: list[int] = []
+
+    def fake_run_implementer(*args, **kwargs):
+        received.append(int(kwargs["wall_timeout_seconds"]))
+        return 0
+
+    monkeypatch.setattr(MODULE, "run_implementer", fake_run_implementer)
+    for flag in ("--timeout-seconds", "--wall-timeout-seconds"):
+        monkeypatch.setattr(
+            MODULE.sys,
+            "argv",
+            [
+                "cmdc-implementer.py",
+                "--prompt-file",
+                "prompt.md",
+                "--plan-file",
+                "plan.md",
+                flag,
+                "1234",
+            ],
+        )
+        assert MODULE.main() == 0
+
+    # Both spellings reach the single watchdog destination used by the
+    # process runner, carrying the exact command-line value.
+    assert received == [1234, 1234]
 
 
 def test_windows_tree_verification_is_fail_closed(monkeypatch) -> None:
@@ -1732,3 +2409,175 @@ def test_review_timeout_preserves_final_drain_output(
     # appended to it instead of being discarded.
     assert "drained-out" in result.stdout
     assert "drained-err" in result.stderr
+
+
+def test_failed_child_process_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A failed child process after a valid preflight retains the selected
+    mode and the complete initial Git snapshot through the real diagnostic
+    rendering path, not only the process details."""
+    repo = _create_git_fixture(tmp_path / "fixture-failed-process-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=4, stdout="partial output", stderr="MODEL_NOT_IN_PLAN"
+        ),
+    )
+
+    assert (
+        MODULE.run_implementer(repo, prompt_path, plan_file=plan, allow_dirty=True)
+        == 4
+    )
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: MODEL_UNAVAILABLE" in captured.err
+    assert "MODE: normal" in captured.err
+    # The full initial snapshot rides in the rendered diagnostic, including
+    # the canonical root, branch, HEAD, and every raw status line.
+    state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+    assert "MODE" in captured.err and "INITIAL_GIT_STATE" in captured.err
+
+
+def test_failed_child_process_yolo_mode_keeps_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """The selected yolo mode is preserved through the same real path."""
+    repo = _create_git_fixture(tmp_path / "fixture-failed-process-yolo-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=1, stdout="", stderr="unexpected failure"
+        ),
+    )
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            plan_file=plan,
+            allow_cmdc_yolo=True,
+            allow_dirty=True,
+        )
+        == 1
+    )
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: PROCESS_FAILED" in captured.err
+    assert "MODE: yolo" in captured.err
+    state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+
+
+def test_cmd_not_found_after_preflight_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A missing CMDc binary after a valid preflight keeps the selected mode
+    and the complete initial Git snapshot in the rendered diagnostic."""
+    repo = _create_git_fixture(tmp_path / "fixture-cmd-not-found-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def missing_command(command, prompt_text, cwd, **kwargs):
+        raise FileNotFoundError("cmdc binary not found")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", missing_command)
+
+    assert (
+        MODULE.run_implementer(repo, prompt_path, plan_file=plan, allow_dirty=True)
+        == 127
+    )
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: CMD_NOT_FOUND" in captured.err
+    assert "MODE: normal" in captured.err
+    # The full initial snapshot rides in the rendered diagnostic.
+    state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]

@@ -13,7 +13,12 @@ REGISTRY = REPO_ROOT / "skills" / "stout-skill-registry" / "registry.json"
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # Canonical digest for the copied-file contract: the sibling skill is
+    # checked out with CRLF by Windows core.autocrlf (i/lf w/crlf), while
+    # this package is forced LF by its scoped eol=lf attributes. The
+    # comparison is on canonicalized text (CRLF -> LF), so it is stable
+    # across checkout line endings yet still detects real content drift.
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def test_frontmatter_identifies_sdd_cmdc_opencode() -> None:
@@ -197,6 +202,40 @@ def test_skill_requires_tests_in_report_and_fresh_implementer_per_round() -> Non
     assert "tests" in content.lower() or "test" in content.lower()
 
 
+def test_skill_command_example_documents_timeout_alias_and_outer_window() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    # The dispatch example must show the explicit bounded timeout spelling
+    # alongside the canonical watchdog, and must bind the caller's outer
+    # process window to be at least as long as the adapter watchdog.
+    assert "--timeout-seconds" in content
+    assert "--wall-timeout-seconds" in content
+    assert "outer" in content.lower() or "outer process" in content.lower()
+
+
+def test_implementer_prompt_orders_work_before_host_owned_checks() -> None:
+    prompt = (SKILL / "implementer-prompt.md").read_text(encoding="utf-8")
+
+    # The prompt is a sequencing contract: focused tests, commit and report
+    # come before broad suite/Ruff/review work that the brief assigns to the
+    # host. Verify the sequence through the source document boundaries, not a
+    # standalone regex over the file text.
+    job_section = prompt.split("## Your Job")[1].split("## Escalation")[0]
+    focused_idx = job_section.index("focused")
+    commit_idx = job_section.index("commit")
+    report_idx = job_section.index("report")
+    broad_idx = job_section.index("broad")
+    host_idx = job_section.index("host")
+    assert focused_idx < commit_idx < report_idx < broad_idx < host_idx, (
+        "the prompt must order focused tests -> commit -> report before "
+        "broad suite/Ruff/review work assigned to the host"
+    )
+    assert prompt.index("focused") < prompt.index("broad"), (
+        "the sequencing contract must appear in the job section, not only "
+        "as a later reiteration"
+    )
+
+
 def test_skill_review_flow_uses_preview_metadata_for_diffs() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
@@ -232,9 +271,14 @@ def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
 
 
 def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:
-    # Files intentionally copied from the source skill must remain byte-identical.
+    # Files intentionally copied from the source skill must remain identical
+    # once checkout line endings are canonicalized (CRLF -> LF): the shared
+    # support scripts must remain the same canonical content.
+    # Exception: the implementer prompt is the evolving issue-131 prompt
+    # contract. It is allowed to diverge from the source sdd-cmdc copy when
+    # the issue-131 sequencing change is owned by this skill; the shared
+    # support scripts must remain canonical-identical.
     pairs = [
-        ("implementer-prompt.md", "implementer-prompt.md"),
         ("scripts/sdd-workspace", "scripts/sdd-workspace"),
         ("scripts/task-brief", "scripts/task-brief"),
         ("scripts/review-package", "scripts/review-package"),
@@ -243,6 +287,25 @@ def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:
     for new_relative, source_relative in pairs:
         assert digest(SKILL / new_relative) == digest(SOURCE / source_relative), (
             f"digest mismatch for {new_relative}"
+        )
+
+    # The implementer prompt may diverge only by carrying the issue-131
+    # sequencing contract; it must still contain the same core instructions.
+    prompt = (SKILL / "implementer-prompt.md").read_text(encoding="utf-8")
+    source_prompt = (SOURCE / "implementer-prompt.md").read_text(encoding="utf-8")
+    assert "focused" in prompt.lower()
+    assert "commit" in prompt.lower()
+    assert "report" in prompt.lower()
+    assert "host" in prompt.lower()
+    assert "## Your Job" in prompt
+    assert "## Escalation" in prompt
+    assert "## Report Format" in prompt
+    assert "deepseek/deepseek-v4-flash" in prompt
+    # The sequencing change must be confined to the job/iterating sections;
+    # the report contract and escalation must match the source.
+    for section in ("## Escalation", "## Report Format"):
+        assert prompt.split(section, 1)[1] == source_prompt.split(section, 1)[1], (
+            f"{section} must stay identical to the source prompt"
         )
 
 
