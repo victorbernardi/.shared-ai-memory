@@ -1421,6 +1421,13 @@ def run_implementer(
             stderr if completed.stderr else "",
             report_exists=report_exists,
         )
+        if diagnostic and preflight_snapshot is not None:
+            diagnostic["MODE"] = str(preflight_snapshot["mode"])
+            diagnostic["INITIAL_GIT_STATE"] = json.dumps(
+                preflight_snapshot["initial_git_state"],
+                ensure_ascii=False,
+                sort_keys=True,
+            )
         if known_failure_evidence:
             diagnostic = {}
             exit_code = 0
@@ -1429,6 +1436,13 @@ def run_implementer(
     except FileNotFoundError as exc:
         command = [cmd_bin, *COMMAND_FLAGS]
         diagnostic = classify_failure(127, str(exc), report_exists=False, cmd_found=False)
+        if diagnostic and preflight_snapshot is not None:
+            diagnostic["MODE"] = str(preflight_snapshot["mode"])
+            diagnostic["INITIAL_GIT_STATE"] = json.dumps(
+                preflight_snapshot["initial_git_state"],
+                ensure_ascii=False,
+                sort_keys=True,
+            )
         exit_code = 127
     except subprocess.TimeoutExpired as exc:
         command = build_command(
@@ -1797,6 +1811,14 @@ def run_implementer(
 
     if diagnostic:
         diagnostic["COMMAND"] = " ".join(str(part) for part in command)
+        if diagnostic.get("BLOCKER_CODE") == "REPORT_MISSING":
+            diagnostic["MODE"] = mode
+        if diagnostic.get("INITIAL_GIT_STATE") is None and preflight_snapshot is not None:
+            diagnostic["INITIAL_GIT_STATE"] = json.dumps(
+                preflight_snapshot["initial_git_state"],
+                ensure_ascii=False,
+                sort_keys=True,
+            )
         print(render_blocked(diagnostic), file=sys.stderr)
         return exit_code or 1
     return 0

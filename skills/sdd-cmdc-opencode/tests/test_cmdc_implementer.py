@@ -2163,3 +2163,175 @@ def test_review_timeout_preserves_final_drain_output(
     # appended to it instead of being discarded.
     assert "drained-out" in result.stdout
     assert "drained-err" in result.stderr
+
+
+def test_failed_child_process_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A failed child process after a valid preflight retains the selected
+    mode and the complete initial Git snapshot through the real diagnostic
+    rendering path, not only the process details."""
+    repo = _create_git_fixture(tmp_path / "fixture-failed-process-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=4, stdout="partial output", stderr="MODEL_NOT_IN_PLAN"
+        ),
+    )
+
+    assert (
+        MODULE.run_implementer(repo, prompt_path, plan_file=plan, allow_dirty=True)
+        == 4
+    )
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: MODEL_UNAVAILABLE" in captured.err
+    assert "MODE: normal" in captured.err
+    # The full initial snapshot rides in the rendered diagnostic, including
+    # the canonical root, branch, HEAD, and every raw status line.
+    state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+    assert "MODE" in captured.err and "INITIAL_GIT_STATE" in captured.err
+
+
+def test_failed_child_process_yolo_mode_keeps_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """The selected yolo mode is preserved through the same real path."""
+    repo = _create_git_fixture(tmp_path / "fixture-failed-process-yolo-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+    monkeypatch.setattr(
+        MODULE,
+        "_run_cmdc_process",
+        lambda command, prompt_text, cwd, **kwargs: SimpleNamespace(
+            returncode=1, stdout="", stderr="unexpected failure"
+        ),
+    )
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            plan_file=plan,
+            allow_cmdc_yolo=True,
+            allow_dirty=True,
+        )
+        == 1
+    )
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: PROCESS_FAILED" in captured.err
+    assert "MODE: yolo" in captured.err
+    state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+
+
+def test_cmd_not_found_after_preflight_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A missing CMDc binary after a valid preflight keeps the selected mode
+    and the complete initial Git snapshot in the rendered diagnostic."""
+    repo = _create_git_fixture(tmp_path / "fixture-cmd-not-found-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    prompt_path = _write_prompt(prompt_dir, repo / "missing-report.md")
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def missing_command(command, prompt_text, cwd, **kwargs):
+        raise FileNotFoundError("cmdc binary not found")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", missing_command)
+
+    assert (
+        MODULE.run_implementer(repo, prompt_path, plan_file=plan, allow_dirty=True)
+        == 127
+    )
+    captured = capsys.readouterr()
+    assert "BLOCKER_CODE: CMD_NOT_FOUND" in captured.err
+    assert "MODE: normal" in captured.err
+    # The full initial snapshot rides in the rendered diagnostic.
+    state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
