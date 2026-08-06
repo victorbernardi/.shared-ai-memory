@@ -996,6 +996,252 @@ def test_timeout_with_partial_diff_runs_bounded_cmdc_recovery(
     assert "STATUS: RECOVERED" in capsys.readouterr().out
 
 
+def test_unsuccessful_recovery_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A bounded recovery that ends without transactional evidence renders
+    through the real public path as IMPLEMENTATION INCOMPLETE and still
+    carries the selected mode and the complete initial Git snapshot."""
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-failed-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        # Recovery exits nonzero without committing or writing the report:
+        # not ready, so the diagnostic rides the classify_failure path.
+        return SimpleNamespace(returncode=3, stdout="", stderr="recovery failure")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+            plan_file=plan,
+            allow_dirty=True,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 2
+
+    captured = capsys.readouterr()
+    assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
+    assert "BLOCKER_CODE: PROCESS_FAILED" in captured.err
+    assert "MODE: normal" in captured.err
+    # The full initial snapshot rides in the rendered diagnostic, including
+    # the canonical root, branch, HEAD, and every raw status line. Only the
+    # single line carrying the snapshot is parsed, so the EVENT_LOG line
+    # emitted after it by _render_incomplete stays intact.
+    initial_state_line = next(
+        line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
+    )
+    state = json.loads(initial_state_line.split("INITIAL_GIT_STATE: ", 1)[1].strip())
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+    assert "EVENT_LOG: " in captured.err
+
+
+def test_recovery_incomplete_fallback_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A bounded recovery that ends without transactional evidence and
+    without a classifying failure falls back to RECOVERY_INCOMPLETE, which
+    still carries the selected mode and the complete initial Git snapshot
+    through the real public path."""
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-incomplete-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        # Recovery exits zero but never commits: not ready (head unchanged,
+        # no commits), and no classification matches because the report now
+        # exists, so the diagnostic falls back to the RECOVERY_INCOMPLETE
+        # contract.
+        report_path.write_text("STATUS: DONE\n", encoding="utf-8")
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+            plan_file=plan,
+            allow_dirty=True,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 2
+
+    captured = capsys.readouterr()
+    assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
+    assert "BLOCKER_CODE: RECOVERY_INCOMPLETE" in captured.err
+    assert "MODE: normal" in captured.err
+    state = json.loads(
+        next(
+            line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
+        ).split("INITIAL_GIT_STATE: ", 1)[1].strip()
+    )
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+
+
+def test_recovery_exception_keeps_mode_and_full_initial_git_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """When the bounded recovery itself raises, the RECOVERY_FAILED
+    diagnostic rendered through the real public path still carries the
+    selected mode and the complete initial Git snapshot."""
+    repo = _create_git_fixture(tmp_path / "fixture-recovery-exception-enrichment")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", "plan.md"], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    # A pre-existing tracked change makes the raw status lines observable in
+    # the initial snapshot carried by the diagnostic.
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    expected_status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--short", "--untracked-files=all"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    calls = {"cmdc": 0}
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path("cmdc"))
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls["cmdc"] += 1
+        if calls["cmdc"] == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        raise MODULE.subprocess.TimeoutExpired(
+            command, timeout=0.01, stderr="recovery watchdog stopped it"
+        )
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+            plan_file=plan,
+            allow_dirty=True,
+        )
+        == 8
+    )
+    assert calls["cmdc"] == 2
+
+    captured = capsys.readouterr()
+    assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
+    assert "BLOCKER_CODE: TIMEOUT" in captured.err
+    assert "recovery failed: " in captured.err
+    assert "MODE: normal" in captured.err
+    state = json.loads(
+        next(
+            line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
+        ).split("INITIAL_GIT_STATE: ", 1)[1].strip()
+    )
+    assert state["git_root"] == str(repo.resolve())
+    assert state["branch"] == "feature"
+    assert state["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert state["status"] == expected_status
+    assert " M tracked.py" in state["status"]
+
+
 def test_run_implementer_accepts_success_with_transaction_evidence(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

@@ -467,6 +467,24 @@ def render_blocked(diagnostic: dict[str, str]) -> str:
     )
 
 
+def _enrich_blocked_context(
+    diagnostic: dict[str, str], preflight_snapshot: dict[str, object]
+) -> None:
+    """Carry the explicit mode and the complete initial Git snapshot on any
+    diagnostic that renders through the blocked/incomplete renderers.
+
+    The snapshot holds only Git-derived fields (canonical root, branch, HEAD,
+    and raw ``git status --short`` lines), so no secrets leak.
+    """
+    diagnostic["MODE"] = str(preflight_snapshot["mode"])
+    if diagnostic.get("INITIAL_GIT_STATE") is None:
+        diagnostic["INITIAL_GIT_STATE"] = json.dumps(
+            preflight_snapshot["initial_git_state"],
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+
+
 def _run_git(cwd: Path, *args: str) -> str:
     result = subprocess.run(
         ["git", *args],
@@ -1677,6 +1695,8 @@ def run_implementer(
                         f"recovery failed: {recovery_error}"
                     ).strip()
                     command = recovery_command
+            if preflight_snapshot is not None:
+                _enrich_blocked_context(diagnostic, preflight_snapshot)
             diagnostic["COMMAND"] = " ".join(str(part) for part in command)
             print(_render_incomplete(diagnostic, snapshot, checkpoint_file), file=sys.stderr)
             return exit_code
