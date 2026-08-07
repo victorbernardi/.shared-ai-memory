@@ -1,0 +1,4 @@
+interface:
+  display_name: "Inova Protheus Fabric SQL Review"
+  short_description: "Revisão SQL de Protheus no Fabric para pipelines Python da Inova"
+  default_prompt: "Revise esta consulta Python/SQL conforme o contrato Protheus-Fabric da Inova e entregue achados com evidências."
