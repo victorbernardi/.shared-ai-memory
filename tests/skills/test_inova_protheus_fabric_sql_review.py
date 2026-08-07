@@ -63,3 +63,23 @@ def test_skill_contains_no_auxiliary_installation_document():
     assert not (SKILL / "README.md").exists()
     assert not (SKILL / "INSTALLATION_GUIDE.md").exists()
     assert not (SKILL / "QUICK_REFERENCE.md").exists()
+
+
+def test_source_contract_uses_observed_fields_and_marks_unknown_sources():
+    content = _read("references/inova-source-contract.md")
+    for term in ("VV1_CHASSI", "VV2_MODVEI", "VO1_NUMOSV", "VMB_NUMOSV", "R_E_C_N_O_", "D_E_L_E_T_ <> '*'", "SF3010", "SFT010", "REVIEW INCOMPLETE"):
+        assert term in content
+    assert "C0_FILIAL" not in content
+    assert "one row per OS" not in content
+
+
+def test_skill_uses_trigger_only_description_and_maps_six_official_skills():
+    content = _read("SKILL.md")
+    _, frontmatter, _ = content.split("---", 2)
+    keys = {line.split(":", 1)[0].strip() for line in frontmatter.splitlines() if ":" in line}
+    assert keys == {"name", "description"}
+    assert "description: Use when" in frontmatter
+    assert "to verify source contract" not in frontmatter
+    mapping = _read("references/totvs-to-inova-map.md")
+    for term in ("sql-code-review", "sql-optimization", "query-builder", "data-dictionary-lookup", "code-review", "refactor"):
+        assert term in mapping

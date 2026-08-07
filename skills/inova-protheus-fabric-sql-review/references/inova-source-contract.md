@@ -1,148 +1,151 @@
 # Contrato de Fontes Inova — Protheus exposto no Fabric
 
 Contrato **observado** apenas, extraído dos projetos Inova citados na revisão.
-Nenhuma regra aqui é prescritiva fora da fonte que a originou. Este documento
-não substitui a evidência: toda aplicação exige confirmar a fonte e o arquivo
-onde o contrato foi observado.
+Nenhuma regra aqui é prescritiva fora da fonte que a originou, e nenhum campo
+não observado é declarado. Este documento não substitui a evidência: toda
+aplicação exige confirmar a fonte e o arquivo onde o contrato foi observado.
+Sem evidência, grão/chave/período/status são desconhecidos e o status final é
+**REVIEW INCOMPLETE**.
 
 ## 1. Regras de exclusão — distinguir, nunca universalizar
 
-- **Tabelas cruas observadas** (`SA1010`, `VV1010`, `VV2010`, `VO1010`,
-  `VMB010`, `SF2010`, `SF3010`, `SFT010`): exclusão lógica filtrada por
-  `D_E_L_E_T_ = ''` (coluna vazia) — padrão observado nos pipelines Inova que
-  leem essas tabelas.
-- **Pesquisa VOO010 (research)**: usa `COALESCE(VOO.D_E_L_E_T_, '') <> '*'`
-  — regra própria dessa consulta de pesquisa; não é um padrão de pipeline e não
-  pode ser transplantada.
+- **`D_E_L_E_T_ = ''`** (coluna vazia) é observado em `src/seo_dna_ingest_fabric.py`
+  para leitura de dados do pipeline.
+- **`D_E_L_E_T_ <> '*'`** é observado na pesquisa VOO010 (research) e no
+  `sandbox/investiga_protheus.py` (SF2010 agrupado por `F2_FILIAL`/count).
+- **`COALESCE(VOO.D_E_L_E_T_, '') <> '*'`** é a regra própria da pesquisa VOO010;
+  não é um padrão de pipeline e não pode ser transplantada.
 - **Views e snapshots** (`vw_VENDAS`, `f_vendas_hist31102025`): nenhuma das
-  regras acima se aplica automaticamente. O contrato da view/snapshot precisa
-  ser observado ou documentado; sem evidência, a regra de exclusão é
+  regras acima se aplica automaticamente — o contrato da view/snapshot não
+  herda filtros de exclusão de tabelas cruas; sem evidência própria, a regra é
   desconhecida.
+- As duas formas observadas (`= ''` e `<> '*'`) convivem em ativos diferentes;
+  **nenhuma é regra universal Protheus**.
 
-## 2. Tabelas cruas (contrato observado)
+## 2. Fontes observadas (contrato registrado)
 
-Cada família registra: tipo de fonte, grão observado, chave, período/autoridade
-e caveat de exclusão/status.
+Cada família registra: tipo de fonte, o que foi observado, autoridade do
+arquivo e caveat de grão/chave/exclusão.
 
-### SA1010 — Cadastro de clientes
-
-- **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: um registro de cadastro de cliente por chave de negócio.
-- **Chave**: `A1_COD` (código do cliente).
-- **Período/autoridade**: cadastro vigente; não é fonte de movimento — período
-  não se aplica como filtro temporal de fato.
-- **Exclusão/status**: `D_E_L_E_T_ = ''` (tabela crua observada).
-- **Caveat**: não usar para faturamento; status fiscal nativo não se aplica.
-
-### VV1010 — Pedidos de venda (workflow)
+### SA1010 — dados de cliente (cadastro)
 
 - **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: um pedido por linha de pedido (itens).
-- **Chave**: `V1_FILIAL` + `V1_NUM` (cabeçalho) / `V1_ITEM` (linha).
-- **Período/autoridade**: data do pedido (`V1_EMISSAO`); autoridade conforme
-  projeto citado.
-- **Exclusão/status**: `D_E_L_E_T_ = ''`; status de workflow deve ser tratado
-  com evidência do projeto (ex.: cancelamento).
+- **Observado**: campos `A1_COD`, `A1_LOJA`, `A1_CGC`, `A1_NOME`.
+- **Autoridade**: `pipelines/potencial-clientes/01_DNA/extract.py`;
+  exclusão `D_E_L_E_T_ = ''` observada em `src/seo_dna_ingest_fabric.py`.
+- **Grão**: dado de cadastro de cliente.
+- **Chave**: `A1_COD`+`A1_LOJA` é **candidata** — exige validação de
+  duplicidade/cardinalidade antes de ser provada.
+- **Caveat**: cadastro não é fonte de movimento; não usar para faturamento.
 
-### VV2010 — Faturamento/pedido faturado (workflow)
-
-- **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: documento de faturamento por filial + número + parcela/série.
-- **Chave**: `V2_FILIAL` + `V2_NUM` + `V2_SERIE` (+ `V2_PARCELA` quando cabível).
-- **Período/autoridade**: data de emissão do faturamento (`V2_EMISSAO`).
-- **Exclusão/status**: `D_E_L_E_T_ = ''`; status nativo de nota fiscal deve ser
-  conferido na fonte.
-
-### VO1010 — Ordens de serviço
+### VV1010 — dados de veículo
 
 - **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: uma ordem de serviço (cabeçalho).
-- **Chave**: `C0_FILIAL` + `C0_NUM` (número da OS).
-- **Período/autoridade**: data de emissão/abertura da OS.
-- **Exclusão/status**: `D_E_L_E_T_ = ''`; status nativo de OS (aberta, encerrada,
-  cancelada) é campo próprio — não confundir com exclusão.
+- **Observado**: campos `VV1_CHASSI`, `VV1_MODVEI`, `VV1_FABMOD`, `VV1_DOCIND`.
+- **Autoridade**: `pipelines/potencial-clientes/01_DNA/extract.py`.
+- **Grão**: dado de veículo por chassi.
+- **Chave**: chassi é **candidata** — exige validação de duplicidade/
+  cardinalidade antes de ser provada.
+- **Caveat**: sem evidência, não afirmar período ou chave composta adicional.
 
-### VMB010 — Cadastro/operação (movimento por OS)
-
-- **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: um registro de movimento/operação por OS.
-- **Chave**: número de OS (`NUM_OS` ou equivalente observado no projeto).
-- **Período/autoridade**: conforme projeto citado.
-- **Exclusão/status**: `D_E_L_E_T_ = ''` (tabela crua observada).
-
-### VOO010 — OS / pesquisa de research (regra própria)
-
-- **Tipo de fonte**: tabela crua, mas consultada em **pesquisa de research**
-  com contrato distinto.
-- **Grão**: uma ordem de serviço (pesquisa).
-- **Chave**: `C0_NUM`/`O.C0_NUM` (número da OS).
-- **Exclusão/status**: a pesquisa observada aplica
-  `COALESCE(VOO.D_E_L_E_T_, '') <> '*'` — regra **exclusiva da pesquisa**, com
-  `COALESCE` tratando `NULL` e `<> '*'` para excluir linhas marcadas.
-- **Caveat**: não transplantar essa regra para pipelines de tabela crua, views
-  ou snapshots sem evidência equivalente.
-
-### SF2010 — Notas fiscais de saída
+### VV2010 — dados de referência de modelo
 
 - **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: uma nota fiscal de saída (por filial, série, número).
-- **Chave**: `F2_FILIAL` + `F2_DOC` + `F2_SERIE`.
-- **Período/autoridade**: data de emissão (`F2_EMISSAO`); autoridade conforme
-  projeto citado.
-- **Exclusão/status**: `D_E_L_E_T_ = ''`; status fiscal nativo (`F2_STATUS`,
-  cancelada, devolução) deve ser tratado com evidência.
+- **Observado**: campos `VV2_MODVEI`, `VV2_DESMOD`, `VV2_GRUMOD`, `VV2_ESPVEI`.
+- **Autoridade**: `pipelines/potencial-clientes/01_DNA/extract.py`.
+- **Grão**: referência de modelo.
+- **Chave**: modelo é **candidata** — exige validação de duplicidade/
+  cardinalidade antes de ser provada.
+- **Caveat**: combinação modelo-código não é chave provada sem validação.
 
-### SF3010 — Devoluções de venda
+### VO1010 — evidência de oficina/OS
+
+- **Tipo de fonte**: pesquisa (research) sobre tabela crua Protheus.
+- **Observado**: campos `VO1_FILIAL`, `VO1_NUMOSV`, `VO1_CHASSI`, `VO1_DATABE`,
+  `VO1_DATSAI`, `VO1_STATUS` (status e flags nativos preservados).
+- **Autoridade**: `projects/Relatórios/recuperação-POPs/docs/research/queries/fabric_vmb_vo1_operational_profile.sql`.
+- **Grão**: evidência de oficina/OS por OS (não afirmado como único).
+- **Chave**: filial+OS é **candidata de join**, nunca chave única provada.
+- **Caveat**: status nativo da OS não é status fiscal.
+
+### VMB010 — evidência de garantia/DTAC
+
+- **Tipo de fonte**: pesquisa (research) sobre tabela crua Protheus.
+- **Observado**: campos `VMB_FILIAL`, `VMB_CODGAR`, `VMB_NUMOSV`, `VMB_CHASSI`,
+  `VMB_DTACCS`, `VMB_DTACSL`, `VMB_STATUS` (status e flags nativos preservados).
+- **Autoridade**: `projects/Relatórios/recuperação-POPs/docs/research/queries/fabric_vmb_dtac_basic.sql`.
+- **Grão**: evidência de garantia/DTAC por OS (não afirmado como único).
+- **Chave**: filial+OS é **candidata de join**, nunca chave única provada.
+- **Caveat**: execução nativa (garantia/DTAC) não é status fiscal.
+
+### VOO010 — detalhe por natureza (research, regra própria)
+
+- **Tipo de fonte**: pesquisa (research) sobre tabela crua Protheus.
+- **Observado**: campos `VOO_FILIAL`, `VOO_NUMOSV`, `VOO_NATPEC`, `VOO_NATSRV`,
+  `VOO_FATPAR`, `VOO_TOTPEC`, `VOO_TOTSRV` e `R_E_C_N_O_`.
+- **Autoridade**: `projects/Relatórios/recuperação-POPs/docs/research/queries/fabric_voo010_intervention_detail.sql`
+  e `fabric_voo010_nature_profile.sql`.
+- **Grão**: detalhe por natureza — **não é uma linha por OS**; agregação por
+  natureza muda o grão.
+- **Predicado de exclusão**: `COALESCE(VOO.D_E_L_E_T_, '') <> '*'` — exato da
+  pesquisa; não transplantar para pipelines, views ou snapshots.
+
+### SF2010 — notas fiscais de saída (contagem apenas)
 
 - **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: uma devolução de venda.
-- **Chave**: `F3_FILIAL` + `F3_DOC` + `F3_SERIE`.
-- **Período/autoridade**: data de emissão (`F3_EMISSAO`).
-- **Exclusão/status**: `D_E_L_E_T_ = ''`; classificação fiscal conforme
-  evidência do projeto.
+- **Observado**: apenas que a tabela foi agrupada por `F2_FILIAL` com count e
+  `D_E_L_E_T_ <> '*'`.
+- **Autoridade**: `pipelines/potencial-clientes/02_Faturamento/sandbox/investiga_protheus.py`.
+- **Caveat**: **não** afirmar chave única, período ou schema completo — a fonte
+  só estabelece o agrupamento observado.
 
-### SFT010 — Títulos a receber
+## 3. Fontes sem suporte — REVIEW INCOMPLETE
 
-- **Tipo de fonte**: tabela crua Protheus exposta no Fabric.
-- **Grão**: um título a receber (parcela).
-- **Chave**: `F4_FILIAL` + `F4_DOC` + `F4_PARCELA`.
-- **Período/autoridade**: data de vencimento/emissão (`F4_VENCREA`/`F4_EMISSAO`).
-- **Exclusão/status**: `D_E_L_E_T_ = ''`; status de baixa/liquidação é campo
-  próprio (`F4_BAIXA`) — não confundir com exclusão.
+### SF3010
 
-## 3. Views e snapshots (contrato próprio)
+- Nenhuma query ou projeção de suporte para `SF3010` foi encontrada nos caminhos
+  do projeto fornecidos.
+- Tipo de fonte, grão, chave, período e status: **desconhecidos**.
+- Resultado: **REVIEW INCOMPLETE** — não inventar campos.
 
-### vw_VENDAS — view analítica de vendas
+### SFT010
+
+- Nenhuma query ou projeção de suporte para `SFT010` foi encontrada nos caminhos
+  do projeto fornecidos.
+- Tipo de fonte, grão, chave, período e status: **desconhecidos**.
+- Resultado: **REVIEW INCOMPLETE** — não inventar campos.
+
+## 4. Views e snapshots (contrato próprio)
+
+### vw_VENDAS — view corrente (Nov/2025 em diante)
 
 - **Tipo de fonte**: view analítica Inova no Fabric.
-- **Grão**: a definir pelo contrato da view — não assumir grão de tabela crua.
-- **Chave**: definida pela view (ex.: chave de faturamento consolidado).
-- **Período/autoridade**: o contrato da view deve documentar o corte temporal.
-- **Exclusão/status**: regra de exclusão da view, **não** `D_E_L_E_T_ = ''`
-  automático. Sem evidência da view → **REVIEW INCOMPLETE**.
+- **Período**: Nov/2025 em diante — view corrente.
+- **Autoridade**: `02_Faturamento/queries/vendas_pecas_construcao.sql` e seu
+  `CONTEXT.md`.
+- **Caveat**: contrato da view não herda filtros de exclusão de tabelas cruas;
+  grão/chave conforme contrato da view — sem evidência, **REVIEW INCOMPLETE**.
 
-### f_vendas_hist31102025 — snapshot histórico de vendas
+### f_vendas_hist31102025 — snapshot histórico (Jan–Out/2025)
 
-- **Tipo de fonte**: snapshot histórico (corte `31/10/2025` no nome).
-- **Grão**: a confirmar no contrato do snapshot.
-- **Chave**: a confirmar (documento/linha de venda no corte).
-- **Período/autoridade**: corte fixo indicado no nome; validar se o snapshot
-  contém apenas o corte ou janela histórica.
-- **Exclusão/status**: regra própria do snapshot; nenhuma regra de tabela crua
-  se aplica sem evidência.
+- **Tipo de fonte**: snapshot histórico Inova no Fabric.
+- **Período**: Jan–Out/2025 (corte no nome).
+- **Autoridade**: `02_Faturamento/queries/vendas_pecas_construcao.sql` e seu
+  `CONTEXT.md`.
+- **Caveat**: snapshot e view corrente são **períodos distintos**; o contrato do
+  snapshot não herda filtros de exclusão de tabelas cruas.
 
-## 4. Denominador POPS e status nativo/fiscal
+## 5. Denominador POPS e status nativo/fiscal
 
-- **POPS**: indicador de faturamento da Inova cujo **denominador** é a base de
-  vendas válida. Ao revisar consultas que alimentam POPS, verificar se o
-  denominador usa a mesma fonte/grão/período do numerador — divergência é
-  achado de corretude.
-- **Execução nativa vs. status fiscal**: distinguir sempre (a) o que a fonte
-  nativa Protheus registra (status de workflow, exclusão lógica) de (b) o que o
-  Fabric/JDBC entrega (tipos, nulos, particionamento). Uma consulta não pode
-  misturar os dois sem documentar a conversão.
+- **POPS**: `Product_details_full.parquet` é o **denominador** da base POPS.
+- **Autoridade**: `recuperação-POPs/CONTEXT.md` e `src/recuperacao_pops/extract.py`
+  (precedência de fontes).
+- **Execução nativa vs. fiscal**: distinguir sempre (a) o que a fonte nativa
+  Protheus registra (execução/status de oficina, garantia/DTAC, exclusão lógica)
+  de (b) status fiscal. Uma consulta não pode misturar os dois sem documentar a
+  conversão.
 
-## 5. Evidência obrigatória
+## 6. Evidência obrigatória
 
 Para aplicar qualquer contrato deste documento, cite o arquivo/linha do projeto
 onde foi observado, ou registre a evidência coletada na revisão. Sem isso, o
