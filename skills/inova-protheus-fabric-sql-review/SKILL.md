@@ -107,7 +107,7 @@ from shared.query_loader import load_query
 
 query = load_query(Path("queries/sa1010.sql"))
 df = pd.read_sql(query, conexao_fabric)
-df = df[df["D_E_L_E_T_"] == " "]
+df = df[df["D_E_L_E_T_"] == ""]
 ```
 
 Revisão (formato exigido):

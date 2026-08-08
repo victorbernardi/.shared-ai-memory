@@ -65,6 +65,12 @@ def test_skill_contains_no_auxiliary_installation_document():
     assert not (SKILL / "QUICK_REFERENCE.md").exists()
 
 
+def test_skill_example_uses_observed_empty_string_delete_marker():
+    content = _read("SKILL.md")
+
+    assert 'df = df[df["D_E_L_E_T_"] == ""]' in content
+    assert 'df = df[df["D_E_L_E_T_"] == " "]"' not in content
+
 def test_source_contract_uses_observed_fields_and_marks_unknown_sources():
     content = _read("references/inova-source-contract.md")
     for term in ("VV1_CHASSI", "VV2_MODVEI", "VO1_NUMOSV", "VMB_NUMOSV", "R_E_C_N_O_", "D_E_L_E_T_ <> '*'", "SF3010", "SFT010", "REVIEW INCOMPLETE"):
