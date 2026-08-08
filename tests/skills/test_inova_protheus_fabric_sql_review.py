@@ -69,7 +69,8 @@ def test_skill_example_uses_observed_empty_string_delete_marker():
     content = _read("SKILL.md")
 
     assert 'df = df[df["D_E_L_E_T_"] == ""]' in content
-    assert 'df = df[df["D_E_L_E_T_"] == " "]"' not in content
+    assert 'df = df[df["D_E_L_E_T_"] == " "]' not in content
+
 
 def test_source_contract_uses_observed_fields_and_marks_unknown_sources():
     content = _read("references/inova-source-contract.md")
