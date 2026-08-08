@@ -1460,7 +1460,31 @@
       "updated_at": "2026-07-17",
       "author": "Victor",
       "notes": "Criada após auditoria APPROVED; compatível com Codex/GPT, Claude Code e CommandCode."
-    }  ],
+    },
+    {
+      "name": "inova-protheus-fabric-sql-review",
+      "path": "skills/inova-protheus-fabric-sql-review",
+      "tier": 1,
+      "category": "data",
+      "role": "Revisão baseada em evidências de consultas Python/SQL de leitura contra dados Protheus no Microsoft Fabric, JDBC, views e snapshots analíticos da Inova",
+      "triggers": [
+        "review sql",
+        "review query",
+        "Protheus Fabric",
+        "Fabric JDBC",
+        "query_loader",
+        "SQL audit",
+        "inova-protheus-fabric-sql-review"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-08-08",
+      "updated_at": "2026-08-08",
+      "author": "Victor",
+      "notes": "Criada via stout-create-skill. Auditor APPROVED (overlaps=0). Validada e instalada nas plataformas Codex, Claude Code e CommandCode.",
+      "promoted_at": "2026-08-08"
+    }
+  ],
   "deprecated": [
     {
       "name": "stout-governance-orchestration-engine",
