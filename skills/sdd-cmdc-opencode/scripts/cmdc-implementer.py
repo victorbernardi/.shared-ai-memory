@@ -896,22 +896,28 @@ def _drain_stream(
             _record_activity(activity_state, "event")
             if event_log is not None:
                 try:
-                    with event_log.open("a", encoding="utf-8", newline="\n") as handle:
-                        handle.write(
-                            json.dumps(
-                                {
-                                    "stream": stream_name,
-                                    "elapsed_seconds": round(
-                                        time.monotonic()
-                                        - float(activity_state["started"]),
-                                        1,
-                                    ),
-                                    "text": text,
-                                },
-                                ensure_ascii=False,
+                    event_log_lock = activity_state.setdefault(
+                        "event_log_lock", threading.Lock()
+                    )
+                    with event_log_lock:
+                        with event_log.open(
+                            "a", encoding="utf-8", newline="\n"
+                        ) as handle:
+                            handle.write(
+                                json.dumps(
+                                    {
+                                        "stream": stream_name,
+                                        "elapsed_seconds": round(
+                                            time.monotonic()
+                                            - float(activity_state["started"]),
+                                            1,
+                                        ),
+                                        "text": text,
+                                    },
+                                    ensure_ascii=False,
+                                )
+                                + "\n"
                             )
-                            + "\n"
-                        )
                 except OSError:
                     pass
     finally:
