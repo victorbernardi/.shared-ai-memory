@@ -93,6 +93,32 @@ def test_build_command_accepts_a_task_specific_turn_limit() -> None:
     assert command[command.index("--model") + 1] == "deepseek/deepseek-v4-flash"
 
 
+def test_platform_command_wraps_windows_script_shims(monkeypatch) -> None:
+    monkeypatch.setattr(MODULE.os, "name", "nt")
+    monkeypatch.setenv("COMSPEC", r"C:\Windows\System32\cmd.exe")
+    monkeypatch.setattr(MODULE.shutil, "which", lambda name: r"C:\Program Files\PowerShell\pwsh.exe")
+
+    cmd_command = MODULE._platform_command([r"C:\Users\me\AppData\Roaming\npm\cmdc.cmd", "-p"])
+    ps_command = MODULE._platform_command([r"C:\Users\me\AppData\Roaming\npm\cmdc.ps1", "-p"])
+
+    assert cmd_command == [
+        r"C:\Windows\System32\cmd.exe",
+        "/d",
+        "/c",
+        r"C:\Users\me\AppData\Roaming\npm\cmdc.cmd",
+        "-p",
+    ]
+    assert ps_command == [
+        r"C:\Program Files\PowerShell\pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        r"C:\Users\me\AppData\Roaming\npm\cmdc.ps1",
+        "-p",
+    ]
+
+
 def test_classify_failure_reports_missing_command() -> None:
     diagnostic = MODULE.classify_failure(127, "", report_exists=False, cmd_found=False)
 
@@ -149,7 +175,7 @@ def test_initial_workspace_snapshot_failure_blocks_before_cmdc(
     subprocess.run(
         ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
     )
-    prompt_path = _write_prompt(tmp_path, tmp_path / "task-report.md")
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
     monkeypatch.setattr(
         MODULE,
         "collect_workspace_snapshot",
@@ -214,6 +240,18 @@ def test_classify_failure_reports_timeout() -> None:
     diagnostic = MODULE.classify_failure(8, "max turns reached", report_exists=False)
 
     assert diagnostic["BLOCKER_CODE"] == "TIMEOUT"
+
+
+def test_classify_failure_distinguishes_worker_turn_limit() -> None:
+    diagnostic = MODULE.classify_failure(
+        8,
+        "max turns reached",
+        report_exists=False,
+        phase="WORKER_TURN_LIMIT",
+    )
+
+    assert diagnostic["BLOCKER_CODE"] == "WORKER_TURN_LIMIT"
+    assert diagnostic["PHASE"] == "WORKER_TURN_LIMIT"
 
 
 def test_classify_failure_reports_generic_process_failure() -> None:
@@ -1384,6 +1422,75 @@ def test_run_implementer_reports_missing_command(
     assert "BLOCKER_CODE: CMD_NOT_FOUND" in capsys.readouterr().err
 
 
+def test_run_implementer_reports_missing_prompt_as_structured_block(
+    tmp_path: Path, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-missing-prompt")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "plan"], check=True)
+
+    result = MODULE.run_implementer(
+        repo, repo / "missing-prompt.md", plan_file=plan
+    )
+
+    assert result == 1
+    error = capsys.readouterr().err
+    assert "STATUS: BLOCKED" in error
+    assert "BLOCKER_CODE: PROMPT_NOT_FOUND" in error
+    assert "FileNotFoundError" not in error
+
+
+def test_run_implementer_blocks_unreadable_prompt_before_cmdc(
+    tmp_path: Path, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-invalid-prompt")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "plan"], check=True)
+    prompt = tmp_path / "prompt.md"
+    prompt.write_bytes(b"Write your full report to report.md:\n\xff")
+
+    result = MODULE.run_implementer(repo, prompt, plan_file=plan)
+
+    assert result == 1
+    error = capsys.readouterr().err
+    assert "STATUS: BLOCKED" in error
+    assert "BLOCKER_CODE: PROMPT_UNREADABLE" in error
+    assert "UnicodeDecodeError" not in error
+
+
+def test_run_implementer_blocks_report_and_checkpoint_outside_repository(
+    tmp_path: Path, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-output-boundary")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "plan"], check=True)
+
+    prompt = tmp_path / "prompt.md"
+    outside_report = tmp_path / "outside-report.md"
+    prompt.write_text(
+        f"Write your full report to {outside_report}:\n", encoding="utf-8"
+    )
+    result = MODULE.run_implementer(repo, prompt, plan_file=plan)
+    assert result == 1
+    assert "BLOCKER_CODE: REPORT_OUTSIDE_REPOSITORY" in capsys.readouterr().err
+
+    prompt.write_text("Write your full report to report.md:\n", encoding="utf-8")
+    result = MODULE.run_implementer(
+        repo,
+        prompt,
+        checkpoint_file=tmp_path / "outside-checkpoint.jsonl",
+        plan_file=plan,
+    )
+    assert result == 1
+    assert "BLOCKER_CODE: CHECKPOINT_OUTSIDE_REPOSITORY" in capsys.readouterr().err
+
+
 def test_run_implementer_reports_incomplete_transaction_after_zero_exit(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -1411,6 +1518,57 @@ def test_run_implementer_reports_incomplete_transaction_after_zero_exit(
 
     assert MODULE.run_implementer(repo, prompt_path, plan_file=plan) == 1
     assert "BLOCKER_CODE: TRANSACTION_INCOMPLETE" in capsys.readouterr().err
+
+
+def test_recovery_uses_windows_launcher_and_preserves_primary_failure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-windows-recovery")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "plan"], check=True)
+    report_path = repo / "task-report.md"
+    prompt_path = _write_prompt(tmp_path, report_path)
+    checkpoint_path = repo / "checkpoints.jsonl"
+    calls: list[list[str]] = []
+
+    monkeypatch.setattr(MODULE.os, "name", "nt")
+    monkeypatch.setenv("COMSPEC", r"C:\Windows\System32\cmd.exe")
+    monkeypatch.setattr(
+        MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": Path(r"C:\npm\cmdc.cmd")
+    )
+
+    def fake_process(command, prompt_text, cwd, **kwargs):
+        calls.append(command)
+        if len(calls) == 1:
+            (repo / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+            raise MODULE.subprocess.TimeoutExpired(
+                command, timeout=0.01, stderr="max turns reached"
+            )
+        raise FileNotFoundError("launcher unavailable")
+
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
+
+    assert (
+        MODULE.run_implementer(
+            repo,
+            prompt_path,
+            checkpoint_file=checkpoint_path,
+            heartbeat_interval=0,
+            recovery_max_turns=2,
+            plan_file=plan,
+        )
+        == 8
+    )
+
+    expected_launcher = r"C:\Windows\System32\cmd.exe"
+    assert len(calls) == 2
+    assert all(command[:3] == [expected_launcher, "/d", "/c"] for command in calls)
+    error = capsys.readouterr().err
+    assert "BLOCKER_CODE: TIMEOUT" in error
+    assert "PRIMARY_BLOCKER_CODE: TIMEOUT" in error
+    assert "RECOVERY_BLOCKER_CODE: RECOVERY_SPAWN_FAILED" in error
 
 
 def test_strict_no_commit_still_transaction_incomplete(
