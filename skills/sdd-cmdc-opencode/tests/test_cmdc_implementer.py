@@ -1546,7 +1546,7 @@ def test_recovery_uses_windows_launcher_and_preserves_primary_failure(
             raise MODULE.subprocess.TimeoutExpired(
                 command, timeout=0.01, stderr="max turns reached"
             )
-        return SimpleNamespace(returncode=3, stdout="", stderr="recovery failed")
+        raise FileNotFoundError("launcher unavailable")
 
     monkeypatch.setattr(MODULE, "_run_cmdc_process", fake_process)
 
@@ -1568,7 +1568,7 @@ def test_recovery_uses_windows_launcher_and_preserves_primary_failure(
     error = capsys.readouterr().err
     assert "BLOCKER_CODE: TIMEOUT" in error
     assert "PRIMARY_BLOCKER_CODE: TIMEOUT" in error
-    assert "RECOVERY_BLOCKER_CODE: PROCESS_FAILED" in error
+    assert "RECOVERY_BLOCKER_CODE: RECOVERY_SPAWN_FAILED" in error
 
 
 def test_strict_no_commit_still_transaction_incomplete(

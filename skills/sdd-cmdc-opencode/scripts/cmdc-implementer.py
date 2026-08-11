@@ -1506,6 +1506,7 @@ def run_implementer(
         if checkpoint_file is not None
         else None
     )
+    cmd_path: Path | None = None
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
@@ -1603,7 +1604,20 @@ def run_implementer(
             exit_code = completed.returncode
     except FileNotFoundError as exc:
         command = [cmd_bin, *COMMAND_FLAGS]
-        diagnostic = classify_failure(127, str(exc), report_exists=False, cmd_found=False)
+        if cmd_path is None:
+            diagnostic = classify_failure(
+                127, str(exc), report_exists=False, cmd_found=False
+            )
+        else:
+            diagnostic = {
+                "BLOCKER_CODE": "LAUNCHER_SPAWN_FAILED",
+                "MESSAGE": "o launcher Windows do Command Code não pôde ser iniciado",
+                "COMMAND": "",
+                "EXIT_CODE": "127",
+                "STDERR": str(exc),
+                "ACTION": "verificar COMSPEC/PowerShell e a permissão de spawn",
+                "PHASE": "SPAWN",
+            }
         if diagnostic and preflight_snapshot is not None:
             diagnostic["MODE"] = str(preflight_snapshot["mode"])
             diagnostic["INITIAL_GIT_STATE"] = json.dumps(
@@ -1870,7 +1884,7 @@ def run_implementer(
                         mode=watchdog_mode,
                     )
                     if isinstance(recovery_error, FileNotFoundError):
-                        recovery_code = "CMD_NOT_FOUND"
+                        recovery_code = "RECOVERY_SPAWN_FAILED"
                     elif isinstance(recovery_error, subprocess.TimeoutExpired):
                         recovery_code = "RECOVERY_TIMEOUT"
                     else:
