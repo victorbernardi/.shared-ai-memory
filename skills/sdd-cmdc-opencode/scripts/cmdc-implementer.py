@@ -1507,6 +1507,7 @@ def run_implementer(
         else None
     )
     cmd_path: Path | None = None
+    process_command: list[str] | None = None
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
@@ -1604,7 +1605,10 @@ def run_implementer(
             exit_code = completed.returncode
     except FileNotFoundError as exc:
         command = [cmd_bin, *COMMAND_FLAGS]
-        if cmd_path is None:
+        launcher_spawn_failed = cmd_path is not None and (
+            process_command is None or process_command[0] != str(cmd_path)
+        )
+        if not launcher_spawn_failed:
             diagnostic = classify_failure(
                 127, str(exc), report_exists=False, cmd_found=False
             )
