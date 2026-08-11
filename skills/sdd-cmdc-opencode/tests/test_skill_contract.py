@@ -61,6 +61,7 @@ def test_implementation_files_exist() -> None:
         "implementer-prompt.md",
         "scripts/__init__.py",
         "scripts/cmdc-implementer.py",
+        "scripts/verify-install-parity.py",
         "scripts/sdd-workspace",
         "scripts/task-brief",
         "scripts/review-package",
@@ -268,6 +269,10 @@ def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
     assert "PERMISSION_DENIED" in content
     assert "IMPLEMENTATION INCOMPLETE" in content
     assert "TIMED_OUT" in content
+    assert "Task N" in content and "Tarefa N" in content
+    assert "PROMPT_UNREADABLE" in content
+    assert "PRIMARY_BLOCKER_CODE" in content
+    assert "verify-install-parity.py" in content
 
 
 def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:

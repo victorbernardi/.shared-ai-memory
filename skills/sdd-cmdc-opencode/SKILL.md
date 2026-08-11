@@ -209,6 +209,14 @@ conflicts that only emerge from implementation.
   initial Git snapshot before any child process starts. A blocked boundary
   emits the stable structured `BLOCKED` diagnostic and never spawns Command
   Code.
+- The same preflight also validates the prompt as an existing, regular,
+  readable UTF-8 file, requires the prompt to declare a report path, and
+  keeps report/checkpoint outputs inside the canonical repository. Invalid
+  artifacts emit `BLOCKED` codes such as `PROMPT_NOT_FOUND`,
+  `PROMPT_UNREADABLE`, `REPORT_PATH_MISSING`,
+  `REPORT_OUTSIDE_REPOSITORY`, or `CHECKPOINT_OUTSIDE_REPOSITORY` before
+  CMDc starts. Controller-owned prompt files may live in a temporary
+  directory; mutable report/checkpoint paths may not.
 - The initial snapshot records the canonical repository root, branch, HEAD,
   and the raw `git status --short --untracked-files=all` lines verbatim —
   leading status-column whitespace is preserved, never erased or normalized.
@@ -258,7 +266,11 @@ package and fix-round diffs need it.
 
 - **Task brief:** before running an implementer, run this skill's
   `scripts/task-brief PLAN_FILE N` — it extracts the task's full text to a
-  uniquely named file and prints the path. Compose the dispatch so the
+  uniquely named file and prints the path. The extractor accepts both
+  `Task N` and `Tarefa N` headings (including numbered-list prefixes),
+  ignores headings inside fenced code, and atomically replaces the output
+  only after a non-empty extraction. Compose the dispatch so the
+  brief stays the single source of
   brief stays the single source of
   requirements. Your dispatch should contain: (1) one line on where this
   task fits in the project; (2) the brief path, introduced as "read this
@@ -323,8 +335,31 @@ the requested report and detectable test evidence all exist; otherwise it
 remains incomplete and blocks review. A successful recovery emits
 `STATUS: RECOVERED`; this permits package generation only after the normal
 delegated review gates are rechecked.
+- Recovery never replaces the primary failure. In an incomplete result,
+  `PRIMARY_BLOCKER_CODE`, `PRIMARY_PHASE`, and `PRIMARY_COMMAND` identify the
+  original watchdog/worker failure; `RECOVERY_BLOCKER_CODE`,
+  `RECOVERY_COMMAND`, and `RECOVERY_ERROR` contain only the bounded recovery
+  attempt. A normal CMDc exit at turn budget is reported as
+  `WORKER_TURN_LIMIT`; `WALL_TIMEOUT`, `STALLED`, and launcher/spawn failures
+  remain distinct evidence.
 An exit code `4` is classified as `PERMISSION_DENIED`; the headless adapter
 does not wait for an interactive permission answer.
+
+**Installation parity.** The canonical source is this checkout's
+`skills/sdd-cmdc-opencode`. Before publishing an installation, run the
+read-only audit below for every target copy. It reports `MISSING`, `EXTRA`, and
+`CHANGED` files and never modifies either tree:
+
+```powershell
+python scripts/verify-install-parity.py `
+  skills/sdd-cmdc-opencode `
+  "$env:USERPROFILE\.agents\skills\sdd-cmdc-opencode" `
+  "$env:USERPROFILE\.codex\skills\sdd-cmdc-opencode"
+```
+
+Do not delete or overwrite a target to make the audit pass without a separate
+publication authorization; an extra model-override test or a diverging
+adapter is a release blocker.
 
 Template: [implementer-prompt.md](implementer-prompt.md)
 
