@@ -24,6 +24,9 @@ Subagent (general-purpose):
 
     **Base:** [BASE_SHA]
     **Head:** [HEAD_SHA]
+    **Reviewer model:** [REVIEW_MODEL]
+    **Reasoning effort:** [REVIEW_REASONING_EFFORT]
+    **Requested service tier:** [REVIEW_SERVICE_TIER]
 
     ```bash
     git diff --stat [BASE_SHA]..[HEAD_SHA]
@@ -130,6 +133,9 @@ Subagent (general-purpose):
 - `[PLAN_OR_REQUIREMENTS]` — what it should do (plan file path, task text, or requirements)
 - `[BASE_SHA]` — starting commit
 - `[HEAD_SHA]` — ending commit
+- `[REVIEW_MODEL]` — model confirmed for this review
+- `[REVIEW_REASONING_EFFORT]` — reasoning effort confirmed for this review
+- `[REVIEW_SERVICE_TIER]` — requested service tier, or `unknown` when not exposed
 
 **Reviewer returns:** Strengths, Issues (Critical / Important / Minor), Recommendations, Assessment
 
