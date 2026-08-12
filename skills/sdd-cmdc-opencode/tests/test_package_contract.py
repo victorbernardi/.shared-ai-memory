@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
+
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILL = REPO_ROOT / "skills" / "sdd-cmdc-opencode"
+PARITY_SCRIPT = SKILL / "scripts" / "verify-install-parity.py"
 
 EXECUTABLE_SHELLS = {
     Path("scripts/review-package"),
@@ -111,3 +115,73 @@ def test_tracked_manifest_excludes_generated_payload() -> None:
 def test_all_tracked_text_sources_are_lf_only() -> None:
     for path in tracked_text_files(SKILL):
         assert_lf_or_non_binary(path)
+
+
+def test_install_parity_accepts_identical_trees(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    (source / "scripts").mkdir(parents=True)
+    target.mkdir()
+    (source / "SKILL.md").write_text("contract\n", encoding="utf-8")
+    (source / "scripts" / "adapter.py").write_text("print('ok')\n", encoding="utf-8")
+    (target / "SKILL.md").write_text("contract\n", encoding="utf-8")
+    (target / "scripts").mkdir()
+    (target / "scripts" / "adapter.py").write_text("print('ok')\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [sys.executable, str(PARITY_SCRIPT), str(source), str(target)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "PARITY: OK" in result.stdout
+
+
+def test_install_parity_rejects_symlink_target(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    source.mkdir()
+    target.mkdir()
+    source_file = source / "adapter.py"
+    source_file.write_text("source\n", encoding="utf-8")
+    try:
+        (target / "adapter.py").symlink_to(source_file)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    result = subprocess.run(
+        [sys.executable, str(PARITY_SCRIPT), str(source), str(target)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "CHANGED adapter.py" in result.stdout
+
+
+def test_install_parity_reports_changed_missing_and_extra_without_mutation(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    source.mkdir()
+    target.mkdir()
+    (source / "adapter.py").write_text("source\n", encoding="utf-8")
+    (source / "only-source.md").write_text("source-only\n", encoding="utf-8")
+    (target / "adapter.py").write_text("target\n", encoding="utf-8")
+    (target / "extra.py").write_text("extra\n", encoding="utf-8")
+    before = {path: path.read_bytes() for path in target.rglob("*") if path.is_file()}
+
+    result = subprocess.run(
+        [sys.executable, str(PARITY_SCRIPT), str(source), str(target)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "CHANGED adapter.py" in result.stdout
+    assert "MISSING only-source.md" in result.stdout
+    assert "EXTRA extra.py" in result.stdout
+    after = {path: path.read_bytes() for path in target.rglob("*") if path.is_file()}
+    assert after == before

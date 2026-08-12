@@ -159,6 +159,72 @@ def _preflight_blocked(
     return blocked
 
 
+def _validate_artifact_path(
+    path: Path,
+    git_root: Path,
+    *,
+    kind: str,
+    require_existing: bool,
+    require_readable: bool = False,
+    require_contained: bool = True,
+) -> dict[str, str] | None:
+    """Validate a prompt/input or mutable output path without touching it."""
+    try:
+        resolved = path.expanduser().resolve()
+    except (OSError, RuntimeError) as exc:
+        return {
+            "BLOCKER_CODE": f"{kind}_UNRESOLVABLE",
+            "MESSAGE": f"{kind.lower()} path cannot be resolved: {exc}",
+            "ACTION": f"pass a resolvable {kind.lower()} path",
+        }
+    if require_contained:
+        try:
+            resolved.relative_to(git_root)
+        except ValueError:
+            return {
+                "BLOCKER_CODE": f"{kind}_OUTSIDE_REPOSITORY",
+                "MESSAGE": f"{kind.lower()} path is outside the repository: {resolved}",
+                "ACTION": f"keep the {kind.lower()} artifact inside the repository worktree",
+            }
+    if require_existing:
+        if not resolved.exists():
+            return {
+                "BLOCKER_CODE": f"{kind}_NOT_FOUND",
+                "MESSAGE": f"{kind.lower()} file does not exist: {resolved}",
+                "ACTION": f"create the {kind.lower()} file or pass the correct path",
+            }
+        if not resolved.is_file():
+            return {
+                "BLOCKER_CODE": f"{kind}_NOT_REGULAR_FILE",
+                "MESSAGE": f"{kind.lower()} path is not a regular file: {resolved}",
+                "ACTION": f"pass a regular {kind.lower()} file",
+            }
+        if require_readable:
+            try:
+                with resolved.open("rb"):
+                    pass
+            except (OSError, PermissionError) as exc:
+                return {
+                    "BLOCKER_CODE": f"{kind}_UNREADABLE",
+                    "MESSAGE": f"{kind.lower()} file cannot be read: {exc}",
+                    "ACTION": f"grant read access to the {kind.lower()} file",
+                }
+    else:
+        if resolved.exists() and not resolved.is_file():
+            return {
+                "BLOCKER_CODE": f"{kind}_NOT_REGULAR_FILE",
+                "MESSAGE": f"{kind.lower()} output path is not a regular file: {resolved}",
+                "ACTION": f"pass a file path for the {kind.lower()} output",
+            }
+        if not resolved.parent.is_dir():
+            return {
+                "BLOCKER_CODE": f"{kind}_PARENT_NOT_FOUND",
+                "MESSAGE": f"{kind.lower()} output directory does not exist: {resolved.parent}",
+                "ACTION": f"create the parent directory for the {kind.lower()} output",
+            }
+    return None
+
+
 def capture_initial_git_state(cwd: Path) -> dict[str, object]:
     """Capture canonical worktree, branch, HEAD, and exact status lines."""
     git_root = _run_git(cwd, "rev-parse", "--show-toplevel")
@@ -390,6 +456,7 @@ def classify_failure(
     stderr: str,
     report_exists: bool,
     cmd_found: bool = True,
+    phase: str | None = None,
 ) -> dict[str, str]:
     """Classify a failed or contract-invalid implementer run."""
     lowered = stderr.lower()
@@ -417,9 +484,13 @@ def classify_failure(
         action = "parar novas invocações e aguardar o limite ser liberado"
         message = "o Command Code aplicou rate limit"
     elif returncode == 8 or "timeout" in lowered or "max turns" in lowered:
-        code = "TIMEOUT"
+        code = "WORKER_TURN_LIMIT" if phase == "WORKER_TURN_LIMIT" else "TIMEOUT"
         action = "revisar o limite de turnos e reexecutar controladamente"
-        message = "o Command Code atingiu o limite de tempo/turnos"
+        message = (
+            "o Command Code atingiu o limite de turnos"
+            if code == "WORKER_TURN_LIMIT"
+            else "o Command Code atingiu o limite de tempo/turnos"
+        )
     elif returncode != 0:
         code = "PROCESS_FAILED"
         action = "inspecionar stderr e corrigir a falha antes de reexecutar"
@@ -431,7 +502,7 @@ def classify_failure(
     else:
         return {}
 
-    return {
+    diagnostic = {
         "BLOCKER_CODE": code,
         "MESSAGE": message,
         "COMMAND": "",
@@ -439,6 +510,9 @@ def classify_failure(
         "STDERR": stderr,
         "ACTION": action,
     }
+    if phase:
+        diagnostic["PHASE"] = phase
+    return diagnostic
 
 
 def render_blocked(diagnostic: dict[str, str]) -> str:
@@ -458,6 +532,19 @@ def render_blocked(diagnostic: dict[str, str]) -> str:
         ("ACTION", diagnostic.get("ACTION", "")),
         ("MODE", diagnostic.get("MODE", "")),
     ]
+    for key in (
+        "PHASE",
+        "PRIMARY_BLOCKER_CODE",
+        "PRIMARY_PHASE",
+        "PRIMARY_COMMAND",
+        "RECOVERY_BLOCKER_CODE",
+        "RECOVERY_PHASE",
+        "RECOVERY_COMMAND",
+        "RECOVERY_ERROR",
+    ):
+        value = diagnostic.get(key)
+        if value:
+            fields.append((key, str(value)))
     initial_git_state = diagnostic.get("INITIAL_GIT_STATE")
     if initial_git_state:
         fields.append(("INITIAL_GIT_STATE", str(initial_git_state)))
@@ -816,22 +903,28 @@ def _drain_stream(
             _record_activity(activity_state, "event")
             if event_log is not None:
                 try:
-                    with event_log.open("a", encoding="utf-8", newline="\n") as handle:
-                        handle.write(
-                            json.dumps(
-                                {
-                                    "stream": stream_name,
-                                    "elapsed_seconds": round(
-                                        time.monotonic()
-                                        - float(activity_state["started"]),
-                                        1,
-                                    ),
-                                    "text": text,
-                                },
-                                ensure_ascii=False,
+                    event_log_lock = activity_state.setdefault(
+                        "event_log_lock", threading.Lock()
+                    )
+                    with event_log_lock:
+                        with event_log.open(
+                            "a", encoding="utf-8", newline="\n"
+                        ) as handle:
+                            handle.write(
+                                json.dumps(
+                                    {
+                                        "stream": stream_name,
+                                        "elapsed_seconds": round(
+                                            time.monotonic()
+                                            - float(activity_state["started"]),
+                                            1,
+                                        ),
+                                        "text": text,
+                                    },
+                                    ensure_ascii=False,
+                                )
+                                + "\n"
                             )
-                            + "\n"
-                        )
                 except OSError:
                     pass
     finally:
@@ -1264,8 +1357,6 @@ def run_implementer(
     cwd = cwd.expanduser().resolve()
     prompt_file = prompt_file.expanduser().resolve()
     mode = "yolo" if allow_cmdc_yolo else "normal"
-    prompt_text = prompt_file.read_text(encoding="utf-8")
-    report_path = _extract_report_path(prompt_text, cwd)
     preflight_snapshot: dict[str, object] | None = None
     if plan_file is None:
         # Fail closed: without a supplied plan there is no execution boundary
@@ -1312,6 +1403,77 @@ def run_implementer(
         print(render_blocked(diagnostic), file=sys.stderr)
         return 1
     preflight_snapshot = preflight
+    git_root = Path(str(preflight["git_root"])).resolve()
+
+    def emit_artifact_block(error: dict[str, str]) -> int:
+        diagnostic = {
+            "BLOCKER_CODE": error["BLOCKER_CODE"],
+            "MESSAGE": error["MESSAGE"],
+            "COMMAND": "",
+            "EXIT_CODE": "1",
+            "STDERR": "",
+            "ACTION": error["ACTION"],
+            "MODE": mode,
+            "INITIAL_GIT_STATE": json.dumps(
+                preflight["initial_git_state"],
+                ensure_ascii=False,
+                sort_keys=True,
+            ),
+        }
+        print(render_blocked(diagnostic), file=sys.stderr)
+        return 1
+
+    prompt_error = _validate_artifact_path(
+        prompt_file,
+        git_root,
+        kind="PROMPT",
+        require_existing=True,
+        require_readable=True,
+        # Prompt files are controller-owned, read-only inputs and may live in
+        # a temporary directory outside the worktree. Mutable outputs below
+        # are always contained by the repository boundary.
+        require_contained=False,
+    )
+    if prompt_error is not None:
+        return emit_artifact_block(prompt_error)
+    try:
+        prompt_text = prompt_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        return emit_artifact_block(
+            {
+                "BLOCKER_CODE": "PROMPT_UNREADABLE",
+                "MESSAGE": f"prompt file cannot be decoded as UTF-8: {exc}",
+                "ACTION": "rewrite the prompt file as readable UTF-8 and re-run",
+            }
+        )
+
+    report_path = _extract_report_path(prompt_text, cwd)
+    if report_path is None:
+        return emit_artifact_block(
+            {
+                "BLOCKER_CODE": "REPORT_PATH_MISSING",
+                "MESSAGE": "the prompt does not declare a report file path",
+                "ACTION": "add 'Write your full report to <path>:' inside the prompt",
+            }
+        )
+    report_error = _validate_artifact_path(
+        report_path,
+        git_root,
+        kind="REPORT",
+        require_existing=False,
+    )
+    if report_error is not None:
+        return emit_artifact_block(report_error)
+    if checkpoint_file is not None:
+        checkpoint_file = checkpoint_file.expanduser().resolve()
+        checkpoint_error = _validate_artifact_path(
+            checkpoint_file,
+            git_root,
+            kind="CHECKPOINT",
+            require_existing=False,
+        )
+        if checkpoint_error is not None:
+            return emit_artifact_block(checkpoint_error)
     baseline_snapshot: dict[str, object] | None = None
     try:
         baseline_snapshot = collect_workspace_snapshot(
@@ -1357,6 +1519,8 @@ def run_implementer(
         if checkpoint_file is not None
         else None
     )
+    cmd_path: Path | None = None
+    process_command: list[str] | None = None
 
     try:
         cmd_path = resolve_cmdc(cmd_bin)
@@ -1438,6 +1602,7 @@ def run_implementer(
             completed.returncode,
             stderr if completed.stderr else "",
             report_exists=report_exists,
+            phase=("WORKER_TURN_LIMIT" if completed.returncode == 8 else None),
         )
         if diagnostic and preflight_snapshot is not None:
             diagnostic["MODE"] = str(preflight_snapshot["mode"])
@@ -1453,7 +1618,23 @@ def run_implementer(
             exit_code = completed.returncode
     except FileNotFoundError as exc:
         command = [cmd_bin, *COMMAND_FLAGS]
-        diagnostic = classify_failure(127, str(exc), report_exists=False, cmd_found=False)
+        launcher_spawn_failed = cmd_path is not None and (
+            process_command is None or process_command[0] != str(cmd_path)
+        )
+        if not launcher_spawn_failed:
+            diagnostic = classify_failure(
+                127, str(exc), report_exists=False, cmd_found=False
+            )
+        else:
+            diagnostic = {
+                "BLOCKER_CODE": "LAUNCHER_SPAWN_FAILED",
+                "MESSAGE": "o launcher Windows do Command Code não pôde ser iniciado",
+                "COMMAND": "",
+                "EXIT_CODE": "127",
+                "STDERR": str(exc),
+                "ACTION": "verificar COMSPEC/PowerShell e a permissão de spawn",
+                "PHASE": "SPAWN",
+            }
         if diagnostic and preflight_snapshot is not None:
             diagnostic["MODE"] = str(preflight_snapshot["mode"])
             diagnostic["INITIAL_GIT_STATE"] = json.dumps(
@@ -1472,6 +1653,10 @@ def run_implementer(
             part for part in (timeout_stdout, timeout_stderr) if part
         )
         watchdog_reason = getattr(exc, "watchdog_reason", "WALL_TIMEOUT")
+        primary_command = build_command(
+            Path(cmd_bin), max_turns=max_turns, allow_cmdc_yolo=allow_cmdc_yolo
+        )
+        primary_command_text = " ".join(str(part) for part in primary_command)
         watchdog_cleanup_verified = getattr(
             exc, "watchdog_cleanup_verified", True
         )
@@ -1497,6 +1682,10 @@ def run_implementer(
                 ),
             }
             diagnostic["MODE"] = watchdog_mode
+            diagnostic["PHASE"] = "WATCHDOG_CLEANUP"
+            diagnostic["PRIMARY_BLOCKER_CODE"] = diagnostic["BLOCKER_CODE"]
+            diagnostic["PRIMARY_PHASE"] = "WATCHDOG_CLEANUP"
+            diagnostic["PRIMARY_COMMAND"] = primary_command_text
             print(render_blocked(diagnostic), file=sys.stderr)
             return 8
         if watchdog_reason == "STALLED":
@@ -1515,11 +1704,20 @@ def run_implementer(
                 ),
             }
             diagnostic["MODE"] = watchdog_mode
+            diagnostic["PHASE"] = "STALLED"
             if event_log is not None:
                 diagnostic["EVENT_LOG"] = str(event_log)
         else:
-            diagnostic = classify_failure(8, timeout_stderr, report_exists=False)
+            diagnostic = classify_failure(
+                8,
+                timeout_stderr,
+                report_exists=False,
+                phase=watchdog_reason,
+            )
             diagnostic["MODE"] = watchdog_mode
+        diagnostic["PRIMARY_BLOCKER_CODE"] = diagnostic.get("BLOCKER_CODE", "")
+        diagnostic["PRIMARY_PHASE"] = watchdog_reason
+        diagnostic["PRIMARY_COMMAND"] = primary_command_text
         exit_code = 8
 
         snapshot = None
@@ -1566,6 +1764,7 @@ def run_implementer(
                     heartbeat_thread.join(timeout=max(1.0, heartbeat_interval))
                 recovery_start_head = str(snapshot["head"])
                 recovery_command = [cmd_bin, *COMMAND_FLAGS]
+                recovery_process_command = list(recovery_command)
                 recovery_text = (
                     f"{prompt_text}\n\n"
                     "RECOVERY MODE: the previous implementer timed out. This is a "
@@ -1581,13 +1780,13 @@ def run_implementer(
                         max_turns=recovery_max_turns,
                         allow_cmdc_yolo=allow_cmdc_yolo,
                     )
-                    command = recovery_command
+                    recovery_process_command = _platform_command(recovery_command)
                     recovery_timeout = max(60, recovery_max_turns * 120)
                     recovery_activity = _fresh_activity_state(
                         _activity_fingerprint(snapshot)
                     )
                     recovery_completed = _run_cmdc_process(
-                        recovery_command,
+                        recovery_process_command,
                         recovery_text,
                         cwd,
                         wall_timeout_seconds=recovery_timeout,
@@ -1632,7 +1831,7 @@ def run_implementer(
                             else "IMPLEMENTATION INCOMPLETE"
                         ),
                         phase="RECOVERY_FINISHED",
-                        last_command=" ".join(str(part) for part in recovery_command),
+                        last_command=" ".join(str(part) for part in recovery_process_command),
                         last_output=recovery_output,
                         preflight_snapshot=preflight_snapshot,
                         mode=watchdog_mode,
@@ -1644,13 +1843,14 @@ def run_implementer(
                         )
                         return 0
                     snapshot = recovery_snapshot
-                    diagnostic = classify_failure(
+                    recovery_diagnostic = classify_failure(
                         recovery_completed.returncode,
                         recovery_output,
                         report_exists=bool(recovery_snapshot["report_exists"]),
+                        phase="RECOVERY",
                     )
-                    if not diagnostic:
-                        diagnostic = {
+                    if not recovery_diagnostic:
+                        recovery_diagnostic = {
                             "BLOCKER_CODE": "RECOVERY_INCOMPLETE",
                             "MESSAGE": (
                                 "a recuperação terminou sem evidência transacional completa"
@@ -1663,6 +1863,16 @@ def run_implementer(
                                 "antes da revisão"
                             ),
                         }
+                    diagnostic["RECOVERY_BLOCKER_CODE"] = recovery_diagnostic.get(
+                        "BLOCKER_CODE", "RECOVERY_INCOMPLETE"
+                    )
+                    diagnostic["RECOVERY_PHASE"] = "RECOVERY"
+                    diagnostic["RECOVERY_COMMAND"] = " ".join(
+                        str(part) for part in recovery_process_command
+                    )
+                    diagnostic["RECOVERY_ERROR"] = recovery_diagnostic.get(
+                        "STDERR", recovery_output
+                    )
                 except (FileNotFoundError, RuntimeError, subprocess.TimeoutExpired) as recovery_error:
                     recovery_output = _text_output(
                         getattr(recovery_error, "stdout", "")
@@ -1685,16 +1895,27 @@ def run_implementer(
                         snapshot,
                         state="IMPLEMENTATION INCOMPLETE",
                         phase="RECOVERY_FAILED",
-                        last_command=" ".join(str(part) for part in recovery_command),
+                        last_command=" ".join(str(part) for part in recovery_process_command),
                         last_output=recovery_output.strip(),
                         preflight_snapshot=preflight_snapshot,
                         mode=watchdog_mode,
                     )
+                    if isinstance(recovery_error, FileNotFoundError):
+                        recovery_code = "RECOVERY_SPAWN_FAILED"
+                    elif isinstance(recovery_error, subprocess.TimeoutExpired):
+                        recovery_code = "RECOVERY_TIMEOUT"
+                    else:
+                        recovery_code = "RECOVERY_FAILED"
+                    diagnostic["RECOVERY_BLOCKER_CODE"] = recovery_code
+                    diagnostic["RECOVERY_PHASE"] = "RECOVERY"
+                    diagnostic["RECOVERY_COMMAND"] = " ".join(
+                        str(part) for part in recovery_process_command
+                    )
+                    diagnostic["RECOVERY_ERROR"] = str(recovery_error)
                     diagnostic["STDERR"] = (
                         f"{diagnostic.get('STDERR', '')}\n"
                         f"recovery failed: {recovery_error}"
                     ).strip()
-                    command = recovery_command
             if preflight_snapshot is not None:
                 _enrich_blocked_context(diagnostic, preflight_snapshot)
             diagnostic["COMMAND"] = " ".join(str(part) for part in command)
