@@ -31,6 +31,10 @@ out_dir=$(dirname "$out")
   echo "output directory does not exist: $out_dir" >&2
   exit 2
 }
+if [ -d "$out" ] || { [ -e "$out" ] && [ ! -f "$out" ]; }; then
+  echo "output path is not a regular file: $out" >&2
+  exit 2
+fi
 tmp=$(mktemp "$out_dir/.task-${n}-brief.XXXXXX") || {
   echo "could not create temporary task brief beside $out" >&2
   exit 2
@@ -41,7 +45,6 @@ trap cleanup EXIT HUP INT TERM
 awk -v n="$n" '
   /^```/ { infence = !infence }
   !infence && /^#+[ \t]+([0-9]+[.)]?[ \t]+)?(Task|Tarefa)[ \t]+[0-9]+/ {
-    task_heading = "^#+[ \t]+([0-9]+[.)]?[ \t]+)?(Task|Tarefa)[ \t]+[0-9]+([^0-9]|$)"
     wanted_heading = "^#+[ \t]+([0-9]+[.)]?[ \t]+)?(Task|Tarefa)[ \t]+" n "([^0-9]|$)"
     intask = ($0 ~ wanted_heading)
   }

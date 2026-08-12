@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILL = REPO_ROOT / "skills" / "sdd-cmdc-opencode"
@@ -134,6 +136,28 @@ def test_install_parity_accepts_identical_trees(tmp_path: Path) -> None:
 
     assert result.returncode == 0, result.stderr
     assert "PARITY: OK" in result.stdout
+
+
+def test_install_parity_rejects_symlink_target(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    source.mkdir()
+    target.mkdir()
+    source_file = source / "adapter.py"
+    source_file.write_text("source\n", encoding="utf-8")
+    try:
+        (target / "adapter.py").symlink_to(source_file)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    result = subprocess.run(
+        [sys.executable, str(PARITY_SCRIPT), str(source), str(target)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "CHANGED adapter.py" in result.stdout
 
 
 def test_install_parity_reports_changed_missing_and_extra_without_mutation(

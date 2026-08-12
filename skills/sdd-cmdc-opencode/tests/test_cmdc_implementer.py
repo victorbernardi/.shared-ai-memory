@@ -1422,6 +1422,59 @@ def test_run_implementer_reports_missing_command(
     assert "BLOCKER_CODE: CMD_NOT_FOUND" in capsys.readouterr().err
 
 
+def test_run_implementer_accepts_controller_owned_prompt_outside_repository(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-external-prompt")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "plan"], check=True)
+
+    prompt = tmp_path / "controller-prompt.md"
+    prompt.write_text(
+        f"Write your full report to {repo / 'task-report.md'}:\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        MODULE,
+        "resolve_cmdc",
+        lambda cmd_bin="cmdc": (_ for _ in ()).throw(
+            FileNotFoundError("cmdc binary not found")
+        ),
+    )
+
+    assert MODULE.run_implementer(repo, prompt, plan_file=plan) == 127
+    error = capsys.readouterr().err
+    assert "BLOCKER_CODE: CMD_NOT_FOUND" in error
+    assert "PROMPT_OUTSIDE_REPOSITORY" not in error
+
+
+def test_run_implementer_blocks_prompt_directory_before_cmdc(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-prompt-directory")
+    plan = repo / "plan.md"
+    plan.write_text("# Plan\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "plan"], check=True)
+    prompt_directory = tmp_path / "prompt-directory"
+    prompt_directory.mkdir()
+
+    def cmdc_must_not_run(*args, **kwargs):
+        raise AssertionError("Command Code must not run for a prompt directory")
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", cmdc_must_not_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", cmdc_must_not_run)
+
+    assert MODULE.run_implementer(repo, prompt_directory, plan_file=plan) == 1
+    error = capsys.readouterr().err
+    assert "STATUS: BLOCKED" in error
+    assert "BLOCKER_CODE: PROMPT_NOT_REGULAR_FILE" in error
+    assert "AssertionError" not in error
+
+
 def test_run_implementer_reports_missing_prompt_as_structured_block(
     tmp_path: Path, capsys
 ) -> None:
@@ -1460,6 +1513,29 @@ def test_run_implementer_blocks_unreadable_prompt_before_cmdc(
     assert "STATUS: BLOCKED" in error
     assert "BLOCKER_CODE: PROMPT_UNREADABLE" in error
     assert "UnicodeDecodeError" not in error
+
+
+def test_validate_artifact_path_reports_resolution_failure() -> None:
+    class UnresolvablePath:
+        def expanduser(self):
+            return self
+
+        def resolve(self):
+            raise OSError("symlink loop")
+
+    result = MODULE._validate_artifact_path(
+        UnresolvablePath(),
+        Path.cwd(),
+        kind="PROMPT",
+        require_existing=True,
+        require_readable=True,
+    )
+
+    assert result == {
+        "BLOCKER_CODE": "PROMPT_UNRESOLVABLE",
+        "MESSAGE": "prompt path cannot be resolved: symlink loop",
+        "ACTION": "pass a resolvable prompt path",
+    }
 
 
 def test_run_implementer_blocks_report_and_checkpoint_outside_repository(

@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 IGNORED_DIRECTORIES = {"__pycache__", ".pytest_cache", ".mypy_cache"}
+SYMLINK_MARKER = "<symlink>"
 
 
 def _files(root: Path) -> dict[Path, str]:
@@ -18,6 +19,9 @@ def _files(root: Path) -> dict[Path, str]:
     for path in root.rglob("*"):
         relative = path.relative_to(root)
         if any(part in IGNORED_DIRECTORIES for part in relative.parts):
+            continue
+        if path.is_symlink():
+            result[relative] = SYMLINK_MARKER
             continue
         if not path.is_file():
             continue
@@ -35,7 +39,11 @@ def compare(source: Path, target: Path) -> list[str]:
     for relative in sorted(target_files.keys() - source_files.keys(), key=str):
         lines.append(f"EXTRA {relative.as_posix()}")
     for relative in sorted(source_files.keys() & target_files.keys(), key=str):
-        if source_files[relative] != target_files[relative]:
+        if (
+            source_files[relative] == SYMLINK_MARKER
+            or target_files[relative] == SYMLINK_MARKER
+            or source_files[relative] != target_files[relative]
+        ):
             lines.append(f"CHANGED {relative.as_posix()}")
     return lines
 

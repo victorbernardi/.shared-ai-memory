@@ -169,7 +169,14 @@ def _validate_artifact_path(
     require_contained: bool = True,
 ) -> dict[str, str] | None:
     """Validate a prompt/input or mutable output path without touching it."""
-    resolved = path.expanduser().resolve()
+    try:
+        resolved = path.expanduser().resolve()
+    except (OSError, RuntimeError) as exc:
+        return {
+            "BLOCKER_CODE": f"{kind}_UNRESOLVABLE",
+            "MESSAGE": f"{kind.lower()} path cannot be resolved: {exc}",
+            "ACTION": f"pass a resolvable {kind.lower()} path",
+        }
     if require_contained:
         try:
             resolved.relative_to(git_root)

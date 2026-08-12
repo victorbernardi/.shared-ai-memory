@@ -12,7 +12,7 @@
 
 - The fixed CMDc model remains `deepseek/deepseek-v4-flash`; do not add model override or `/fast` behavior.
 - CMDc-only, OCR-only, and fail-closed execution contracts remain unchanged.
-- Missing, malformed, or out-of-bound artifacts produce structured `BLOCKED` output before any child process starts.
+- Missing, malformed, or out-of-bound artifacts produce structured `BLOCKED` output before any child process starts. The controller-owned prompt is a read-only input exception: it may live in a temporary directory outside the worktree, while mutable report and checkpoint outputs must remain inside the repository.
 - A primary timeout/worker failure remains the top-level cause; recovery failures are attached evidence and never replace it.
 - Existing tests and unrelated dirty files are preserved; no `.agents` or `.codex` installation is overwritten in this branch.
 - Completion requires focused tests, the complete canonical skill suite, and a read-only parity audit against the installed copies.
@@ -57,21 +57,22 @@
 - Test: `skills/sdd-cmdc-opencode/tests/test_preflight_contract.py` and `skills/sdd-cmdc-opencode/tests/test_cmdc_implementer.py`.
 
 **Interfaces:**
-- Add `validate_artifact_path(path, git_root, code_prefix, ...) -> tuple[Path | None, dict[str, object] | None]` or an equivalent private helper returning either a resolved regular in-repository path or the existing `_preflight_blocked` payload.
-- `run_implementer` reads `prompt_file` only after the structured preflight has accepted it.
+- Add `validate_artifact_path(path, git_root, code_prefix, ...) -> tuple[Path | None, dict[str, object] | None]` or an equivalent private helper. The helper must support the explicit controller-owned prompt-input exception, while returning only resolved regular in-repository paths for mutable outputs.
+- `run_implementer` reads `prompt_file` only after the structured preflight has accepted it. The prompt must be an existing readable regular UTF-8 file, but it may be outside the worktree because the controller owns it and CMDc does not mutate it.
+- `report_file` and `checkpoint_file` are mutable controller artifacts and must remain regular-file paths contained by the canonical repository root; the external-input exception must never apply to them.
 - A prompt decode failure is rendered as `BLOCKED` with a stable `PROMPT_UNREADABLE` code; an outside/directory/missing report or checkpoint path has a stable artifact-specific code.
 
 - [x] **Step 1: Write failing tests**
 
-  Add public-path tests for a missing prompt, a prompt directory, an outside-repository prompt, invalid UTF-8 prompt, a report marker pointing outside the repository, and a checkpoint path outside the repository. Monkeypatch the process launcher to fail if called. Assert exit `1`, structured `STATUS: BLOCKED`, an artifact code/message, and no raw `FileNotFoundError` traceback.
+  Add public-path tests for an external controller-owned prompt accepted with an in-repository report, a missing prompt, a prompt directory, invalid UTF-8 prompt, a report marker pointing outside the repository, and a checkpoint path outside the repository. Monkeypatch the process launcher to fail if called for blocked cases. Assert the external prompt reaches the normal command-resolution boundary, while blocked cases return exit `1`, structured `STATUS: BLOCKED`, an artifact code/message, and no raw `FileNotFoundError` traceback.
 
-- [x] **Step 2: Run the focused tests and verify RED**
+- [x] **Step 2: Run the focused tests and verify the boundary contract**
 
-  Run `python -m pytest skills/sdd-cmdc-opencode/tests/test_preflight_contract.py skills/sdd-cmdc-opencode/tests/test_cmdc_implementer.py -q -k "prompt or artifact or checkpoint"`. The pre-patch missing prompt path raises before preflight and the other paths are not validated consistently.
+  Run `python -m pytest skills/sdd-cmdc-opencode/tests/test_preflight_contract.py skills/sdd-cmdc-opencode/tests/test_cmdc_implementer.py -q -k "prompt or artifact or checkpoint"`. The controller-owned external-prompt case is a characterization test for the existing read-only input exception; missing, directory, malformed, and out-of-bound mutable artifacts must remain fail-closed before CMDc starts.
 
-- [x] **Step 3: Implement the minimal fix**
+- [x] **Step 3: Confirm the minimal boundary implementation**
 
-  Resolve and validate `cwd`/Git root first, then validate `plan_file`, `prompt_file`, optional `checkpoint_file`, and the extracted report path as regular files or safe output paths inside that root. Catch `UnicodeDecodeError`, `PermissionError`, and `OSError` while reading the prompt and convert them to `_preflight_blocked` data. Do not create or truncate checkpoint/report files during validation. Reuse the same descendant check for all artifact paths and preserve the initial Git snapshot on later boundary blocks.
+  Resolve and validate `cwd`/Git root first, then validate `plan_file`, the controller-owned `prompt_file`, optional `checkpoint_file`, and the extracted report path. Keep the prompt exception explicit and read-only; require regular readable UTF-8 input, but do not require repository containment. Keep checkpoint/report paths as regular output paths inside the repository. Catch `UnicodeDecodeError`, `PermissionError`, and `OSError` while reading the prompt and convert them to `_preflight_blocked` data. Do not create or truncate checkpoint/report files during validation. Reuse the same descendant check for mutable artifacts and preserve the initial Git snapshot on later boundary blocks.
 
 - [x] **Step 4: Run the focused tests and verify GREEN**
 

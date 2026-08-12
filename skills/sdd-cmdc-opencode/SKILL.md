@@ -271,7 +271,6 @@ package and fix-round diffs need it.
   ignores headings inside fenced code, and atomically replaces the output
   only after a non-empty extraction. Compose the dispatch so the
   brief stays the single source of
-  brief stays the single source of
   requirements. Your dispatch should contain: (1) one line on where this
   task fits in the project; (2) the brief path, introduced as "read this
   first — it is your requirements, with the exact values to use verbatim";

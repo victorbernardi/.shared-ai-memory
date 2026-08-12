@@ -81,3 +81,16 @@ def test_task_brief_failure_does_not_destroy_existing_output(tmp_path: Path) -> 
     assert result.returncode == 3
     assert "Task 99" in result.stderr or "Tarefa 99" in result.stderr
     assert output.read_text(encoding="utf-8") == "previous brief\n"
+
+
+def test_task_brief_rejects_directory_output_without_mutation(tmp_path: Path) -> None:
+    plan = tmp_path / "plan.md"
+    output = tmp_path / "brief-output"
+    plan.write_text("# Plan\n\n## Tarefa 1: Only task\n\nText.\n", encoding="utf-8")
+    output.mkdir()
+
+    result = _run(plan, 1, output)
+
+    assert result.returncode == 2
+    assert "not a regular file" in result.stderr
+    assert list(output.iterdir()) == []
