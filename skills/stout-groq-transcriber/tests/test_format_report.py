@@ -23,6 +23,7 @@ class FormatReportImportTests(unittest.TestCase):
 
         self.assertTrue(callable(module.main))
         self.assertTrue(callable(module.build_report))
+        self.assertEqual(module.DEFAULT_CLEANUP_MODEL, "openai/gpt-oss-120b")
 
 
 if __name__ == "__main__":

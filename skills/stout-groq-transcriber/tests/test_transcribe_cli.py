@@ -57,6 +57,34 @@ def test_main_errors_when_api_key_missing(monkeypatch, capsys, tmp_path: Path) -
     assert "GROQ_API_KEY" in captured.err
 
 
+def test_cleanup_uses_configured_model(monkeypatch) -> None:
+    observed_models = []
+
+    class RecordingGroq:
+        class chat:
+            class completions:
+                @staticmethod
+                def create(**kwargs):
+                    observed_models.append(kwargs["model"])
+
+                    class Choice:
+                        class Message:
+                            content = "Speaker 1: fala organizada"
+
+                        message = Message()
+
+                    class Response:
+                        choices = [Choice()]
+
+                    return Response()
+
+    monkeypatch.setenv("GROQ_CLEANUP_MODEL", "openai/gpt-oss-20b")
+
+    transcribe.cleanup_with_groq("fala crua", RecordingGroq())
+
+    assert observed_models == ["openai/gpt-oss-20b"]
+
+
 class DummyGroq:
     def __init__(self, **_: object) -> None:
         pass

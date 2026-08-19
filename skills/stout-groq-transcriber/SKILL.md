@@ -27,18 +27,25 @@ status: active
 
 # Stout Groq Transcriber
 
-Skill para transcrição automática de áudio usando Groq Whisper v3 + LLaMA 3.3-70b, com limpeza semântica automática e estruturação (Meeting Summary + Key Action Items).
+Skill para transcrição automática de áudio usando Groq Whisper v3 + modelo de limpeza configurável, com limpeza semântica automática e estruturação (Meeting Summary + Key Action Items). O pipeline segue ETL explícito: `run.py` orquestra `extract.py` → `transform.py` → `load.py`.
+
+## Estrutura ETL
+
+- `scripts/extract.py`: lê áudio, transcrição existente e metadados.
+- `scripts/transform.py`: aplica correções, limpeza LLM, estruturação e renderização do relatório.
+- `scripts/load.py`: grava os artefatos Markdown e cópias opcionais.
+- `scripts/run.py`: coordena as etapas e expõe o entrypoint oficial; `transcribe.py` e `format_report.py` são wrappers compatíveis.
 
 ## O que faz
 
 1. **Transcrição** via Groq Whisper Large v3 (rápido + preciso)
 2. **Correção** via dicionário customizável (termos Inova, nomes próprios, etc)
-3. **Limpeza** via Groq LLaMA 3.3-70b (gramática, pontuação, estrutura)
+3. **Limpeza** via modelo de chat Groq configurado por `GROQ_CLEANUP_MODEL` (padrão: `openai/gpt-oss-120b`)
 4. **Estruturação** automática:
    - Meeting Summary (resumo interpretativo)
    - Transcrição completa formatada
    - Key Action Items (extraídos automaticamente)
-5. **Relatório template (opcional)** via `format_report.py`: reformata o output acima no template "Audio Transcription Report" (metadados + Meeting Minutes com Participants/Topics Discussed/Decisions Made/Action Items), sem re-transcrever o áudio — ver seção [Relatório no template audio-transcriber](#relatório-no-template-audio-transcriber)
+5. **Relatório template (opcional)** via `run.py report` (ou o wrapper compatível `format_report.py`): reformata o output acima no template "Audio Transcription Report" (metadados + Meeting Minutes com Participants/Topics Discussed/Decisions Made/Action Items), sem re-transcrever o áudio — ver seção [Relatório no template audio-transcriber](#relatório-no-template-audio-transcriber)
 
 ## Qualidade
 
@@ -82,7 +89,7 @@ Sua chave está configurada em: `~/.shared-ai-memory/.env`
 ### Linha de comando
 
 ```bash
-python transcribe.py <audio> [--mode clean|debug|archive] [--out-dir DIR] [--session-name NAME] [--keep-source-copy]
+python scripts/run.py <audio> [--mode clean|debug|archive] [--out-dir DIR] [--session-name NAME] [--keep-source-copy]
 ```
 
 **Modos:**
@@ -97,20 +104,20 @@ python transcribe.py <audio> [--mode clean|debug|archive] [--out-dir DIR] [--ses
 
 ```bash
 # Clean — saída padrão (modo default)
-python transcribe.py meeting.mp3
+python scripts/run.py meeting.mp3
 # → research/meeting.md  (se research/ existe)  ou  transcriptions/meeting.md
 
 # Debug
-python transcribe.py meeting.m4a --mode debug --keep-source-copy
+python scripts/run.py meeting.m4a --mode debug --keep-source-copy
 
 # Archive
-python transcribe.py meeting.m4a --mode archive --keep-source-copy
+python scripts/run.py meeting.m4a --mode archive --keep-source-copy
 
 # Saída em diretório customizado
-python transcribe.py meeting.m4a --out-dir ~/meus-relatorios
+python scripts/run.py meeting.m4a --out-dir ~/meus-relatorios
 
 # Nome de sessão customizado
-python transcribe.py meeting.m4a --session-name reuniao-2026-07-09
+python scripts/run.py meeting.m4a --session-name reuniao-2026-07-09
 ```
 
 ### Via skill
@@ -169,17 +176,17 @@ Key Action Items
 
 ## Relatório no template audio-transcriber
 
-`format_report.py` é um post-processor **opcional** e **separado** de `transcribe.py`: ele lê o `.txt`/`.md` já gerado pela transcrição (Meeting Summary + falas por Speaker + Key Action Items) e o reorganiza no template "Audio Transcription Report" da skill `audio-transcriber`, sem chamar o Whisper novamente. Precisa do arquivo de áudio original só para extrair metadados (tamanho e duração via `mutagen`) — não o retranscreve.
+`run.py report` é um post-processor **opcional** e **separado** da transcrição: ele lê o `.txt`/`.md` já gerado (Meeting Summary + falas por Speaker + Key Action Items) e o reorganiza no template "Audio Transcription Report" da skill `audio-transcriber`, sem chamar o Whisper novamente. Precisa do arquivo de áudio original só para extrair metadados (tamanho e duração via `mutagen`) — não o retranscreve. `format_report.py` permanece como wrapper compatível.
 
 ```bash
-python format_report.py transcript.txt audio.m4a [output.md]
+python scripts/run.py report transcript.txt audio.m4a [output.md]
 ```
 
 **Exemplo (fluxo completo):**
 
 ```bash
-python transcribe.py meeting.m4a meeting_transcript.txt
-python format_report.py meeting_transcript.txt meeting.m4a meeting_report.md
+python scripts/run.py meeting.m4a --out-dir . --session-name meeting_transcript
+python scripts/run.py report meeting_transcript.md meeting.m4a meeting_report.md
 ```
 
 **Saída gerada:**
@@ -196,7 +203,7 @@ python format_report.py meeting_transcript.txt meeting.m4a meeting_report.md
 | **Language** | Português (pt-BR) |
 | **Processed Date** | ... |
 | **Speakers Identified** | ... |
-| **Transcription Engine** | Groq Whisper Large v3 + LLaMA 3.3-70b |
+| **Transcription Engine** | Groq Whisper Large v3 + configured cleanup model |
 
 ## 📋 Meeting Minutes
 ### Participants
@@ -223,7 +230,7 @@ Se `mutagen` não estiver instalado, a Duration é reportada como "Desconhecida"
 ```env
 GROQ_API_KEY=gsk_...
 GROQ_WHISPER_MODEL=whisper-large-v3
-GROQ_CLEANUP_MODEL=llama-3.3-70b-versatile
+GROQ_CLEANUP_MODEL=openai/gpt-oss-120b
 ```
 
 **Via `config/config.json`:**
@@ -232,7 +239,7 @@ GROQ_CLEANUP_MODEL=llama-3.3-70b-versatile
 {
   "api_key": "${GROQ_API_KEY}",
   "whisper_model": "whisper-large-v3",
-  "cleanup_model": "llama-3.3-70b-versatile",
+  "cleanup_model": "openai/gpt-oss-120b",
   "max_tokens": 4096,
   "temperature": 0.3
 }

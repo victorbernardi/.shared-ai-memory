@@ -1,198 +1,34 @@
 #!/usr/bin/env python3
-"""
-Stout Groq Transcriber -- Report Formatter
+"""Compatibility CLI for the report ETL orchestrator in ``run.py``."""
 
-Reformata o output de transcribe.py (Meeting Summary + transcricao +
-Key Action Items) no template "Audio Transcription Report"
-(metadados + Meeting Minutes estruturados), sem re-transcrever o audio.
-
-Uso:
-  python format_report.py transcript.txt audio.m4a [output.md]
-"""
-
-import argparse
-import os
-import re
 import sys
-from datetime import datetime
-from pathlib import Path
 
 try:
-    from dotenv import load_dotenv
+    from groq import Groq
 except ImportError:
-    def load_dotenv(*_args, **_kwargs):
-        return False
+    Groq = None
 
 try:
-    from mutagen import File as MutagenFile
-except ImportError:
-    MutagenFile = None
-
-if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-
-ENV_PATH = Path.home() / ".shared-ai-memory" / ".env"
-if ENV_PATH.exists():
-    load_dotenv(ENV_PATH)
-else:
-    load_dotenv()
-
-
-def get_groq_client():
-    try:
-        from groq import Groq
-    except ImportError as exc:
-        raise RuntimeError(
-            "groq package not installed; install dependencies before running format_report.py"
-        ) from exc
-
-    return Groq()
-
-
-def human_size(num_bytes):
-    size = float(num_bytes)
-    for unit in ("B", "KB", "MB", "GB"):
-        if size < 1024:
-            return f"{size:.2f} {unit}"
-        size /= 1024
-    return f"{size:.2f} TB"
-
-
-def format_duration(seconds):
-    if seconds is None:
-        return "Desconhecida (instale mutagen para extrair automaticamente)"
-    seconds = int(seconds)
-    h, rem = divmod(seconds, 3600)
-    m, s = divmod(rem, 60)
-    return f"{h:02d}:{m:02d}:{s:02d}"
-
-
-def get_audio_metadata(audio_path):
-    """Extrai tamanho e duracao do audio original sem re-transcrever."""
-    size_bytes = os.path.getsize(audio_path)
-    duration = None
-    if MutagenFile is not None:
-        try:
-            audio = MutagenFile(audio_path)
-            if audio is not None and audio.info is not None:
-                duration = audio.info.length
-        except Exception:
-            duration = None
-    return {
-        "size": human_size(size_bytes),
-        "duration": format_duration(duration),
-    }
-
-
-def count_speakers(transcript_text):
-    speakers = set(re.findall(r"Speaker (\d+):", transcript_text))
-    return len(speakers) if speakers else 1
-
-
-def structure_minutes(transcript_text, client, model):
-    """Extrair secoes de minutes usando apenas o inicio da transcricao."""
-    context = transcript_text[:6000]
-    prompt = f"""Documente esta transcricao de reuniao.
-
-Transcricao (inicio): \"\"\"
-{context}
-\"\"\"
-
-Extraia em Markdown:
-- Participants: quem fala (Speaker X). Outras pessoas mencionadas: listar apos.
-- Topics Discussed: temas numerados com sub-pontos.
-- Decisions Made: decisoes formais. Se nenhuma, escreva: \"Nenhuma decisao formal registrada.\"
-- Action Items: checkbox com responsavel se identificavel.
-Nao invente. Retorne APENAS as 4 secoes."""
-
-    response = client.chat.completions.create(
-        model=model,
-        max_tokens=2048,
-        messages=[{"role": "user", "content": prompt}],
+    from scripts.run import (
+        DEFAULT_CLEANUP_MODEL,
+        parse_report_args,
+        report_main,
+        run_report_pipeline,
     )
-    return response.choices[0].message.content.strip()
+    from scripts.transform import render_report
+except ModuleNotFoundError:
+    from run import DEFAULT_CLEANUP_MODEL, parse_report_args, report_main, run_report_pipeline
+    from transform import render_report
 
 
 def build_report(transcript_path, audio_path, output_path):
-    transcript_text = Path(transcript_path).read_text(encoding="utf-8")
-    meta = get_audio_metadata(audio_path)
-    speakers = count_speakers(transcript_text)
+    """Preserve the historical function while routing through ``run.py``."""
 
-    api_key = os.environ.get("GROQ_API_KEY") or os.environ.get("Groq_API_Key")
-    if not api_key:
-        print("[ERRO] GROQ_API_KEY nao configurada")
-        print("   Verificar em: ~/.shared-ai-memory/.env")
-        return 1
-
-    try:
-        client = get_groq_client()
-    except RuntimeError as exc:
-        print(f"[ERRO] {exc}")
-        return 1
-
-    model = os.environ.get("GROQ_CLEANUP_MODEL", "llama-3.3-70b-versatile")
-
-    print("[ESTRUTURANDO] Meeting Minutes (participantes, topicos, decisoes, action items)...")
-    minutes_md = structure_minutes(transcript_text, client, model)
-
-    process_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-    filename = os.path.basename(audio_path)
-
-    report = f"""# Audio Transcription Report
-
-## Metadata
-
-| Field | Value |
-|-------|-------|
-| **File Name** | {filename} |
-| **File Size** | {meta['size']} |
-| **Duration** | {meta['duration']} |
-| **Language** | Portugues (pt-BR) |
-| **Processed Date** | {process_date} |
-| **Speakers Identified** | {speakers} |
-| **Transcription Engine** | Groq Whisper Large v3 + LLaMA 3.3-70b (stout-groq-transcriber) |
-
-## Meeting Minutes
-
-{minutes_md}
-
-## Transcricao Completa
-
-{transcript_text}
-
----
-
-*Generated by stout-groq-transcriber (format_report.py) -- template: audio-transcriber v1.0.0*
-"""
-
-    Path(output_path).write_text(report, encoding="utf-8")
-    print(f"\n[OK] Relatorio salvo em: {output_path}\n")
-    return 0
-
-
-def parse_args(argv=None):
-    parser = argparse.ArgumentParser(
-        description="Reformatar transcricao de transcribe.py no template Audio Transcription Report"
-    )
-    parser.add_argument("transcript_txt", help="Arquivo .txt/.md gerado por transcribe.py")
-    parser.add_argument("audio_file", help="Arquivo de audio original (para metadados)")
-    parser.add_argument("output_md", nargs="?", help="Arquivo .md de saida (opcional)")
-    return parser.parse_args(argv)
+    return run_report_pipeline(transcript_path, audio_path, output_path, client_factory=Groq)
 
 
 def main(argv=None):
-    args = parse_args(argv)
-
-    if not os.path.isfile(args.transcript_txt):
-        print(f"[ERRO] Transcricao nao encontrada: {args.transcript_txt}")
-        return 1
-    if not os.path.isfile(args.audio_file):
-        print(f"[ERRO] Audio nao encontrado: {args.audio_file}")
-        return 1
-
-    output_path = args.output_md or f"{os.path.splitext(args.transcript_txt)[0]}_report.md"
-    return build_report(args.transcript_txt, args.audio_file, output_path)
+    return report_main(argv, client_factory=Groq)
 
 
 if __name__ == "__main__":

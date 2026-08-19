@@ -24,7 +24,7 @@ Obtenha uma chave gratuita em: <https://console.groq.com>
 ### 3. Transcrever
 
 ```bash
-python transcribe.py seu_audio.mp3
+python scripts/run.py seu_audio.mp3
 ```
 
 Saída:
@@ -40,16 +40,16 @@ Saída:
 
 ```bash
 # Saída automática no modo clean
-python transcribe.py meeting_2026_07_01.m4a
+python scripts/run.py meeting_2026_07_01.m4a
 
 # Debug com cópia do original
-python transcribe.py meeting.mp3 --mode debug --keep-source-copy
+python scripts/run.py meeting.mp3 --mode debug --keep-source-copy
 
 # Archive
-python transcribe.py meeting.m4a --mode archive --keep-source-copy
+python scripts/run.py meeting.m4a --mode archive --keep-source-copy
 
 # Saída em diretório customizado
-python transcribe.py meeting.m4a --out-dir relatorios --session-name reuniao
+python scripts/run.py meeting.m4a --out-dir relatorios --session-name reuniao
 ```
 
 ### Programaticamente

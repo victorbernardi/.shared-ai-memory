@@ -6,9 +6,9 @@
   "category": "transcrição",
   "author": "Claude Code (Stout)",
   "created": "2026-07-01",
-  "last_updated": "2026-07-01",
-  "description": "Transcrição de áudio via Groq Whisper v3 + LLaMA, com limpeza automática e estruturação (summary + action items)",
-  "long_description": "Skill para transcrição automática de áudio usando Groq Whisper v3 + LLaMA 3.3-70b. Inclui correção de termos via dicionário customizável, limpeza semântica automática, e extração de ação items.",
+  "last_updated": "2026-08-19",
+  "description": "Transcrição de áudio via Groq Whisper v3 + modelo de limpeza configurável, com pipeline ETL extract/transform/load coordenado por run.py",
+  "long_description": "Skill para transcrição automática de áudio usando Groq Whisper v3 + modelo de limpeza configurável. Inclui correção de termos via dicionário customizável, limpeza semântica automática, e extração de ação items.",
   "tags": [
     "audio",
     "transcription",
@@ -31,7 +31,7 @@
     "groq": ">=1.5.0",
     "python-dotenv": ">=1.0.0"
   },
-  "entrypoint": "scripts/transcribe.py",
+  "entrypoint": "scripts/run.py",
   "status": "active",
   "tier": 3,
   "docs": {
@@ -47,7 +47,7 @@
     "corrections_file": "config/corrections.json",
     "models": {
       "whisper": "whisper-large-v3",
-      "cleanup": "llama-3.3-70b-versatile"
+      "cleanup": "openai/gpt-oss-120b"
     }
   },
   "roadmap": {
