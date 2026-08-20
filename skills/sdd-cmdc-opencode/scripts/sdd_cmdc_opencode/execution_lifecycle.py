@@ -907,7 +907,7 @@ class ExecutionLifecycle:
         _atomic_json_write(self.record.run_dir / "scope-contract.json", scope)
 
     def _preflight_cmdc(self, repo_root: Path) -> None:
-        mod_path = Path(__file__).with_name("_scope_mod.ts")
+        mod_path = Path(__file__).with_name("_mod_probe.ts")
         if not mod_path.is_file():
             raise _LifecycleFault(
                 "MOD_NOT_FOUND",

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -186,6 +187,39 @@ def test_execution_lifecycle_exposes_the_canonical_interface() -> None:
 
     assert callable(lifecycle.start)
     assert callable(lifecycle.resume)
+
+
+def test_preflight_uses_the_dedicated_mod_hook_probe(tmp_path: Path) -> None:
+    record, repo, _ = _run_fixture(tmp_path)
+
+    class PreflightCmdc:
+        def __init__(self) -> None:
+            self.smoke_mod_path: Path | None = None
+
+        def resolve_launcher(self) -> Path:
+            return Path("cmdc")
+
+        def smoke_test(
+            self,
+            _cwd: Path,
+            *,
+            require_mod_hook: bool,
+            mod_path: Path,
+        ) -> SimpleNamespace:
+            assert require_mod_hook is True
+            self.smoke_mod_path = mod_path
+            return SimpleNamespace(mod_hook_verified=True)
+
+    cmdc = PreflightCmdc()
+
+    ExecutionLifecycle(record, cmdc)._preflight_cmdc(repo)
+
+    assert cmdc.smoke_mod_path == (
+        Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "sdd_cmdc_opencode"
+        / "_mod_probe.ts"
+    )
 
 
 def test_invalid_state_transition_is_fail_closed() -> None:
