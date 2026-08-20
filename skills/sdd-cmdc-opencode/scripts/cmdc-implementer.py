@@ -5,18 +5,60 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
 import os
 import re
 import shutil
-import signal
 import subprocess
 import sys
 import threading
 import time
 from pathlib import Path
+from typing import Any
 
-MODEL_ID = "deepseek/deepseek-v4-flash"
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from sdd_cmdc_opencode.cmdc_local import (  # noqa: E402
+    COMMAND_FLAGS,
+    MODEL_ID,
+    CmdcLocal,
+    CmdcLocalError,
+)
+from sdd_cmdc_opencode.execution_lifecycle import (  # noqa: E402
+    ExecutionLifecycle,
+    default_progress_deadline,
+)
+from sdd_cmdc_opencode.process_supervisor import (  # noqa: E402
+    ProcessFailure,
+    ProcessOutcome,
+    ProcessRequest,
+    ProcessStatus,
+    StreamEvent,
+    run_process,
+)
+from sdd_cmdc_opencode.run_record import (  # noqa: E402
+    ExecutionPolicy,
+    PlanProvenance,
+    ReviewPolicy,
+    RunContract,
+    RunRecord,
+    RunRecordError,
+    RunResult,
+    RunStatus,
+    ScopeContract,
+    SuccessPolicy,
+    TaskContract,
+    WorkspaceContract,
+    workspace_fingerprint,
+)
+
+# The fixed backend model is owned by cmdc_local; keep the contract visible at
+# this adapter boundary without maintaining a second model constant.
+# deepseek/deepseek-v4-flash
+
 PROTECTED_BRANCHES = ("main", "master")
 LEDGER_CONSENT_MARKER = "ALLOW_PROTECTED_BRANCH"
 DEPLOYED_CONSENT_MARKER = "ALLOW_DEPLOYED_EXECUTION"
@@ -57,13 +99,6 @@ KNOWN_FAILURE_ALLOWLIST: dict[str, str] = {
     "out-of-scope": "an explicit disposition token is required",
     "out of scope": "an explicit disposition token is required",
 }
-COMMAND_FLAGS = (
-    "--no-skills",
-    "--trust",
-    "--skip-onboarding",
-)
-
-
 def _stall_expired(last_activity: float, now: float, stall_timeout: float) -> bool:
     """Return whether no observable activity occurred within the stall budget."""
     return stall_timeout > 0 and now - last_activity >= stall_timeout
@@ -81,7 +116,7 @@ def build_command(
     permission boundary and never assumes consent.
     """
     command = [
-        str(cmd_path),
+        *CmdcLocal._launcher_prefix(cmd_path),
         "-p",
         "--model",
         MODEL_ID,
@@ -416,39 +451,19 @@ def validate_execution_boundary(
 
 
 def _is_native_windows_cmd(path: Path) -> bool:
-    return path.name.lower() == "cmd.exe" and path.parent.name.lower() == "system32"
+    return path.name.lower() == "cmd.exe" and "system32" in {
+        part.lower() for part in path.parts
+    }
 
 
 def resolve_cmdc(cmd_bin: str = "cmdc") -> Path:
-    """Resolve Command Code without accepting the native Windows cmd.exe."""
-    direct = Path(cmd_bin).expanduser()
-    candidates: list[Path] = []
-    if direct.is_file():
-        candidates.append(direct.resolve())
-
-    found = shutil.which(cmd_bin)
-    if found:
-        candidates.append(Path(found).resolve())
-
-    if not direct.is_absolute() and len(direct.parts) == 1:
-        npm_dir = Path(os.environ.get("APPDATA", "")) / "npm"
-        candidates.extend(
-            (npm_dir / f"{cmd_bin}{suffix}").resolve()
-            for suffix in (".ps1", ".cmd", "")
-        )
-
-    seen: set[Path] = set()
-    for candidate in candidates:
-        if candidate in seen:
-            continue
-        seen.add(candidate)
-        if candidate.is_file() and not _is_native_windows_cmd(candidate):
-            return candidate
-
-    raise FileNotFoundError(
-        f"Command Code executable '{cmd_bin}' was not found; "
-        "use cmdc or install/authenticate Command Code"
-    )
+    """Resolve Command Code through the shared local launcher Module."""
+    try:
+        return CmdcLocal(cmd_bin).resolve_launcher()
+    except CmdcLocalError as exc:
+        if exc.code != "LAUNCHER_NOT_FOUND":
+            raise
+        raise FileNotFoundError(str(exc)) from exc
 
 
 def classify_failure(
@@ -885,187 +900,6 @@ def _attach_activity_evidence(
         snapshot["event_log"] = str(event_log)
 
 
-def _drain_stream(
-    stream: object,
-    stream_name: str,
-    chunks: list[str],
-    activity_state: dict[str, object],
-    event_log: Path | None,
-) -> None:
-    reader = stream
-    try:
-        while True:
-            line = reader.readline()
-            if line == "" or line == b"":
-                break
-            text = _text_output(line)
-            chunks.append(text)
-            _record_activity(activity_state, "event")
-            if event_log is not None:
-                try:
-                    event_log_lock = activity_state.setdefault(
-                        "event_log_lock", threading.Lock()
-                    )
-                    with event_log_lock:
-                        with event_log.open(
-                            "a", encoding="utf-8", newline="\n"
-                        ) as handle:
-                            handle.write(
-                                json.dumps(
-                                    {
-                                        "stream": stream_name,
-                                        "elapsed_seconds": round(
-                                            time.monotonic()
-                                            - float(activity_state["started"]),
-                                            1,
-                                        ),
-                                        "text": text,
-                                    },
-                                    ensure_ascii=False,
-                                )
-                                + "\n"
-                            )
-                except OSError:
-                    pass
-    finally:
-        close = getattr(reader, "close", None)
-        if close is not None:
-            close()
-
-
-def _terminate_process_tree(pid: int) -> None:
-    if os.name == "nt":
-        subprocess.run(
-            ["taskkill", "/PID", str(pid), "/T", "/F"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        return
-    try:
-        os.killpg(pid, signal.SIGTERM)
-    except ProcessLookupError:
-        return
-
-
-def _windows_process_pids() -> list[int]:
-    """List every live PID from tasklist (Windows-only)."""
-    result = subprocess.run(
-        ["tasklist", "/FO", "CSV", "/NH"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    pids: list[int] = []
-    for line in result.stdout.splitlines():
-        columns = line.split(",")
-        if len(columns) >= 2:
-            candidate = columns[1].strip().strip('"')
-            if candidate.isdigit():
-                pids.append(int(candidate))
-    return pids
-
-
-def _windows_pid_in_group(pid: int, leader: int) -> bool:
-    """Return whether a Windows process belongs to the tree rooted at leader.
-
-    On Windows the process group is not exposed to Python, so the tree is
-    approximated by walking parent links: every process whose ancestor chain
-    reaches the leader is a member. A process that cannot be resolved is
-    treated as a member so the check stays fail-closed.
-    """
-    if pid == leader:
-        return True
-    seen: set[int] = set()
-    current = pid
-    while current not in seen:
-        seen.add(current)
-        parent = _windows_parent_pid(current)
-        if parent is None:
-            # The process's parent could not be resolved (wmic failed or the
-            # process vanished); treat it as a member so cleanup verification
-            # fails closed instead of declaring a false clean tree.
-            return True
-        if parent == 0:
-            # A known root that is not the leader: the chain is fully
-            # resolved and never reaches the leader, so this process is a
-            # known non-member of the tree.
-            return False
-        if parent == leader:
-            return True
-        current = parent
-    return False
-
-
-def _windows_parent_pid(pid: int) -> int | None:
-    """Return the PPID of a Windows process via wmic, or None when unknown."""
-    result = subprocess.run(
-        ["wmic", "process", "where", f"ProcessId={pid}", "get", "ParentProcessId"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    for line in result.stdout.splitlines():
-        line = line.strip()
-        if line.isdigit():
-            return int(line)
-    return None
-
-
-def _capture_process_group(pid: int) -> int | None:
-    """Capture the POSIX process-group identity before the leader exits.
-
-    killpg(pid) keeps the group id equal to the leader pid, so the group is
-    captured before termination; after the leader exits os.getpgid(leader)
-    raises ProcessLookupError and the group identity is gone.
-    """
-    if os.name == "nt":
-        return None
-    try:
-        return os.getpgid(pid)
-    except (ProcessLookupError, PermissionError, OSError):
-        return None
-
-
-def _process_tree_alive(pid: int, group: int | None = None) -> bool:
-    """Return True when any process of the group is still alive.
-
-    killpg()/taskkill /T keep the group id equal to the leader pid, so the
-    whole tree is verified from the group captured before termination
-    instead of only the leader. A surviving descendant makes the cleanup
-    unverified; an uncaptured group identity counts as alive (fail closed).
-    """
-    if os.name == "nt":
-        # On Windows, taskkill /T (used by _terminate_process_tree) kills the
-        # whole tree rooted at pid. Verify absence by scanning the full
-        # process list for any surviving member of that tree rather than
-        # trusting the leader alone.
-        return any(
-            _windows_pid_in_group(candidate_pid, pid)
-            for candidate_pid in _windows_process_pids()
-        )
-    if group is None:
-        # The group identity was never captured (or could not be resolved).
-        # The tree cannot be verified absent, so it must count as alive:
-        # fail closed.
-        return True
-    try:
-        processes = os.listdir("/proc")
-    except (PermissionError, OSError):
-        return True
-    for process in processes:
-        if not process.isdigit():
-            continue
-        try:
-            if os.getpgid(int(process)) == group:
-                return True
-        except ProcessLookupError:
-            continue
-        except (PermissionError, OSError):
-            return True
-    return False
-
-
 def _fresh_activity_state(
     baseline_fingerprint: tuple[object, ...] | None = None,
 ) -> dict[str, object]:
@@ -1087,6 +921,14 @@ def _fresh_activity_state(
     }
 
 
+class _ProcessLifecycleError(RuntimeError):
+    def __init__(self, outcome: ProcessOutcome) -> None:
+        failure = outcome.primary_failure
+        message = failure.message if failure is not None else "process lifecycle failed"
+        super().__init__(message)
+        self.outcome = outcome
+
+
 def _run_cmdc_process(
     process_command: list[str],
     prompt_text: str,
@@ -1097,93 +939,63 @@ def _run_cmdc_process(
     activity_state: dict[str, object],
     event_log: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    """Run CMDc while streaming events and enforcing both watchdogs."""
-    process = subprocess.Popen(
-        process_command,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=str(cwd),
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        creationflags=(
-            getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-            | getattr(subprocess, "CREATE_NO_WINDOW", 0)
-        )
-        if os.name == "nt"
-        else 0,
-        start_new_session=os.name != "nt",
+    """Run CMDc through the shared supervisor and retain adapter evidence."""
+
+    def on_output(event: StreamEvent) -> None:
+        _record_activity(activity_state, "event")
+        if event_log is None:
+            return
+        try:
+            event_log_lock = activity_state.setdefault("event_log_lock", threading.Lock())
+            with event_log_lock:
+                with event_log.open("a", encoding="utf-8", newline="\n") as handle:
+                    handle.write(
+                        json.dumps(
+                            {
+                                "stream": event.stream,
+                                "elapsed_seconds": round(event.elapsed_seconds, 1),
+                                "text": event.text,
+                            },
+                            ensure_ascii=False,
+                        )
+                        + "\n"
+                    )
+        except OSError:
+            pass
+
+    outcome = run_process(
+        ProcessRequest(
+            command=tuple(process_command),
+            cwd=cwd,
+            stdin_text=prompt_text,
+            wall_timeout_seconds=float(wall_timeout_seconds),
+            stall_timeout_seconds=float(stall_timeout_seconds),
+        ),
+        on_output=on_output,
     )
-    stdout_chunks: list[str] = []
-    stderr_chunks: list[str] = []
-    readers = [
-        threading.Thread(
-            target=_drain_stream,
-            args=(process.stdout, "stdout", stdout_chunks, activity_state, event_log),
-            daemon=True,
-        ),
-        threading.Thread(
-            target=_drain_stream,
-            args=(process.stderr, "stderr", stderr_chunks, activity_state, event_log),
-            daemon=True,
-        ),
-    ]
-    for reader in readers:
-        reader.start()
-    try:
-        if process.stdin is not None:
-            try:
-                process.stdin.write(prompt_text)
-                process.stdin.close()
-            except (BrokenPipeError, OSError):
-                pass
-        started = float(activity_state["started"])
-        while process.poll() is None:
-            now = time.monotonic()
-            last_activity = float(activity_state["last_activity"])
-            if now - started >= wall_timeout_seconds:
-                reason = "WALL_TIMEOUT"
-            elif _stall_expired(last_activity, now, stall_timeout_seconds):
-                reason = "STALLED"
-            else:
-                reason = ""
-            if reason:
-                process_group = _capture_process_group(process.pid)
-                _terminate_process_tree(process.pid)
-                cleanup_verified = False
-                try:
-                    process.wait(timeout=5)
-                    cleanup_verified = not _process_tree_alive(process.pid)
-                    if process_group is not None:
-                        cleanup_verified = not _process_tree_alive(process.pid, process_group)
-                except subprocess.TimeoutExpired:
-                    cleanup_verified = not _process_tree_alive(process.pid)
-                    if process_group is not None:
-                        cleanup_verified = not _process_tree_alive(process.pid, process_group)
-                for reader in readers:
-                    reader.join(timeout=2)
-                error = subprocess.TimeoutExpired(
-                    process_command,
-                    timeout=wall_timeout_seconds
-                    if reason == "WALL_TIMEOUT"
-                    else stall_timeout_seconds,
-                    output="".join(stdout_chunks),
-                    stderr="".join(stderr_chunks),
-                )
-                error.watchdog_reason = reason  # type: ignore[attr-defined]
-                error.watchdog_pid = process.pid  # type: ignore[attr-defined]
-                error.watchdog_cleanup_verified = cleanup_verified  # type: ignore[attr-defined]
-                raise error
-            time.sleep(0.2)
-    finally:
-        for reader in readers:
-            reader.join(timeout=2)
+    if outcome.status in {ProcessStatus.WALL_TIMEOUT, ProcessStatus.STALLED}:
+        error = subprocess.TimeoutExpired(
+            process_command,
+            timeout=(
+                wall_timeout_seconds
+                if outcome.status is ProcessStatus.WALL_TIMEOUT
+                else stall_timeout_seconds
+            ),
+            output=outcome.stdout,
+            stderr=outcome.stderr,
+        )
+        error.watchdog_reason = outcome.status.value  # type: ignore[attr-defined]
+        error.watchdog_pid = outcome.pid  # type: ignore[attr-defined]
+        error.watchdog_cleanup_verified = outcome.cleanup_verified  # type: ignore[attr-defined]
+        error.watchdog_drain_verified = outcome.drain_verified  # type: ignore[attr-defined]
+        raise error
+    if outcome.primary_failure is not None or outcome.secondary_failures:
+        raise _ProcessLifecycleError(outcome)
     return subprocess.CompletedProcess(
         process_command,
-        process.returncode,
-        "".join(stdout_chunks),
-        "".join(stderr_chunks),
+        outcome.returncode,
+        outcome.stdout,
+        outcome.stderr,
     )
 
 
@@ -1318,17 +1130,8 @@ def _extract_report_path(prompt_text: str, cwd: Path) -> Path | None:
 
 
 def _platform_command(command: list[str]) -> list[str]:
-    """Launch Windows script shims through PowerShell/cmd while keeping cmdc."""
-    path = Path(command[0])
-    if os.name == "nt" and path.suffix.lower() == ".ps1":
-        powershell = shutil.which("pwsh") or shutil.which("powershell")
-        if not powershell:
-            raise FileNotFoundError("PowerShell launcher was not found")
-        return [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", *command]
-    if os.name == "nt" and path.suffix.lower() in {".cmd", ".bat"}:
-        launcher = os.environ.get("COMSPEC", "cmd.exe")
-        return [launcher, "/d", "/c", *command]
-    return command
+    """Normalize a compatibility command through the shared launcher logic."""
+    return [*CmdcLocal._launcher_prefix(Path(command[0])), *command[1:]]
 
 
 def run_implementer(
@@ -1616,6 +1419,36 @@ def run_implementer(
             exit_code = 0
         else:
             exit_code = completed.returncode
+    except _ProcessLifecycleError as exc:
+        outcome = exc.outcome
+        failure = outcome.primary_failure or (
+            outcome.secondary_failures[0] if outcome.secondary_failures else None
+        )
+        failure_code = failure.code if failure is not None else "PROCESS_LIFECYCLE_FAILED"
+        failure_phase = failure.phase if failure is not None else "lifecycle"
+        diagnostic = {
+            "BLOCKER_CODE": failure_code,
+            "MESSAGE": str(exc),
+            "COMMAND": " ".join(str(part) for part in (process_command or command)),
+            "EXIT_CODE": "1",
+            "STDERR": outcome.stderr,
+            "ACTION": "preservar as evidências e corrigir a fase indicada antes de repetir",
+            "PHASE": failure_phase.upper(),
+        }
+        if outcome.stdout:
+            diagnostic["STDOUT"] = outcome.stdout
+        exit_code = 1
+    except CmdcLocalError as exc:
+        diagnostic = {
+            "BLOCKER_CODE": exc.code,
+            "MESSAGE": exc.message,
+            "COMMAND": "",
+            "EXIT_CODE": "1",
+            "STDERR": str(exc),
+            "ACTION": "corrigir o launcher local antes de repetir",
+            "PHASE": "RESOLUTION",
+        }
+        exit_code = 1
     except FileNotFoundError as exc:
         command = [cmd_bin, *COMMAND_FLAGS]
         launcher_spawn_failed = cmd_path is not None and (
@@ -2065,6 +1898,494 @@ def run_implementer(
     return 0
 
 
+def _contract_run_dir(contract: RunContract, contract_file: Path) -> Path:
+    """Resolve the durable Run directory without copying plan authority."""
+
+    contract_file = contract_file.expanduser().resolve()
+    if contract_file.name == "contract.json" and contract_file.parent.name == contract.run_id:
+        return contract_file.parent
+    if contract_file.parent.name == "runs":
+        return contract_file.parent / contract.run_id
+    return (
+        contract.workspace.repo_root
+        / ".superpowers"
+        / "sdd"
+        / "canonical"
+        / "runs"
+        / contract.run_id
+    )
+
+
+def _load_or_create_run(contract_file: Path) -> RunRecord:
+    contract_file = contract_file.expanduser().resolve()
+    contract = RunContract.load(contract_file)
+    run_dir = _contract_run_dir(contract, contract_file)
+    existing = run_dir / "contract.json"
+    if existing.is_file():
+        record = RunRecord.load(run_dir)
+        if record.contract_sha256 != contract.contract_sha256:
+            raise RunRecordError("existing Run Contract differs from --contract-file")
+        return record
+    return RunRecord.create(run_dir, contract)
+
+
+def render_run_result(result: RunResult, record: RunRecord) -> str:
+    """Render canonical output while retaining the adapter's short summary."""
+
+    lines = [f"STATUS: {result.status.value}"]
+    if result.primary_blocker is not None:
+        lines.extend(
+            [
+                f"BLOCKER_CODE: {result.primary_blocker.code}",
+                f"MESSAGE: {result.primary_blocker.message}",
+            ]
+        )
+    lines.extend(
+        [
+            f"RUN_ID: {result.run_id}",
+            f"RESULT_FILE: {record.run_dir / 'result.json'}",
+            f"EVENTS_FILE: {record.run_dir / 'events.jsonl'}",
+            f"CHECKPOINTS_FILE: {record.run_dir / 'checkpoints.jsonl'}",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _derive_flat_run_id(cwd: Path, plan_file: Path, task_number: int) -> str:
+    """Derive the deterministic legacy Run ID from exact workspace identity.
+
+    The ID names the plan workspace and task so a later operator can find the
+    persisted Run; it is not operational authority. The plan file name is
+    normalized for the Run ID grammar (the plan workspace keeps the original
+    plan stem) and the derived ID remains unique per task.
+    """
+    repo_root = Path(cwd).resolve()
+    plan_stem = plan_file.resolve().name
+    safe_stem = re.sub(r"[^A-Za-z0-9._-]", "-", plan_stem).strip(".-") or "plan"
+    base = f"{safe_stem}-task-{int(task_number)}"
+    return f"{base}-{_flat_run_sequence(repo_root, base)}"
+
+
+def _flat_run_sequence(repo_root: Path, base: str) -> int:
+    """Return the next monotonic flat-Run sequence under the plan workspace."""
+    plan_workspace = repo_root / ".superpowers" / "sdd"
+    highest = 0
+    if plan_workspace.is_dir():
+        for workspace in plan_workspace.iterdir():
+            runs = workspace / "runs"
+            if not runs.is_dir():
+                continue
+            for run_dir in runs.iterdir():
+                if not run_dir.is_dir():
+                    continue
+                match = re.fullmatch(rf"{re.escape(base)}-(\d+)", run_dir.name)
+                if match:
+                    highest = max(highest, int(match.group(1)))
+    return highest + 1
+
+
+def _flat_task_number(plan_text: str) -> int:
+    """Return the single task number a legacy plan must declare.
+
+    Legacy dispatches name one task; the Run Contract requires a task ID and a
+    heading/brief from the plan, so a plan that does not identify exactly one
+    task cannot be normalized deterministically and fails closed.
+    """
+    headings = re.findall(
+        r"^(?:#{1,6}[ \t]+)?(?:\d+[.)]?[ \t]+)?"
+        r"(?:Task|Tarefa)[ \t]+(\d+)(?=$|[ \t:.)-])",
+        plan_text,
+        flags=re.IGNORECASE | re.MULTILINE,
+    )
+    if not headings:
+        raise _FlatNormalizationError(
+            "the plan declares no Task/Tarefa heading; legacy flat "
+            "normalization requires exactly one task"
+        )
+    numbers = sorted({int(value) for value in headings})
+    if len(numbers) != 1:
+        raise _FlatNormalizationError(
+            "the plan declares multiple tasks; legacy flat normalization "
+            "requires exactly one task"
+        )
+    return numbers[0]
+
+
+class _FlatNormalizationError(ValueError):
+    """The legacy flat CLI cannot be normalized into a governed Run Contract."""
+
+
+def _extract_report_path_legacy(prompt_text: str, cwd: Path) -> Path:
+    """Reuse the legacy marker parser for the flat prompt only.
+
+    New Runs always use ``task.report_path`` directly; this parser exists
+    only so old invocations keep their report contract. A prompt without the
+    explicit marker fails closed instead of guessing a report path.
+    """
+    report_path = _extract_report_path(prompt_text, cwd)
+    if report_path is None:
+        raise _FlatNormalizationError(
+            "the prompt does not declare a report file path; legacy flat "
+            "normalization requires 'Write your full report to <path>:'"
+        )
+    return report_path
+
+
+def _load_task_brief_helper() -> Any:
+    """Import the adjacent task-brief extractor as a private helper module."""
+    helper_path = Path(__file__).resolve().parent / "task-brief.py"
+    spec = importlib.util.spec_from_file_location("_cmdc_flat_task_brief", helper_path)
+    if spec is None or spec.loader is None:
+        raise _FlatNormalizationError("task-brief.py is unavailable")
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    return helper
+
+
+def _flat_scope_and_brief(
+    plan_path: Path,
+    plan_text: str,
+    task_number: int,
+) -> tuple[tuple[str, ...], str]:
+    """Derive deterministic allowed scope and the exact task brief.
+
+    The scope comes only from the task's declared ``Files``/``Arquivos``
+    section through the shared extractor. When the task declares no
+    deterministic paths, normalization fails closed with
+    ``SCOPE_CONTRACT_MISSING`` — there is never an implicit allow-all scope.
+    """
+    helper = _load_task_brief_helper()
+    try:
+        heading, body = helper.extract_task(plan_text, task_number)
+    except Exception as error:  # noqa: BLE001 - helper taxonomy boundary
+        raise _FlatNormalizationError(
+            f"could not extract the flat task from the plan: {error}"
+        ) from error
+    brief = heading + "\n" + body
+    try:
+        allowed = helper.extract_declared_files(brief)
+    except Exception as error:  # noqa: BLE001 - strict derivation boundary
+        raise _FlatNormalizationError(
+            f"the task has no deterministic Files/Arquivos scope: {error}"
+        ) from error
+    if not allowed:
+        raise _FlatNormalizationError(
+            "the task declares no allowed files; legacy flat normalization "
+            "requires a deterministic Files/Arquivos scope"
+        )
+    return tuple(allowed), brief
+
+
+def _flat_plan_provenance(
+    repo_root: Path,
+    plan_path: Path,
+    task_number: int,
+) -> PlanProvenance:
+    """Record the plan's own repository, branch, HEAD, path, and SHA-256.
+
+    Legacy dispatches execute inside the same repository that owns the plan,
+    so the plan is its own source. The recorded identity is the exact current
+    Git identity and file hash; the lifecycle re-verifies them before spawn.
+    """
+    try:
+        source_repository = Path(
+            _run_git(repo_root, "rev-parse", "--show-toplevel")
+        ).resolve()
+        source_head = _run_git(repo_root, "rev-parse", "HEAD")
+        branch = _run_git(repo_root, "symbolic-ref", "--short", "-q", "HEAD") or ""
+    except RuntimeError as error:
+        raise _FlatNormalizationError(
+            f"could not capture plan provenance: {error}"
+        ) from error
+    try:
+        plan_hash = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    except OSError as error:
+        raise _FlatNormalizationError(
+            f"could not hash the plan file: {error}"
+        ) from error
+    return PlanProvenance(
+        source_path=plan_path.resolve(),
+        source_repository=source_repository,
+        source_branch=branch,
+        source_head=source_head,
+        sha256=plan_hash,
+    )
+
+
+def _normalize_flat_contract(
+    cwd: Path,
+    prompt_file: Path,
+    plan_file: Path,
+    *,
+    max_turns: int,
+    checkpoint_file: Path | None,
+    wall_timeout_seconds: int,
+    stall_timeout_seconds: int,
+    recovery_max_turns: int,
+    allow_cmdc_yolo: bool,
+) -> RunContract:
+    """Normalize one legacy flat invocation into an immutable v1 Run Contract.
+
+    The legacy cwd, plan, prompt/brief/report paths, timeout/turn/recovery/
+    yolo/no-skills settings, exact baseline, and derived scope are carried
+    into the Contract. After the Contract exists, prompt prose and mutable CLI
+    values are never operational authority again: the lifecycle renders its
+    own prompt from the Contract and the task brief.
+    """
+    cwd = cwd.expanduser().resolve()
+    plan_path = plan_file.expanduser().resolve()
+    prompt_path = prompt_file.expanduser().resolve()
+    if not cwd.is_dir():
+        raise _FlatNormalizationError(f"the working directory does not exist: {cwd}")
+    if not plan_path.is_file():
+        raise _FlatNormalizationError(f"the plan file does not exist: {plan_path}")
+    try:
+        plan_text = plan_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as error:
+        raise _FlatNormalizationError(f"the plan file cannot be read: {error}") from error
+    prompt_error = _validate_artifact_path(
+        prompt_path,
+        cwd,
+        kind="PROMPT",
+        require_existing=True,
+        require_readable=True,
+        require_contained=False,
+    )
+    if prompt_error is not None:
+        raise _FlatNormalizationError(prompt_error["MESSAGE"])
+    try:
+        prompt_text = prompt_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as error:
+        raise _FlatNormalizationError(f"the prompt file cannot be read: {error}") from error
+    report_path = _extract_report_path_legacy(prompt_text, cwd)
+    report_error = _validate_artifact_path(
+        report_path, cwd, kind="REPORT", require_existing=False
+    )
+    if report_error is not None:
+        raise _FlatNormalizationError(report_error["MESSAGE"])
+    if checkpoint_file is not None:
+        checkpoint_error = _validate_artifact_path(
+            checkpoint_file, cwd, kind="CHECKPOINT", require_existing=False
+        )
+        if checkpoint_error is not None:
+            raise _FlatNormalizationError(checkpoint_error["MESSAGE"])
+
+    task_number = _flat_task_number(plan_text)
+    allowed, brief = _flat_scope_and_brief(plan_path, plan_text, task_number)
+    plan_provenance = _flat_plan_provenance(cwd, plan_path, task_number)
+
+    # The task brief is an owned workspace artifact and must exist before the
+    # baseline fingerprint is captured: the lifecycle then treats it as a
+    # recorded pre-existing change instead of an unknown post-contract write.
+    # No RunRecord exists yet here, so the baseline captures the workspace
+    # without any owner authority: every run directory already on disk stays
+    # visible and fails closed.
+    run_id = _derive_flat_run_id(cwd, plan_path, task_number)
+    brief_path = cwd / ".superpowers" / "sdd" / plan_path.stem / f"task-{task_number}-brief.md"
+    brief_path.parent.mkdir(parents=True, exist_ok=True)
+    brief_bytes = brief.encode("utf-8").replace(b"\r\n", b"\n")
+    try:
+        brief_path.write_bytes(brief_bytes)
+    except OSError as error:
+        raise _FlatNormalizationError(f"could not write the flat task brief: {error}") from error
+
+    baseline = workspace_fingerprint(cwd)
+
+    contract = RunContract(
+        schema_version=1,
+        run_id=run_id,
+        task=TaskContract(
+            id=task_number,
+            heading=re.sub(r"^#{1,6}[ \t]+", "", brief.splitlines()[0]),
+            brief_path=brief_path,
+            brief_sha256=hashlib.sha256(brief_bytes).hexdigest(),
+            report_path=report_path,
+        ),
+        plan=plan_provenance,
+        workspace=WorkspaceContract(
+            repo_root=cwd,
+            base_head=str(baseline.get("head", "")),
+            branch=str(baseline.get("branch", "")),
+            baseline_status=baseline,
+        ),
+        scope=ScopeContract(allowed_paths=allowed, denied_paths=()),
+        execution=ExecutionPolicy(
+            backend="cmdc-local",
+            model=MODEL_ID,
+            max_turns=max(1, int(max_turns)),
+            wall_timeout_seconds=max(0, int(wall_timeout_seconds)),
+            stall_timeout_seconds=max(0, int(stall_timeout_seconds)),
+            progress_deadline_turns=default_progress_deadline(max_turns),
+            max_resumes=max(0, int(recovery_max_turns)),
+            no_skills=True,
+            yolo=bool(allow_cmdc_yolo),
+        ),
+        success=SuccessPolicy(
+            require_commit=True,
+            require_report=True,
+            require_test_evidence=True,
+        ),
+        review=ReviewPolicy(auto_fix_rounds=0),
+        lineage=None,
+    )
+    return contract
+
+
+def _render_flat_blocked(code: str, message: str, action: str, *, mode: str) -> int:
+    """Render the stable structured BLOCKED diagnostic for a legacy invocation."""
+    diagnostic = {
+        "BLOCKER_CODE": code,
+        "MESSAGE": message,
+        "COMMAND": "",
+        "EXIT_CODE": "1",
+        "STDERR": "",
+        "ACTION": action,
+        "MODE": mode,
+    }
+    print(render_blocked(diagnostic), file=sys.stderr)
+    return 1
+
+
+def run_flat_compat(
+    cwd: Path,
+    prompt_file: Path,
+    plan_file: Path,
+    *,
+    max_turns: int,
+    cmd_bin: str,
+    checkpoint_file: Path | None,
+    wall_timeout_seconds: int,
+    stall_timeout_seconds: int,
+    recovery_max_turns: int,
+    allow_cmdc_yolo: bool,
+    allow_protected_branch: bool,
+    ledger_file: Path | None,
+) -> int:
+    """Execute one legacy flat invocation through the canonical lifecycle.
+
+    The legacy arguments are normalized into an immutable v1 Run Contract
+    first; when normalization is impossible the adapter returns a structured
+    BLOCKED result before any launcher smoke or child process. The old
+    ``run_implementer`` child-process path is never used by this route. The
+    same repository/plan/branch/dirty/deployed boundary used by the legacy
+    adapter API runs before the derived brief or Contract is written.
+    """
+    mode = "yolo" if allow_cmdc_yolo else "normal"
+    preflight = validate_execution_boundary(
+        cwd.expanduser().resolve(),
+        plan_file.expanduser().resolve(),
+        allow_protected_branch=allow_protected_branch,
+        ledger_file=ledger_file,
+        allow_dirty=False,
+        allow_cmdc_yolo=allow_cmdc_yolo,
+    )
+    if "BLOCKER_CODE" in preflight:
+        diagnostic = {
+            "BLOCKER_CODE": str(preflight["BLOCKER_CODE"]),
+            "MESSAGE": str(preflight["MESSAGE"]),
+            "COMMAND": "",
+            "EXIT_CODE": "1",
+            "STDERR": "",
+            "ACTION": str(preflight["ACTION"]),
+            "MODE": mode,
+        }
+        initial_git_state = preflight.get("initial_git_state")
+        if initial_git_state is not None:
+            diagnostic["INITIAL_GIT_STATE"] = json.dumps(
+                initial_git_state,
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+        print(render_blocked(diagnostic), file=sys.stderr)
+        return 1
+    try:
+        contract = _normalize_flat_contract(
+            cwd,
+            prompt_file,
+            plan_file,
+            max_turns=max_turns,
+            checkpoint_file=checkpoint_file,
+            wall_timeout_seconds=wall_timeout_seconds,
+            stall_timeout_seconds=stall_timeout_seconds,
+            recovery_max_turns=recovery_max_turns,
+            allow_cmdc_yolo=allow_cmdc_yolo,
+        )
+    except _FlatNormalizationError as error:
+        return _render_flat_blocked(
+            "FLAT_NORMALIZATION_FAILED",
+            str(error),
+            "pass a plan with exactly one task and a deterministic Files/Arquivos "
+            "scope, or use start --contract-file/resume --run-id",
+            mode=mode,
+        )
+
+    # The legacy adapter creates the immutable Contract file, then the
+    # canonical start path loads it and owns Run Record creation: the Contract
+    # baseline was captured before the Run artifacts existed, and the durable
+    # run directory is a lifecycle-owned artifact that never enters the
+    # workspace audit.
+    contract_file = (
+        cwd
+        / ".superpowers"
+        / "sdd"
+        / contract.plan.source_path.stem
+        / "runs"
+        / contract.run_id
+        / "contract.json"
+    )
+    contract_file.parent.mkdir(parents=True, exist_ok=True)
+    contract_file.write_text(
+        json.dumps(contract.to_mapping(), ensure_ascii=False, sort_keys=True, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+    return run_canonical_start(contract_file, cmd_bin=cmd_bin)
+
+
+def run_canonical_start(contract_file: Path, *, cmd_bin: str = "cmdc") -> int:
+    """Load one immutable Run Contract and execute its canonical start path."""
+
+    try:
+        record = _load_or_create_run(contract_file)
+    except RunRecordError as error:
+        print(
+            "\n".join(
+                [
+                    "STATUS: BLOCKED",
+                    "BLOCKER_CODE: RUN_CONTRACT_INVALID",
+                    f"MESSAGE: {error}",
+                ]
+            ),
+            file=sys.stderr,
+        )
+        return 1
+    result = ExecutionLifecycle(record, CmdcLocal(cmd_bin)).start()
+    print(render_run_result(result, record))
+    return 0 if result.status is RunStatus.COMPLETE else 1
+
+
+def run_canonical_resume(cwd: Path, run_id: str, *, cmd_bin: str = "cmdc") -> int:
+    """Resume the one Run found under ``cwd`` without rebuilding its Contract."""
+
+    try:
+        record = RunRecord.locate(cwd, run_id)
+    except RunRecordError as error:
+        print(
+            "\n".join(
+                [
+                    "STATUS: BLOCKED",
+                    "BLOCKER_CODE: RESUME_INVARIANT_FAILED",
+                    f"MESSAGE: {error}",
+                ]
+            ),
+            file=sys.stderr,
+        )
+        return 1
+    result = ExecutionLifecycle(record, CmdcLocal(cmd_bin)).resume()
+    print(render_run_result(result, record))
+    return 0 if result.status is RunStatus.COMPLETE else 1
+
+
 def _positive_int(value: str) -> int:
     """Parse a CLI integer that must be strictly positive."""
     parsed = int(value)
@@ -2074,6 +2395,17 @@ def _positive_int(value: str) -> int:
 
 
 def parse_args() -> argparse.Namespace:
+    if len(sys.argv) > 1 and sys.argv[1] in {"start", "resume"}:
+        parser = argparse.ArgumentParser(description=__doc__)
+        command = sys.argv[1]
+        parser.add_argument("command", choices=("start", "resume"))
+        if command == "start":
+            parser.add_argument("--contract-file", required=True, type=Path)
+        else:
+            parser.add_argument("--cwd", required=True, type=Path)
+            parser.add_argument("--run-id", required=True)
+        parser.add_argument("--cmd-bin", default="cmdc")
+        return parser.parse_args()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cwd", default=".", type=Path)
     parser.add_argument("--prompt-file", required=True, type=Path)
@@ -2147,22 +2479,28 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     _configure_stdio()
     args = parse_args()
-    return run_implementer(
+    if getattr(args, "command", None) == "start":
+        return run_canonical_start(args.contract_file, cmd_bin=args.cmd_bin)
+    if getattr(args, "command", None) == "resume":
+        return run_canonical_resume(args.cwd, args.run_id, cmd_bin=args.cmd_bin)
+    # The legacy flat form stays accepted but is normalized into a v1 Run
+    # Contract and executed through the canonical lifecycle before any
+    # launcher smoke or child process. The old run_implementer child-process
+    # path is never used by this route; a legacy invocation that cannot be
+    # normalized returns a structured BLOCKED result.
+    return run_flat_compat(
         cwd=args.cwd,
         prompt_file=args.prompt_file,
+        plan_file=args.plan_file,
         max_turns=args.max_turns,
         cmd_bin=args.cmd_bin,
         checkpoint_file=args.checkpoint_file,
-        heartbeat_interval=args.heartbeat_interval,
-        recovery_max_turns=args.recovery_max_turns,
         wall_timeout_seconds=args.wall_timeout_seconds,
         stall_timeout_seconds=args.stall_timeout_seconds,
-        allow_no_change=args.allow_no_change,
-        allow_known_test_failures=args.allow_known_test_failures,
-        plan_file=args.plan_file,
+        recovery_max_turns=args.recovery_max_turns,
+        allow_cmdc_yolo=args.allow_cmdc_yolo,
         allow_protected_branch=args.allow_protected_branch,
         ledger_file=args.ledger_file,
-        allow_cmdc_yolo=args.allow_cmdc_yolo,
     )
 
 

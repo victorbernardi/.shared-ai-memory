@@ -6,6 +6,7 @@
 skills/sdd-cmdc-opencode/**/*.py text eol=lf
 skills/sdd-cmdc-opencode/**/*.md text eol=lf
 skills/sdd-cmdc-opencode/**/*.json text eol=lf
+skills/sdd-cmdc-opencode/**/*.ts text eol=lf
 skills/sdd-cmdc-opencode/scripts/review-package text eol=lf
 skills/sdd-cmdc-opencode/scripts/sdd-workspace text eol=lf
 skills/sdd-cmdc-opencode/scripts/task-brief text eol=lf

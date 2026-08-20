@@ -38,6 +38,56 @@ also preserves your own context for coordination work.
 **Core principle:** Fresh subagent per task + delegated task review (spec +
 quality) + broad delegated final review = high quality, fast iteration
 
+## Canonical Run Contract lifecycle
+
+The governed execution authority is a Run Contract schema version 1, not a
+prompt or a mutable CLI argument list. The Contract is immutable and is
+persisted with one Run Record under `contract.json`, append-only
+`events.jsonl` and `checkpoints.jsonl`, and the atomically current
+`result.json`. The Run Result is the transactional authority; the
+Implementer Report is the human-readable Markdown account and is not a
+substitute for Result evidence.
+
+The canonical entry points are:
+
+```powershell
+python scripts/cmdc-implementer.py start --contract-file PATH\contract.json
+python scripts/cmdc-implementer.py resume --cwd REPOSITORY --run-id RUN_ID
+```
+
+`start --contract-file` loads one existing Contract or creates its one owned
+Run Record. `resume --cwd ... --run-id ...` locates exactly one owned Run and
+revalidates its Contract SHA-256, base HEAD, branch, Checkpoint ownership and
+sequence, captured Session ID, known workspace fingerprint, and scope before
+creating a process. Recovery never reconstructs authority from a new prompt.
+
+Scope is explicit when the Contract declares allowed and denied paths, or is
+deterministically derived from the task `Files`/`Arquivos` section by the
+Windows `scripts/task-brief.py` entry point. Missing scope is
+`SCOPE_CONTRACT_MISSING`, never an implicit allow-all decision. The pre-tool Mod
+checks direct write/edit targets; the post-shell audit and final audit
+compare the Git workspace against the baseline and allowed Run paths. An
+unknown direct or indirect change remains present and blocks the Result.
+
+The first execution uses one Command Code Session. A `WORKER_TURN_LIMIT` may
+automatically enter same Command Code Session Recovery while the configured
+attempt budget and cleanup evidence permit it. `STALLED` and wall timeout
+remain explicit `INCOMPLETE` outcomes until the operator invokes the exact
+`resume --cwd REPOSITORY --run-id RUN_ID` command. Recovery must use the same
+Session ID and Mod/scope environment; a different returned Session is
+`CMD_CODE_PROTOCOL_ERROR`. The early progress deadline is recorded as
+`NO_IMPLEMENTATION_PROGRESS`. Test approval comes only from normalized test events
+with a successful tool result, never from agent prose or a Markdown
+claim. The external plan and task-brief provenance remain tied to the recorded
+repository, branch, commit, paths, and SHA-256. There is no generic allow-dirty Recovery bypass: pre-existing changes
+are accepted only when they match the recorded baseline and remain untouched.
+
+The legacy flat adapter remains available for compatibility and retains its
+legacy report-marker parsing only for old calls. New governed work must use
+the canonical Contract/Record/Result path; legacy `--allow-dirty` behavior
+does not authorize canonical Recovery or weaken scope, provenance, cleanup,
+or Result gates.
+
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
@@ -241,6 +291,30 @@ conflicts that only emerge from implementation.
 - Never route implementation to a Codex worker and never silently fall back to
   Codex when Command Code is unavailable.
 
+### Shared process and local launcher Modules
+
+- `scripts/sdd_cmdc_opencode/process_supervisor.py` is the single process
+  lifecycle Module for both `cmdc-implementer.py` and `review-session.py`.
+  It owns argument-array spawn, UTF-8 replacement, streamed stdout/stderr,
+  wall and stall watchdogs, termination, final drain, and verified cleanup.
+  Adapters must not carry a second process-tree implementation.
+- On native Windows the supervisor assigns the bootstrap to a Job Object before
+  the target starts. Cleanup is verified from Job Object accounting; a leader
+  exit alone is never proof. A timeout remains the primary failure when
+  termination, cleanup, or drain produces secondary evidence.
+- `scripts/sdd_cmdc_opencode/cmdc_local.py` owns local launcher discovery,
+  platform wrapper argument arrays, the fixed model/output/security flags,
+  validated Mod paths, and the local NDJSON translation. Resolution failures
+  stay distinct from `LAUNCHER_NOT_FOUND`, `LAUNCHER_UNSUPPORTED`,
+  `PROCESS_SPAWN_FAILED`, `WALL_TIMEOUT`, `STALLED`,
+  `PROCESS_CLEANUP_UNVERIFIABLE`, `PROCESS_TREE_TERMINATION_FAILED`,
+  `PROCESS_DRAIN_FAILED`, and `CMD_CODE_PROTOCOL_ERROR`.
+- Deterministic fake-launcher tests are separate from the installed-launcher
+  smoke. Set `SDD_CMDC_REAL_SMOKE=1` only for the real gate; it requires a
+  temporary Git repository, bounded `--max-turns 2`, JSON output, a verified
+  Mod-hook marker, `cleanup_verified`, and `drain_verified`. A skipped real
+  gate is reported as unavailable operational evidence, not as success.
+
 ### Reviewer backend
 
 - Every review — task review, scoped re-review, and the final whole-branch
@@ -326,21 +400,20 @@ dispatch result. A non-zero result or missing report emits `STATUS: BLOCKED` wit
 `BLOCKER_CODE`, `MESSAGE`, `COMMAND`, `EXIT_CODE`, `STDERR` and `ACTION`; write
 that reason into the ledger and do not generate a review package. A wall-clock
 timeout or stall emits `STATUS: IMPLEMENTATION INCOMPLETE`, appends a
-`TIMED_OUT` JSONL checkpoint and blocks review/next-task progression until the
-workspace, report and commit are recovered deterministically. When a partial
-diff or commit is present after a wall-clock timeout, the adapter starts one
-fresh, bounded CMDc recovery phase. Recovery is accepted only when a new commit,
-the requested report and detectable test evidence all exist; otherwise it
-remains incomplete and blocks review. A successful recovery emits
-`STATUS: RECOVERED`; this permits package generation only after the normal
-delegated review gates are rechecked.
+`TIMED_OUT` JSONL checkpoint and blocks review/next-task progression. In the
+canonical Run lifecycle this is a persisted `INCOMPLETE` Result that requires
+explicit same-session Recovery through `resume --cwd REPOSITORY --run-id RUN_ID`;
+the wall-timeout/stall path never silently creates a new Session. The legacy
+flat adapter retains its bounded compatibility output: a successful legacy
+recovery emits `STATUS: RECOVERED`, and package generation is permitted only
+after the normal delegated review gates are rechecked.
 - Recovery never replaces the primary failure. In an incomplete result,
   `PRIMARY_BLOCKER_CODE`, `PRIMARY_PHASE`, and `PRIMARY_COMMAND` identify the
-  original watchdog/worker failure; `RECOVERY_BLOCKER_CODE`,
-  `RECOVERY_COMMAND`, and `RECOVERY_ERROR` contain only the bounded recovery
-  attempt. A normal CMDc exit at turn budget is reported as
-  `WORKER_TURN_LIMIT`; `WALL_TIMEOUT`, `STALLED`, and launcher/spawn failures
-  remain distinct evidence.
+  original watchdog/worker failure; canonical `RecoveryEvidence` records the
+  same Session attempt and any Recovery blocker only as secondary evidence. A
+  normal CMDc exit at turn budget is reported as `WORKER_TURN_LIMIT`;
+  `WALL_TIMEOUT`, `STALLED`, and launcher/spawn failures remain distinct and
+  launcher/scope/cleanup failures are non-resumable.
 An exit code `4` is classified as `PERMISSION_DENIED`; the headless adapter
 does not wait for an interactive permission answer.
 

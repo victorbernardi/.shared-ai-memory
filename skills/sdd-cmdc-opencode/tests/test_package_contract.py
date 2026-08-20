@@ -20,7 +20,7 @@ EXECUTABLE_SHELLS = {
 # Text suffixes whose tracked files must be UTF-8. Sources already carry the
 # ``text``/``eol=lf`` attributes; assertions must hold for tracked files only,
 # so ignored caches and build output can never fail the contract.
-TEXT_SUFFIXES = {".py", ".md", ".json"}
+TEXT_SUFFIXES = {".py", ".md", ".json", ".ts"}
 
 
 def git_ls_files_under(directory: Path) -> list[Path]:
@@ -104,8 +104,26 @@ def test_tracked_manifest_is_stable_and_complete() -> None:
     tracked = git_ls_files_under(SKILL)
     assert Path("SKILL.md") in tracked
     assert Path("scripts/cmdc-implementer.py") in tracked
+    assert Path("scripts/sdd_cmdc_opencode/process_supervisor.py") in tracked
+    assert Path("scripts/sdd_cmdc_opencode/cmdc_local.py") in tracked
+    assert Path("scripts/sdd_cmdc_opencode/_windows_job.py") in tracked
+    assert Path("scripts/sdd_cmdc_opencode/_job_bootstrap.py") in tracked
+    assert Path("scripts/sdd_cmdc_opencode/_mod_probe.ts") in tracked
     assert Path("tests/test_package_contract.py") in tracked
     assert tracked == sorted(tracked, key=str)
+
+
+def test_tracked_manifest_contains_resumable_run_runtime_and_integration() -> None:
+    tracked = git_ls_files_under(SKILL)
+
+    for relative in (
+        Path("scripts/sdd_cmdc_opencode/run_record.py"),
+        Path("scripts/sdd_cmdc_opencode/execution_lifecycle.py"),
+        Path("scripts/sdd_cmdc_opencode/_scope_guard.py"),
+        Path("scripts/sdd_cmdc_opencode/_scope_mod.ts"),
+        Path("tests/test_run_integration.py"),
+    ):
+        assert relative in tracked
 
 
 def test_tracked_manifest_excludes_generated_payload() -> None:

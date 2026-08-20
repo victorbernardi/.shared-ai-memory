@@ -13,11 +13,23 @@ import json
 import os
 import re
 import shutil
-import signal
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from sdd_cmdc_opencode.process_supervisor import (  # noqa: E402
+    ProcessFailure,
+    ProcessOutcome,
+    ProcessRequest,
+    ProcessStatus,
+    run_process,
+)
 
 DEFAULT_TIMEOUT_SECONDS = 1800
 MAX_TIMEOUT_SECONDS = 3600
@@ -28,9 +40,6 @@ ORPHAN_EXIT_CODE = 4
 REPORT_INVALID_EXIT_CODE = 5
 HOST_PROCESS_EXIT_CODE = 6
 PROCESS_QUERY_TIMEOUT_SECONDS = 5
-_REAL_POPEN = subprocess.Popen
-_WINDOW_PROCESS_TREE: set[int] | None = None
-
 REQUIRED_REPORT_FIELDS = (
     "Files reviewed",
     "Excluded files",
@@ -265,7 +274,7 @@ class ReviewError(Exception):
 
 @dataclass
 class ProcessResult:
-    pid: int
+    pid: int | None
     returncode: int
     stdout: str
     stderr: str
@@ -273,6 +282,8 @@ class ProcessResult:
     orphaned: bool = False
     cleanup_failed: bool = False
     drain_verified: bool = False
+    failure_code: str | None = None
+    failure_phase: str | None = None
 
 
 def build_command(codex_path: Path, repo: Path, report_file: Path) -> list[str]:
@@ -395,15 +406,6 @@ def _text(value: object) -> str:
     return "" if value is None else str(value)
 
 
-def _creation_kwargs() -> dict[str, object]:
-    if os.name == "nt":
-        return {
-            "creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-            | getattr(subprocess, "CREATE_NO_WINDOW", 0)
-        }
-    return {"start_new_session": True}
-
-
 def _run_process(
     command: list[str],
     prompt: str,
@@ -411,275 +413,42 @@ def _run_process(
     repo: Path | None = None,
     timeout_seconds: int,
 ) -> ProcessResult:
-    """Run a child with a retained PID and verified timeout cleanup."""
-    process = subprocess.Popen(
-        command,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=str(repo) if repo else None,
-        env=_review_environment(),
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        **_creation_kwargs(),
+    """Run a clean-host child through the shared process supervisor."""
+    outcome = run_process(
+        ProcessRequest(
+            command=tuple(command),
+            cwd=repo or Path.cwd(),
+            stdin_text=prompt,
+            wall_timeout_seconds=float(timeout_seconds),
+            env=_review_environment(),
+        )
     )
-    pid = process.pid
-    try:
-        stdout, stderr = process.communicate(input=prompt, timeout=timeout_seconds)
-        return ProcessResult(pid, process.returncode, stdout, stderr)
-    except subprocess.TimeoutExpired as exc:
-        stdout = _text(exc.output)
-        stderr = _text(exc.stderr)
-        cleanup_failed = False
-        orphaned = False
-        drain_verified = False
-        group = _capture_process_group(pid)
-        global _WINDOW_PROCESS_TREE
-        _WINDOW_PROCESS_TREE = (
-            _capture_windows_process_tree(pid)
-            if os.name == "nt" and subprocess.Popen is _REAL_POPEN
-            else None
-        )
-        try:
-            _terminate_tree(pid)
-            time.sleep(0.1)
-            orphaned = (
-                _process_tree_alive(pid)
-                if os.name == "nt"
-                else _process_tree_alive(pid, group)
-            )
-            if not orphaned:
-                try:
-                    drained_stdout, drained_stderr = process.communicate(timeout=1)
-                    drain_verified = True
-                except subprocess.TimeoutExpired as drain_timeout:
-                    # The final drain may itself time out; every byte read so
-                    # far is still partial evidence and must be preserved.
-                    drain_verified = False
-                    stdout += _text(drain_timeout.output)
-                    stderr += _text(drain_timeout.stderr)
-                except OSError:
-                    cleanup_failed = True
-                else:
-                    stdout += _text(drained_stdout)
-                    stderr += _text(drained_stderr)
-        except OSError:
-            cleanup_failed = True
-        _WINDOW_PROCESS_TREE = None
-        return ProcessResult(
-            pid,
-            TIMEOUT_EXIT_CODE,
-            stdout,
-            stderr,
-            timed_out=True,
-            orphaned=orphaned,
-            cleanup_failed=cleanup_failed,
-            drain_verified=drain_verified,
-        )
-
-
-def _terminate_tree(pid: int) -> None:
-    if os.name == "nt":
-        subprocess.run(
-            ["taskkill", "/PID", str(pid), "/T", "/F"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        return
-    try:
-        os.killpg(pid, signal.SIGTERM)
-    except ProcessLookupError:
-        return
-
-
-def _windows_process_parents() -> dict[int, int] | None:
-    powershell = shutil.which("pwsh") or shutil.which("powershell")
-    if not powershell:
-        return None
-    try:
-        result = subprocess.run(
-            [
-                powershell,
-                "-NoProfile",
-                "-NonInteractive",
-                "-Command",
-                "Get-CimInstance Win32_Process | "
-                "Select-Object ProcessId,ParentProcessId | ConvertTo-Json -Compress",
-            ],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-            timeout=PROCESS_QUERY_TIMEOUT_SECONDS,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    if result.returncode != 0 or not result.stdout.strip():
-        return None
-    try:
-        rows = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return None
-    if isinstance(rows, dict):
-        rows = [rows]
-    if not isinstance(rows, list) or not rows:
-        return None
-    parents: dict[int, int] = {}
-    for row in rows:
-        if not isinstance(row, dict):
-            return None
-        pid = row.get("ProcessId")
-        parent = row.get("ParentProcessId")
-        if not isinstance(pid, int) or not isinstance(parent, int):
-            return None
-        parents[pid] = parent
-    return parents
-
-
-def _windows_parent_pid(pid: int) -> int | None:
-    parents = _windows_process_parents()
-    return None if parents is None else parents.get(pid)
-
-
-def _windows_pid_in_group(pid: int, leader: int) -> bool:
-    if pid == leader:
-        return True
-    seen: set[int] = set()
-    current = pid
-    while current not in seen:
-        seen.add(current)
-        parent = _windows_parent_pid(current)
-        if parent is None:
-            return True
-        if parent == 0:
-            return False
-        if parent == leader:
-            return True
-        current = parent
-    return True
-
-
-def _capture_windows_process_tree(pid: int) -> set[int] | None:
-    parents = _windows_process_parents()
-    if parents is None or pid not in parents:
-        return None
-    tree = {pid}
-    for candidate in parents:
-        current = candidate
-        seen: set[int] = set()
-        while current not in seen:
-            seen.add(current)
-            if current == pid:
-                tree.add(candidate)
-                break
-            parent = parents.get(current)
-            if parent is None or parent == 0:
-                break
-            current = parent
-    return tree
-
-
-def _capture_process_group(pid: int) -> int | None:
-    """Capture the POSIX process-group identity before the leader exits.
-
-    killpg(pid) keeps the group id equal to the leader pid, so the group is
-    captured before termination; after the leader exits os.getpgid(leader)
-    raises ProcessLookupError and the group identity is gone.
-    """
-    if os.name == "nt":
-        return None
-    try:
-        return os.getpgid(pid)
-    except (ProcessLookupError, PermissionError, OSError):
-        return None
-
-
-def _windows_tasklist_pid_state(pid: int) -> bool | None:
-    """Return whether a filtered tasklist query proves one PID is alive."""
-    try:
-        result = subprocess.run(
-            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=PROCESS_QUERY_TIMEOUT_SECONDS,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    if result.returncode != 0 or not result.stdout.strip():
-        return None
-
-    rows: list[int] = []
-    for line in result.stdout.splitlines():
-        columns = line.split(",")
-        if len(columns) < 2:
-            continue
-        candidate = columns[1].strip().strip('"')
-        if candidate.isdigit():
-            rows.append(int(candidate))
-    if not rows:
-        return False
-    if any(candidate != pid for candidate in rows):
-        return None
-    return True
-
-
-def _process_tree_alive(pid: int, group: int | None = None) -> bool:
-    """Verify the whole process tree is absent, not just the leader.
-
-    A descendant can survive after the leader exits, which would make the
-    leader-only check report a false clean cleanup. The tree is always
-    traversed from the process group captured before termination because
-    killpg(pid) and taskkill /T keep the group id equal to the leader pid,
-    and the group identity is unrecoverable once the leader has exited.
-    """
-    if os.name == "nt":
-        if _WINDOW_PROCESS_TREE is None:
-            return True
-        for candidate in sorted(_WINDOW_PROCESS_TREE):
-            state = _windows_tasklist_pid_state(candidate)
-            if state is None or state:
-                return True
-        return False
-    if group is None:
-        # The group identity was never captured (or could not be resolved).
-        # The tree cannot be verified absent, so it must count as alive:
-        # fail closed.
-        return True
-    try:
-        processes = os.listdir("/proc")
-    except (PermissionError, OSError):
-        return True
-    for process in processes:
-        if not process.isdigit():
-            continue
-        try:
-            if os.getpgid(int(process)) == group:
-                return True
-        except ProcessLookupError:
-            continue
-        except (PermissionError, OSError):
-            return True
-    return False
-
-
-def _process_alive(pid: int) -> bool:
-    if os.name == "nt":
-        result = subprocess.run(
-            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        return f'","{pid}",' in result.stdout or result.stdout.strip().startswith(f'"{pid}"')
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    return True
+    timed_out = outcome.status in {
+        ProcessStatus.WALL_TIMEOUT,
+        ProcessStatus.STALLED,
+    }
+    cleanup_failed = not outcome.cleanup_verified
+    orphaned = any(
+        failure.code == "PROCESS_TREE_TERMINATION_FAILED"
+        for failure in outcome.secondary_failures
+    )
+    failure = outcome.primary_failure or (
+        outcome.secondary_failures[0] if outcome.secondary_failures else None
+    )
+    return ProcessResult(
+        outcome.pid,
+        TIMEOUT_EXIT_CODE
+        if timed_out
+        else (outcome.returncode if outcome.returncode is not None else 1),
+        outcome.stdout,
+        outcome.stderr,
+        timed_out=timed_out,
+        orphaned=orphaned,
+        cleanup_failed=cleanup_failed,
+        drain_verified=outcome.drain_verified,
+        failure_code=failure.code if failure is not None else None,
+        failure_phase=failure.phase if failure is not None else None,
+    )
 
 
 def _write_evidence(
@@ -773,6 +542,8 @@ def run_session(
                 "orphaned": result.orphaned,
                 "cleanup_failed": result.cleanup_failed,
                 "drain_verified": result.drain_verified,
+                "failure_code": result.failure_code,
+                "failure_phase": result.failure_phase,
                 "stdout": result.stdout,
                 "stderr": result.stderr,
                 "report_exists": report_file.is_file(),
@@ -782,13 +553,27 @@ def run_session(
             if result.orphaned or result.cleanup_failed:
                 status = {
                     "status": "BLOCKED",
-                    "blocker_code": "ORPHANED_PROCESS" if result.orphaned else "CLEANUP_FAILED",
-                    "message": "child process tree was not verified absent",
+                    "blocker_code": result.failure_code
+                    or ("ORPHANED_PROCESS" if result.orphaned else "CLEANUP_FAILED"),
+                    "message": (
+                        "child process tree was not verified absent"
+                        f" (phase={result.failure_phase or 'cleanup'})"
+                    ),
                 }
                 exit_code = ORPHAN_EXIT_CODE
             else:
                 status = {"status": "REVIEW INCOMPLETE", "reason": "CLEAN_HOST_TIMEOUT"}
                 exit_code = TIMEOUT_EXIT_CODE
+        elif result.failure_code is not None:
+            status = {
+                "status": "BLOCKED",
+                "blocker_code": result.failure_code,
+                "message": (
+                    "shared process supervisor reported a lifecycle failure"
+                    f" (phase={result.failure_phase or 'unknown'})"
+                ),
+            }
+            exit_code = EXEC_FAILURE_EXIT_CODE
         elif result.returncode != 0:
             status = {
                 "status": "REVIEW INCOMPLETE",

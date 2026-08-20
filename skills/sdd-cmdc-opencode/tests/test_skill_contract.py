@@ -49,6 +49,53 @@ def test_skill_defines_failure_states() -> None:
     assert "FIX_BASE" in content
 
 
+def test_skill_documents_shared_process_and_real_smoke_gates() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    for token in (
+        "process_supervisor.py",
+        "cmdc_local.py",
+        "Job Object",
+        "LAUNCHER_NOT_FOUND",
+        "PROCESS_SPAWN_FAILED",
+        "PROCESS_CLEANUP_UNVERIFIABLE",
+        "CMD_CODE_PROTOCOL_ERROR",
+        "SDD_CMDC_REAL_SMOKE",
+        "cleanup_verified",
+        "drain_verified",
+    ):
+        assert token in content
+
+    assert "single process" in content and "lifecycle Module" in content
+    assert "Deterministic fake-launcher tests are separate" in content
+
+
+def test_skill_documents_the_canonical_resumable_run_contract() -> None:
+    content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+    for token in (
+        "Run Contract schema version 1",
+        "contract.json",
+        "events.jsonl",
+        "checkpoints.jsonl",
+        "result.json",
+        "start --contract-file",
+        "resume --cwd",
+        "--run-id",
+        "SCOPE_CONTRACT_MISSING",
+        "pre-tool Mod",
+        "post-shell audit",
+        "final audit",
+        "NO_IMPLEMENTATION_PROGRESS",
+        "same Command Code Session",
+        "external plan",
+        "normalized test events",
+        "scripts/task-brief.py",
+        "no generic allow-dirty Recovery bypass",
+    ):
+        assert token in content, f"missing canonical Run contract token: {token}"
+
+
 def test_skill_forbids_codex_review_fallback() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
@@ -279,13 +326,11 @@ def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:
     # Files intentionally copied from the source skill must remain identical
     # once checkout line endings are canonicalized (CRLF -> LF): the shared
     # support scripts must remain the same canonical content.
-    # Exception: the implementer prompt is the evolving issue-131 prompt
-    # contract. It is allowed to diverge from the source sdd-cmdc copy when
-    # the issue-131 sequencing change is owned by this skill; the shared
-    # support scripts must remain canonical-identical.
+    # Exception: the implementer prompt and task-brief entry point are
+    # evolving contracts owned by this skill. They may diverge from the source
+    # sdd-cmdc copy; the remaining shared support scripts stay canonical.
     pairs = [
         ("scripts/sdd-workspace", "scripts/sdd-workspace"),
-        ("scripts/task-brief", "scripts/task-brief"),
         ("scripts/review-package", "scripts/review-package"),
     ]
 

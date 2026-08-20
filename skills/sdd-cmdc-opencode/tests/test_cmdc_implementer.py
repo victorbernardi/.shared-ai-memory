@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import json
 import os
@@ -8,6 +9,8 @@ import sys
 import time
 from types import SimpleNamespace
 from pathlib import Path
+
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -297,6 +300,50 @@ def _write_prompt(tmp_path: Path, report_path: Path) -> Path:
         encoding="utf-8",
     )
     return prompt_path
+
+
+def _write_single_task_plan(repo: Path) -> Path:
+    """Write a committed plan that declares exactly one Task with a Files scope."""
+    plan = repo / "plan.md"
+    plan.write_text(
+        "# Plan\n"
+        "\n"
+        "## Task 5\n"
+        "Implement the adapter.\n"
+        "\n"
+        "**Files:**\n"
+        "- Modify: `scripts/cmdc-implementer.py`\n"
+        "- Test: `tests/test_cmdc_implementer.py`\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    return plan
+
+
+def _flat_args(**overrides: object) -> dict[str, object]:
+    args = {
+        "command": None,
+        "cwd": Path("."),
+        "prompt_file": Path("prompt.md"),
+        "plan_file": Path("plan.md"),
+        "max_turns": 100,
+        "cmd_bin": "cmdc",
+        "checkpoint_file": None,
+        "wall_timeout_seconds": 14400,
+        "stall_timeout_seconds": 900,
+        "recovery_max_turns": 5,
+        "allow_cmdc_yolo": False,
+        "allow_no_change": False,
+        "allow_known_test_failures": False,
+        "heartbeat_interval": 30.0,
+        "allow_protected_branch": False,
+        "ledger_file": None,
+    }
+    args.update(overrides)
+    return args
 
 
 def _create_git_fixture(path: Path) -> Path:
@@ -717,43 +764,25 @@ def test_stall_expiry_is_separate_from_wall_timeout() -> None:
 
 
 def test_cmdc_process_streams_events_and_records_activity(tmp_path: Path, monkeypatch) -> None:
-    class FakeStream:
-        def __init__(self, lines: list[str]) -> None:
-            self.lines = iter(lines)
+    def fake_run(request, *, on_output=None):
+        assert request.command == ("cmdc",)
+        if on_output is not None:
+            on_output(MODULE.StreamEvent("stdout", "event one\n", 0.1))
+            on_output(MODULE.StreamEvent("stderr", "warning\n", 0.2))
+        return MODULE.ProcessOutcome(
+            pid=1234,
+            returncode=0,
+            stdout="event one\n",
+            stderr="warning\n",
+            status=MODULE.ProcessStatus.EXITED,
+            containment="windows-job",
+            cleanup_verified=True,
+            drain_verified=True,
+            primary_failure=None,
+            secondary_failures=(),
+        )
 
-        def readline(self) -> str:
-            return next(self.lines, "")
-
-        def close(self) -> None:
-            return None
-
-    class FakeStdin:
-        def __init__(self) -> None:
-            self.value = ""
-
-        def write(self, value: str) -> None:
-            self.value += value
-
-        def close(self) -> None:
-            return None
-
-    class FakeProcess:
-        pid = 1234
-        returncode = 0
-
-        def __init__(self) -> None:
-            self.stdin = FakeStdin()
-            self.stdout = FakeStream(["event one\n"])
-            self.stderr = FakeStream(["warning\n"])
-
-        def poll(self) -> int:
-            return 0
-
-        def wait(self, timeout: float | None = None) -> int:
-            return self.returncode
-
-    process = FakeProcess()
-    monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: process)
+    monkeypatch.setattr(MODULE, "run_process", fake_run)
     started = time.monotonic()
     activity_state = {
         "lock": MODULE.threading.Lock(),
@@ -783,67 +812,34 @@ def test_cmdc_process_streams_events_and_records_activity(tmp_path: Path, monkey
 
 
 def test_cmdc_process_stops_when_stream_and_workspace_stall(tmp_path: Path, monkeypatch) -> None:
-    class EmptyStream:
-        def readline(self) -> str:
-            return ""
+    def fake_run(request, *, on_output=None):
+        return MODULE.ProcessOutcome(
+            pid=5678,
+            returncode=None,
+            stdout="",
+            stderr="",
+            status=MODULE.ProcessStatus.STALLED,
+            containment="windows-job",
+            cleanup_verified=True,
+            drain_verified=True,
+            primary_failure=MODULE.ProcessFailure(
+                "STALLED", "execution", "synthetic stall"
+            ),
+            secondary_failures=(),
+        )
 
-        def close(self) -> None:
-            return None
-
-    class FakeStdin:
-        def write(self, value: str) -> None:
-            return None
-
-        def close(self) -> None:
-            return None
-
-    class FakeProcess:
-        pid = 5678
-        returncode = None
-
-        def __init__(self) -> None:
-            self.stdin = FakeStdin()
-            self.stdout = EmptyStream()
-            self.stderr = EmptyStream()
-
-        def poll(self) -> None:
-            return None
-
-        def wait(self, timeout: float | None = None) -> int:
-            self.returncode = 1
-            return self.returncode
-
-    process = FakeProcess()
-    terminated: list[int] = []
-    monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: process)
-    monkeypatch.setattr(MODULE, "_terminate_process_tree", terminated.append)
-    monkeypatch.setattr(MODULE, "_process_tree_alive", lambda pid: False)
-    started = time.monotonic()
-    activity_state = {
-        "lock": MODULE.threading.Lock(),
-        "started": started,
-        "last_activity": started,
-        "last_event": started,
-        "last_workspace": started,
-        "events_seen": 0,
-    }
-
-    try:
+    monkeypatch.setattr(MODULE, "run_process", fake_run)
+    with pytest.raises(MODULE.subprocess.TimeoutExpired) as raised:
         MODULE._run_cmdc_process(
             ["cmdc"],
             "prompt",
             tmp_path,
             wall_timeout_seconds=60,
             stall_timeout_seconds=0.01,
-            activity_state=activity_state,
+            activity_state={"lock": MODULE.threading.Lock(), "started": time.monotonic()},
         )
-    except MODULE.subprocess.TimeoutExpired as error:
-        assert getattr(error, "watchdog_reason") == "STALLED"
-        assert getattr(error, "watchdog_pid") == 5678
-    else:
-        raise AssertionError("stall watchdog did not stop the process")
-
-    assert terminated == [5678]
+    assert getattr(raised.value, "watchdog_reason") == "STALLED"
+    assert getattr(raised.value, "watchdog_pid") == 5678
 
 
 def test_git_success_without_commit_is_transaction_incomplete(
@@ -2099,6 +2095,7 @@ def test_unverified_watchdog_cleanup_blocks_before_recovery(
         )
 
 
+@pytest.mark.skip(reason="tree containment is covered by process_supervisor native tests")
 def test_watchdog_tree_verification_is_fail_closed_with_live_descendant(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -2162,6 +2159,7 @@ def test_watchdog_tree_verification_is_fail_closed_with_live_descendant(
         raise AssertionError("watchdog did not stop the process")
 
 
+@pytest.mark.skip(reason="tree containment is covered by process_supervisor native tests")
 def test_clean_watchdog_tree_verification_is_verified(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -2418,19 +2416,23 @@ def test_cli_accepts_timeout_seconds_alias_and_rejects_non_positive_values() -> 
 
 def test_cli_alias_populates_shared_wall_timeout_destination(monkeypatch) -> None:
     """Both spellings populate the argparse destination main() forwards into
-    the process-runner watchdog, with the exact value from the command line.
+    the flat normalization route, with the exact value from the command line.
 
     Unlike the --help checks, this drives the real parser and main() entry
     point, so it fails when the alias registration is absent instead of only
-    proving option recognition.
+    proving option recognition. The flat route is the compatibility path the
+    alias feeds; the legacy run_implementer child-process path is never used.
     """
     received: list[int] = []
 
-    def fake_run_implementer(*args, **kwargs):
+    def fake_run_flat_compat(*args, **kwargs):
         received.append(int(kwargs["wall_timeout_seconds"]))
         return 0
 
-    monkeypatch.setattr(MODULE, "run_implementer", fake_run_implementer)
+    monkeypatch.setattr(MODULE, "run_flat_compat", fake_run_flat_compat)
+    monkeypatch.setattr(
+        MODULE, "run_implementer", lambda *a, **k: (_ for _ in ()).throw(AssertionError("run_implementer must not be called"))
+    )
     for flag in ("--timeout-seconds", "--wall-timeout-seconds"):
         monkeypatch.setattr(
             MODULE.sys,
@@ -2448,89 +2450,411 @@ def test_cli_alias_populates_shared_wall_timeout_destination(monkeypatch) -> Non
         assert MODULE.main() == 0
 
     # Both spellings reach the single watchdog destination used by the
-    # process runner, carrying the exact command-line value.
+    # canonical flat route, carrying the exact command-line value.
     assert received == [1234, 1234]
 
 
-def test_windows_tree_verification_is_fail_closed(monkeypatch) -> None:
-    """The Windows process-group helper walks parent links and stays
-    fail-closed when a process cannot be resolved."""
-    # A chain ending at a known root (parent 0). A PID with no entry is
-    # unknown (returns None from _windows_parent_pid).
-    parent_map = {500: 400, 400: 300, 300: 200, 200: 0}
+def test_canonical_start_parser_requires_a_run_contract(monkeypatch) -> None:
     monkeypatch.setattr(
-        MODULE, "_windows_parent_pid", lambda pid: parent_map.get(pid)
+        MODULE.sys,
+        "argv",
+        ["cmdc-implementer.py", "start", "--contract-file", "run/contract.json"],
     )
 
-    # A descendant whose ancestor chain reaches the leader is a member.
-    assert MODULE._windows_pid_in_group(500, 300) is True
-    # The leader itself is always a member.
-    assert MODULE._windows_pid_in_group(300, 300) is True
-    # A process on a fully-resolved chain that never reaches the leader is a
-    # known non-member.
-    assert MODULE._windows_pid_in_group(500, 600) is False
-    # A process whose parent cannot be resolved is treated as a member so
-    # cleanup verification fails closed.
-    assert MODULE._windows_pid_in_group(900, 300) is True
+    args = MODULE.parse_args()
+
+    assert args.command == "start"
+    assert args.contract_file == Path("run/contract.json")
 
 
-def test_review_windows_tree_verification_is_fail_closed(monkeypatch) -> None:
-    """The review launcher's Windows helper has the same fail-closed semantics."""
-    parent_map = {500: 400, 400: 300, 300: 200, 200: 0}
+def test_canonical_resume_parser_requires_cwd_and_run_id(monkeypatch) -> None:
     monkeypatch.setattr(
-        REVIEW, "_windows_parent_pid", lambda pid: parent_map.get(pid)
+        MODULE.sys,
+        "argv",
+        ["cmdc-implementer.py", "resume", "--cwd", "repo", "--run-id", "run-5"],
     )
 
-    assert REVIEW._windows_pid_in_group(500, 300) is True
-    assert REVIEW._windows_pid_in_group(300, 300) is True
-    assert REVIEW._windows_pid_in_group(500, 600) is False
-    assert REVIEW._windows_pid_in_group(900, 300) is True
+    args = MODULE.parse_args()
+
+    assert args.command == "resume"
+    assert args.cwd == Path("repo")
+    assert args.run_id == "run-5"
+
+
+def test_canonical_resume_routes_the_owned_run_without_rebuilding_contract(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    record = type("Record", (), {"run_dir": tmp_path / "run-5"})()
+    located: list[tuple[Path, str]] = []
+    constructed: list[tuple[object, object]] = []
+
+    class FakeRunRecord:
+        @classmethod
+        def locate(cls, cwd: Path, run_id: str):
+            located.append((cwd, run_id))
+            return record
+
+    class FakeCmdc:
+        def __init__(self, cmd_bin: str) -> None:
+            self.cmd_bin = cmd_bin
+
+    class FakeLifecycle:
+        def __init__(self, owned_record, cmdc) -> None:
+            constructed.append((owned_record, cmdc))
+
+        def resume(self):
+            return MODULE.RunResult(
+                schema_version=1,
+                run_id="run-5",
+                backend="cmdc-local",
+                session_id="session-123",
+                status=MODULE.RunStatus.INCOMPLETE,
+                primary_blocker=None,
+                secondary_blockers=(),
+                base_head="a" * 40,
+                final_head="a" * 40,
+                scope_valid=True,
+                violating_paths=(),
+                report_valid=False,
+                test_evidence_valid=False,
+                cleanup_verified=True,
+                tests=(),
+                recoveries=(),
+                artifact_hashes={},
+            )
+
+    monkeypatch.setattr(MODULE, "RunRecord", FakeRunRecord)
+    monkeypatch.setattr(MODULE, "CmdcLocal", FakeCmdc)
+    monkeypatch.setattr(MODULE, "ExecutionLifecycle", FakeLifecycle)
+
+    assert MODULE.run_canonical_resume(Path("repo"), "run-5", cmd_bin="fake-cmdc") == 1
+    assert located == [(Path("repo"), "run-5")]
+    assert constructed[0][0] is record
+    assert constructed[0][1].cmd_bin == "fake-cmdc"
+    assert "STATUS: INCOMPLETE" in capsys.readouterr().out
+
+
+def test_canonical_result_render_includes_durable_artifact_paths(tmp_path: Path) -> None:
+    from sdd_cmdc_opencode.run_record import RunStatus
+
+    result = MODULE.RunResult(
+        schema_version=1,
+        run_id="run-5",
+        backend="cmdc-local",
+        session_id="session-123",
+        status=RunStatus.COMPLETE,
+        primary_blocker=None,
+        secondary_blockers=(),
+        base_head="a" * 40,
+        final_head="b" * 40,
+        scope_valid=True,
+        violating_paths=(),
+        report_valid=True,
+        test_evidence_valid=True,
+        cleanup_verified=True,
+        tests=(),
+        recoveries=(),
+        artifact_hashes={},
+    )
+    record = type("Record", (), {"run_dir": tmp_path / "run-5"})()
+
+    rendered = MODULE.render_run_result(result, record)
+
+    assert "STATUS: COMPLETE" in rendered
+    assert "RUN_ID: run-5" in rendered
+    assert f"RESULT_FILE: {tmp_path / 'run-5' / 'result.json'}" in rendered
+    assert f"EVENTS_FILE: {tmp_path / 'run-5' / 'events.jsonl'}" in rendered
+    assert f"CHECKPOINTS_FILE: {tmp_path / 'run-5' / 'checkpoints.jsonl'}" in rendered
+
+
+def test_flat_main_routes_through_canonical_start_and_never_run_implementer(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """The legacy flat CLI normalizes into a Run Contract and executes through
+    the canonical lifecycle; the old run_implementer child-process path is
+    never used by the adapter route."""
+    repo = _create_git_fixture(tmp_path / "fixture-flat-route")
+    plan = _write_single_task_plan(repo)
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+    constructed: list[tuple[object, object]] = []
+    started: list[object] = []
+
+    class FakeRecord:
+        def __init__(self, run_dir: Path, contract: object) -> None:
+            self.run_dir = run_dir
+            self.contract = contract
+            self.contract_sha256 = "c" * 64
+
+    class FakeLifecycle:
+        def __init__(self, owned_record, cmdc) -> None:
+            constructed.append((owned_record, cmdc))
+
+        def start(self):
+            started.append(self)
+            return MODULE.RunResult(
+                schema_version=1,
+                run_id="flat-run",
+                backend="cmdc-local",
+                session_id="session-1",
+                status=MODULE.RunStatus.COMPLETE,
+                primary_blocker=None,
+                secondary_blockers=(),
+                base_head="a" * 40,
+                final_head="b" * 40,
+                scope_valid=True,
+                violating_paths=(),
+                report_valid=True,
+                test_evidence_valid=True,
+                cleanup_verified=True,
+                tests=(),
+                recoveries=(),
+                artifact_hashes={},
+            )
+
+    def fake_load_or_create_run(contract_file: Path):
+        contract = MODULE.RunContract.load(contract_file)
+        return FakeRecord(contract_file.parent, contract)
+
+    monkeypatch.setattr(MODULE, "ExecutionLifecycle", FakeLifecycle)
+    monkeypatch.setattr(MODULE, "RunRecord", type("RR", (), {"create": fake_load_or_create_run, "load": fake_load_or_create_run}))
+    monkeypatch.setattr(MODULE, "_load_or_create_run", fake_load_or_create_run)
+    monkeypatch.setattr(MODULE, "run_implementer", lambda *a, **k: (_ for _ in ()).throw(AssertionError("run_implementer must not be called by the flat route")))
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", lambda *a, **k: (_ for _ in ()).throw(AssertionError("child process must not be created by the flat route")))
+    monkeypatch.setattr(MODULE, "resolve_cmdc", lambda cmd_bin="cmdc": (_ for _ in ()).throw(AssertionError("launcher must not resolve in the canonical path")))
+
+    args = _flat_args(
+        cwd=repo,
+        prompt_file=prompt_path,
+        plan_file=plan,
+        max_turns=7,
+        wall_timeout_seconds=1234,
+        stall_timeout_seconds=432,
+        recovery_max_turns=2,
+        allow_cmdc_yolo=True,
+    )
+    monkeypatch.setattr(MODULE, "parse_args", lambda: argparse.Namespace(**args))
+
+    assert MODULE.main() == 0
+    assert len(constructed) == 1
+    assert len(started) == 1
+    # The canonical lifecycle received a real immutable v1 Contract.
+    record, cmdc = constructed[0]
+    contract = record.contract
+    assert contract.schema_version == 1
+    assert contract.task.id == 5
+    assert contract.execution.max_turns == 7
+    assert contract.execution.wall_timeout_seconds == 1234
+    assert contract.execution.stall_timeout_seconds == 432
+    assert contract.execution.max_resumes == 2
+    assert contract.execution.yolo is True
+    assert contract.execution.no_skills is True
+    assert contract.execution.progress_deadline_turns == MODULE.default_progress_deadline(7)
+    assert contract.workspace.repo_root == repo.resolve()
+    assert contract.workspace.base_head == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert contract.plan.source_path == plan.resolve()
+    assert contract.plan.source_repository == repo.resolve()
+    assert contract.scope.allowed_paths == (
+        "scripts/cmdc-implementer.py",
+        "tests/test_cmdc_implementer.py",
+    )
+    assert contract.scope.denied_paths == ()
+    assert contract.task.report_path == (repo / "task-report.md").resolve()
+    assert "RUN_ID: flat-run" in capsys.readouterr().out
+
+
+def test_flat_main_blocks_before_launcher_when_normalization_is_impossible(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A legacy plan with multiple tasks cannot be normalized deterministically,
+    so the adapter returns a structured BLOCKED result and never resolves or
+    spawns the launcher or a child process."""
+    repo = _create_git_fixture(tmp_path / "fixture-flat-blocked")
+    plan = repo / "plan.md"
+    plan.write_text(
+        "# Plan\n"
+        "\n"
+        "## Task 1\n"
+        "First.\n"
+        "\n"
+        "**Files:**\n"
+        "- Create: `a.py`\n"
+        "\n"
+        "## Task 2\n"
+        "Second.\n"
+        "\n"
+        "**Files:**\n"
+        "- Create: `b.py`\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+
+    def must_not_run(*args, **kwargs):
+        raise AssertionError("no launcher/child process may run on a blocked flat route")
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", must_not_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", must_not_run)
+    monkeypatch.setattr(MODULE, "run_implementer", must_not_run)
+    monkeypatch.setattr(
+        MODULE,
+        "parse_args",
+        lambda: argparse.Namespace(
+            **_flat_args(cwd=repo, prompt_file=prompt_path, plan_file=plan)
+        ),
+    )
+
+    assert MODULE.main() == 1
+    error = capsys.readouterr().err
+    assert "STATUS: BLOCKED" in error
+    assert "BLOCKER_CODE: FLAT_NORMALIZATION_FAILED" in error
+    assert "multiple tasks" in error
+    assert "MODE: normal" in error
+
+
+def test_flat_normalization_fails_closed_without_deterministic_scope(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """A task without a Files/Arquivos section cannot be normalized; there is
+    never an implicit allow-all scope."""
+    repo = _create_git_fixture(tmp_path / "fixture-flat-no-scope")
+    plan = repo / "plan.md"
+    plan.write_text(
+        "# Plan\n" "\n" "## Task 3\n" "Implement without declared files.\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "-C", str(repo), "add", "--", "plan.md"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "plan"], check=True
+    )
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+
+    def must_not_run(*args, **kwargs):
+        raise AssertionError("no launcher/child process may run without scope")
+
+    monkeypatch.setattr(MODULE, "resolve_cmdc", must_not_run)
+    monkeypatch.setattr(MODULE, "_run_cmdc_process", must_not_run)
+    monkeypatch.setattr(MODULE, "run_implementer", must_not_run)
+    monkeypatch.setattr(
+        MODULE,
+        "parse_args",
+        lambda: argparse.Namespace(
+            **_flat_args(cwd=repo, prompt_file=prompt_path, plan_file=plan)
+        ),
+    )
+
+    assert MODULE.main() == 1
+    error = capsys.readouterr().err
+    assert "STATUS: BLOCKED" in error
+    assert "BLOCKER_CODE: FLAT_NORMALIZATION_FAILED" in error
+    assert "Files/Arquivos" in error
+    assert "MODE: normal" in error
+
+
+def test_flat_route_reuses_governed_preflight_before_contract_creation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """The compatibility route must not adopt a dirty or uncommitted boundary."""
+    repo = _create_git_fixture(tmp_path / "fixture-flat-dirty")
+    plan = _write_single_task_plan(repo)
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+    (repo / "pre-existing.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+    def must_not_run(*args, **kwargs):
+        raise AssertionError("flat preflight must block before normalization/launcher")
+
+    monkeypatch.setattr(MODULE, "_normalize_flat_contract", must_not_run)
+    monkeypatch.setattr(MODULE, "resolve_cmdc", must_not_run)
+    monkeypatch.setattr(MODULE, "run_implementer", must_not_run)
+    monkeypatch.setattr(
+        MODULE,
+        "parse_args",
+        lambda: argparse.Namespace(
+            **_flat_args(cwd=repo, prompt_file=prompt_path, plan_file=plan)
+        ),
+    )
+
+    assert MODULE.main() == 1
+    error = capsys.readouterr().err
+    assert "STATUS: BLOCKED" in error
+    assert "BLOCKER_CODE: DIRTY_WORKTREE" in error
+
+
+def test_flat_contract_carries_exact_baseline_fingerprint(
+    tmp_path: Path,
+) -> None:
+    """The normalized Contract records the exact pre-existing workspace
+    fingerprint as its baseline; post-contract changes are never adopted."""
+    repo = _create_git_fixture(tmp_path / "fixture-flat-baseline")
+    plan = _write_single_task_plan(repo)
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+    (repo / "tracked.py").write_text("VALUE = 2\n", encoding="utf-8")
+    (repo / "untracked-note.txt").write_text("pre-existing\n", encoding="utf-8")
+
+    contract = MODULE._normalize_flat_contract(
+        repo,
+        prompt_path,
+        plan,
+        max_turns=100,
+        checkpoint_file=None,
+        wall_timeout_seconds=14400,
+        stall_timeout_seconds=900,
+        recovery_max_turns=5,
+        allow_cmdc_yolo=False,
+    )
+
+    baseline = contract.workspace.baseline_status
+    assert baseline["head"] == subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert baseline["branch"] == "feature"
+    assert "tracked.py" in baseline["paths"]
+    assert "untracked-note.txt" in baseline["paths"]
+    assert contract.workspace.base_head == baseline["head"]
+
+
+def test_adapters_do_not_expose_legacy_ancestry_helpers() -> None:
+    assert not hasattr(MODULE, "_windows_parent_pid")
+    assert not hasattr(MODULE, "_process_tree_alive")
+    assert not hasattr(REVIEW, "_windows_parent_pid")
+    assert not hasattr(REVIEW, "_process_tree_alive")
 
 
 def test_review_timeout_cleanup_verifies_full_process_tree(
     tmp_path: Path, monkeypatch
 ) -> None:
-    """A leader that exits while a descendant survives is ORPHANED, not clean."""
+    def fake_run(request):
+        return REVIEW.ProcessOutcome(
+            pid=7777,
+            returncode=None,
+            stdout="",
+            stderr="",
+            status=REVIEW.ProcessStatus.WALL_TIMEOUT,
+            containment="windows-job",
+            cleanup_verified=True,
+            drain_verified=False,
+            primary_failure=REVIEW.ProcessFailure(
+                "WALL_TIMEOUT", "execution", "synthetic timeout"
+            ),
+            secondary_failures=(
+                REVIEW.ProcessFailure(
+                    "PROCESS_TREE_TERMINATION_FAILED", "cleanup", "descendant"
+                ),
+            ),
+        )
 
-    class FakeStream:
-        def readline(self) -> str:
-            return ""
-
-        def close(self) -> None:
-            return None
-
-    class FakeStdin:
-        def write(self, value: str) -> None:
-            return None
-
-        def close(self) -> None:
-            return None
-
-    class FakeProcess:
-        pid = 7777
-        returncode = None
-
-        def __init__(self) -> None:
-            self.stdin = FakeStdin()
-            self.stdout = FakeStream()
-            self.stderr = FakeStream()
-
-        def communicate(self, input=None, timeout=None):
-            if timeout is not None:
-                raise REVIEW.subprocess.TimeoutExpired("cmd", timeout)
-            return ("", "")
-
-    process = FakeProcess()
-    # The leader is gone but the tree check still finds a descendant.
-    monkeypatch.setattr(REVIEW, "_terminate_tree", lambda pid: None)
-    monkeypatch.setattr(REVIEW, "_process_tree_alive", lambda pid: True)
-    monkeypatch.setattr(REVIEW.subprocess, "Popen", lambda *a, **k: process)
-
-    result = REVIEW._run_process(
-        ["codex"],
-        "prompt",
-        timeout_seconds=0.01,
-    )
+    monkeypatch.setattr(REVIEW, "run_process", fake_run)
+    result = REVIEW._run_process(["codex"], "prompt", timeout_seconds=0.01)
 
     assert result.timed_out is True
     assert result.orphaned is True
@@ -2541,48 +2865,24 @@ def test_review_timeout_cleanup_verifies_full_process_tree(
 def test_review_timeout_cleanup_verified_with_clean_tree(
     tmp_path: Path, monkeypatch
 ) -> None:
-    """A fully absent tree yields a verified clean cleanup."""
+    def fake_run(request):
+        return REVIEW.ProcessOutcome(
+            pid=7778,
+            returncode=None,
+            stdout="drained-out",
+            stderr="drained-err",
+            status=REVIEW.ProcessStatus.WALL_TIMEOUT,
+            containment="windows-job",
+            cleanup_verified=True,
+            drain_verified=True,
+            primary_failure=REVIEW.ProcessFailure(
+                "WALL_TIMEOUT", "execution", "synthetic timeout"
+            ),
+            secondary_failures=(),
+        )
 
-    class FakeStream:
-        def readline(self) -> str:
-            return ""
-
-        def close(self) -> None:
-            return None
-
-    class FakeStdin:
-        def write(self, value: str) -> None:
-            return None
-
-        def close(self) -> None:
-            return None
-
-    class FakeProcess:
-        pid = 7778
-        returncode = None
-
-        def __init__(self) -> None:
-            self.stdin = FakeStdin()
-            self.stdout = FakeStream()
-            self.stderr = FakeStream()
-            self.calls = 0
-
-        def communicate(self, input=None, timeout=None):
-            self.calls += 1
-            if self.calls == 1:
-                raise REVIEW.subprocess.TimeoutExpired("cmd", timeout)
-            return ("drained-out", "drained-err")
-
-    process = FakeProcess()
-    monkeypatch.setattr(REVIEW, "_terminate_tree", lambda pid: None)
-    monkeypatch.setattr(REVIEW, "_process_tree_alive", lambda pid: False)
-    monkeypatch.setattr(REVIEW.subprocess, "Popen", lambda *a, **k: process)
-
-    result = REVIEW._run_process(
-        ["codex"],
-        "prompt",
-        timeout_seconds=0.01,
-    )
+    monkeypatch.setattr(REVIEW, "run_process", fake_run)
+    result = REVIEW._run_process(["codex"], "prompt", timeout_seconds=0.01)
 
     assert result.timed_out is True
     assert result.orphaned is False
@@ -2595,49 +2895,24 @@ def test_review_timeout_cleanup_verified_with_clean_tree(
 def test_review_timeout_preserves_final_drain_output(
     tmp_path: Path, monkeypatch
 ) -> None:
-    """Output produced after the timeout is drained and preserved."""
-    captured: dict[str, str] = {}
+    def fake_run(request):
+        return REVIEW.ProcessOutcome(
+            pid=7779,
+            returncode=None,
+            stdout="drained-out",
+            stderr="drained-err",
+            status=REVIEW.ProcessStatus.WALL_TIMEOUT,
+            containment="windows-job",
+            cleanup_verified=True,
+            drain_verified=False,
+            primary_failure=REVIEW.ProcessFailure(
+                "WALL_TIMEOUT", "execution", "synthetic timeout"
+            ),
+            secondary_failures=(),
+        )
 
-    class FakeStream:
-        def readline(self) -> str:
-            return ""
-
-        def close(self) -> None:
-            return None
-
-    class FakeStdin:
-        def write(self, value: str) -> None:
-            return None
-
-        def close(self) -> None:
-            return None
-
-    class FakeProcess:
-        pid = 7779
-        returncode = None
-
-        def __init__(self) -> None:
-            self.stdin = FakeStdin()
-            self.stdout = FakeStream()
-            self.stderr = FakeStream()
-
-        def communicate(self, input=None, timeout=None):
-            if timeout is not None:
-                raise REVIEW.subprocess.TimeoutExpired(
-                    "cmd", timeout, output="drained-out", stderr="drained-err"
-                )
-            return ("", "")
-
-    process = FakeProcess()
-    monkeypatch.setattr(REVIEW, "_terminate_tree", lambda pid: None)
-    monkeypatch.setattr(REVIEW, "_process_tree_alive", lambda pid: False)
-    monkeypatch.setattr(REVIEW.subprocess, "Popen", lambda *a, **k: process)
-
-    result = REVIEW._run_process(
-        ["codex"],
-        "prompt",
-        timeout_seconds=0.01,
-    )
+    monkeypatch.setattr(REVIEW, "run_process", fake_run)
+    result = REVIEW._run_process(["codex"], "prompt", timeout_seconds=0.01)
 
     # The exc already carried some partial output; the final drain bytes are
     # appended to it instead of being discarded.
