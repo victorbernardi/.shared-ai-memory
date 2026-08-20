@@ -395,11 +395,12 @@ The fake Command Code and fake review Adapter remove model/network nondeterminis
 
 - preserve behavior from closed issues `Inova#129`, `#131`, and `#164`;
 - run `skills/sdd-cmdc-opencode/tests` from the skill directory;
-- run sibling `skills/sdd-cmdc/tests` separately to avoid import collisions;
+- treat the former standalone `sdd-cmdc` suite as historical evidence only;
 - verify the package manifest and tracked-file contract;
 - report installation parity separately without overwriting installed copies.
 
-The clean baseline before this design was `158 passed, 1 skipped` from `skills/sdd-cmdc-opencode` on native Windows.
+The current governed baseline is `299 passed, 12 skipped` from
+`skills/sdd-cmdc-opencode` on native Windows.
 
 ## Delivery sequence
 

@@ -918,26 +918,6 @@
       "notes": "Descoberta física e adicionada automaticamente ao ledger."
     },
     {
-      "name": "sdd-cmdc",
-      "path": "skills/sdd-cmdc",
-      "tier": 4,
-      "category": "meta-factory",
-      "role": "Execução de planos de implementação com delegação de tarefas, revisão por tarefa e revisão final via Command Code",
-      "triggers": [
-        "sdd-cmdc",
-        "command-code",
-        "executar plano",
-        "delegar implementação",
-        "revisão por tarefa"
-      ],
-      "version": "1.0.0",
-      "status": "active",
-      "created_at": "2026-07-30",
-      "updated_at": "2026-07-30",
-      "author": "Victor",
-      "notes": "Implementador via cmdc/deepseek-v4-flash; reviewers permanecem Codex."
-    },
-    {
       "name": "sdd-cmdc-opencode",
       "path": "skills/sdd-cmdc-opencode",
       "tier": 4,

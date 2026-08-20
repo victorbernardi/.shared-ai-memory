@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -8,17 +7,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILL = REPO_ROOT / "skills" / "sdd-cmdc-opencode"
-SOURCE = REPO_ROOT / "skills" / "sdd-cmdc"
 REGISTRY = REPO_ROOT / "skills" / "stout-skill-registry" / "registry.json"
-
-
-def digest(path: Path) -> str:
-    # Canonical digest for the copied-file contract: the sibling skill is
-    # checked out with CRLF by Windows core.autocrlf (i/lf w/crlf), while
-    # this package is forced LF by its scoped eol=lf attributes. The
-    # comparison is on canonicalized text (CRLF -> LF), so it is stable
-    # across checkout line endings yet still detects real content drift.
-    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def test_frontmatter_identifies_sdd_cmdc_opencode() -> None:
@@ -298,7 +287,7 @@ def test_skill_review_flow_uses_preview_metadata_for_diffs() -> None:
     assert "diff" in content.lower()
 
 
-def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
+def test_skill_preserves_command_code_workflow_sequence() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 
     assert "worktree" in content.lower()
@@ -322,27 +311,17 @@ def test_skill_preserves_sdd_cmdc_workflow_sequence() -> None:
     assert "verify-install-parity.py" in content
 
 
-def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:
-    # Files intentionally copied from the source skill must remain identical
-    # once checkout line endings are canonicalized (CRLF -> LF): the shared
-    # support scripts must remain the same canonical content.
-    # Exception: the implementer prompt and task-brief entry point are
-    # evolving contracts owned by this skill. They may diverge from the source
-    # sdd-cmdc copy; the remaining shared support scripts stay canonical.
-    pairs = [
-        ("scripts/sdd-workspace", "scripts/sdd-workspace"),
-        ("scripts/review-package", "scripts/review-package"),
-    ]
+def test_support_scripts_keep_their_local_contract() -> None:
+    workspace = (SKILL / "scripts" / "sdd-workspace").read_text(encoding="utf-8")
+    review_package = (SKILL / "scripts" / "review-package").read_text(encoding="utf-8")
 
-    for new_relative, source_relative in pairs:
-        assert digest(SKILL / new_relative) == digest(SOURCE / source_relative), (
-            f"digest mismatch for {new_relative}"
-        )
+    assert "git rev-parse --show-toplevel" in workspace
+    assert ".superpowers/sdd" in workspace
+    assert "git diff -U10" in review_package
+    assert "review-" in review_package
 
-    # The implementer prompt may diverge only by carrying the issue-131
-    # sequencing contract; it must still contain the same core instructions.
+    # The implementer prompt is an evolving contract owned by this skill.
     prompt = (SKILL / "implementer-prompt.md").read_text(encoding="utf-8")
-    source_prompt = (SOURCE / "implementer-prompt.md").read_text(encoding="utf-8")
     assert "focused" in prompt.lower()
     assert "commit" in prompt.lower()
     assert "report" in prompt.lower()
@@ -351,12 +330,6 @@ def test_copied_implementation_files_match_sdd_cmdc_digests() -> None:
     assert "## Escalation" in prompt
     assert "## Report Format" in prompt
     assert "deepseek/deepseek-v4-flash" in prompt
-    # The sequencing change must be confined to the job/iterating sections;
-    # the report contract and escalation must match the source.
-    for section in ("## Escalation", "## Report Format"):
-        assert prompt.split(section, 1)[1] == source_prompt.split(section, 1)[1], (
-            f"{section} must stay identical to the source prompt"
-        )
 
 
 def test_evolving_adapter_keeps_contract_and_never_infers_completion() -> None:
@@ -379,14 +352,13 @@ def test_evolving_adapter_keeps_contract_and_never_infers_completion() -> None:
     assert "raise ValueError" in adapter
 
 
-def test_source_skills_have_no_worktree_diff() -> None:
+def test_subagent_workflow_has_no_worktree_diff() -> None:
     result = subprocess.run(
         [
             "git",
             "diff",
             "--name-only",
             "--",
-            "skills/sdd-cmdc",
             "skills/subagent-driven-development",
         ],
         cwd=REPO_ROOT,
@@ -397,6 +369,10 @@ def test_source_skills_have_no_worktree_diff() -> None:
 
     assert result.returncode == 0
     assert result.stdout.strip() == ""
+
+
+def test_legacy_sdd_cmdc_skill_directory_is_absent() -> None:
+    assert not (REPO_ROOT / "skills" / "sdd-cmdc").exists()
 
 
 def test_skill_has_approved_audit_artifact() -> None:
@@ -437,18 +413,14 @@ def test_skill_is_registered_active_in_stout_registry() -> None:
     assert "OPENAI_API_KEY" in entry["notes"]
 
 
-def test_stout_registry_preserves_sdd_cmdc_entry() -> None:
+def test_stout_registry_has_no_legacy_sdd_cmdc_entry() -> None:
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
 
     sdd_cmdc_entries = [
         entry for entry in registry["skills"] if entry.get("name") == "sdd-cmdc"
     ]
 
-    assert len(sdd_cmdc_entries) == 1, (
-        f"expected exactly one sdd-cmdc entry, got {len(sdd_cmdc_entries)}"
-    )
-    assert sdd_cmdc_entries[0]["status"] == "active"
-    assert sdd_cmdc_entries[0]["tier"] == 4
+    assert sdd_cmdc_entries == []
 
 
 def test_skill_defines_review_only_section() -> None:
