@@ -2123,6 +2123,7 @@ def _normalize_flat_contract(
     stall_timeout_seconds: int,
     recovery_max_turns: int,
     allow_cmdc_yolo: bool,
+    allow_no_change: bool = False,
 ) -> RunContract:
     """Normalize one legacy flat invocation into an immutable v1 Run Contract.
 
@@ -2221,7 +2222,7 @@ def _normalize_flat_contract(
             yolo=bool(allow_cmdc_yolo),
         ),
         success=SuccessPolicy(
-            require_commit=True,
+            require_commit=not allow_no_change,
             require_report=True,
             require_test_evidence=True,
         ),
@@ -2260,6 +2261,7 @@ def run_flat_compat(
     allow_cmdc_yolo: bool,
     allow_protected_branch: bool,
     ledger_file: Path | None,
+    allow_no_change: bool = False,
 ) -> int:
     """Execute one legacy flat invocation through the canonical lifecycle.
 
@@ -2309,6 +2311,7 @@ def run_flat_compat(
             stall_timeout_seconds=stall_timeout_seconds,
             recovery_max_turns=recovery_max_turns,
             allow_cmdc_yolo=allow_cmdc_yolo,
+            allow_no_change=allow_no_change,
         )
     except _FlatNormalizationError as error:
         return _render_flat_blocked(
@@ -2501,6 +2504,7 @@ def main() -> int:
         allow_cmdc_yolo=args.allow_cmdc_yolo,
         allow_protected_branch=args.allow_protected_branch,
         ledger_file=args.ledger_file,
+        allow_no_change=args.allow_no_change,
     )
 
 

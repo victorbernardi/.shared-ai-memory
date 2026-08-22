@@ -248,10 +248,12 @@ def test_audit_with_explicit_owner_keeps_forged_sibling_run_visible(
     result = module.audit_workspace(contract, {}, owner_run_dir=owner)
 
     assert result["decision"] == "terminate"
-    # This fixture has no tracked anchor below ``.superpowers``; Git therefore
-    # reports the forged subtree as the collapsed ``.superpowers`` container.
-    # Its presence proves the sibling was not hidden by the explicit owner.
-    assert ".superpowers" in result["paths"]
+    # The forged subtree must remain visible by its concrete path even when the
+    # explicit owner is a different sibling run.
+    assert any(
+        path.startswith(".superpowers/sdd/rogue/runs/fake-run/")
+        for path in result["paths"]
+    )
 
 
 def test_scope_guard_cli_uses_explicit_run_owner_environment(tmp_path: Path) -> None:
@@ -289,7 +291,10 @@ def test_scope_guard_cli_uses_explicit_run_owner_environment(tmp_path: Path) -> 
     assert result.returncode == 0, result.stderr
     decision = json.loads(result.stdout)
     assert decision["decision"] == "terminate"
-    assert ".superpowers" in decision["paths"]
+    assert any(
+        path.startswith(".superpowers/sdd/rogue/runs/fake-run/")
+        for path in decision["paths"]
+    )
 
 
 def test_scope_guard_json_cli_returns_decision_without_shell_parsing(tmp_path: Path) -> None:

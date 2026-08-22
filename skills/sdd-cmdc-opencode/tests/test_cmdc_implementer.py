@@ -2454,6 +2454,31 @@ def test_cli_alias_populates_shared_wall_timeout_destination(monkeypatch) -> Non
     assert received == [1234, 1234]
 
 
+def test_cli_allow_no_change_reaches_the_flat_route(monkeypatch) -> None:
+    received: list[bool] = []
+
+    def fake_run_flat_compat(*args, **kwargs):
+        received.append(bool(kwargs["allow_no_change"]))
+        return 0
+
+    monkeypatch.setattr(MODULE, "run_flat_compat", fake_run_flat_compat)
+    monkeypatch.setattr(
+        MODULE.sys,
+        "argv",
+        [
+            "cmdc-implementer.py",
+            "--prompt-file",
+            "prompt.md",
+            "--plan-file",
+            "plan.md",
+            "--allow-no-change",
+        ],
+    )
+
+    assert MODULE.main() == 0
+    assert received == [True]
+
+
 def test_canonical_start_parser_requires_a_run_contract(monkeypatch) -> None:
     monkeypatch.setattr(
         MODULE.sys,
@@ -2821,6 +2846,29 @@ def test_flat_contract_carries_exact_baseline_fingerprint(
     assert "tracked.py" in baseline["paths"]
     assert "untracked-note.txt" in baseline["paths"]
     assert contract.workspace.base_head == baseline["head"]
+
+
+def test_flat_contract_validation_only_does_not_require_a_commit(
+    tmp_path: Path,
+) -> None:
+    repo = _create_git_fixture(tmp_path / "fixture-flat-validation-only")
+    plan = _write_single_task_plan(repo)
+    prompt_path = _write_prompt(tmp_path, repo / "task-report.md")
+
+    contract = MODULE._normalize_flat_contract(
+        repo,
+        prompt_path,
+        plan,
+        max_turns=100,
+        checkpoint_file=None,
+        wall_timeout_seconds=14400,
+        stall_timeout_seconds=900,
+        recovery_max_turns=5,
+        allow_cmdc_yolo=False,
+        allow_no_change=True,
+    )
+
+    assert contract.success.require_commit is False
 
 
 def test_adapters_do_not_expose_legacy_ancestry_helpers() -> None:

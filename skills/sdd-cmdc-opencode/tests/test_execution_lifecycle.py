@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 from pathlib import Path
@@ -32,6 +32,7 @@ from sdd_cmdc_opencode.execution_lifecycle import (
     NO_IMPLEMENTATION_PROGRESS,
     ExecutionLifecycle,
     LifecycleError,
+    _render_contract_prompt,
     default_progress_deadline,
     evaluate_progress,
     normalize_test_evidence,
@@ -115,6 +116,39 @@ def _run_fixture(
     )
     run_dir = repo / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
     return RunRecord.create(run_dir, contract), repo, head
+
+
+@pytest.mark.parametrize(
+    ("require_commit", "expected_instruction"),
+    (
+        (
+            True,
+            "A task commit based on the Run base HEAD is required before reporting.",
+        ),
+        (
+            False,
+            "This Run does not require a task commit; do not create one solely to satisfy the Run.",
+        ),
+    ),
+)
+def test_contract_prompt_states_the_commit_policy(
+    tmp_path: Path,
+    require_commit: bool,
+    expected_instruction: str,
+) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    contract = replace(
+        record.contract,
+        success=SuccessPolicy(
+            require_commit=require_commit,
+            require_report=True,
+            require_test_evidence=True,
+        ),
+    )
+
+    prompt = _render_contract_prompt(contract)
+
+    assert expected_instruction in prompt
 
 
 def _process(

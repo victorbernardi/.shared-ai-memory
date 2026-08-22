@@ -30,6 +30,17 @@ def test_skill_requires_delegated_open_code_review() -> None:
     assert "ocr delegate rule" in content
 
 
+def test_review_routing_uses_the_namespaced_delegate_skill() -> None:
+    required_skill = "$open-code-review-codex:open-code-review-delegate"
+
+    for filename in ("SKILL.md", "task-reviewer-prompt.md", "re-review-prompt.md"):
+        content = (SKILL / filename).read_text(encoding="utf-8")
+        assert required_skill in content, (
+            f"{filename} must name the exact delegated OCR skill; "
+            "the unqualified name is ambiguous"
+        )
+
+
 def test_skill_defines_failure_states() -> None:
     content = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 

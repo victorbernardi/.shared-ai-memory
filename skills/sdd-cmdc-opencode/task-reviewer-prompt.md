@@ -9,6 +9,12 @@ The host session never re-runs OCR and never re-derives the range: the
 controller supplies the preview output, the resolved rule groups, and the
 exact diffs as evidence.
 
+The controller must route OCR through the exact skill
+`$open-code-review-codex:open-code-review-delegate`. Do not select the
+similarly named LLM-backed `$open-code-review-codex:open-code-review` skill;
+this review uses delegated `ocr delegate preview` and `ocr delegate rule`
+only.
+
 ```
 You are reviewing an already-finished implementation range in a fresh,
 ephemeral host session with read-only access to the repository. You have no

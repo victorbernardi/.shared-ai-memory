@@ -233,7 +233,15 @@ def _spawn_windows_process(request: ProcessRequest) -> _SpawnResult:
         else:
             process.stdin.write("SDD_CMDC_GO\n")
             process.stdin.flush()
-        sentinel_line = process.stdout.readline()
+        # The bootstrap sentinel and target output share this pipe. Reading
+        # the sentinel through TextIOWrapper can prefetch target bytes into a
+        # decoder buffer before the reader thread starts. Consume the
+        # sentinel from the underlying binary buffer so the later text reader
+        # sees the remaining stream without competing buffered readers.
+        sentinel_stream = getattr(process.stdout, "buffer", process.stdout)
+        sentinel_line = sentinel_stream.readline()
+        if isinstance(sentinel_line, bytes):
+            sentinel_line = sentinel_line.decode("utf-8", errors="replace")
         if not sentinel_line:
             return _SpawnResult(
                 process=process,
