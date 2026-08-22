@@ -530,6 +530,35 @@ def test_workspace_fingerprint_captures_git_status_and_changed_path_evidence(
     assert paths["delete.txt"]["kind"] == "missing"
 
 
+def test_workspace_fingerprint_detects_nested_files_in_a_mixed_untracked_container(
+    tmp_path: Path,
+) -> None:
+    """A new allowed artifact must not disappear behind a pre-existing folder."""
+    module = _module()
+    repo = tmp_path / "mixed-untracked-container"
+    repo.mkdir()
+    _git(repo, "init", "-q")
+    _git(repo, "config", "user.email", "tests@example.invalid")
+    _git(repo, "config", "user.name", "Run Record Tests")
+    (repo / "tracked.txt").write_text("base\n", encoding="utf-8")
+    _git(repo, "add", "--all")
+    _git(repo, "commit", "-qm", "base")
+
+    foreign = repo / ".superpowers" / "foreign" / "keep.txt"
+    foreign.parent.mkdir(parents=True)
+    foreign.write_text("pre-existing\n", encoding="utf-8")
+    baseline = module.workspace_fingerprint(repo)
+
+    generated = repo / ".superpowers" / "planetfone-hybrid" / "baseline" / "pages.json"
+    generated.parent.mkdir(parents=True)
+    generated.write_text("{}\n", encoding="utf-8")
+    current = module.workspace_fingerprint(repo)
+
+    assert ".superpowers/foreign/keep.txt" in baseline["paths"]
+    assert ".superpowers/planetfone-hybrid/baseline/pages.json" in current["paths"]
+    assert baseline["paths"] != current["paths"]
+
+
 def test_run_record_owned_artifacts_do_not_appear_in_workspace_fingerprint(
     tmp_path: Path,
 ) -> None:
@@ -663,9 +692,10 @@ def test_run_artifact_fingerprint_owner_other_run_does_not_hide_paths(
     fingerprint = module.run_artifact_fingerprint(
         repo, run_dir, module.workspace_fingerprint(repo)
     )
-    assert ".superpowers/sdd/plan/runs/" in fingerprint.get("paths", {}), (
-        "a sibling run must keep the shared untracked container visible"
-    )
+    assert any(
+        str(path).startswith(".superpowers/sdd/plan/runs/")
+        for path in fingerprint.get("paths", {})
+    ), "a sibling run must keep the shared untracked container visible"
 
 
 def test_run_artifact_fingerprint_merges_owned_run_artifacts_and_keeps_external_changes(

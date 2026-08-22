@@ -12,6 +12,14 @@ review, fix re-review, and final review — uses the `open-code-review-delegate`
 subskill with `ocr delegate preview` followed by `ocr delegate rule`; no
 review is ever routed to a Codex reviewer.
 
+**Exact review-skill routing:** explicitly invoke
+`$open-code-review-codex:open-code-review-delegate` for every review, including
+the initial task review, each fix re-review, and the final review. The
+unqualified name `open-code-review-delegate` is descriptive only and is not a
+safe skill selection when similarly named OCR skills are installed. Never
+invoke `$open-code-review-codex:open-code-review`: it is the LLM-backed
+`ocr review` route and must never be executed in this workflow.
+
 **Backend boundary:** implementation runs only through
 `scripts/cmdc-implementer.py` (Command Code, fixed model
 `deepseek/deepseek-v4-flash`); reviewers, re-reviewers and the final reviewer
@@ -60,6 +68,13 @@ Run Record. `resume --cwd ... --run-id ...` locates exactly one owned Run and
 revalidates its Contract SHA-256, base HEAD, branch, Checkpoint ownership and
 sequence, captured Session ID, known workspace fingerprint, and scope before
 creating a process. Recovery never reconstructs authority from a new prompt.
+
+`success.require_commit` is the completion policy, not a request to infer
+authorization from ledger prose. For validation/evidence tasks whose brief says
+to finish without a commit, set it to `false`; the worker must then leave the
+task uncommitted. For implementation or authorized fix tasks, set it to `true`
+only when the controller has recorded the required local-commit authorization.
+The rendered worker prompt states this policy explicitly.
 
 Scope is explicit when the Contract declares allowed and denied paths, or is
 deterministically derived from the task `Files`/`Arquivos` section by the
@@ -318,9 +333,11 @@ conflicts that only emerge from implementation.
 ### Reviewer backend
 
 - Every review — task review, scoped re-review, and the final whole-branch
-  review — uses the `open-code-review-delegate` subskill in the host
-  session: `ocr delegate preview` for the exact repository and range,
-  then `ocr delegate rule` for every reviewable path.
+  review — explicitly invokes the namespaced
+  `$open-code-review-codex:open-code-review-delegate` skill in the host
+  session: `ocr delegate preview` for the exact repository and range, then
+  `ocr delegate rule` for every reviewable path. The unqualified name alone is
+  insufficient.
 - Never dispatch a Codex reviewer. This skill ships no reviewer prompts:
   there is no Codex review stage and no other mechanism replaces the
   delegated flow.
@@ -387,6 +404,9 @@ $workspace = (Get-Location).Path
   --stall-timeout-seconds 900 `
   --recovery-max-turns 5
 ```
+
+For a validation-only legacy invocation, add `--allow-no-change`; it is
+carried into the canonical Contract as `success.require_commit=false`.
 
 `--timeout-seconds` is the explicit spelling of the same finite process
 watchdog as `--wall-timeout-seconds` (the two flags are aliases; the adapter
@@ -467,8 +487,8 @@ required. Implementer self-review never replaces the task review; both are
 needed.
 
 Every review — task review, fix re-review, and final whole-branch review —
-follows the same delegated OCR flow through the `open-code-review-delegate`
-subskill:
+first explicitly invokes `$open-code-review-codex:open-code-review-delegate`,
+then follows the same delegated OCR flow through that skill:
 
 1. Generate the review package for audit evidence with the exact range:
    `scripts/review-package PLAN_FILE BASE HEAD` for a task review,

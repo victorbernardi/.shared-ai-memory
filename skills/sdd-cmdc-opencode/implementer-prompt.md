@@ -33,9 +33,10 @@ Command Code implementer:
     Once the requirements are clear:
     1. Implement exactly what the brief specifies.
     2. Write tests following TDD when the brief requires it.
-    3. Run the focused tests for the changed code, commit the work with an
-       intentional message, and write the full report before broad
-       suite/Ruff/review work that the brief assigns to the host.
+    3. Run the focused tests for the changed code, follow the Run Contract's
+       `success.require_commit` policy, and write the full report before broad
+       suite/Ruff/review work that the brief assigns to the host. Create a task
+       commit only when that policy is true.
     4. Verify the implementation and inspect the diff.
     5. Self-review completeness, quality, scope and test evidence.
     6. Return the short status contract below.
@@ -54,10 +55,11 @@ Command Code implementer:
     `--yolo`, or mutate the snapshot; the mode is `normal` unless the
     controller explicitly passed `--allow-cmdc-yolo`.
 
-    While iterating, run the focused tests for the changed code and commit
-    with the report before starting broad suite/Ruff/review work when the
-    brief assigns those checks to the host. Keep each file within the plan's
-    stated responsibility. Do not restructure unrelated files.
+    While iterating, run the focused tests for the changed code and, when the
+    Run Contract requires it, commit with the report before starting broad
+    suite/Ruff/review work when the brief assigns those checks to the host.
+    Keep each file within the plan's stated responsibility. Do not restructure
+    unrelated files.
 
     ## Escalation
 
@@ -76,7 +78,8 @@ Command Code implementer:
     - no unrelated behavior or dependency was added;
     - tests verify real behavior and the output is clean;
     - the diff contains only this task's changes;
-    - the commit exists and the report contains test commands and outputs.
+    - the commit policy is satisfied and the report contains test commands and
+      outputs; a commit is required only when `success.require_commit` is true.
 
     Fix discovered issues before reporting.
 

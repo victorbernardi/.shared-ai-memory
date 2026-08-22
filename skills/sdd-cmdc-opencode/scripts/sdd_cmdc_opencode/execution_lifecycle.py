@@ -1421,12 +1421,22 @@ def _render_contract_prompt(contract: Any) -> str:
     brief_path = contract.task.brief_path.expanduser().resolve()
     brief = brief_path.read_text(encoding="utf-8")
     report_path = contract.task.report_path.expanduser().resolve(strict=False)
+    if contract.success.require_commit:
+        commit_policy = (
+            "A task commit based on the Run base HEAD is required before reporting. "
+            "Commit only files permitted by the Run Contract."
+        )
+    else:
+        commit_policy = (
+            "This Run does not require a task commit; do not create one solely to "
+            "satisfy the Run."
+        )
     return (
         "Implement the structured task below inside the governed Run scope.\n\n"
         f"{brief.rstrip()}\n\n"
         f"Write your full report to {report_path}:\n"
         "The report must state the implementation result and exact validation evidence.\n"
-        "Commit only files permitted by the Run Contract."
+        f"{commit_policy}"
     )
 
 

@@ -744,7 +744,17 @@ def workspace_fingerprint(
     owner = _validate_run_owner(repo_root, owner_run_dir)
     head = _git_text(repo_root, "rev-parse", "HEAD")
     branch = _git_text(repo_root, "branch", "--show-current")
-    raw_status = _git_bytes(repo_root, "status", "--porcelain=v2", "-z")
+    # Expand untracked files instead of accepting Git's default directory
+    # collapse. A pre-existing mixed untracked container (for example
+    # ``.superpowers/``) must not hide a new permitted artifact from the
+    # progress fingerprint.
+    raw_status = _git_bytes(
+        repo_root,
+        "status",
+        "--porcelain=v2",
+        "--untracked-files=all",
+        "-z",
+    )
     entries = _parse_status(raw_status)
     owned_paths = _owned_run_artifact_paths(repo_root, entries, owner)
     filtered_status = _filter_owned_status_tokens(raw_status, owned_paths)

@@ -9,6 +9,12 @@ session run by `scripts/review-session.py` — not a Codex reviewer prompt,
 never a model selector. It covers only `FIX_BASE..HEAD`; out-of-scope
 observations go to the ledger, not to a fresh review.
 
+The controller must route OCR through the exact skill
+`$open-code-review-codex:open-code-review-delegate`. Do not select the
+similarly named LLM-backed `$open-code-review-codex:open-code-review` skill;
+this re-review uses delegated `ocr delegate preview` and `ocr delegate rule`
+only.
+
 ```
 You are re-reviewing a fix round over the scoped range FIX_BASE..HEAD in a
 fresh, ephemeral host session with read-only access to the repository. A
