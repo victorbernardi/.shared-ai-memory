@@ -32,7 +32,7 @@
 
 - [x] Verify the branch is isolated and based on current `master`.
 - [x] Record the BUP/CEVAP boundary, standalone CEVAP environment, platform targets, and no-production-refresh constraint.
-- [ ] Commit the design and plan:
+- [x] Commit the design and plan:
 
 ```powershell
 git add docs/superpowers/specs/2026-08-23-inova-refresh-skills-canonical-design.md docs/superpowers/plans/2026-08-23-inova-refresh-skills-canonical.md
@@ -49,9 +49,9 @@ git commit -m "docs: define canonical refresh skill port"
 - Consumes: local skill documents, configs, blueprints, and registry JSON.
 - Produces: deterministic tests that fail when the old CEVAP monorepo path or incomplete metadata is present.
 
-- [ ] Write BUP tests for required files, four target platforms, `C:\Projetos\Inova`, `refresh_governance.json`, `dependency_governance.py`, canonical Python, focused QA names, blueprint structure, and registry dependencies.
-- [ ] Write CEVAP tests for the standalone path, `CEVAP_BUP_PATH`, `CEVAP_ONEDRIVE_PATH`, standalone UV/local-venv command, focused tests, forbidden legacy path, and blueprint structure.
-- [ ] Run RED:
+- [x] Write BUP tests for required files, four target platforms, `C:\Projetos\Inova`, `refresh_governance.json`, `dependency_governance.py`, canonical Python, focused QA names, blueprint structure, and registry dependencies.
+- [x] Write CEVAP tests for the standalone path, `CEVAP_BUP_PATH`, `CEVAP_ONEDRIVE_PATH`, standalone UV/local-venv command, focused tests, forbidden legacy path, and blueprint structure.
+- [x] Run RED:
 
 ```powershell
 python -m pytest skills/inova-bup-refresh/tests skills/inova-cevap-refresh/tests -q
@@ -70,9 +70,9 @@ Expected: failure because the new `master` branch does not yet contain the porte
 - Consumes: Task 2 tests and production contracts in the BUP and standalone CEVAP repositories.
 - Produces: active registry entries with `inova-cevap-refresh -> inova-bup-refresh` dependency and correct runtime instructions.
 
-- [ ] Port BUP docs while retaining governed preflight, source list, focused QA, feedback preservation, and no-destructive-operation constraints; add Codex metadata; declare `SKILL.md` and `tests/` in the blueprint.
-- [ ] Rewrite CEVAP docs for `C:\Projetos\Inova.maquinas\motor-cevap`, explicit environment variables, standalone Python/UV, standalone commands/tests, timestamped output, and commercial-field preservation; remove legacy monorepo execution instructions.
-- [ ] Port configs and registry entries with Claude Code, Antigravity, CommandCode, and Codex; map Codex to `.codex/skills`.
+- [x] Port BUP docs while retaining governed preflight, source list, focused QA, feedback preservation, and no-destructive-operation constraints; add Codex metadata; declare `SKILL.md` and `tests/` in the blueprint.
+- [x] Rewrite CEVAP docs for `C:\Projetos\Inova.maquinas\motor-cevap`, explicit environment variables, standalone Python/UV, standalone commands/tests, timestamped output, and commercial-field preservation; remove legacy monorepo execution instructions.
+- [x] Port configs and registry entries with Claude Code, Antigravity, CommandCode, and Codex; map Codex to `.codex/skills`.
 
 ### Task 4: Run GREEN validation and audits
 
@@ -83,16 +83,18 @@ Expected: failure because the new `master` branch does not yet contain the porte
 - Consumes: Task 3 artifacts.
 - Produces: fresh evidence for contract tests, JSON parsing, quality gates, semantic overlap, and whitespace.
 
-- [ ] Run contract tests and confirm zero failures.
-- [ ] Run both commands:
+- [x] Run contract tests and confirm zero failures.
+- [x] Run both commands:
 
 ```powershell
 python skills/stout-create-skill/scripts/skill_validator.py --path skills/inova-bup-refresh
 python skills/stout-create-skill/scripts/skill_validator.py --path skills/inova-cevap-refresh
 ```
 
-- [ ] Parse every target JSON and run `git diff --check master...HEAD`.
-- [ ] Run semantic overlap checks for both proposed roles against the current registry. Record results without claiming operational refresh success.
+- [x] Parse every target JSON and run `git diff --check master...HEAD`.
+- [x] Run semantic overlap checks for both proposed roles against the current registry. Record results without claiming operational refresh success.
+
+The repository-wide `python -m pytest -q` collection is blocked by 12 unrelated import/dependency errors; the focused contract suite is the verified gate for this documentation-only change.
 
 ### Task 5: Review and commit the port
 
@@ -103,12 +105,12 @@ python skills/stout-create-skill/scripts/skill_validator.py --path skills/inova-
 - Consumes: all Task 4 evidence.
 - Produces: a reviewable canonical branch with the old branch reference preserved.
 
-- [ ] Search the final diff for the forbidden legacy CEVAP path and required standalone variables.
-- [ ] Commit the tested port:
+- [x] Search the final diff for the forbidden legacy CEVAP path and required standalone variables.
+- [x] Commit the tested port:
 
 ```powershell
 git add skills/inova-bup-refresh skills/inova-cevap-refresh skills/stout-skill-registry/registry.json
 git commit -m "feat: port governed BUP and CEVAP refresh skills"
 ```
 
-- [ ] Re-run the full verification after commit and report branch, commit SHA, clean status, test count, and limitations.
+- [ ] Re-run the scoped verification after commit and report branch, commit SHA, clean status, test count, and limitations. The repository-wide suite remains blocked as noted above.
