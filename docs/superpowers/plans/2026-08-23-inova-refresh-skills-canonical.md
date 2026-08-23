@@ -42,8 +42,8 @@ git commit -m "docs: define canonical refresh skill port"
 ### Task 2: Add RED contract tests
 
 **Files:**
-- Create: `skills/inova-bup-refresh/tests/test_skill_contract.py`
-- Create: `skills/inova-cevap-refresh/tests/test_skill_contract.py`
+- Create: `skills/inova-bup-refresh/tests/test_bup_skill_contract.py`
+- Create: `skills/inova-cevap-refresh/tests/test_cevap_skill_contract.py`
 
 **Interfaces:**
 - Consumes: local skill documents, configs, blueprints, and registry JSON.
