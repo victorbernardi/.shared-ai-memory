@@ -1,0 +1,24 @@
+{
+  "name": "inova-cevap-refresh",
+  "version": "1.0.0",
+  "author": "Victor",
+  "platforms": {
+    "claude-code": {"enabled": true, "output": ".claude/skills"},
+    "antigravity": {"enabled": true, "output": ".gemini/antigravity-cli/skills"},
+    "commandcode": {"enabled": true, "output": ".commandcode/skills"},
+    "codex": {"enabled": true, "output": ".codex/skills"}
+  },
+  "description": {
+    "full": "Refresh governado do motor de ativação CEVAP dependente do BUP",
+    "short": "Refresh governado do motor de ativação CEVAP dependente do BUP"
+  },
+  "body": {
+    "source": "SKILL.md",
+    "sections": {
+      "claude": ["all"],
+      "antigravity": ["Objetivo", "Fluxo", "Constraints"],
+      "commandcode": ["Objetivo", "Fluxo", "Constraints"],
+      "codex": ["Objetivo", "Fluxo", "Constraints"]
+    }
+  }
+}
