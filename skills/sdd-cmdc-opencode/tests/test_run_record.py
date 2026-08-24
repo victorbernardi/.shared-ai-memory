@@ -450,6 +450,24 @@ def test_run_record_recovers_an_incomplete_final_event_tail(tmp_path: Path) -> N
     assert events_path.read_bytes().endswith(b"\n")
 
 
+def test_run_record_recovers_an_incomplete_final_checkpoint_tail(tmp_path: Path) -> None:
+    module, mapping, fixture = _valid_mapping(tmp_path)
+    contract = module.RunContract.from_mapping(mapping)
+    run_dir = fixture["repo"] / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
+    record = module.RunRecord.create(run_dir, contract)
+
+    record.append_checkpoint({"kind": "session", "session_id": "session-123"})
+    checkpoints_path = run_dir / "checkpoints.jsonl"
+    with checkpoints_path.open("ab") as handle:
+        handle.write(b'{"kind":"partial-tail"')
+
+    checkpoints = record.read_checkpoints()
+
+    assert [item["sequence"] for item in checkpoints] == [1]
+    assert checkpoints_path.read_text(encoding="utf-8").count("partial-tail") == 0
+    assert checkpoints_path.read_bytes().endswith(b"\n")
+
+
 def test_run_record_keeps_event_legible_when_fsync_is_interrupted(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -468,6 +486,106 @@ def test_run_record_keeps_event_legible_when_fsync_is_interrupted(
     events = record.read_events()
 
     assert [item["type"] for item in events] == ["assistant_progress"]
+
+
+def test_run_record_keeps_checkpoint_legible_when_fsync_is_interrupted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module, mapping, fixture = _valid_mapping(tmp_path)
+    contract = module.RunContract.from_mapping(mapping)
+    run_dir = fixture["repo"] / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
+    record = module.RunRecord.create(run_dir, contract)
+
+    def interrupt_fsync(_fd: int) -> None:
+        raise KeyboardInterrupt("simulated fsync interruption")
+
+    monkeypatch.setattr(module.os, "fsync", interrupt_fsync)
+    with pytest.raises(KeyboardInterrupt, match="simulated fsync interruption"):
+        record.append_checkpoint({"kind": "session", "session_id": "session-123"})
+
+    checkpoints = record.read_checkpoints()
+
+    assert [item["kind"] for item in checkpoints] == ["session"]
+
+
+@pytest.mark.parametrize(
+    ("append_name", "read_name", "filename", "kind", "value", "corrupt_tail"),
+    (
+        (
+            "append_event",
+            "read_events",
+            "events.jsonl",
+            "event",
+            {"type": "valid"},
+            b'{"complete":true}\xff',
+        ),
+        (
+            "append_event",
+            "read_events",
+            "events.jsonl",
+            "event",
+            {"type": "valid"},
+            b'{"complete":true}\xc3',
+        ),
+        (
+            "append_checkpoint",
+            "read_checkpoints",
+            "checkpoints.jsonl",
+            "checkpoint",
+            {"kind": "session"},
+            b'{"complete":true}\xff',
+        ),
+        (
+            "append_checkpoint",
+            "read_checkpoints",
+            "checkpoints.jsonl",
+            "checkpoint",
+            {"kind": "session"},
+            b'{"complete":true}\xc3',
+        ),
+    ),
+)
+def test_run_record_rejects_complete_invalid_utf8_tails(
+    tmp_path: Path,
+    append_name: str,
+    read_name: str,
+    filename: str,
+    kind: str,
+    value: dict[str, object],
+    corrupt_tail: bytes,
+) -> None:
+    module, mapping, fixture = _valid_mapping(tmp_path)
+    contract = module.RunContract.from_mapping(mapping)
+    run_dir = fixture["repo"] / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
+    record = module.RunRecord.create(run_dir, contract)
+
+    getattr(record, append_name)(value)
+    stream_path = run_dir / filename
+    with stream_path.open("ab") as handle:
+        handle.write(corrupt_tail)
+    corrupted = stream_path.read_bytes()
+
+    with pytest.raises(module.RunRecordError, match=f"could not read {kind} stream"):
+        getattr(record, read_name)()
+
+    assert stream_path.read_bytes() == corrupted
+
+
+def test_run_record_recovers_a_truncated_utf8_object_tail(tmp_path: Path) -> None:
+    module, mapping, fixture = _valid_mapping(tmp_path)
+    contract = module.RunContract.from_mapping(mapping)
+    run_dir = fixture["repo"] / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
+    record = module.RunRecord.create(run_dir, contract)
+
+    record.append_event({"type": "valid"})
+    events_path = run_dir / "events.jsonl"
+    with events_path.open("ab") as handle:
+        handle.write(b'{"type":"partial","text":"\xc3')
+
+    events = record.read_events()
+
+    assert [item["sequence"] for item in events] == [1]
+    assert events_path.read_bytes().endswith(b"\n")
 
 
 def test_run_record_batches_event_appends_with_one_append_operation(tmp_path: Path) -> None:

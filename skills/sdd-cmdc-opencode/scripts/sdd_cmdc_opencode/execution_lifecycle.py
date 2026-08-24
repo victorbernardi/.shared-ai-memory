@@ -485,6 +485,13 @@ class ExecutionLifecycle:
         except _LifecycleFault as error:
             self._add_blocker(error.code, error.phase, error.message)
             return self._finish_without_process()
+        except KeyboardInterrupt as error:
+            self._add_blocker(
+                "INTERRUPTED",
+                "SPAWN",
+                str(error) or "cmdc-local execution was interrupted",
+            )
+            return self._finish_without_process()
         except Exception as error:  # noqa: BLE001 - convert adapter failures to a stable Result
             self._add_blocker(
                 "RUNTIME_FAILED",
@@ -525,6 +532,13 @@ class ExecutionLifecycle:
         self._transition(_LifecycleState.SPAWN)
         try:
             outcome = self.cmdc.resume(session_id, request)
+        except KeyboardInterrupt as error:
+            self._add_blocker(
+                "INTERRUPTED",
+                "SPAWN",
+                str(error) or "cmdc-local Recovery was interrupted",
+            )
+            return self._finish_without_process()
         except Exception as error:  # noqa: BLE001 - convert adapter failures to a stable Result
             self._add_blocker(
                 "RUNTIME_FAILED",

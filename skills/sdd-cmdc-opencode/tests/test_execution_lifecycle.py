@@ -326,7 +326,7 @@ def test_lifecycle_wires_live_event_sink_before_cmdc_finishes(tmp_path: Path) ->
     ] == ["git status --short"]
 
 
-def test_lifecycle_keeps_live_event_when_cmdc_is_interrupted(tmp_path: Path) -> None:
+def test_lifecycle_persists_live_event_when_cmdc_is_interrupted(tmp_path: Path) -> None:
     record, _, _ = _run_fixture(tmp_path)
     event = _event("write_file", turn=1)
 
@@ -336,14 +336,47 @@ def test_lifecycle_keeps_live_event_when_cmdc_is_interrupted(tmp_path: Path) -> 
             request.event_sink(event)  # type: ignore[attr-defined]
             raise KeyboardInterrupt("simulated worker interruption")
 
-    with pytest.raises(KeyboardInterrupt, match="simulated worker interruption"):
-        ExecutionLifecycle(record, InterruptingCmdc(None)).start()
+    result = ExecutionLifecycle(record, InterruptingCmdc(None)).start()
 
+    assert result.status is RunStatus.BLOCKED
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "INTERRUPTED"
+    assert record.read_result() == result
     assert [
         item["command"]
         for item in record.read_events()
         if item["type"] == "tool_result"
     ] == ["write_file"]
+
+
+def test_lifecycle_persists_result_when_live_event_persistence_is_interrupted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    event = _event("write_file", turn=1)
+
+    def interrupted_append(*_args: object, **_kwargs: object) -> tuple[int, ...]:
+        raise KeyboardInterrupt("simulated event persistence interruption")
+
+    monkeypatch.setattr(
+        "sdd_cmdc_opencode.execution_lifecycle.append_event_records",
+        interrupted_append,
+    )
+
+    class InterruptingPersistenceCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            return self.outcome
+
+    result = ExecutionLifecycle(record, InterruptingPersistenceCmdc(None)).start()
+
+    assert result.status is RunStatus.BLOCKED
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "INTERRUPTED"
+    assert result.cleanup_verified is True
+    assert record.read_result() == result
+    assert record.read_checkpoints()
 
 
 def test_post_contract_workspace_change_fails_closed_before_launcher(

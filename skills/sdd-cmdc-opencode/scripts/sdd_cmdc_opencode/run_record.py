@@ -655,7 +655,16 @@ class RunRecord:
         if not tail.lstrip().startswith(b"{"):
             return False
         if isinstance(error, UnicodeDecodeError):
-            return True
+            if error.reason != "unexpected end of data" or error.end != len(tail):
+                return False
+            try:
+                prefix = tail[: error.start].decode("utf-8").lstrip()
+                json.JSONDecoder().raw_decode(prefix)
+            except json.JSONDecodeError:
+                return True
+            except UnicodeDecodeError:
+                return False
+            return False
         if not isinstance(error, json.JSONDecodeError):
             return False
         stripped = text.rstrip()
