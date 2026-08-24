@@ -971,7 +971,9 @@ class ExecutionLifecycle:
             cwd=repo_root,
             prompt=prompt,
             max_turns=contract.execution.max_turns,
-            allow_yolo=contract.execution.yolo,
+            # The Contract loader rejects execution.yolo=false, so the
+            # launcher mode is always yolo here; keep the request explicit.
+            allow_yolo=True,
             wall_timeout_seconds=float(contract.execution.wall_timeout_seconds),
             stall_timeout_seconds=float(contract.execution.stall_timeout_seconds),
             mod_path=Path(__file__).with_name("_scope_mod.ts"),

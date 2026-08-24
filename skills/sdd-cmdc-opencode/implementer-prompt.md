@@ -52,8 +52,9 @@ Command Code implementer:
     the initial Git snapshot, and it recorded that snapshot (canonical root,
     branch, HEAD and raw `git status --short --untracked-files=all` lines)
     in the report/checkpoint context. Do not change the mode, add or remove
-    `--yolo`, or mutate the snapshot; the mode is `normal` unless the
-    controller explicitly passed `--allow-cmdc-yolo`.
+    `--yolo`, or mutate the snapshot; the governed launcher always runs in
+    `yolo` mode because CMDc writes are part of the worker contract. The
+    preserved `--allow-cmdc-yolo` option is a no-op compatibility flag.
 
     While iterating, run the focused tests for the changed code and, when the
     Run Contract requires it, commit with the report before starting broad

@@ -44,31 +44,25 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "100",
         "--output-format",
         "json",
-        "--no-skills",
-        "--trust",
-        "--skip-onboarding",
-    ]
-
-
-def test_build_command_includes_yolo_only_for_explicit_consent() -> None:
-    command = MODULE.build_command(Path("cmdc"), allow_cmdc_yolo=True)
-
-    assert command == [
-        "cmdc",
-        "-p",
-        "--model",
-        "deepseek/deepseek-v4-flash",
-        "--max-turns",
-        "100",
-        "--output-format",
-        "json",
         "--yolo",
         "--no-skills",
         "--trust",
         "--skip-onboarding",
     ]
-    # The default command never assumes consent.
-    assert "--yolo" not in MODULE.build_command(Path("cmdc"))
+    # The launcher mode is unconditional: exactly one --yolo is always present.
+    assert command.count("--yolo") == 1
+
+
+def test_build_command_noop_compat_flag_cannot_disable_yolo() -> None:
+    default = MODULE.build_command(Path("cmdc"))
+    consented = MODULE.build_command(Path("cmdc"), allow_cmdc_yolo=True)
+
+    # The legacy --allow-cmdc-yolo option remains accepted but is a no-op
+    # compatibility flag: both spellings produce the same unconditional
+    # --yolo command, and forbidding it cannot downgrade the launcher mode.
+    assert default.count("--yolo") == 1
+    assert consented.count("--yolo") == 1
+    assert default == consented
 
 
 def test_configure_stdio_requests_utf8(monkeypatch) -> None:
@@ -202,7 +196,7 @@ def test_initial_workspace_snapshot_failure_blocks_before_cmdc(
     captured = capsys.readouterr()
     assert "BLOCKER_CODE: WORKSPACE_INSPECTION_FAILED" in captured.err
     assert "git root unavailable" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
 
 
 def test_heartbeat_snapshot_failure_is_checkpointed(tmp_path: Path, monkeypatch) -> None:
@@ -690,7 +684,7 @@ def test_timeout_preserves_diagnostic_when_snapshot_collection_fails(
     assert "STATUS: BLOCKED" in captured.err
     assert "BLOCKER_CODE: TIMEOUT" in captured.err
     assert "git status unavailable" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
 
 
 def test_success_writes_starting_and_finished_checkpoints(
@@ -1091,7 +1085,7 @@ def test_unsuccessful_recovery_keeps_mode_and_full_initial_git_state(
     captured = capsys.readouterr()
     assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
     assert "BLOCKER_CODE: PROCESS_FAILED" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
     # The full initial snapshot rides in the rendered diagnostic, including
     # the canonical root, branch, HEAD, and every raw status line. Only the
     # single line carrying the snapshot is parsed, so the EVENT_LOG line
@@ -1178,7 +1172,7 @@ def test_recovery_incomplete_fallback_keeps_mode_and_full_initial_git_state(
     captured = capsys.readouterr()
     assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
     assert "BLOCKER_CODE: RECOVERY_INCOMPLETE" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
     state = json.loads(
         next(
             line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
@@ -1258,7 +1252,7 @@ def test_recovery_exception_keeps_mode_and_full_initial_git_state(
     assert "STATUS: IMPLEMENTATION INCOMPLETE" in captured.err
     assert "BLOCKER_CODE: TIMEOUT" in captured.err
     assert "recovery failed: " in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
     state = json.loads(
         next(
             line for line in captured.err.splitlines() if line.startswith("INITIAL_GIT_STATE: ")
@@ -2741,7 +2735,7 @@ def test_flat_main_blocks_before_launcher_when_normalization_is_impossible(
     assert "STATUS: BLOCKED" in error
     assert "BLOCKER_CODE: FLAT_NORMALIZATION_FAILED" in error
     assert "multiple tasks" in error
-    assert "MODE: normal" in error
+    assert "MODE: yolo" in error
 
 
 def test_flat_normalization_fails_closed_without_deterministic_scope(
@@ -2780,7 +2774,7 @@ def test_flat_normalization_fails_closed_without_deterministic_scope(
     assert "STATUS: BLOCKED" in error
     assert "BLOCKER_CODE: FLAT_NORMALIZATION_FAILED" in error
     assert "Files/Arquivos" in error
-    assert "MODE: normal" in error
+    assert "MODE: yolo" in error
 
 
 def test_flat_route_reuses_governed_preflight_before_contract_creation(
@@ -2846,6 +2840,9 @@ def test_flat_contract_carries_exact_baseline_fingerprint(
     assert "tracked.py" in baseline["paths"]
     assert "untracked-note.txt" in baseline["paths"]
     assert contract.workspace.base_head == baseline["head"]
+    # The normalized Contract always carries execution.yolo=true; the preserved
+    # --allow-cmdc-yolo compatibility flag cannot downgrade the launcher mode.
+    assert contract.execution.yolo is True
 
 
 def test_flat_contract_validation_only_does_not_require_a_commit(
@@ -3011,7 +3008,7 @@ def test_failed_child_process_keeps_mode_and_full_initial_git_state(
     )
     captured = capsys.readouterr()
     assert "BLOCKER_CODE: MODEL_UNAVAILABLE" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
     # The full initial snapshot rides in the rendered diagnostic, including
     # the canonical root, branch, HEAD, and every raw status line.
     state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
@@ -3125,7 +3122,7 @@ def test_cmd_not_found_after_preflight_keeps_mode_and_full_initial_git_state(
     )
     captured = capsys.readouterr()
     assert "BLOCKER_CODE: CMD_NOT_FOUND" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
     # The full initial snapshot rides in the rendered diagnostic.
     state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
     assert state["git_root"] == str(repo.resolve())
