@@ -25,17 +25,17 @@
 
 **Files:**
 - Create: `skills/sdd-cmdc-opencode/.gitignore`
-- Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/cmdc_local.py:301-332,508-570`
-- Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/execution_lifecycle.py:970-984`
-- Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/run_record.py:232-277`
-- Modify: `skills/sdd-cmdc-opencode/scripts/cmdc-implementer.py:107-131,280-450,1150-1190,2115-2223,2250-2345,2464-2471`
-- Modify: `skills/sdd-cmdc-opencode/tests/helpers/fake_cmdc.py:25-95`
-- Modify: `skills/sdd-cmdc-opencode/tests/test_cmdc_local.py:1-245`
-- Modify: `skills/sdd-cmdc-opencode/tests/test_cmdc_implementer.py:1-3150`
-- Modify: `skills/sdd-cmdc-opencode/tests/test_preflight_contract.py:480-535`
-- Modify: `skills/sdd-cmdc-opencode/tests/test_run_record.py:1-180`
-- Modify: `skills/sdd-cmdc-opencode/tests/test_skill_contract.py:1-110`
-- Modify: `skills/sdd-cmdc-opencode/SKILL.md:293-331`
+- Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/cmdc_local.py`
+- Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/execution_lifecycle.py`
+- Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/run_record.py`
+- Modify: `skills/sdd-cmdc-opencode/scripts/cmdc-implementer.py`
+- Modify: `skills/sdd-cmdc-opencode/tests/helpers/fake_cmdc.py`
+- Modify: `skills/sdd-cmdc-opencode/tests/test_cmdc_local.py`
+- Modify: `skills/sdd-cmdc-opencode/tests/test_cmdc_implementer.py`
+- Modify: `skills/sdd-cmdc-opencode/tests/test_preflight_contract.py`
+- Modify: `skills/sdd-cmdc-opencode/tests/test_run_record.py`
+- Modify: `skills/sdd-cmdc-opencode/tests/test_skill_contract.py`
+- Modify: `skills/sdd-cmdc-opencode/SKILL.md`
 
 **Interfaces:**
 - Consumes: `CmdcOutcome`, `CmdcEvent`, `ProcessOutcome`, `MOD_HOOK_MARKER`, and `MOD_HOOK_HANDSHAKE` already defined by `cmdc_local.py`.
