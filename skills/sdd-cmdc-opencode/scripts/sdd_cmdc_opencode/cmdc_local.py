@@ -482,9 +482,23 @@ class CmdcLocal:
                 "SCOPE_ENV_INVALID",
                 "scope environment keys and values must be strings",
             )
-        environment = dict(os.environ)
+        # Do not leak a parent Run's scope variables into this child. The Mod
+        # itself fails closed on any SDD_CMDC_SCOPE_* name outside the current
+        # request, so retain ordinary environment variables and add only the
+        # validated scope contract below.
+        environment = {
+            key: value
+            for key, value in os.environ.items()
+            if not key.startswith("SDD_CMDC_SCOPE_")
+        }
         if request.env is not None:
-            environment.update(request.env)
+            environment.update(
+                {
+                    key: value
+                    for key, value in request.env.items()
+                    if not key.startswith("SDD_CMDC_SCOPE_")
+                }
+            )
         environment.update(request.scope_env)
         return environment
 

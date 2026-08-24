@@ -498,6 +498,7 @@ def test_scope_mod_environment_is_forwarded_to_start_and_resume(
         "SDD_CMDC_SCOPE_HELPER": str(helper.resolve()),
         "SDD_CMDC_SCOPE_CONTRACT": str(contract.resolve()),
     }
+    monkeypatch.setenv("SDD_CMDC_SCOPE_FOREIGN", "must-not-leak")
     request_value = request(tmp_path, mod_path=mod, scope_env=scope_env)
     local = CmdcLocal(str(FAKE))
 
@@ -508,11 +509,11 @@ def test_scope_mod_environment_is_forwarded_to_start_and_resume(
     for process_request in captured:
         assert process_request.env is not None
         # Assert every requested scope variable is forwarded with its exact
-        # value. The host process may itself carry foreign SDD_CMDC_SCOPE_*
-        # variables (the governed Run environment), so the comparison only
-        # covers the request's own scope keys.
+        # value and foreign parent scope variables are not leaked into the
+        # child, where the Mod would terminate the Run.
         for key, value in scope_env.items():
             assert process_request.env.get(key) == value
+        assert "SDD_CMDC_SCOPE_FOREIGN" not in process_request.env
 
 
 def test_scope_mod_environment_rejects_unexpected_scope_variables(tmp_path: Path) -> None:
