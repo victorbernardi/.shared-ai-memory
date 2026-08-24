@@ -1,0 +1,86 @@
+# SDD Command Code Mod Hook Preflight Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Make the Windows Mod-hook preflight diagnose `MOD_HOOK_UNVERIFIED` with bounded, actionable evidence while preserving the fail-closed boundary and keeping normal worker invocations free of `--yolo`.
+
+**Architecture:** Keep the dedicated `_mod_probe.ts` as the only preflight capability probe. The isolated probe may use `--yolo` solely to permit the harmless shell call that the hook must block; the governed worker request continues to derive its mode from the immutable Contract. When the exact protocol handshake is absent, `CmdcLocal` will render bounded evidence from the completed smoke outcome and a remediation path through the existing `CmdcLocalError`/lifecycle blocker boundary.
+
+**Tech Stack:** Python 3.12, pytest, TypeScript Command Code Mod probe, Windows `cmdc.cmd`/`cmdc.ps1` launcher wrappers.
+
+## Global Constraints
+
+- The preflight remains fail-closed: absence of the exact `tool_hook_blocked` event with `hookOutput=SDD_CMDC_MOD_HOOK_HANDSHAKE` must block the Run; it must never fall back to Codex or treat marker text as proof.
+- The diagnostic must preserve the stable `BLOCKER_CODE: MOD_HOOK_UNVERIFIED` and the existing `smoke did not emit SDD_CMDC_MOD_HOOK_OK` text while adding bounded session/process/event evidence and a concrete launcher/Mod remediation path.
+- `--yolo` is allowed only on the isolated harmless smoke probe; normal governed worker requests must continue to omit it unless the immutable Contract explicitly authorizes yolo.
+- Do not expose prompts, secrets, full NDJSON streams, or unbounded paths in the diagnostic; cap event-type evidence and include only the launcher/protocol fields needed to remediate the boundary.
+- Deterministic fake-launcher tests and the installed-launcher smoke remain separate; a skipped real smoke is unavailable operational evidence, not success.
+- Do not change the fixed implementation model, Run Contract schema, scope gates, or review backend routing.
+
+---
+
+### Task 1: Actionable Windows Mod-hook preflight evidence
+
+**Files:**
+- Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/cmdc_local.py:508-570`
+- Modify: `skills/sdd-cmdc-opencode/tests/helpers/fake_cmdc.py:25-95`
+- Modify: `skills/sdd-cmdc-opencode/tests/test_cmdc_local.py:188-245`
+- Modify: `skills/sdd-cmdc-opencode/SKILL.md:293-331`
+
+**Interfaces:**
+- Consumes: `CmdcOutcome`, `CmdcEvent`, `ProcessOutcome`, `MOD_HOOK_MARKER`, and `MOD_HOOK_HANDSHAKE` already defined by `cmdc_local.py`.
+- Produces: `CmdcLocal.smoke_test()` continues returning `CmdcPreflight` on verified success and continues raising `CmdcLocalError(code="MOD_HOOK_UNVERIFIED", ...)` on an unverified hook, but its message contains the stable legacy text, the exact expected protocol shape, bounded `session_id`/process/event evidence, and the remediation sentence.
+
+- [ ] **Step 1: Write the failing regression test**
+
+Add a `no_hook` fake-launcher variant that still emits a valid terminal result but omits the `tool_hook_blocked` event. Add one focused test that calls `CmdcLocal(str(FAKE)).smoke_test(tmp_path, require_mod_hook=True)` with that variant and asserts the raised error has code `MOD_HOOK_UNVERIFIED` and includes:
+
+```python
+assert "smoke did not emit SDD_CMDC_MOD_HOOK_OK" in str(error.value)
+assert "expected tool_hook_blocked" in str(error.value)
+assert "session_id=session-123" in str(error.value)
+assert "remediation" in str(error.value).lower()
+```
+
+Also extend the successful fake smoke test to assert `"--yolo" in preflight.command`, documenting that the probe permission is isolated from the worker mode.
+
+- [ ] **Step 2: Run the focused tests to verify they fail**
+
+Run from the skill directory:
+
+```powershell
+python -m pytest tests/test_cmdc_local.py::test_smoke_failure_reports_actionable_hook_evidence tests/test_cmdc_local.py::test_fake_smoke_initializes_git_and_verifies_mod_hook -q
+```
+
+Expected: the new diagnostic test fails because the current error contains only the legacy marker sentence, while the existing smoke test continues to pass.
+
+- [ ] **Step 3: Implement the minimal diagnostic change**
+
+Keep `_hook_seen()` exact and fail-closed. In `smoke_test()`, after the completed outcome fails verification, build a bounded message containing:
+
+```text
+smoke did not emit SDD_CMDC_MOD_HOOK_OK; expected tool_hook_blocked with hookOutput=SDD_CMDC_MOD_HOOK_HANDSHAKE; session_id=<value-or-null>; process_status=<status>; observed_event_types=<bounded list>; remediation: verify the installed Command Code launcher and Mod support, then rerun the isolated smoke probe.
+```
+
+Use the existing `CmdcLocalError("MOD_HOOK_UNVERIFIED", message)` boundary. Do not include the full output, prompt, or arbitrary event payloads. Add a short code comment/docstring explaining that the probe’s `allow_yolo=True` is scoped to the harmless preflight capability check and does not authorize the governed worker.
+
+Update the skill contract paragraph to state the same distinction and the remediation expected for `MOD_HOOK_UNVERIFIED`.
+
+- [ ] **Step 4: Run the focused tests to verify they pass**
+
+Run:
+
+```powershell
+python -m pytest tests/test_cmdc_local.py -q
+```
+
+Expected: all deterministic tests pass; the real-launcher test remains skipped unless `SDD_CMDC_REAL_SMOKE=1` is explicitly set.
+
+- [ ] **Step 5: Commit**
+
+```powershell
+git add -- skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/cmdc_local.py skills/sdd-cmdc-opencode/tests/helpers/fake_cmdc.py skills/sdd-cmdc-opencode/tests/test_cmdc_local.py skills/sdd-cmdc-opencode/SKILL.md
+git commit -m "fix(sdd-cmdc-opencode): diagnose mod hook preflight failures"
+```
+
+The task report must record the focused test command and complete output, the commit SHA, and whether the separately authorized real smoke was run.
