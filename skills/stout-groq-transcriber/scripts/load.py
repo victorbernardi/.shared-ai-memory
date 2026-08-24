@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
-try:
+_MODULE_DIR = Path(__file__).resolve().parent
+_SKILL_ROOT = _MODULE_DIR.parent
+if not __package__:
+    if str(_SKILL_ROOT) in sys.path:
+        sys.path.remove(str(_SKILL_ROOT))
+    sys.path.insert(0, str(_SKILL_ROOT))
+
+if __package__:
+    from .output_contract import OutputPlan, copy_source_if_requested
+else:
     from scripts.output_contract import OutputPlan, copy_source_if_requested
-except ModuleNotFoundError:
-    from output_contract import OutputPlan, copy_source_if_requested
 
 
 def load_transcription(plan: OutputPlan, markdown: str, input_path: str | Path) -> Path:
