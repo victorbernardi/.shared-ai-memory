@@ -244,7 +244,20 @@ def test_preflight_uses_the_dedicated_mod_hook_probe(tmp_path: Path) -> None:
         ) -> SimpleNamespace:
             assert require_mod_hook is True
             self.smoke_mod_path = mod_path
-            return SimpleNamespace(mod_hook_verified=True)
+            return SimpleNamespace(
+                mod_hook_verified=True,
+                smoke=SimpleNamespace(
+                    session_id="session-123",
+                    process=SimpleNamespace(
+                        status="EXITED",
+                        returncode=0,
+                        primary_failure=None,
+                        secondary_failures=(),
+                        cleanup_verified=True,
+                        drain_verified=True,
+                    ),
+                ),
+            )
 
     cmdc = PreflightCmdc()
 
@@ -256,6 +269,45 @@ def test_preflight_uses_the_dedicated_mod_hook_probe(tmp_path: Path) -> None:
         / "sdd_cmdc_opencode"
         / "_mod_probe.ts"
     )
+
+
+def test_preflight_rejects_hook_proof_without_clean_smoke_evidence(
+    tmp_path: Path,
+) -> None:
+    record, repo, _ = _run_fixture(tmp_path)
+
+    class UncleanPreflightCmdc:
+        def resolve_launcher(self) -> Path:
+            return Path("cmdc")
+
+        def smoke_test(
+            self,
+            _cwd: Path,
+            *,
+            require_mod_hook: bool,
+            mod_path: Path,
+        ) -> SimpleNamespace:
+            assert require_mod_hook is True
+            assert mod_path.is_file()
+            return SimpleNamespace(
+                mod_hook_verified=True,
+                smoke=SimpleNamespace(
+                    session_id="session-123",
+                    process=SimpleNamespace(
+                        status="WALL_TIMEOUT",
+                        returncode=None,
+                        primary_failure=None,
+                        secondary_failures=(),
+                        cleanup_verified=False,
+                        drain_verified=False,
+                    ),
+                ),
+            )
+
+    with pytest.raises(LifecycleError) as error:
+        ExecutionLifecycle(record, UncleanPreflightCmdc())._preflight_cmdc(repo)
+
+    assert getattr(error.value, "code", None) == "SMOKE_FAILED"
 
 
 def test_invalid_state_transition_is_fail_closed() -> None:

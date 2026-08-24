@@ -987,7 +987,37 @@ class ExecutionLifecycle:
             except Exception as error:  # noqa: BLE001 - adapter taxonomy boundary
                 code = getattr(error, "code", "MOD_HOOK_UNVERIFIED")
                 raise _LifecycleFault(str(code), "PREFLIGHT", str(error)) from error
-            if hasattr(result, "mod_hook_verified") and not result.mod_hook_verified:
+            smoke = getattr(result, "smoke", None)
+            process = getattr(smoke, "process", None)
+            process_status = getattr(
+                getattr(process, "status", None), "value", getattr(process, "status", None)
+            )
+            process_returncode = getattr(process, "returncode", None)
+            primary_failure = getattr(process, "primary_failure", None)
+            secondary_failures = getattr(process, "secondary_failures", None)
+            cleanup_verified = getattr(process, "cleanup_verified", False)
+            drain_verified = getattr(process, "drain_verified", False)
+            session_id = getattr(smoke, "session_id", None)
+            if (
+                smoke is None
+                or process is None
+                or process_status != "EXITED"
+                or process_returncode != 0
+                or primary_failure is not None
+                or not isinstance(secondary_failures, tuple)
+                or secondary_failures
+                or cleanup_verified is not True
+                or drain_verified is not True
+                or not isinstance(session_id, str)
+                or not session_id.strip()
+            ):
+                raise _LifecycleFault(
+                    "SMOKE_FAILED",
+                    "PREFLIGHT",
+                    "Command Code smoke lacked clean process, cleanup, drain, "
+                    "and session evidence",
+                )
+            if getattr(result, "mod_hook_verified", False) is not True:
                 raise _LifecycleFault(
                     "MOD_HOOK_UNVERIFIED",
                     "PREFLIGHT",
