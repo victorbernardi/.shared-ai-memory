@@ -35,10 +35,12 @@ def test_cevap_document_uses_standalone_runtime_contract():
         "test_inactivity_filter.py",
         "test_governance.py",
         "test_onedrive.py",
-        "CEVAP_ATIVACAO_",
+        "data/CEVAP_ATIVACAO.xlsx",
+        "data/backups/CEVAP_ATIVACAO_backup_",
     ):
         assert required in skill
 
+    assert "data/CEVAP_ATIVACAO_<" not in skill
     assert r"C:\Projetos\Inova\projects\motor-cevap" not in skill
     assert "Set-Location (Join-Path $repo \"projects\\motor-cevap\")" not in skill
 
@@ -55,7 +57,11 @@ def test_cevap_metadata_targets_all_active_platforms_and_delivered_files():
     }
     assert config["platforms"]["codex"]["output"] == ".codex/skills"
     assert set(blueprint["target_platforms"]) == set(config["platforms"])
-    assert blueprint["structure"] == ["SKILL.md", "tests/"]
+    assert blueprint["structure"] == [
+        "SKILL.md",
+        "tests/",
+        "tests/test_cevap_skill_contract.py",
+    ]
 
 
 def test_cevap_registry_depends_on_bup_only():

@@ -10,6 +10,7 @@
   ],
   "structure": [
     "SKILL.md",
-    "tests/"
+    "tests/",
+    "tests/test_cevap_skill_contract.py"
   ]
 }

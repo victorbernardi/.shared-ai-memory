@@ -64,7 +64,7 @@ Executar o motor de ativação CEVAP somente após um BUP validado no dia corren
    if ($LASTEXITCODE -ne 0) { throw "Consolidação CEVAP falhou" }
    ```
 
-5. Confirmar o snapshot `data/CEVAP_ATIVACAO_<YYYYMMDD_HHMM>.xlsx`, a atualização do ativo e a preservação por CNPJ de `Data_Tentativa_1`, `Status_Contato_1`, `Data_Tentativa_2`, `Status_Contato_2` e `Observacao`. Novos clientes recebem somente os defaults do consolidator.
+5. Confirmar o ativo `data/CEVAP_ATIVACAO.xlsx`, o backup de rollback `data/backups/CEVAP_ATIVACAO_backup_<timestamp>.xlsx`, a atualização do ativo e a preservação por CNPJ de `Data_Tentativa_1`, `Status_Contato_1`, `Data_Tentativa_2`, `Status_Contato_2` e `Observacao`. Novos clientes recebem somente os defaults do consolidator.
 6. Reabrir o artefato e confirmar que o monitor identifica `CEVAP (Ativacao)` pelo snapshot mais recente. Em falha de governança, não publicar uma atualização degradada.
 
 ## Preservação comercial

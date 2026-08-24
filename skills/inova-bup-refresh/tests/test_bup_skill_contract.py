@@ -50,7 +50,11 @@ def test_bup_metadata_targets_all_active_platforms_and_delivered_files():
     }
     assert config["platforms"]["codex"]["output"] == ".codex/skills"
     assert set(blueprint["target_platforms"]) == set(config["platforms"])
-    assert blueprint["structure"] == ["SKILL.md", "tests/"]
+    assert blueprint["structure"] == [
+        "SKILL.md",
+        "tests/",
+        "tests/test_bup_skill_contract.py",
+    ]
 
 
 def test_bup_registry_entry_declares_only_real_upstream_dependencies():
@@ -64,3 +68,14 @@ def test_bup_registry_entry_declares_only_real_upstream_dependencies():
         "inova-motor-faturamento",
         "inova-motor-orcamentos",
     ]
+
+
+def test_registry_last_updated_covers_skill_entries():
+    registry = _read_json(REGISTRY_PATH)
+    latest_entry_update = max(
+        entry["updated_at"]
+        for entry in registry["skills"]
+        if entry.get("updated_at")
+    )
+
+    assert registry["last_updated"] >= latest_entry_update

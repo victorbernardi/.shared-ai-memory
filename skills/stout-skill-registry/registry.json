@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/skill_entry.schema.json",
   "version": "1.3.0",
-  "last_updated": "2026-07-28",
+  "last_updated": "2026-08-23",
   "ecosystem": "stout-inova",
   "skills": [
     {
