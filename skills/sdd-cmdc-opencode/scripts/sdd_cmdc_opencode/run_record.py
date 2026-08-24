@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -633,6 +633,9 @@ class RunRecord:
     def append_event(self, event: dict[str, object]) -> int:
         return self._append(self._run_dir / "events.jsonl", event, "event")
 
+    def append_events(self, events: Iterable[dict[str, object]]) -> tuple[int, ...]:
+        return self._append_many(self._run_dir / "events.jsonl", events, "event")
+
     def append_checkpoint(self, checkpoint: dict[str, object]) -> int:
         return self._append(self._run_dir / "checkpoints.jsonl", checkpoint, "checkpoint")
 
@@ -677,31 +680,47 @@ class RunRecord:
         return tuple(values)
 
     def _append(self, path: Path, value: dict[str, object], kind: str) -> int:
-        if not isinstance(value, dict):
-            raise RunRecordError(f"{kind} must be a JSON object")
+        return self._append_many(path, (value,), kind)[0]
+
+    def _append_many(
+        self,
+        path: Path,
+        values: Iterable[dict[str, object]],
+        kind: str,
+    ) -> tuple[int, ...]:
+        pending = tuple(values)
+        if not pending:
+            return ()
         with self._lock:
             next_sequence = _last_sequence(path) + 1
-            supplied_run = value.get("run_id")
-            if supplied_run is not None and supplied_run != self._contract.run_id:
-                raise RunRecordError(f"{kind} run_id does not belong to this Run")
-            supplied_hash = value.get("contract_sha256")
-            if supplied_hash is not None and supplied_hash != self.contract_sha256:
-                raise RunRecordError(f"{kind} contract hash does not belong to this Run")
-            supplied_sequence = value.get("sequence")
-            if supplied_sequence is not None and supplied_sequence != next_sequence:
-                raise RunRecordError(f"{kind} sequence is not monotonic")
-            record = dict(value)
-            record["sequence"] = next_sequence
-            record["run_id"] = self._contract.run_id
-            record["contract_sha256"] = self.contract_sha256
-            record["timestamp"] = record.get("timestamp") or _utc_timestamp()
-            payload = _canonical_json(record) + b"\n"
+            payloads: list[bytes] = []
+            sequences: list[int] = []
+            for value in pending:
+                if not isinstance(value, dict):
+                    raise RunRecordError(f"{kind} must be a JSON object")
+                supplied_run = value.get("run_id")
+                if supplied_run is not None and supplied_run != self._contract.run_id:
+                    raise RunRecordError(f"{kind} run_id does not belong to this Run")
+                supplied_hash = value.get("contract_sha256")
+                if supplied_hash is not None and supplied_hash != self.contract_sha256:
+                    raise RunRecordError(f"{kind} contract hash does not belong to this Run")
+                supplied_sequence = value.get("sequence")
+                if supplied_sequence is not None and supplied_sequence != next_sequence:
+                    raise RunRecordError(f"{kind} sequence is not monotonic")
+                record = dict(value)
+                record["sequence"] = next_sequence
+                record["run_id"] = self._contract.run_id
+                record["contract_sha256"] = self.contract_sha256
+                record["timestamp"] = record.get("timestamp") or _utc_timestamp()
+                payloads.append(_canonical_json(record) + b"\n")
+                sequences.append(next_sequence)
+                next_sequence += 1
             path.parent.mkdir(parents=True, exist_ok=True)
             with path.open("ab") as handle:
-                handle.write(payload)
+                handle.write(b"".join(payloads))
                 handle.flush()
                 os.fsync(handle.fileno())
-            return next_sequence
+            return tuple(sequences)
 
     def write_result(self, result: RunResult) -> None:
         if not isinstance(result, RunResult):

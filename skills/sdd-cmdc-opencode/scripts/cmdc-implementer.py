@@ -126,7 +126,7 @@ def build_command(
         "json",
         "--yolo",
     ]
-    command.extend(("--no-skills", "--trust", "--skip-onboarding"))
+    command.extend(("--no-skills", "--trust", "--skip-onboarding", "--no-auto-update"))
     return command
 
 

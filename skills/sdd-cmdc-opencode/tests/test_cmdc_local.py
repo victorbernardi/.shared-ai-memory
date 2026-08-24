@@ -50,6 +50,7 @@ def test_direct_launcher_builds_stable_start_arguments(tmp_path: Path) -> None:
         "--no-skills",
         "--trust",
         "--skip-onboarding",
+        "--no-auto-update",
     )
     # Every generated command carries exactly one --yolo: CMDc writes are part
     # of the governed worker contract, so the default request cannot downgrade

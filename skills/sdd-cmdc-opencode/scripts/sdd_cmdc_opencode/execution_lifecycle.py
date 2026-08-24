@@ -271,26 +271,24 @@ def classify_progress_event(event: CmdcEvent) -> str | None:
 def append_event_records(record: RunRecord, events: Iterable[CmdcEvent]) -> tuple[int, ...]:
     """Append raw Cmdc events while retaining exact command and streams."""
 
-    sequences: list[int] = []
+    records: list[dict[str, object]] = []
     for event in events:
         if not isinstance(event, CmdcEvent):
             continue
-        sequences.append(
-            record.append_event(
-                {
-                    "type": event.type,
-                    "session_id": event.session_id,
-                    "turn": event.turn_number,
-                    "tool": event.tool,
-                    "command": event.command,
-                    "exit_code": event.exit_code,
-                    "stdout": event.stdout,
-                    "stderr": event.stderr,
-                    "raw": dict(event.raw),
-                }
-            )
+        records.append(
+            {
+                "type": event.type,
+                "session_id": event.session_id,
+                "turn": event.turn_number,
+                "tool": event.tool,
+                "command": event.command,
+                "exit_code": event.exit_code,
+                "stdout": event.stdout,
+                "stderr": event.stderr,
+                "raw": dict(event.raw),
+            }
         )
-    return tuple(sequences)
+    return record.append_events(records)
 
 
 def persist_progress_checkpoint(record: Any, assessment: ProgressAssessment) -> int | None:

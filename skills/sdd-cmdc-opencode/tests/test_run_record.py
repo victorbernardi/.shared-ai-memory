@@ -432,6 +432,23 @@ def test_run_record_streams_are_owned_and_monotonic(tmp_path: Path) -> None:
         record.read_checkpoints()
 
 
+def test_run_record_batches_event_appends_with_one_append_operation(tmp_path: Path) -> None:
+    module, mapping, fixture = _valid_mapping(tmp_path)
+    contract = module.RunContract.from_mapping(mapping)
+    run_dir = fixture["repo"] / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
+    record = module.RunRecord.create(run_dir, contract)
+
+    sequences = record.append_events(
+        [
+            {"type": "thinking_delta", "turn": 1},
+            {"type": "tool_result", "turn": 1},
+        ]
+    )
+
+    assert sequences == (1, 2)
+    assert [item["sequence"] for item in record.read_events()] == [1, 2]
+
+
 def test_result_replacement_is_atomic_and_prior_streams_remain_append_only(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

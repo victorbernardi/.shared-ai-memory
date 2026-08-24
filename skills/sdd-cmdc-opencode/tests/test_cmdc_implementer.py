@@ -48,6 +48,7 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "--no-skills",
         "--trust",
         "--skip-onboarding",
+        "--no-auto-update",
     ]
     # The launcher mode is unconditional: exactly one --yolo is always present.
     assert command.count("--yolo") == 1

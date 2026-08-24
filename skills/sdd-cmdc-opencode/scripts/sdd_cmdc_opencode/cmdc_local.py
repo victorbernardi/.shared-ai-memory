@@ -20,7 +20,7 @@ from .process_supervisor import (
 
 
 MODEL_ID = "deepseek/deepseek-v4-flash"
-COMMAND_FLAGS = ("--no-skills", "--trust", "--skip-onboarding")
+COMMAND_FLAGS = ("--no-skills", "--trust", "--skip-onboarding", "--no-auto-update")
 MOD_HOOK_MARKER = "SDD_CMDC_MOD_HOOK_OK"
 MOD_HOOK_HANDSHAKE = "SDD_CMDC_MOD_HOOK_HANDSHAKE"
 SCOPE_ENV_NAMES = frozenset(
