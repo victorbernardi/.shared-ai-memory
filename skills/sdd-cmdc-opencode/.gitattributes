@@ -2,3 +2,6 @@
 *.py text eol=lf
 *.json text eol=lf
 *.ts text eol=lf
+scripts/review-package text eol=lf
+scripts/sdd-workspace text eol=lf
+scripts/task-brief text eol=lf
