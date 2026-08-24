@@ -17,6 +17,7 @@ import tempfile
 from typing import Any
 
 from .cmdc_local import CmdcEvent, CmdcLocal
+from .process_supervisor import ProcessCallbackError, ProcessSupervisionError
 from .run_record import (
     Blocker,
     RecoveryEvidence,
@@ -400,6 +401,7 @@ class ExecutionLifecycle:
         self._recovery_expected_session: str | None = None
         self._recovery_trigger = "explicit-resume"
         self._live_event_count = 0
+        self._live_session_id: str | None = None
 
     @property
     def state(self) -> str | None:
@@ -447,6 +449,8 @@ class ExecutionLifecycle:
             self._secondary.append(blocker)
 
     def _persist_live_event(self, event: CmdcEvent) -> None:
+        if event.session_id:
+            self._live_session_id = event.session_id
         sequences = append_event_records(self.record, (event,))
         if len(sequences) != 1:
             raise RunRecordError("live Cmdc event was not persisted")
@@ -469,6 +473,7 @@ class ExecutionLifecycle:
         self._recovery_expected_session = None
         self._recovery_trigger = "explicit-resume"
         self._live_event_count = 0
+        self._live_session_id = None
 
     def start(self) -> RunResult:
         self._reset()
@@ -485,13 +490,19 @@ class ExecutionLifecycle:
         except _LifecycleFault as error:
             self._add_blocker(error.code, error.phase, error.message)
             return self._finish_without_process()
+        except (ProcessCallbackError, ProcessSupervisionError) as error:
+            return self._finish_process_error(error)
         except KeyboardInterrupt as error:
             self._add_blocker(
                 "INTERRUPTED",
                 "SPAWN",
                 str(error) or "cmdc-local execution was interrupted",
             )
-            return self._finish_without_process()
+            return self._finish_without_process(
+                session_id=self._live_session_id,
+                cleanup_verified=False,
+                drain_verified=False,
+            )
         except Exception as error:  # noqa: BLE001 - convert adapter failures to a stable Result
             self._add_blocker(
                 "RUNTIME_FAILED",
@@ -532,13 +543,19 @@ class ExecutionLifecycle:
         self._transition(_LifecycleState.SPAWN)
         try:
             outcome = self.cmdc.resume(session_id, request)
+        except (ProcessCallbackError, ProcessSupervisionError) as error:
+            return self._finish_process_error(error)
         except KeyboardInterrupt as error:
             self._add_blocker(
                 "INTERRUPTED",
                 "SPAWN",
                 str(error) or "cmdc-local Recovery was interrupted",
             )
-            return self._finish_without_process()
+            return self._finish_without_process(
+                session_id=self._live_session_id or self._recovery_expected_session,
+                cleanup_verified=False,
+                drain_verified=False,
+            )
         except Exception as error:  # noqa: BLE001 - convert adapter failures to a stable Result
             self._add_blocker(
                 "RUNTIME_FAILED",
@@ -610,6 +627,12 @@ class ExecutionLifecycle:
                 "RESUME_INVARIANT_FAILED",
                 "PREFLIGHT",
                 f"primary blocker {primary_code or '<none>'} is not resumable",
+            )
+        if not prior.cleanup_verified:
+            raise _LifecycleFault(
+                "RESUME_INVARIANT_FAILED",
+                "PREFLIGHT",
+                "Recovery requires verified process cleanup and output drain",
             )
         attempt = len(prior.recoveries)
         if attempt >= contract.execution.max_resumes:
@@ -1006,7 +1029,54 @@ class ExecutionLifecycle:
             event_sink=self._persist_live_event,
         )
 
-    def _finish_without_process(self) -> RunResult:
+    def _finish_process_error(
+        self, error: ProcessCallbackError | ProcessSupervisionError
+    ) -> RunResult:
+        process = error.outcome
+        if process.primary_failure is not None:
+            failure = process.primary_failure
+            self._add_blocker(failure.code, failure.phase, failure.message)
+        for failure in process.secondary_failures:
+            self._add_blocker(failure.code, failure.phase, failure.message)
+        session_id = self._session_id_from_process_output(process)
+        return self._finish_without_process(
+            session_id=session_id,
+            cleanup_verified=process.cleanup_verified,
+            drain_verified=process.drain_verified,
+        )
+
+    @staticmethod
+    def _session_id_from_process_output(process: Any) -> str | None:
+        try:
+            translated = CmdcLocal._translate(process)
+        except Exception:  # noqa: BLE001 - diagnostic recovery must remain fail-closed
+            return None
+        return getattr(translated, "session_id", None)
+
+    def _persist_session_checkpoint(self, session_id: str, *, state: str) -> None:
+        fingerprint = self._capture_fingerprint(
+            self.record.contract.workspace.repo_root
+        )
+        self._checkpoint(
+            {
+                "kind": "session",
+                "state": state,
+                "session_id": session_id,
+                "head": fingerprint.get("head"),
+                "branch": fingerprint.get("branch"),
+                "workspace_fingerprint": fingerprint,
+            }
+        )
+        if self._recovery_expected_session is not None:
+            self._current_fingerprint = fingerprint
+
+    def _finish_without_process(
+        self,
+        *,
+        session_id: str | None = None,
+        cleanup_verified: bool = True,
+        drain_verified: bool = True,
+    ) -> RunResult:
         if self._state in {
             _LifecycleState.PREFLIGHT,
             _LifecycleState.SPAWN,
@@ -1015,15 +1085,35 @@ class ExecutionLifecycle:
             self._transition(_LifecycleState.TERMINATING)
         if self._state is _LifecycleState.TERMINATING:
             self._transition(_LifecycleState.CLEANUP_VERIFICATION)
+        effective_session_id = (
+            session_id or self._live_session_id or self._recovery_expected_session
+        )
+        if effective_session_id:
+            self._persist_session_checkpoint(
+                effective_session_id,
+                state="INTERRUPTED",
+            )
+        if not cleanup_verified:
+            self._add_blocker(
+                "CLEANUP_UNVERIFIED",
+                "CLEANUP_VERIFICATION",
+                "process cleanup was not verified",
+            )
+        if not drain_verified:
+            self._add_blocker(
+                "DRAIN_UNVERIFIED",
+                "CLEANUP_VERIFICATION",
+                "process output drain was not verified",
+            )
         return self._write_result(
             status=RunStatus.BLOCKED,
-            session_id=None,
+            session_id=effective_session_id,
             tests=(),
             scope_valid=False,
             violating_paths=(),
             report_valid=False,
             test_evidence_valid=False,
-            cleanup_verified=True,
+            cleanup_verified=bool(cleanup_verified and drain_verified),
         )
 
     def _finish_outcome(self, outcome: Any) -> RunResult:
@@ -1144,21 +1234,8 @@ class ExecutionLifecycle:
             }
         )
         if getattr(outcome, "session_id", None):
-            fingerprint = self._capture_fingerprint(
-                self.record.contract.workspace.repo_root
-            )
-            self._checkpoint(
-                {
-                    "kind": "session",
-                    "state": "RUNNING",
-                    "session_id": outcome.session_id,
-                    "head": fingerprint.get("head"),
-                    "branch": fingerprint.get("branch"),
-                    "workspace_fingerprint": fingerprint,
-                }
-            )
-            if self._recovery_expected_session is not None:
-                self._current_fingerprint = fingerprint
+            self._live_session_id = outcome.session_id
+            self._persist_session_checkpoint(outcome.session_id, state="RUNNING")
 
     def _process_blockers(self, outcome: Any) -> bool:
         process = outcome.process

@@ -175,6 +175,13 @@ def _text_value(value: object) -> str:
         return str(value)
 
 
+def _bounded_diagnostic(value: object, limit: int = 128) -> str:
+    text = value if isinstance(value, str) else str(value)
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "..."
+
+
 class CmdcLocal:
     """Concrete local Command Code launcher and NDJSON protocol adapter."""
 
@@ -615,15 +622,50 @@ class CmdcLocal:
         )
         command = self.build_start_command(request)
         outcome = self.start(request)
+        process = outcome.process
+        process_status = _bounded_diagnostic(
+            getattr(process.status, "value", process.status)
+        )
+        primary_code = (
+            process.primary_failure.code
+            if process.primary_failure is not None
+            else "<none>"
+        )
+        secondary_codes = tuple(
+            failure.code for failure in process.secondary_failures
+        )
+        if (
+            process_status != "EXITED"
+            or process.returncode != 0
+            or process.primary_failure is not None
+            or secondary_codes
+            or not process.cleanup_verified
+            or not process.drain_verified
+        ):
+            bounded_secondary = ", ".join(
+                _bounded_diagnostic(code, 64) for code in secondary_codes[:8]
+            ) or "<none>"
+            raise CmdcLocalError(
+                "SMOKE_FAILED",
+                "smoke process did not complete cleanly; "
+                f"process_status={process_status}; returncode={process.returncode}; "
+                f"primary_failure={_bounded_diagnostic(primary_code)}; "
+                f"secondary_failures={bounded_secondary}; "
+                f"cleanup_verified={process.cleanup_verified}; "
+                f"drain_verified={process.drain_verified}; remediation: verify the "
+                "installed Command Code launcher and rerun the isolated smoke probe.",
+            )
         hook_seen = self._hook_seen(outcome)
         if require_mod_hook and not hook_seen:
             # Fail closed with bounded, actionable evidence: the stable legacy
             # marker sentence, the exact expected protocol shape, the bounded
             # session/process/event facts, and the remediation. The full child
             # output, prompt, or arbitrary event payloads are never included.
-            session_id = outcome.session_id or "null"
-            status = getattr(outcome.process.status, "value", outcome.process.status)
-            observed_types = tuple(event.type for event in outcome.events)
+            session_id = _bounded_diagnostic(outcome.session_id or "null")
+            status = _bounded_diagnostic(
+                getattr(outcome.process.status, "value", outcome.process.status)
+            )
+            observed_types = tuple(_bounded_diagnostic(event.type, 64) for event in outcome.events)
             bounded_events = ", ".join(observed_types[:8]) or "<none>"
             raise CmdcLocalError(
                 "MOD_HOOK_UNVERIFIED",

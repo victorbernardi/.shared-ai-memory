@@ -273,12 +273,16 @@ def test_activity_clock_extends_stall_deadline_until_external_activity_stops(
 def test_callback_exceptions_are_not_swallowed_and_process_is_cleaned_up(
     tmp_path: Path,
 ) -> None:
-    from sdd_cmdc_opencode.process_supervisor import ProcessRequest, run_process
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessCallbackError,
+        ProcessRequest,
+        run_process,
+    )
 
     def fail_on_output(_event: object) -> None:
         raise RuntimeError("callback failed")
 
-    with pytest.raises(RuntimeError, match="callback failed"):
+    with pytest.raises(ProcessCallbackError, match="callback failed") as error:
         run_process(
             ProcessRequest(
                 command=fixture_command("--wait", "10"),
@@ -286,6 +290,83 @@ def test_callback_exceptions_are_not_swallowed_and_process_is_cleaned_up(
             ),
             on_output=fail_on_output,
         )
+
+    assert error.value.outcome.cleanup_verified is True
+    assert error.value.outcome.drain_verified is True
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "PROCESS_OUTPUT_CALLBACK_FAILED"
+
+
+def test_keyboard_interrupt_callback_preserves_interrupt_and_cleanup_evidence(
+    tmp_path: Path,
+) -> None:
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessCallbackError,
+        ProcessRequest,
+        ProcessStatus,
+        run_process,
+    )
+
+    def interrupt_on_output(_event: object) -> None:
+        raise KeyboardInterrupt("callback interrupted")
+
+    with pytest.raises(ProcessCallbackError, match="callback interrupted") as error:
+        run_process(
+            ProcessRequest(
+                command=fixture_command("--wait", "10"),
+                cwd=tmp_path,
+            ),
+            on_output=interrupt_on_output,
+        )
+
+    assert error.value.outcome.status is ProcessStatus.INTERRUPTED
+    assert error.value.outcome.cleanup_verified is True
+    assert error.value.outcome.drain_verified is True
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "INTERRUPTED"
+
+
+def test_callback_failure_reports_unverified_cleanup_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sdd_cmdc_opencode import process_supervisor as supervisor
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessCallbackError,
+        ProcessFailure,
+        ProcessRequest,
+        run_process,
+    )
+
+    cleanup_failure = ProcessFailure(
+        code="PROCESS_TREE_TERMINATION_FAILED",
+        phase="cleanup",
+        message="synthetic cleanup failure",
+    )
+    monkeypatch.setattr(
+        supervisor,
+        "_terminate_contained",
+        lambda _process, _pid, _containment, _job=None: (
+            False,
+            (cleanup_failure,),
+        ),
+    )
+
+    def fail_on_output(_event: object) -> None:
+        raise RuntimeError("callback failed")
+
+    with pytest.raises(ProcessCallbackError) as error:
+        run_process(
+            ProcessRequest(
+                command=fixture_command("--wait", "10"),
+                cwd=tmp_path,
+            ),
+            on_output=fail_on_output,
+        )
+
+    assert error.value.outcome.cleanup_verified is False
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "PROCESS_OUTPUT_CALLBACK_FAILED"
+    assert cleanup_failure in error.value.outcome.secondary_failures
 
 
 @pytest.mark.skipif(os.name == "nt", reason="native Windows Job coverage is Task 2")

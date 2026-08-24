@@ -96,6 +96,9 @@ with a successful tool result, never from agent prose or a Markdown
 claim. The external plan and task-brief provenance remain tied to the recorded
 repository, branch, commit, paths, and SHA-256. There is no generic allow-dirty Recovery bypass: pre-existing changes
 are accepted only when they match the recorded baseline and remain untouched.
+An `INTERRUPTED` result created while streaming events is resumable only when
+the Run Record contains the same Session checkpoint and both cleanup and output
+drain are verified; an interruption without that evidence remains fail-closed.
 
 The legacy flat adapter remains available for compatibility and retains its
 legacy report-marker parsing only for old calls. New governed work must use
@@ -332,7 +335,8 @@ conflicts that only emerge from implementation.
   temporary Git repository, bounded `--max-turns 2`, JSON output, a verified
   Mod-hook marker, `cleanup_verified`, and `drain_verified`. A skipped real
   gate is reported as unavailable operational evidence, not as success. A
-  failed smoke verification raises `MOD_HOOK_UNVERIFIED` with the stable
+  failed hook verification raises `MOD_HOOK_UNVERIFIED`; a smoke process that
+  does not exit cleanly raises `SMOKE_FAILED`. Both paths include the stable
   marker sentence, the exact expected protocol shape (`tool_hook_blocked`
   with `hookOutput=SDD_CMDC_MOD_HOOK_HANDSHAKE`), bounded
   session/process/event evidence, and the remediation: verify the installed

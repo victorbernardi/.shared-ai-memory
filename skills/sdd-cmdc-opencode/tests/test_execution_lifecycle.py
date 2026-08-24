@@ -10,6 +10,7 @@ import pytest
 
 from sdd_cmdc_opencode.cmdc_local import CmdcEvent, CmdcOutcome
 from sdd_cmdc_opencode.process_supervisor import (
+    ProcessCallbackError,
     ProcessFailure,
     ProcessOutcome,
     ProcessStatus,
@@ -197,6 +198,7 @@ def _event(
     command: str | None,
     stdout: str = "",
     *,
+    session_id: str | None = None,
     exit_code: int | None = 0,
     event_type: str = "tool_result",
     tool: str | None = "shell_command",
@@ -205,6 +207,7 @@ def _event(
 ) -> CmdcEvent:
     return CmdcEvent(
         type=event_type,
+        session_id=session_id,
         turn_number=turn,
         tool=tool,
         command=command,
@@ -327,8 +330,8 @@ def test_lifecycle_wires_live_event_sink_before_cmdc_finishes(tmp_path: Path) ->
 
 
 def test_lifecycle_persists_live_event_when_cmdc_is_interrupted(tmp_path: Path) -> None:
-    record, _, _ = _run_fixture(tmp_path)
-    event = _event("write_file", turn=1)
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+    event = _event("write_file", session_id="session-123", turn=1)
 
     class InterruptingCmdc(_FakeCmdc):
         def start(self, request: object) -> object:
@@ -341,19 +344,42 @@ def test_lifecycle_persists_live_event_when_cmdc_is_interrupted(tmp_path: Path) 
     assert result.status is RunStatus.BLOCKED
     assert result.primary_blocker is not None
     assert result.primary_blocker.code == "INTERRUPTED"
+    assert result.session_id == "session-123"
+    assert result.cleanup_verified is False
     assert record.read_result() == result
     assert [
         item["command"]
         for item in record.read_events()
         if item["type"] == "tool_result"
     ] == ["write_file"]
+    session_checkpoints = [
+        item for item in record.read_checkpoints() if item.get("kind") == "session"
+    ]
+    assert session_checkpoints[-1]["session_id"] == "session-123"
+    assert session_checkpoints[-1]["state"] == "INTERRUPTED"
+
+    resume_cmdc = InterruptingCmdc(None)
+    interrupted = ExecutionLifecycle(record, resume_cmdc)
+    resume_cmdc.resume_outcome = CmdcOutcome(
+        process=_process(),
+        subtype="success",
+        stop_reason="completed",
+        session_id="session-123",
+        final_text="resume attempted",
+        events=(),
+    )
+    resumed = interrupted.resume()
+
+    assert resumed.primary_blocker is not None
+    assert resumed.primary_blocker.code == "RESUME_INVARIANT_FAILED"
+    assert resume_cmdc.resume_calls == []
 
 
 def test_lifecycle_persists_result_when_live_event_persistence_is_interrupted(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     record, _, _ = _run_fixture(tmp_path)
-    event = _event("write_file", turn=1)
+    event = _event("write_file", session_id="session-123", turn=1)
 
     def interrupted_append(*_args: object, **_kwargs: object) -> tuple[int, ...]:
         raise KeyboardInterrupt("simulated event persistence interruption")
@@ -374,9 +400,69 @@ def test_lifecycle_persists_result_when_live_event_persistence_is_interrupted(
     assert result.status is RunStatus.BLOCKED
     assert result.primary_blocker is not None
     assert result.primary_blocker.code == "INTERRUPTED"
-    assert result.cleanup_verified is True
+    assert result.session_id == "session-123"
+    assert result.cleanup_verified is False
     assert record.read_result() == result
     assert record.read_checkpoints()
+
+
+def test_lifecycle_recovers_terminal_session_after_verified_callback_interrupt(
+    tmp_path: Path,
+) -> None:
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+    event = _event("write_file", turn=1)
+    process = ProcessOutcome(
+        pid=123,
+        returncode=-2,
+        stdout=(
+            '{"type":"result","subtype":"error",'
+            '"stopReason":"interrupted","sessionId":"session-123",'
+            '"result":""}\n'
+        ),
+        stderr="",
+        status=ProcessStatus.INTERRUPTED,
+        containment="test",
+        cleanup_verified=True,
+        drain_verified=True,
+        primary_failure=ProcessFailure(
+            "INTERRUPTED", "callback", "callback interrupted"
+        ),
+        secondary_failures=(),
+    )
+    callback_error = ProcessCallbackError(
+        KeyboardInterrupt("callback interrupted"), process
+    )
+
+    class InterruptingSupervisorCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            raise callback_error
+
+    cmdc = InterruptingSupervisorCmdc(None)
+    result = ExecutionLifecycle(record, cmdc).start()
+
+    assert result.status is RunStatus.BLOCKED
+    assert result.session_id == "session-123"
+    assert result.cleanup_verified is True
+    assert any(
+        checkpoint.get("session_id") == "session-123"
+        for checkpoint in record.read_checkpoints()
+    )
+
+    cmdc.resume_outcome = CmdcOutcome(
+        process=_process(),
+        subtype="success",
+        stop_reason="completed",
+        session_id="session-123",
+        final_text="resume attempted",
+        events=(),
+    )
+    resumed = ExecutionLifecycle(record, cmdc).resume()
+
+    assert resumed.primary_blocker is not None
+    assert resumed.primary_blocker.code == "INTERRUPTED"
+    assert [session for session, _ in cmdc.resume_calls] == ["session-123"]
 
 
 def test_post_contract_workspace_change_fails_closed_before_launcher(

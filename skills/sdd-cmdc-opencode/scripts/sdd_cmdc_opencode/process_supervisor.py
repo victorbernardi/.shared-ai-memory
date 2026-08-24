@@ -48,6 +48,28 @@ class ProcessFailure:
     message: str
 
 
+class ProcessCallbackError(RuntimeError):
+    """A stream callback failed after supervision collected process evidence."""
+
+    def __init__(
+        self, callback_error: BaseException, outcome: "ProcessOutcome"
+    ) -> None:
+        self.callback_error = callback_error
+        self.outcome = outcome
+        super().__init__(str(callback_error) or callback_error.__class__.__name__)
+
+
+class ProcessSupervisionError(RuntimeError):
+    """A supervisor failure retained process cleanup and drain evidence."""
+
+    def __init__(
+        self, supervision_error: BaseException, outcome: "ProcessOutcome"
+    ) -> None:
+        self.supervision_error = supervision_error
+        self.outcome = outcome
+        super().__init__(str(supervision_error) or supervision_error.__class__.__name__)
+
+
 @dataclass(frozen=True)
 class ProcessRequest:
     command: tuple[str, ...]
@@ -656,7 +678,8 @@ def run_process(
     cleanup_requested = False
     cleanup_verified = False
     callback_error: BaseException | None = None
-    callback_traceback = None
+    supervision_error: BaseException | None = None
+    supervision_traceback = None
     callback = on_output
     last_activity = started
     activity_error_reported = False
@@ -697,7 +720,7 @@ def run_process(
                 )
 
     def dispatch_pending(timeout: float = 0) -> None:
-        nonlocal last_activity, callback, callback_error, callback_traceback
+        nonlocal last_activity, callback, callback_error
         nonlocal stdout_dispatched
 
         def fill_pending(wait: float) -> None:
@@ -768,7 +791,6 @@ def run_process(
                 callback(event)
             except BaseException as exc:
                 callback_error = exc
-                callback_traceback = exc.__traceback__
                 callback = None
 
     def refresh_external_activity() -> None:
@@ -863,8 +885,8 @@ def run_process(
         )
         cleanup_requested = True
     except BaseException as exc:
-        callback_error = exc
-        callback_traceback = exc.__traceback__
+        supervision_error = exc
+        supervision_traceback = exc.__traceback__
         cleanup_requested = True
 
     try:
@@ -969,10 +991,35 @@ def run_process(
             )
         )
 
-    if callback_error is not None:
-        raise callback_error.with_traceback(callback_traceback)
+    if supervision_error is not None:
+        record_execution_failure(
+            ProcessFailure(
+                code="PROCESS_SUPERVISION_FAILED",
+                phase="supervision",
+                message=(
+                    str(supervision_error)
+                    or f"supervisor raised {supervision_error.__class__.__name__}"
+                ),
+            )
+        )
+    elif callback_error is not None:
+        callback_failure = ProcessFailure(
+            code=(
+                "INTERRUPTED"
+                if isinstance(callback_error, KeyboardInterrupt)
+                else "PROCESS_OUTPUT_CALLBACK_FAILED"
+            ),
+            phase="callback",
+            message=(
+                str(callback_error)
+                or f"output callback raised {callback_error.__class__.__name__}"
+            ),
+        )
+        record_execution_failure(callback_failure)
+        if isinstance(callback_error, KeyboardInterrupt):
+            status = ProcessStatus.INTERRUPTED
 
-    return ProcessOutcome(
+    outcome = ProcessOutcome(
         pid=None if status is ProcessStatus.SPAWN_FAILED else pid,
         returncode=returncode,
         stdout="".join(stdout_parts),
@@ -984,3 +1031,10 @@ def run_process(
         primary_failure=primary_failure,
         secondary_failures=tuple(secondary_failures),
     )
+    if supervision_error is not None:
+        raise ProcessSupervisionError(
+            supervision_error, outcome
+        ).with_traceback(supervision_traceback) from supervision_error
+    if callback_error is not None:
+        raise ProcessCallbackError(callback_error, outcome) from callback_error
+    return outcome
