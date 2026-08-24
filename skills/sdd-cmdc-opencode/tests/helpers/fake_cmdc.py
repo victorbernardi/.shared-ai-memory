@@ -68,7 +68,7 @@ def main() -> int:
             }
         )
 
-    if _value(argv, "--mod"):
+    if variant != "no_hook" and _value(argv, "--mod"):
         _emit(
             {
                 "type": "event",

@@ -290,10 +290,13 @@ conflicts that only emerge from implementation.
 - On `main`/`master` the adapter requires both `--allow-protected-branch`
   and a ledger entry containing `ALLOW_PROTECTED_BRANCH`; the adapter option
   alone is never enough.
-- Normal invocations omit `--yolo`; only the explicit `--allow-cmdc-yolo`
-  adapter option adds it. Name the resulting mode (`normal` or `yolo`) in
-  diagnostics and report context so the orchestrator sees how Command Code
-  was invoked.
+- The launcher always runs with `--yolo`: CMDc writes are part of the
+  governed worker contract enforced by the Run scope Mod. The preflight
+  Mod-hook probe stays harmless and separately scoped by its temporary
+  workspace and the blocking Mod hook. The legacy `--allow-cmdc-yolo` option
+  remains accepted as a no-op compatibility flag and can never disable the
+  launcher mode. Diagnostics name the resulting mode (`yolo`) so the
+  orchestrator sees how Command Code was invoked.
 - The report/checkpoint context carries the preflight snapshot, and failures
   remain fail-closed: a boundary failure blocks before any child process,
   and a timed-out child never claims success.
@@ -328,7 +331,12 @@ conflicts that only emerge from implementation.
   smoke. Set `SDD_CMDC_REAL_SMOKE=1` only for the real gate; it requires a
   temporary Git repository, bounded `--max-turns 2`, JSON output, a verified
   Mod-hook marker, `cleanup_verified`, and `drain_verified`. A skipped real
-  gate is reported as unavailable operational evidence, not as success.
+  gate is reported as unavailable operational evidence, not as success. A
+  failed smoke verification raises `MOD_HOOK_UNVERIFIED` with the stable
+  marker sentence, the exact expected protocol shape (`tool_hook_blocked`
+  with `hookOutput=SDD_CMDC_MOD_HOOK_HANDSHAKE`), bounded
+  session/process/event evidence, and the remediation: verify the installed
+  Command Code launcher and Mod support, then rerun the isolated smoke probe.
 
 ### Reviewer backend
 

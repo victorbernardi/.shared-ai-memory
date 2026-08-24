@@ -46,10 +46,15 @@ def test_direct_launcher_builds_stable_start_arguments(tmp_path: Path) -> None:
         "12",
         "--output-format",
         "json",
+        "--yolo",
         "--no-skills",
         "--trust",
         "--skip-onboarding",
     )
+    # Every generated command carries exactly one --yolo: CMDc writes are part
+    # of the governed worker contract, so the default request cannot downgrade
+    # to a weaker launcher mode.
+    assert command.count("--yolo") == 1
 
 
 def test_yolo_mod_and_resume_are_explicit(tmp_path: Path) -> None:
@@ -62,9 +67,11 @@ def test_yolo_mod_and_resume_are_explicit(tmp_path: Path) -> None:
     resume = local.build_resume_command("session-123", request(tmp_path))
 
     assert "--yolo" in start
+    assert start.count("--yolo") == 1
     assert start[-2:] == ("--mod", str(mod.resolve()))
     assert "--continue" not in resume
     assert resume[2:5] == ("-p", "--resume", "session-123")
+    assert resume.count("--yolo") == 1
 
 
 @pytest.mark.parametrize("suffix", [".exe", ".cmd", ".bat", ".ps1"])
@@ -194,6 +201,25 @@ def test_fake_smoke_initializes_git_and_verifies_mod_hook(tmp_path: Path) -> Non
     assert preflight.smoke.process.drain_verified is True
     assert "--output-format" in preflight.command
     assert "2" in preflight.command
+    # The worker mode is unconditional --yolo; the probe itself stays harmless
+    # and separately scoped by its temporary workspace and blocking Mod hook.
+    assert "--yolo" in preflight.command
+
+
+def test_smoke_failure_reports_actionable_hook_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A completed smoke that omits the protocolar hook event fails closed with
+    bounded, actionable evidence instead of only the legacy marker sentence."""
+    monkeypatch.setenv("FAKE_CMDC_VARIANT", "no_hook")
+    local = CmdcLocal(str(FAKE))
+    with pytest.raises(CmdcLocalError) as error:
+        local.smoke_test(tmp_path, require_mod_hook=True)
+    assert error.value.code == "MOD_HOOK_UNVERIFIED"
+    assert "smoke did not emit SDD_CMDC_MOD_HOOK_OK" in str(error.value)
+    assert "expected tool_hook_blocked" in str(error.value)
+    assert "session_id=session-123" in str(error.value)
+    assert "remediation" in str(error.value).lower()
 
 
 def test_real_smoke_allows_model_startup_burst_but_stays_bounded(
@@ -481,12 +507,12 @@ def test_scope_mod_environment_is_forwarded_to_start_and_resume(
     assert len(captured) == 2
     for process_request in captured:
         assert process_request.env is not None
-        forwarded = {
-            key: process_request.env[key]
-            for key in process_request.env
-            if key.startswith("SDD_CMDC_SCOPE_")
-        }
-        assert forwarded == scope_env
+        # Assert every requested scope variable is forwarded with its exact
+        # value. The host process may itself carry foreign SDD_CMDC_SCOPE_*
+        # variables (the governed Run environment), so the comparison only
+        # covers the request's own scope keys.
+        for key, value in scope_env.items():
+            assert process_request.env.get(key) == value
 
 
 def test_scope_mod_environment_rejects_unexpected_scope_variables(tmp_path: Path) -> None:

@@ -274,6 +274,12 @@ class RunContract:
             )
         no_skills = _bool(execution_mapping["no_skills"], "execution.no_skills")
         yolo = _bool(execution_mapping["yolo"], "execution.yolo")
+        if not yolo:
+            raise RunRecordError(
+                "execution.yolo cannot be false; the governed launcher always "
+                "runs with --yolo because CMDc writes are part of the worker "
+                "contract"
+            )
 
         success_mapping = _mapping(value["success"], "success")
         _exact_keys(

@@ -538,6 +538,20 @@ def test_skill_documents_review_only_command_with_historical_fixture() -> None:
     assert "--timeout-seconds 1800" in content
 
 
+def test_skill_ignores_python_bytecode_generated_by_adapter() -> None:
+    gitignore = SKILL / ".gitignore"
+    assert gitignore.is_file(), "missing skill-local .gitignore"
+    content = gitignore.read_text(encoding="utf-8")
+    assert "__pycache__/" in content, (
+        "the skill-local .gitignore must ignore __pycache__ directories so "
+        "importing the adapter cannot dirty the clean source checkout"
+    )
+    assert "*.pyc" in content and "*.pyo" in content, (
+        "the skill-local .gitignore must ignore Python bytecode files so the "
+        "clean source checkout keeps passing its own Git preflight"
+    )
+
+
 def test_fixture_range_is_not_hardcoded_in_scripts() -> None:
     # The fixture range appears in SKILL.md as documentation only; no script
     # may embed 0f3d86c/d5eddb8 as a default or constant.

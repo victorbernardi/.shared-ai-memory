@@ -111,9 +111,9 @@ def build_command(
 ) -> list[str]:
     """Build the Command Code invocation before any platform launcher is added.
 
-    The explicit --allow-cmdc-yolo adapter option is the only gate that adds
-    the unrestricted --yolo flag; the default command keeps the normal
-    permission boundary and never assumes consent.
+    The launcher always appends exactly one ``--yolo``: CMDc writes are part
+    of the governed worker contract. The preserved ``--allow-cmdc-yolo``
+    option is a no-op compatibility flag and can never disable the mode.
     """
     command = [
         *CmdcLocal._launcher_prefix(cmd_path),
@@ -124,9 +124,8 @@ def build_command(
         str(max_turns),
         "--output-format",
         "json",
+        "--yolo",
     ]
-    if allow_cmdc_yolo:
-        command.append("--yolo")
     command.extend(("--no-skills", "--trust", "--skip-onboarding"))
     return command
 
@@ -294,7 +293,10 @@ def validate_execution_boundary(
     explicit mode consent. The initial Git snapshot preserves every
     ``git status --short`` line verbatim and is never erased or normalized.
     """
-    mode = "yolo" if allow_cmdc_yolo else "normal"
+    # The launcher mode is unconditional --yolo: CMDc writes are part of the
+    # governed worker contract. The preserved --allow-cmdc-yolo option is a
+    # no-op compatibility flag and can never downgrade the mode.
+    mode = "yolo"
 
     # 1. Canonical repository root; the cwd must be a real directory that is
     #    a descendant of the repository root.
@@ -445,7 +447,7 @@ def validate_execution_boundary(
         "head": initial_git_state["head"],
         "dirty": dirty,
         "mode": mode,
-        "yolo_consent": allow_cmdc_yolo,
+        "yolo_consent": True,
         "initial_git_state": initial_git_state,
     }
 
@@ -1009,7 +1011,7 @@ def _write_checkpoint(
     last_command: str = "",
     last_output: str = "",
     preflight_snapshot: dict[str, object] | None = None,
-    mode: str = "normal",
+    mode: str = "yolo",
 ) -> None:
     """Append one JSONL checkpoint record; the snapshot never claims COMPLETE."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -1042,7 +1044,7 @@ def _heartbeat_loop(
     started_monotonic: float | None = None,
     activity_state: dict[str, object] | None = None,
     preflight_snapshot: dict[str, object] | None = None,
-    mode: str = "normal",
+    mode: str = "yolo",
 ) -> None:
     started_monotonic = started_monotonic or time.monotonic()
     while not stop_event.wait(interval):
@@ -1159,7 +1161,9 @@ def run_implementer(
     """
     cwd = cwd.expanduser().resolve()
     prompt_file = prompt_file.expanduser().resolve()
-    mode = "yolo" if allow_cmdc_yolo else "normal"
+    # The launcher mode is unconditional --yolo; the preserved
+    # --allow-cmdc-yolo option is a no-op compatibility flag.
+    mode = "yolo"
     preflight_snapshot: dict[str, object] | None = None
     if plan_file is None:
         # Fail closed: without a supplied plan there is no execution boundary
@@ -1496,7 +1500,7 @@ def run_implementer(
         # A timeout is never success. A diff (or commits) means partial work
         # exists and must be preserved deterministically; the diagnostic keeps
         # the explicit mode so the orchestrator can see how CMDc was invoked.
-        watchdog_mode = "yolo" if allow_cmdc_yolo else "normal"
+        watchdog_mode = "yolo"
         # Fail closed before any recovery: a live CMDc tree could still mutate
         # the workspace, so it must never be followed by a recovery attempt.
         if not watchdog_cleanup_verified:
@@ -2219,7 +2223,9 @@ def _normalize_flat_contract(
             progress_deadline_turns=default_progress_deadline(max_turns),
             max_resumes=max(0, int(recovery_max_turns)),
             no_skills=True,
-            yolo=bool(allow_cmdc_yolo),
+            # The launcher mode is unconditional --yolo; the preserved
+            # --allow-cmdc-yolo option is a no-op compatibility flag.
+            yolo=True,
         ),
         success=SuccessPolicy(
             require_commit=not allow_no_change,
@@ -2272,7 +2278,7 @@ def run_flat_compat(
     same repository/plan/branch/dirty/deployed boundary used by the legacy
     adapter API runs before the derived brief or Contract is written.
     """
-    mode = "yolo" if allow_cmdc_yolo else "normal"
+    mode = "yolo"
     preflight = validate_execution_boundary(
         cwd.expanduser().resolve(),
         plan_file.expanduser().resolve(),
@@ -2465,9 +2471,9 @@ def parse_args() -> argparse.Namespace:
         "--allow-cmdc-yolo",
         action="store_true",
         default=False,
-        help="add --yolo to the Command Code invocation only when this "
-        "explicit consent is supplied; the default keeps the normal "
-        "permission boundary",
+        help="accepted as a no-op compatibility flag; the launcher always uses "
+        "--yolo because CMDc writes are part of the governed worker contract, "
+        "and this option can never disable the mode",
     )
     parser.add_argument(
         "--ledger-file",

@@ -323,8 +323,12 @@ class CmdcLocal:
                 "json",
             )
         )
-        if request.allow_yolo:
-            command.append("--yolo")
+        # The launcher always runs --yolo: CMDc writes are part of the
+        # governed worker contract enforced by the Run scope Mod. The
+        # preflight probe stays harmless and separately scoped by its
+        # temporary workspace and blocking Mod hook; request.allow_yolo is
+        # retained only for interface compatibility and can never disable it.
+        command.append("--yolo")
         command.extend(COMMAND_FLAGS)
         mod_path = self._validate_mod(request.mod_path)
         if mod_path is not None:
@@ -563,9 +567,22 @@ class CmdcLocal:
         outcome = self.start(request)
         hook_seen = self._hook_seen(outcome)
         if require_mod_hook and not hook_seen:
+            # Fail closed with bounded, actionable evidence: the stable legacy
+            # marker sentence, the exact expected protocol shape, the bounded
+            # session/process/event facts, and the remediation. The full child
+            # output, prompt, or arbitrary event payloads are never included.
+            session_id = outcome.session_id or "null"
+            status = getattr(outcome.process.status, "value", outcome.process.status)
+            observed_types = tuple(event.type for event in outcome.events)
+            bounded_events = ", ".join(observed_types[:8]) or "<none>"
             raise CmdcLocalError(
                 "MOD_HOOK_UNVERIFIED",
-                f"smoke did not emit {MOD_HOOK_MARKER}",
+                f"smoke did not emit {MOD_HOOK_MARKER}; "
+                f"expected tool_hook_blocked with hookOutput={MOD_HOOK_HANDSHAKE}; "
+                f"session_id={session_id}; process_status={status}; "
+                f"observed_event_types={bounded_events}; remediation: verify the "
+                "installed Command Code launcher and Mod support, then rerun the "
+                "isolated smoke probe.",
             )
         return CmdcPreflight(
             launcher=self.resolve_launcher(),
