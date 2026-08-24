@@ -1,3 +1,0 @@
-{
-  "output": "Output: Remove-Item : Não é possível localizar um parâmetro posicional que aceite o argumento '_raw/0001-padroes-qualidade-m6.md'.\r\nNo linha:1 caractere:1\r\n+ rm _raw/0001-bypass-motor-m3.md _raw/0001-padroes-qualidade-m6.md _ra ...\r\n+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : InvalidArgument: (:) [Remove-Item], ParameterBindingException\r\n    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.RemoveItemCommand\nExit Code: 1\nProcess Group PGID: 27136"
-}

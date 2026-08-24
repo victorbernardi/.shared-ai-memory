@@ -1,3 +1,0 @@
-{
-  "output": "Output: Path                                                                                      \r\n----                                                                                      \r\nC:\\Projetos\\Inova\\pipelines\\potencial-clientes\\03_Potencial\\sandbox_horimetro_staleness.py\r\nC:\\Projetos\\Inova\\pipelines\\potencial-clientes\\03_Potencial\\transform.py\nProcess Group PGID: 3692"
-}

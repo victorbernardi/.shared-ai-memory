@@ -1,6 +1,0 @@
-- [2026-05-16] INGEST source=\"docs/business/BRD-20260506-motor-cevap.md\" pages_updated=0 pages_created=1 mode=append
-- [2026-05-16] INGEST source=\"docs/plans/active/2026-05-07-ecosystem-reorganization.md\" pages_updated=0 pages_created=1 mode=append
-- [2026-05-16] INGEST source=\"scratch/draft/plano_executivo_kpis_ia_pos_venda_v2_consolidado.md\" pages_updated=0 pages_created=1 mode=append
-- [2026-05-16] INGEST source=\"scratch/draft/Conversa.md\" pages_updated=0 pages_created=1 mode=append
-- [2026-05-16] INGEST source=\"docs/plans/plan_v1_encoding_eradication.md\" pages_updated=0 pages_created=1 mode=append
-- [2026-05-16] INGEST source=\"docs/plans/plan_v1_inova_path_migration.md\" pages_updated=0 pages_created=1 mode=append

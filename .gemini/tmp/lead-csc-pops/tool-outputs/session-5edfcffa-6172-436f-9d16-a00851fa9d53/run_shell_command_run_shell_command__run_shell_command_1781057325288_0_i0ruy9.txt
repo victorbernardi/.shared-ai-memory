@@ -1,3 +1,0 @@
-{
-  "output": "Output: Diretório: C:\\Projetos\\In\r\n    ova\\projects\\lead-csc-pop\r\n    s\\data\\output\r\n\r\n\r\nMode            LastWriteTime\r\n----            -------------\r\n-a----   09/06/2026     18:52\nProcess Group PGID: 15244"
-}

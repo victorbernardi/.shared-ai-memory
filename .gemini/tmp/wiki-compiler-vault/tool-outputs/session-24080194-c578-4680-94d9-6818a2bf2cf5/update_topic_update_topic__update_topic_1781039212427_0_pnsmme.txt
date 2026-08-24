@@ -1,3 +1,0 @@
-{
-  "output": "Current topic: \"Ingestão de Rascunhos (_raw)\"\nTopic summary: Vou carregar as configurações do vault, verificar o manifesto atual e listar os arquivos pendentes na pasta _raw. Em seguida, processarei cada rascunho, destilando seu conteúdo em páginas oficiais da wiki, atualizando os índices e removendo os arquivos originais para evitar duplicidade.\n\nStrategic Intent: Iniciando a ingestão de rascunhos da pasta _raw para a wiki, seguindo o modo Raw Mode."
-}

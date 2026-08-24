@@ -1,3 +1,0 @@
-{
-  "output": "Output: sha256sum : O termo 'sha256sum' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável. \r\nVerifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.\r\nNo linha:1 caractere:1\r\n+ sha256sum _raw/BRD-20260528-leads-csc-pops.md _raw/especificacao_lead ...\r\n+ ~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (sha256sum:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\nExit Code: 1\nProcess Group PGID: 36264"
-}

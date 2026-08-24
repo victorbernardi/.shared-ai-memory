@@ -1,3 +1,0 @@
-{
-  "output": "Output: Erro ao consultar Fabric: No module named 'jpype'\nProcess Group PGID: 34296"
-}
