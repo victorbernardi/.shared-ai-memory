@@ -321,6 +321,51 @@ def test_smoke_rejects_hook_proof_when_process_cleanup_is_unverified(
     assert "drain_verified=False" in str(error.value)
 
 
+def test_smoke_rejects_missing_session_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    local = CmdcLocal(str(FAKE))
+    outcome = CmdcOutcome(
+        process=ProcessOutcome(
+            pid=1,
+            returncode=0,
+            stdout="",
+            stderr="",
+            status=ProcessStatus.EXITED,
+            containment="test",
+            cleanup_verified=True,
+            drain_verified=True,
+            primary_failure=None,
+            secondary_failures=(),
+        ),
+        subtype="success",
+        stop_reason="end_turn",
+        session_id=None,
+        final_text="done",
+        events=(
+            CmdcEvent(
+                type="tool_hook_blocked",
+                tool="shell_command",
+                raw={
+                    "type": "event",
+                    "event": {
+                        "type": "tool_hook_blocked",
+                        "toolName": "shell_command",
+                        "hookOutput": CmdcLocal.MOD_HOOK_HANDSHAKE,
+                    },
+                },
+            ),
+        ),
+    )
+    monkeypatch.setattr(local, "start", lambda _request: outcome)
+
+    with pytest.raises(CmdcLocalError) as error:
+        local.smoke_test(tmp_path, require_mod_hook=True)
+
+    assert error.value.code == "SMOKE_FAILED"
+    assert "session_id=null" in str(error.value)
+
+
 def test_real_smoke_allows_model_startup_burst_but_stays_bounded(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

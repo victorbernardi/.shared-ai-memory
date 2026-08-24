@@ -335,8 +335,10 @@ conflicts that only emerge from implementation.
   temporary Git repository, bounded `--max-turns 2`, JSON output, a verified
   Mod-hook marker, `cleanup_verified`, and `drain_verified`. A skipped real
   gate is reported as unavailable operational evidence, not as success. A
-  failed hook verification raises `MOD_HOOK_UNVERIFIED`; a smoke process that
-  does not exit cleanly raises `SMOKE_FAILED`. Both paths include the stable
+  failed hook verification, an unavailable smoke probe, or missing session
+  evidence raises `MOD_HOOK_UNVERIFIED`; a smoke process that is not `EXITED`
+  with return code `0`, no primary/secondary failures, and verified cleanup and
+  drain raises `SMOKE_FAILED`. Both paths include the stable
   marker sentence, the exact expected protocol shape (`tool_hook_blocked`
   with `hookOutput=SDD_CMDC_MOD_HOOK_HANDSHAKE`), bounded
   session/process/event evidence, and the remediation: verify the installed

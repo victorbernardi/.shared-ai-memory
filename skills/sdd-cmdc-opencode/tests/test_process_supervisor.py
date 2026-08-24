@@ -369,6 +369,37 @@ def test_callback_failure_reports_unverified_cleanup_evidence(
     assert cleanup_failure in error.value.outcome.secondary_failures
 
 
+def test_reader_setup_failure_is_supervision_failure_with_unverified_drain(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sdd_cmdc_opencode import process_supervisor as supervisor
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessRequest,
+        ProcessStatus,
+        ProcessSupervisionError,
+        run_process,
+    )
+
+    def fail_thread_start(_thread: object) -> None:
+        raise RuntimeError("reader setup failed")
+
+    monkeypatch.setattr(supervisor.threading.Thread, "start", fail_thread_start)
+
+    with pytest.raises(ProcessSupervisionError, match="reader setup failed") as error:
+        run_process(
+            ProcessRequest(
+                command=fixture_command("--wait", "10"),
+                cwd=tmp_path,
+            )
+        )
+
+    assert error.value.outcome.status is ProcessStatus.EXITED
+    assert error.value.outcome.cleanup_verified is True
+    assert error.value.outcome.drain_verified is False
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "PROCESS_SUPERVISION_FAILED"
+
+
 @pytest.mark.skipif(os.name == "nt", reason="native Windows Job coverage is Task 2")
 def test_posix_process_group_terminates_descendants_and_drains_output(
     tmp_path: Path,

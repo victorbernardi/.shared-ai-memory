@@ -509,7 +509,11 @@ class ExecutionLifecycle:
                 "SPAWN",
                 f"cmdc-local execution failed: {error}",
             )
-            return self._finish_without_process()
+            return self._finish_without_process(
+                session_id=self._live_session_id,
+                cleanup_verified=False,
+                drain_verified=False,
+            )
 
         self._transition(_LifecycleState.RUNNING)
         result = self._finish_outcome(outcome)
@@ -562,7 +566,11 @@ class ExecutionLifecycle:
                 "SPAWN",
                 f"cmdc-local Recovery failed: {error}",
             )
-            return self._finish_without_process()
+            return self._finish_without_process(
+                session_id=self._live_session_id or self._recovery_expected_session,
+                cleanup_verified=False,
+                drain_verified=False,
+            )
         self._transition(_LifecycleState.RUNNING)
         return self._finish_outcome(outcome)
 
@@ -656,6 +664,12 @@ class ExecutionLifecycle:
             )
         session_checkpoint = session_checkpoints[-1]
         session_id = str(session_checkpoint["session_id"])
+        if prior.session_id != session_id:
+            raise _LifecycleFault(
+                "RESUME_INVARIANT_FAILED",
+                "PREFLIGHT",
+                "Result Session ID differs from the Recovery Checkpoint",
+            )
         checkpoint_sequence = session_checkpoint.get("sequence")
         if not isinstance(checkpoint_sequence, int) or checkpoint_sequence < 1:
             raise _LifecycleFault(
@@ -971,6 +985,12 @@ class ExecutionLifecycle:
                     "cmdc-local did not resolve a launcher",
                 )
         smoke = getattr(self.cmdc, "smoke_test", None)
+        if not callable(smoke):
+            raise _LifecycleFault(
+                "MOD_HOOK_UNVERIFIED",
+                "PREFLIGHT",
+                "cmdc-local does not expose the required isolated smoke probe",
+            )
         if callable(smoke):
             try:
                 with tempfile.TemporaryDirectory(prefix="sdd-cmdc-smoke-") as path:
@@ -1087,7 +1107,7 @@ class ExecutionLifecycle:
         fingerprint = self._capture_fingerprint(
             self.record.contract.workspace.repo_root
         )
-        self._checkpoint(
+        sequence = self._checkpoint(
             {
                 "kind": "session",
                 "state": state,
@@ -1097,6 +1117,13 @@ class ExecutionLifecycle:
                 "workspace_fingerprint": fingerprint,
             }
         )
+        if sequence < 1:
+            self._add_blocker(
+                "SESSION_CHECKPOINT_UNVERIFIED",
+                "CHECKPOINT",
+                "Command Code Session checkpoint was not persisted",
+            )
+            return
         if self._recovery_expected_session is not None:
             self._current_fingerprint = fingerprint
 

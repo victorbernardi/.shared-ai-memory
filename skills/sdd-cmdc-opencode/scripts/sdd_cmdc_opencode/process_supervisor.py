@@ -599,8 +599,6 @@ def run_process(
             secondary_failures=tuple(initial_secondary),
         )
 
-    assert process.stdout is not None
-    assert process.stderr is not None
     pid = process.pid
     started = time.monotonic()
     output_queue: queue.Queue[_QueuedOutput] = queue.Queue()
@@ -613,60 +611,71 @@ def run_process(
     }
     stdout_parts: list[str] = []
     stderr_parts: list[str] = []
-    reader_threads = (
-        threading.Thread(
-            target=_reader,
-            args=(
-                "stdout",
-                process.stdout,
-                output_queue,
-                reader_done["stdout"],
-                reader_errors,
-            ),
-            name=f"process-supervisor-{pid}-stdout",
-            daemon=True,
-        ),
-        threading.Thread(
-            target=_reader,
-            args=(
-                "stderr",
-                process.stderr,
-                output_queue,
-                reader_done["stderr"],
-                reader_errors,
-            ),
-            name=f"process-supervisor-{pid}-stderr",
-            daemon=True,
-        ),
-    )
-    for thread in reader_threads:
-        thread.start()
-
+    reader_threads: tuple[threading.Thread, ...] = ()
+    started_reader_threads: list[threading.Thread] = []
     stdin_thread: threading.Thread | None = None
+    stdin_thread_started = False
     stdin_errors: queue.Queue[BaseException] = queue.Queue()
-    if process.stdin is not None:
-        if request.stdin_text:
+    setup_error: BaseException | None = None
+    try:
+        if process.stdout is None or process.stderr is None:
+            raise RuntimeError("process stdout/stderr pipes were not available")
+        reader_threads = (
+            threading.Thread(
+                target=_reader,
+                args=(
+                    "stdout",
+                    process.stdout,
+                    output_queue,
+                    reader_done["stdout"],
+                    reader_errors,
+                ),
+                name=f"process-supervisor-{pid}-stdout",
+                daemon=True,
+            ),
+            threading.Thread(
+                target=_reader,
+                args=(
+                    "stderr",
+                    process.stderr,
+                    output_queue,
+                    reader_done["stderr"],
+                    reader_errors,
+                ),
+                name=f"process-supervisor-{pid}-stderr",
+                daemon=True,
+            ),
+        )
+        for thread in reader_threads:
+            thread.start()
+            started_reader_threads.append(thread)
 
-            def write_stdin() -> None:
-                try:
-                    process.stdin.write(request.stdin_text)
-                    process.stdin.flush()
-                except BaseException as exc:
-                    stdin_errors.put(exc)
-                finally:
+        if process.stdin is not None:
+            if request.stdin_text:
+
+                def write_stdin() -> None:
                     try:
-                        process.stdin.close()
+                        process.stdin.write(request.stdin_text)
+                        process.stdin.flush()
                     except BaseException as exc:
                         stdin_errors.put(exc)
+                    finally:
+                        try:
+                            process.stdin.close()
+                        except BaseException as exc:
+                            stdin_errors.put(exc)
 
-            stdin_thread = threading.Thread(
-                target=write_stdin,
-                name=f"process-supervisor-{pid}-stdin",
-                daemon=True,
-            )
-            stdin_thread.start()
-        else:
-            process.stdin.close()
+                stdin_thread = threading.Thread(
+                    target=write_stdin,
+                    name=f"process-supervisor-{pid}-stdin",
+                    daemon=True,
+                )
+                stdin_thread.start()
+                stdin_thread_started = True
+            else:
+                process.stdin.close()
+    except BaseException as exc:
+        setup_error = exc
 
     status = (
         ProcessStatus.SPAWN_FAILED
@@ -675,11 +684,11 @@ def run_process(
     )
     primary_failure: ProcessFailure | None = initial_failure
     secondary_failures: list[ProcessFailure] = initial_secondary
-    cleanup_requested = False
+    cleanup_requested = setup_error is not None
     cleanup_verified = False
     callback_error: BaseException | None = None
-    supervision_error: BaseException | None = None
-    supervision_traceback = None
+    supervision_error: BaseException | None = setup_error
+    supervision_traceback = setup_error.__traceback__ if setup_error is not None else None
     callback = on_output
     last_activity = started
     activity_error_reported = False
@@ -819,6 +828,9 @@ def run_process(
             collect_reader_errors()
             collect_stdin_errors()
             refresh_external_activity()
+            if supervision_error is not None:
+                cleanup_requested = True
+                break
             if callback_error is not None:
                 cleanup_requested = True
                 break
@@ -920,7 +932,7 @@ def run_process(
                     message=str(exc),
                 )
             )
-    if stdin_thread is not None:
+    if stdin_thread is not None and stdin_thread_started:
         stdin_thread.join(timeout=_THREAD_JOIN_TIMEOUT_SECONDS)
         if stdin_thread.is_alive():
             record_secondary(
@@ -933,14 +945,16 @@ def run_process(
     collect_stdin_errors()
 
     drain_deadline = time.monotonic() + _DRAIN_TIMEOUT_SECONDS
-    while not all(event.is_set() for event in reader_done.values()):
+    while setup_error is None and not all(
+        event.is_set() for event in reader_done.values()
+    ):
         dispatch_pending(_POLL_INTERVAL_SECONDS)
         collect_reader_errors()
         if time.monotonic() >= drain_deadline:
             break
-    for thread in reader_threads:
+    for thread in started_reader_threads:
         thread.join(timeout=_THREAD_JOIN_TIMEOUT_SECONDS)
-    drain_verified = all(
+    drain_verified = setup_error is None and all(
         event.is_set() and not thread.is_alive()
         for event, thread in zip(reader_done.values(), reader_threads)
     )
@@ -950,9 +964,12 @@ def run_process(
                 stream.close()
             except BaseException:
                 pass
-        for thread in reader_threads:
+        for thread in started_reader_threads:
             thread.join(timeout=_THREAD_JOIN_TIMEOUT_SECONDS)
-        drain_verified = all(not thread.is_alive() for thread in reader_threads)
+        drain_verified = setup_error is None and all(
+            event.is_set() and not thread.is_alive()
+            for event, thread in zip(reader_done.values(), reader_threads)
+        )
     while True:
         before = output_queue.qsize()
         dispatch_pending()

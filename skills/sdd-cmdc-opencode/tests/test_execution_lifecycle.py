@@ -183,6 +183,25 @@ class _FakeCmdc:
         self.resume_outcome: object | None = None
         self.resume_callback = None
 
+    def resolve_launcher(self) -> Path:
+        return Path("cmdc")
+
+    def smoke_test(self, *_args: object, **_kwargs: object) -> SimpleNamespace:
+        return SimpleNamespace(
+            mod_hook_verified=True,
+            smoke=SimpleNamespace(
+                session_id="session-123",
+                process=SimpleNamespace(
+                    status="EXITED",
+                    returncode=0,
+                    primary_failure=None,
+                    secondary_failures=(),
+                    cleanup_verified=True,
+                    drain_verified=True,
+                ),
+            ),
+        )
+
     def start(self, request: object) -> object:
         self.requests.append(request)
         return self.outcome
@@ -308,6 +327,19 @@ def test_preflight_rejects_hook_proof_without_clean_smoke_evidence(
         ExecutionLifecycle(record, UncleanPreflightCmdc())._preflight_cmdc(repo)
 
     assert getattr(error.value, "code", None) == "SMOKE_FAILED"
+
+
+def test_preflight_rejects_backend_without_smoke_probe(tmp_path: Path) -> None:
+    record, repo, _ = _run_fixture(tmp_path)
+
+    class NoSmokeCmdc:
+        def resolve_launcher(self) -> Path:
+            return Path("cmdc")
+
+    with pytest.raises(LifecycleError) as error:
+        ExecutionLifecycle(record, NoSmokeCmdc())._preflight_cmdc(repo)
+
+    assert getattr(error.value, "code", None) == "MOD_HOOK_UNVERIFIED"
 
 
 def test_invalid_state_transition_is_fail_closed() -> None:
@@ -456,6 +488,36 @@ def test_lifecycle_persists_result_when_live_event_persistence_is_interrupted(
     assert result.cleanup_verified is False
     assert record.read_result() == result
     assert record.read_checkpoints()
+
+
+def test_session_checkpoint_persistence_failure_remains_blocked(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+
+    original_append_checkpoint = record.append_checkpoint
+
+    def fail_session_checkpoint(value: dict[str, object]) -> int:
+        if value.get("kind") == "session":
+            raise OSError("session checkpoint unavailable")
+        return original_append_checkpoint(value)
+
+    monkeypatch.setattr(record, "append_checkpoint", fail_session_checkpoint)
+
+    class InterruptingCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(_event("write_file", session_id="session-123"))  # type: ignore[attr-defined]
+            raise KeyboardInterrupt("simulated worker interruption")
+
+    result = ExecutionLifecycle(record, InterruptingCmdc(None)).start()
+
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "INTERRUPTED"
+    codes = [item.code for item in result.secondary_blockers]
+    assert "CHECKPOINT_PERSISTENCE_FAILED" in codes
+    assert "SESSION_CHECKPOINT_UNVERIFIED" in codes
+    assert result.session_id == "session-123"
 
 
 def test_lifecycle_recovers_terminal_session_after_verified_callback_interrupt(
@@ -657,6 +719,30 @@ def test_explicit_resume_uses_the_same_session_after_stall(tmp_path: Path) -> No
     assert request.scope_env["SDD_CMDC_SCOPE_RUN_OWNER"] == str(record.run_dir.resolve())
     assert "--continue" not in request.prompt
     assert len((record.run_dir / "events.jsonl").read_text(encoding="utf-8").splitlines()) >= 3
+
+
+def test_resume_rejects_result_session_mismatch_before_launcher(tmp_path: Path) -> None:
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+    stalled = CmdcOutcome(
+        process=_process(status=ProcessStatus.STALLED),
+        subtype="partial",
+        stop_reason="stalled",
+        session_id="session-123",
+        final_text="partial",
+        events=(_event("git status --short", turn=1),),
+    )
+    cmdc = _FakeCmdc(stalled)
+    ExecutionLifecycle(record, cmdc).start()
+
+    stored = record.read_result()
+    assert stored is not None
+    record.write_result(replace(stored, session_id="session-other"))
+
+    result = ExecutionLifecycle(record, cmdc).resume()
+
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "RESUME_INVARIANT_FAILED"
+    assert cmdc.resume_calls == []
 
 
 def test_resume_fails_before_launcher_without_an_owned_checkpoint(tmp_path: Path) -> None:

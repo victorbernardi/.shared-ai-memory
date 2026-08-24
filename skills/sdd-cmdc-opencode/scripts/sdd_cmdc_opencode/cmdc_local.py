@@ -634,6 +634,7 @@ class CmdcLocal:
         secondary_codes = tuple(
             failure.code for failure in process.secondary_failures
         )
+        session_id = outcome.session_id
         if (
             process_status != "EXITED"
             or process.returncode != 0
@@ -641,6 +642,8 @@ class CmdcLocal:
             or secondary_codes
             or not process.cleanup_verified
             or not process.drain_verified
+            or not isinstance(session_id, str)
+            or not session_id.strip()
         ):
             bounded_secondary = ", ".join(
                 _bounded_diagnostic(code, 64) for code in secondary_codes[:8]
@@ -649,6 +652,7 @@ class CmdcLocal:
                 "SMOKE_FAILED",
                 "smoke process did not complete cleanly; "
                 f"process_status={process_status}; returncode={process.returncode}; "
+                f"session_id={_bounded_diagnostic(session_id or 'null')}; "
                 f"primary_failure={_bounded_diagnostic(primary_code)}; "
                 f"secondary_failures={bounded_secondary}; "
                 f"cleanup_verified={process.cleanup_verified}; "
