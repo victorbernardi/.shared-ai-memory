@@ -1,9 +1,9 @@
 {
   "verdict": "APPROVED",
-  "proposed_name": "inova-motor-orcamentos",
-  "proposed_role": "Atualiza o motor de orcamentos rodando o pipeline completo: estagio 01_abertos (scraper Power BI + Fabric) e estagio 02_cancelados (Fabric JDBC), consolidando o output",
-  "proposed_tier": 1,
-  "audited_at": "2026-06-23T13:31:37.254820",
+  "proposed_name": "protheus-totvs-fiscal-sql-reference",
+  "proposed_role": "Referência reutilizável para auditoria de chaves, estados fiscais e consultas Protheus/TOTVS",
+  "proposed_tier": 2,
+  "audited_at": "2026-08-07T03:52:54.515149",
   "audited_by": "stout-skill-auditor",
   "overlap_scores": {
     "stout-skill-registry": 0,
@@ -18,6 +18,7 @@
     "skillfish": 0,
     "stout-skill-manager": 0,
     "using-superpowers": 0,
+    "superpowers-update": 0,
     "inova-daily-update": 0,
     "inova-pipeline-01": 0,
     "inova-motor-faturamento": 0,
@@ -40,6 +41,8 @@
     "stout-icm-migrate": 0,
     "stout-init-icm": 0,
     "subagent-driven-development": 0,
+    "sdd-cmdc": 0,
+    "sdd-cmdc-opencode": 0,
     "systematic-debugging": 0,
     "test-driven-development": 0,
     "to-issues": 0,
@@ -68,7 +71,9 @@
     "wiki-status": 0,
     "wiki-synthesize": 0,
     "wiki-update": 0,
-    "writing-plans": 0
+    "writing-plans": 0,
+    "inova-motor-orcamentos": 0,
+    "inova-parquet-to-excel": 0
   },
   "notes": "Papel único confirmado. Pode prosseguir com stout-create-skill."
 }

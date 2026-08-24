@@ -2,7 +2,7 @@
 # [STOUT-IMMUTABLE] - Protegido por trava física. Use apenas replace.
 name: stout-skill-auditor
 description: "Porteiro e Auditor de Elite do ecossistema Stout. Avalia intenções e papéis (roles) para detectar ambiguidade, redundância ou sobreposição semântica com habilidades existentes. Triggers de ativação: criar skill, nova skill, precisamos de, falta uma skill, ambiguidade, overlap, duplicidade, conflito semântico."
-version: 1.1.0
+version: 1.4.0
 author: Victor
 tier: 3
 source: custom
@@ -55,6 +55,9 @@ python scripts/semantic_overlap.py --proposed-name "<nome>" --proposed-role "<pa
 
 - `docs/specs/2026-05-15-spec-stout-skill-auditor.md` — Especificação Técnica.
 - `audit_result.json` — Artefato obrigatório para a Fábrica.
+- `references/protheus-totvs-fiscal-sql-audit.md` — Procedimento de apoio para
+  intenções envolvendo Protheus/TOTVS e auditoria fiscal SQL; não amplia a
+  responsabilidade única de governança da skill.
 
 ## Idioma
 
