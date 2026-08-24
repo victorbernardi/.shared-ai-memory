@@ -23,7 +23,7 @@
 ### Task 1: Actionable Windows Mod-hook preflight evidence
 
 **Files:**
-- Add: `skills/sdd-cmdc-opencode/.gitignore`
+- Create: `skills/sdd-cmdc-opencode/.gitignore`
 - Modify: `skills/sdd-cmdc-opencode/scripts/sdd_cmdc_opencode/cmdc_local.py:508-570`
 - Modify: `skills/sdd-cmdc-opencode/tests/helpers/fake_cmdc.py:25-95`
 - Modify: `skills/sdd-cmdc-opencode/tests/test_cmdc_local.py:188-245`
