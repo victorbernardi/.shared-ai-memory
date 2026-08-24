@@ -1,3 +1,0 @@
-{
-  "output": "Directory listing for C:\\Users\\victor.bernardi\\Documents\\wiki-compiler-vault\\projects\\potencial-clientes:\n[DIR] plans\n[DIR] specs\npotencial-clientes.md (438 bytes)"
-}

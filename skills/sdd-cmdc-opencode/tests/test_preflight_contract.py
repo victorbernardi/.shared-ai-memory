@@ -400,6 +400,27 @@ def test_preflight_records_the_explicit_mode(tmp_path: Path) -> None:
     assert result["yolo_consent"] is True
 
 
+def test_preflight_mode_is_yolo_and_compat_flag_cannot_disable_it(
+    tmp_path: Path,
+) -> None:
+    """The launcher mode is unconditional: the preserved --allow-cmdc-yolo
+    option is a no-op compatibility flag and can never downgrade the mode."""
+    repo = _init_repo(tmp_path / "repo", branch="feature")
+    plan = _commit_plan(repo)
+
+    result = validate_execution_boundary(
+        repo,
+        plan,
+        allow_protected_branch=False,
+        ledger_file=None,
+        allow_cmdc_yolo=False,
+    )
+
+    assert "BLOCKER_CODE" not in result
+    assert result["mode"] == "yolo"
+    assert result["yolo_consent"] is True
+
+
 def test_preflight_blocks_a_deployed_server_path_without_recorded_authorization(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -491,7 +512,7 @@ def test_run_implementer_fails_closed_when_no_plan_is_supplied(
     assert MODULE.run_implementer(tmp_path, prompt_path) == 1
     captured = capsys.readouterr()
     assert "BLOCKER_CODE: PLAN_REQUIRED" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
 
 
 def test_run_implementer_blocked_preflight_keeps_initial_git_state_and_mode(
@@ -527,7 +548,7 @@ def test_run_implementer_blocked_preflight_keeps_initial_git_state_and_mode(
 
     captured = capsys.readouterr()
     assert "BLOCKER_CODE: BRANCH_PROTECTED" in captured.err
-    assert "MODE: normal" in captured.err
+    assert "MODE: yolo" in captured.err
     assert "INITIAL_GIT_STATE:" in captured.err
     state = json.loads(captured.err.split("INITIAL_GIT_STATE: ", 1)[1].strip())
     assert state["git_root"] == str(repo.resolve())

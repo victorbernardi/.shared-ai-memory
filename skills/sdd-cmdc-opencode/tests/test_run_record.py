@@ -211,6 +211,7 @@ def test_valid_contract_loads_as_frozen_nested_values_and_roundtrips(tmp_path: P
         lambda value: value["execution"].update({"wall_timeout_seconds": -1}),
         lambda value: value["execution"].update({"max_resumes": -1}),
         lambda value: value["execution"].update({"progress_deadline_turns": 21}),
+        lambda value: value["execution"].update({"yolo": False}),
     ),
 )
 def test_contract_rejects_unknown_schema_backend_and_inconsistent_limits(
@@ -223,6 +224,18 @@ def test_contract_rejects_unknown_schema_backend_and_inconsistent_limits(
 
     with pytest.raises(ValueError):
         module.RunContract.from_mapping(candidate)
+
+
+def test_contract_rejects_execution_yolo_false_before_lifecycle(tmp_path: Path) -> None:
+    """A Run Contract declaring execution.yolo=false is rejected while loading,
+    so a weaker launcher mode can never reach a child process."""
+    module, mapping, _ = _valid_mapping(tmp_path)
+    candidate = copy.deepcopy(mapping)
+    candidate["execution"]["yolo"] = False
+
+    with pytest.raises(ValueError) as raised:
+        module.RunContract.from_mapping(candidate)
+    assert "yolo" in str(raised.value).lower()
 
 
 @pytest.mark.parametrize(

@@ -1,3 +1,0 @@
-{
-  "output": "Output: Diret?rio: C:\\Users\\victor.bernardi\\Documents\\wiki-compiler-vault\\_raw\nProcess Group PGID: 32888"
-}

@@ -1,3 +1,0 @@
-{
-  "output": "Output: Diretório: C:\\Projetos\\Inova\\shared\r\n\r\n\r\nMode                 LastWriteTime         Length Name                                        \r\n----                 -------------         ------ ----                                        \r\n-a----        08/06/2026     10:33           1791 recency_status.md\nProcess Group PGID: 34188"
-}

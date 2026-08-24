@@ -1,3 +1,0 @@
-{
-  "output": "Output: --- DADOS M3 ---\r\n[{'PIN': '1BZ310LAHMD005533', 'Ano Fabricacao': 2021.0, 'Horimetro_Final': 1153.1348333333333, 'METODO_HORIMETRO': 'MEDIANA_DEFASADA', 'STATUS_USO': 'ESTIMADO', 'Dias_Desde_Horimetro': 1687}]\r\n\r\n--- DADOS OFICINA CACHE (VO1010) ---\r\nChassi n�o encontrado no cache da oficina.\nProcess Group PGID: 33208"
-}

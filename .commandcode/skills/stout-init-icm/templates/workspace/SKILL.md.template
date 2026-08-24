@@ -1,9 +1,0 @@
----
-name: <nome-do-projeto>
-description: "<Descrição semântica com triggers. Quando usar, palavras-chave.>"
----
-
-# Regras globais: ..\..\GEMINI.md (Regras 1-9, Karpathy Laws)
-#                ..\..\CLAUDE.md (princípios de código)
-# Caminhos canônicos: ..\..\REFERENCES.md
-# Contrato do pipeline: CONTEXT.md (este diretório)

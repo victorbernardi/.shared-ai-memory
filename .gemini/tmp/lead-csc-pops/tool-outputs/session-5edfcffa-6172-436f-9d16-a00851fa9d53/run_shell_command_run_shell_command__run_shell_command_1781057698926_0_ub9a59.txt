@@ -1,3 +1,0 @@
-{
-  "output": "Output: __pycache__\r\ntest_backup_rotation.py\r\ntest_bup_mapping.py\r\ntest_config_setup.py\r\ntest_enriquecer_retorno_obs.py\r\ntest_extract.py\r\ntest_history.py\r\ntest_kpis_dashboard.py\r\ntest_load_consultor.py\r\ntest_run_janela.py\r\ntest_transform.py\nProcess Group PGID: 39524"
-}

@@ -1,3 +1,0 @@
-{
-  "output": "Output: Total de registros: 3230\r\nRegistros com CNPJ corrompido: 124\nProcess Group PGID: 5240"
-}

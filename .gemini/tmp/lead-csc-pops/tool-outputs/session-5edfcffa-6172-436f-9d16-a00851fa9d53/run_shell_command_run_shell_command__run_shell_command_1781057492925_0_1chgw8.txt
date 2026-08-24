@@ -1,3 +1,0 @@
-{
-  "output": "Output: Chassi\r\n1BZ644KXCJD001036    2\r\n1BZ724KXEPD001287    2\r\n1F9250GXHHD608028    2\r\n1BZ850JALJD000033    2\r\n1BZ850JACJD000044    2\r\nName: count, dtype: int64\nProcess Group PGID: 26416"
-}

@@ -1,3 +1,0 @@
-{
-  "output": "Output: Path                                                                                  \r\n----                                                                                  \r\nC:\\Projetos\\Inova\\pipelines\\potencial-clientes\\04_Estrategia\\motor_de_estrategia_v1.py\r\nC:\\Projetos\\Inova\\pipelines\\potencial-clientes\\04_Estrategia\\scratch_check_bug.py     \r\nC:\\Projetos\\Inova\\pipelines\\potencial-clientes\\04_Estrategia\\transform.py\nProcess Group PGID: 28164"
-}

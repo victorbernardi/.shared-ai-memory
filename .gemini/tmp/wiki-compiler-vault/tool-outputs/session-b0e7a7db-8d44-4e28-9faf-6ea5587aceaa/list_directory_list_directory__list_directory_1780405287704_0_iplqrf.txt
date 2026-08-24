@@ -1,3 +1,0 @@
-{
-  "output": "Directory listing for C:\\Users\\victor.bernardi\\Documents\\wiki-compiler-vault\\projects\\leads-csc-pops:\n[DIR] journal\n[DIR] specs\nBRD.md (12375 bytes)\nESPECIFICACAO.md (11035 bytes)\nIMPACT-REPORT.md (4261 bytes)\nleads-csc-pops.md (1659 bytes)\nPLANO.md (5427 bytes)\nUSER-STORIES.md (6583 bytes)"
-}

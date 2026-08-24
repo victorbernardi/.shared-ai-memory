@@ -1,3 +1,0 @@
-{
-  "output": "Current topic: \"Ingestão Autônoma de Rascunhos (_raw) - Batch 5\"\nTopic summary: Vou listar o diretório `_raw` para identificar os próximos 20 arquivos pendentes, processá-los individualmente destilando conhecimento e organizando na estrutura da wiki, atualizando manifesto/log e removendo os arquivos originais conforme a política de bypass e ingestão autônoma.\n\nStrategic Intent: Ingestão autônoma do próximo lote de até 20 rascunhos da pasta `_raw`."
-}

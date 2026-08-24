@@ -1,3 +1,0 @@
-{
-  "output": "Current topic: \"Lote 1: Projeto leads-csc-pops\"\nTopic summary: Identifiquei um grande número de rascunhos pendentes no diretório `_raw/`. Selecionei o projeto `leads-csc-pops` como o primeiro lote para ingestão. Vou ler as especificações, planos e relatórios deste projeto para estruturá-los adequadamente na Wiki, garantindo a rastreabilidade e a remoção dos rascunhos processados.\n\nStrategic Intent: Processando o primeiro lote de documentos do projeto `leads-csc-pops`. Vou destilar o conhecimento e promover rascunhos para páginas oficiais da Wiki."
-}

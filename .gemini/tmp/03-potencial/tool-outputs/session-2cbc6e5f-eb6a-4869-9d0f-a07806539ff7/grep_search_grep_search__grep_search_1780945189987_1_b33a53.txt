@@ -1,3 +1,0 @@
-{
-  "error": "Path not in workspace: Attempted path \"C:\\Projetos\\Inova\" resolves outside the allowed workspace directories: C:\\Projetos\\Inova\\pipelines\\potencial-clientes\\03_Potencial, c:\\Projetos\\Inova\\pipelines\\potencial-clientes\\03_Potencial or the project temp directory: C:\\Users\\victor.bernardi\\.shared-ai-memory\\.gemini\\tmp\\03-potencial"
-}

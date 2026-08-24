@@ -1,3 +1,0 @@
-{
-  "output": "Output: Chassi         CNPJ  ...     Gatilho Retorno_Contato\r\n123  1BZ130PACSD000134  10149426755  ...  Alerta FPS   Venda Perdida\r\n247  1BZ130PACSD000134            0  ...      Alerta   Venda Perdida\r\n\r\n[2 rows x 6 columns]\nProcess Group PGID: 40216"
-}

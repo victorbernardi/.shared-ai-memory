@@ -1,3 +1,0 @@
-{
-  "output": "Directory listing for C:\\Users\\victor.bernardi\\Documents\\wiki-compiler-vault:\n[DIR] _archives\n[DIR] _raw\n[DIR] .commandcode\n[DIR] .GCC\n[DIR] .obsidian\n[DIR] concepts\n[DIR] data\n[DIR] decisions\n[DIR] entities\n[DIR] journal\n[DIR] plans\n[DIR] projects\n[DIR] references\n[DIR] specs\n[DIR] synthesis\n[DIR] walkthroughs\n.manifest.json (82307 bytes)\nANTIGRAVITY.md (1518 bytes)\nCLAUDE.md (1176 bytes)\nGEMINI.md (1906 bytes)\ngoogle-drive-mcp.md (0 bytes)\nhot.md (2286 bytes)\nindex.md (23915 bytes)\nlog.md (3508 bytes)\nMEMORY.md (124 bytes)\nplan-cevap-v3-columns.md (0 bytes)\nplan-cevap-v4-columns-refactor.md (0 bytes)\nSem título.base (40 bytes)"
-}
