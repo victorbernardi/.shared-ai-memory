@@ -432,6 +432,44 @@ def test_run_record_streams_are_owned_and_monotonic(tmp_path: Path) -> None:
         record.read_checkpoints()
 
 
+def test_run_record_recovers_an_incomplete_final_event_tail(tmp_path: Path) -> None:
+    module, mapping, fixture = _valid_mapping(tmp_path)
+    contract = module.RunContract.from_mapping(mapping)
+    run_dir = fixture["repo"] / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
+    record = module.RunRecord.create(run_dir, contract)
+
+    record.append_event({"type": "assistant_progress", "turn": 1})
+    events_path = run_dir / "events.jsonl"
+    with events_path.open("ab") as handle:
+        handle.write(b'{"type":"partial-tail"')
+
+    events = record.read_events()
+
+    assert [item["sequence"] for item in events] == [1]
+    assert events_path.read_text(encoding="utf-8").count("partial-tail") == 0
+    assert events_path.read_bytes().endswith(b"\n")
+
+
+def test_run_record_keeps_event_legible_when_fsync_is_interrupted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module, mapping, fixture = _valid_mapping(tmp_path)
+    contract = module.RunContract.from_mapping(mapping)
+    run_dir = fixture["repo"] / ".superpowers" / "sdd" / "plan" / "runs" / contract.run_id
+    record = module.RunRecord.create(run_dir, contract)
+
+    def interrupt_fsync(_fd: int) -> None:
+        raise KeyboardInterrupt("simulated fsync interruption")
+
+    monkeypatch.setattr(module.os, "fsync", interrupt_fsync)
+    with pytest.raises(KeyboardInterrupt, match="simulated fsync interruption"):
+        record.append_event({"type": "assistant_progress", "turn": 1})
+
+    events = record.read_events()
+
+    assert [item["type"] for item in events] == ["assistant_progress"]
+
+
 def test_run_record_batches_event_appends_with_one_append_operation(tmp_path: Path) -> None:
     module, mapping, fixture = _valid_mapping(tmp_path)
     contract = module.RunContract.from_mapping(mapping)

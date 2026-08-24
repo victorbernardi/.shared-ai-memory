@@ -5,16 +5,15 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Any
 
 from .process_supervisor import (
     ProcessFailure,
     ProcessOutcome,
     ProcessRequest,
+    StreamEvent,
     run_process,
 )
 
@@ -75,6 +74,7 @@ class CmdcRequest:
     mod_path: Path | None = None
     env: Mapping[str, str] | None = None
     scope_env: Mapping[str, str] | None = None
+    event_sink: Callable[[CmdcEvent], None] | None = None
 
 
 @dataclass(frozen=True)
@@ -363,6 +363,28 @@ class CmdcLocal:
             raw=raw,
         )
 
+    @classmethod
+    def _event_from_line(cls, line: str) -> CmdcEvent | None:
+        """Translate one complete stdout line without treating results as events."""
+
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        payload_type = payload.get("type")
+        if payload_type == "result":
+            return None
+        if payload_type == "event":
+            inner = payload.get("event")
+            if not isinstance(inner, dict):
+                return None
+            return cls._event_from_mapping(inner, payload)
+        if isinstance(payload_type, str):
+            return cls._event_from_mapping(payload, payload)
+        return None
+
     @staticmethod
     def _protocol_failure(message: str) -> ProcessFailure:
         return ProcessFailure(
@@ -455,16 +477,30 @@ class CmdcLocal:
         self, request: CmdcRequest, command: tuple[str, ...]
     ) -> CmdcOutcome:
         process_env = self._process_environment(request)
-        process = run_process(
-            ProcessRequest(
-                command=command,
-                cwd=request.cwd,
-                stdin_text=request.prompt,
-                wall_timeout_seconds=request.wall_timeout_seconds,
-                stall_timeout_seconds=request.stall_timeout_seconds,
-                env=process_env,
-            )
+        process_request = ProcessRequest(
+            command=command,
+            cwd=request.cwd,
+            stdin_text=request.prompt,
+            wall_timeout_seconds=request.wall_timeout_seconds,
+            stall_timeout_seconds=request.stall_timeout_seconds,
+            env=process_env,
         )
+        sink = request.event_sink
+        if sink is None:
+            process = run_process(process_request)
+        else:
+
+            def forward_output(output: StreamEvent) -> None:
+                if output.stream != "stdout":
+                    return
+                for line in output.text.splitlines():
+                    if not line.strip():
+                        continue
+                    event = self._event_from_line(line)
+                    if event is not None:
+                        sink(event)
+
+            process = run_process(process_request, on_output=forward_output)
         return self._translate(process)
 
     @staticmethod

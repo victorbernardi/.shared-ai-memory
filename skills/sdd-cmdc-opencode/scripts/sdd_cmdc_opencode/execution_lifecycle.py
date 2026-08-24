@@ -399,6 +399,7 @@ class ExecutionLifecycle:
         self._recovery_checkpoint_sequence: int | None = None
         self._recovery_expected_session: str | None = None
         self._recovery_trigger = "explicit-resume"
+        self._live_event_count = 0
 
     @property
     def state(self) -> str | None:
@@ -445,6 +446,12 @@ class ExecutionLifecycle:
         else:
             self._secondary.append(blocker)
 
+    def _persist_live_event(self, event: CmdcEvent) -> None:
+        sequences = append_event_records(self.record, (event,))
+        if len(sequences) != 1:
+            raise RunRecordError("live Cmdc event was not persisted")
+        self._live_event_count += 1
+
     def _reset(self) -> None:
         self._state = None
         self._history.clear()
@@ -461,6 +468,7 @@ class ExecutionLifecycle:
         self._recovery_checkpoint_sequence = None
         self._recovery_expected_session = None
         self._recovery_trigger = "explicit-resume"
+        self._live_event_count = 0
 
     def start(self) -> RunResult:
         self._reset()
@@ -981,6 +989,7 @@ class ExecutionLifecycle:
                 "SDD_CMDC_SCOPE_CONTRACT": str(scope_path),
                 "SDD_CMDC_SCOPE_RUN_OWNER": str(self.record.run_dir.resolve()),
             },
+            event_sink=self._persist_live_event,
         )
 
     def _finish_without_process(self) -> RunResult:
@@ -1105,7 +1114,8 @@ class ExecutionLifecycle:
         )
 
     def _append_outcome(self, outcome: Any) -> None:
-        append_event_records(self.record, outcome.events)
+        outcome_events = tuple(outcome.events)
+        append_event_records(self.record, outcome_events[self._live_event_count :])
         self.record.append_event(
             {
                 "type": "terminal_result",

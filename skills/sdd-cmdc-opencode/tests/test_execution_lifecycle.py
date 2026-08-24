@@ -3,7 +3,6 @@ from __future__ import annotations
 import subprocess
 from dataclasses import dataclass, replace
 import hashlib
-import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -296,6 +295,55 @@ def test_start_reaches_complete_only_after_transaction_evidence(tmp_path: Path) 
     assert record.read_result() == result
     assert (record.run_dir / "events.jsonl").read_text(encoding="utf-8").strip()
     assert (record.run_dir / "checkpoints.jsonl").read_text(encoding="utf-8").strip()
+
+
+def test_lifecycle_wires_live_event_sink_before_cmdc_finishes(tmp_path: Path) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    event = _event("git status --short", turn=1)
+
+    class LiveEventCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            return self.outcome
+
+    outcome = CmdcOutcome(
+        process=_process(),
+        subtype="success",
+        stop_reason="completed",
+        session_id="session-123",
+        final_text="done",
+        events=(),
+    )
+
+    result = ExecutionLifecycle(record, LiveEventCmdc(outcome)).start()
+
+    assert result.status is RunStatus.BLOCKED
+    assert [
+        item["command"]
+        for item in record.read_events()
+        if item["type"] == "tool_result"
+    ] == ["git status --short"]
+
+
+def test_lifecycle_keeps_live_event_when_cmdc_is_interrupted(tmp_path: Path) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    event = _event("write_file", turn=1)
+
+    class InterruptingCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            raise KeyboardInterrupt("simulated worker interruption")
+
+    with pytest.raises(KeyboardInterrupt, match="simulated worker interruption"):
+        ExecutionLifecycle(record, InterruptingCmdc(None)).start()
+
+    assert [
+        item["command"]
+        for item in record.read_events()
+        if item["type"] == "tool_result"
+    ] == ["write_file"]
 
 
 def test_post_contract_workspace_change_fails_closed_before_launcher(

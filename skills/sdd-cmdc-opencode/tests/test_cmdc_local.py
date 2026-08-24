@@ -14,7 +14,7 @@ from sdd_cmdc_opencode.cmdc_local import (
     CmdcOutcome,
     CmdcRequest,
 )
-from sdd_cmdc_opencode.process_supervisor import ProcessOutcome, ProcessStatus
+from sdd_cmdc_opencode.process_supervisor import ProcessOutcome, ProcessStatus, StreamEvent
 
 
 FAKE = Path(__file__).parent / "helpers" / "fake_cmdc.py"
@@ -135,6 +135,57 @@ def test_ndjson_success_preserves_events_and_normalizes_result(tmp_path: Path) -
     assert outcome.process.primary_failure is None
     assert outcome.process.cleanup_verified is True
     assert outcome.process.drain_verified is True
+
+
+def test_ndjson_events_are_forwarded_to_the_live_event_sink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: list[CmdcEvent] = []
+
+    def fake_run_process(process_request, *, on_output=None):
+        assert on_output is not None
+        event_line = (
+            '{"type":"event","event":{"type":"assistant_progress",'
+            '"sessionId":"session-123","turn":1}}\n'
+        )
+        result_line = (
+            '{"type":"result","subtype":"success","stopReason":"end_turn",'
+            '"sessionId":"session-123","result":"done"}\n'
+        )
+        on_output(
+            StreamEvent(
+                "stdout",
+                event_line,
+                0.1,
+            )
+        )
+        on_output(
+            StreamEvent(
+                "stdout",
+                result_line,
+                0.2,
+            )
+        )
+        return ProcessOutcome(
+            pid=123,
+            returncode=0,
+            stdout=event_line + result_line,
+            stderr="",
+            status=ProcessStatus.EXITED,
+            containment="test",
+            cleanup_verified=True,
+            drain_verified=True,
+            primary_failure=None,
+            secondary_failures=(),
+        )
+
+    monkeypatch.setattr("sdd_cmdc_opencode.cmdc_local.run_process", fake_run_process)
+
+    outcome = CmdcLocal(str(FAKE)).start(request(tmp_path, event_sink=seen.append))
+
+    assert outcome.process.primary_failure is None
+    assert [event.type for event in seen] == ["assistant_progress"]
+    assert seen[0].session_id == "session-123"
 
 
 @pytest.mark.parametrize(

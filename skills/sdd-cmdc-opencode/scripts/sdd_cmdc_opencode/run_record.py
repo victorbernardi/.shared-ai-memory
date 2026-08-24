@@ -17,7 +17,6 @@ import tempfile
 import threading
 import unicodedata
 from types import MappingProxyType
-from typing import Any
 
 
 SCHEMA_VERSION = 1
@@ -649,35 +648,92 @@ class RunRecord:
         checkpoints = self.read_checkpoints()
         return dict(checkpoints[-1]) if checkpoints else None
 
-    def _read_stream(self, path: Path, kind: str) -> tuple[dict[str, object], ...]:
+    @staticmethod
+    def _is_partial_json_object_tail(
+        tail: bytes, text: str, error: BaseException
+    ) -> bool:
+        if not tail.lstrip().startswith(b"{"):
+            return False
+        if isinstance(error, UnicodeDecodeError):
+            return True
+        if not isinstance(error, json.JSONDecodeError):
+            return False
+        stripped = text.rstrip()
+        return error.pos >= len(stripped) or error.msg.startswith("Unterminated")
+
+    def _repair_unterminated_tail(self, path: Path, kind: str) -> None:
+        """Drop only a demonstrably incomplete final object or finish its newline."""
+
         if not path.is_file():
-            raise RunRecordError(f"{kind} stream is missing: {path}")
-        values: list[dict[str, object]] = []
-        expected_sequence = 1
+            return
         try:
-            lines = path.read_text(encoding="utf-8").splitlines()
+            raw = path.read_bytes()
         except OSError as error:
             raise RunRecordError(f"could not read {kind} stream: {path}") from error
-        for line_number, line in enumerate(lines, start=1):
-            if not line.strip():
-                continue
+        if not raw or raw.endswith(b"\n"):
+            return
+
+        prefix_length = raw.rfind(b"\n") + 1
+        tail = raw[prefix_length:]
+        text = ""
+        try:
+            text = tail.decode("utf-8")
+            value = json.loads(text)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            if not self._is_partial_json_object_tail(tail, text, error):
+                return
             try:
-                value = json.loads(line)
-            except json.JSONDecodeError as error:
+                with path.open("r+b") as handle:
+                    handle.truncate(prefix_length)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+            except OSError as repair_error:
                 raise RunRecordError(
-                    f"invalid {kind} JSON at {path}:{line_number}"
-                ) from error
-            if not isinstance(value, dict):
-                raise RunRecordError(f"{kind} record must be a JSON object")
-            if value.get("run_id") != self._contract.run_id:
-                raise RunRecordError(f"{kind} record has foreign run_id")
-            if value.get("contract_sha256") != self.contract_sha256:
-                raise RunRecordError(f"{kind} record has foreign contract hash")
-            if value.get("sequence") != expected_sequence:
-                raise RunRecordError(f"{kind} sequence is not monotonic")
-            values.append(value)
-            expected_sequence += 1
-        return tuple(values)
+                    f"could not repair incomplete {kind} stream: {path}"
+                ) from repair_error
+            return
+
+        if not isinstance(value, dict):
+            return
+        try:
+            with path.open("ab") as handle:
+                handle.write(b"\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+        except OSError as error:
+            raise RunRecordError(f"could not repair {kind} stream terminator: {path}") from error
+
+    def _read_stream(self, path: Path, kind: str) -> tuple[dict[str, object], ...]:
+        with self._lock:
+            self._repair_unterminated_tail(path, kind)
+            if not path.is_file():
+                raise RunRecordError(f"{kind} stream is missing: {path}")
+            values: list[dict[str, object]] = []
+            expected_sequence = 1
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except (OSError, UnicodeError) as error:
+                raise RunRecordError(f"could not read {kind} stream: {path}") from error
+            for line_number, line in enumerate(lines, start=1):
+                if not line.strip():
+                    continue
+                try:
+                    value = json.loads(line)
+                except json.JSONDecodeError as error:
+                    raise RunRecordError(
+                        f"invalid {kind} JSON at {path}:{line_number}"
+                    ) from error
+                if not isinstance(value, dict):
+                    raise RunRecordError(f"{kind} record must be a JSON object")
+                if value.get("run_id") != self._contract.run_id:
+                    raise RunRecordError(f"{kind} record has foreign run_id")
+                if value.get("contract_sha256") != self.contract_sha256:
+                    raise RunRecordError(f"{kind} record has foreign contract hash")
+                if value.get("sequence") != expected_sequence:
+                    raise RunRecordError(f"{kind} sequence is not monotonic")
+                values.append(value)
+                expected_sequence += 1
+            return tuple(values)
 
     def _append(self, path: Path, value: dict[str, object], kind: str) -> int:
         return self._append_many(path, (value,), kind)[0]
@@ -692,6 +748,7 @@ class RunRecord:
         if not pending:
             return ()
         with self._lock:
+            self._repair_unterminated_tail(path, kind)
             next_sequence = _last_sequence(path) + 1
             payloads: list[bytes] = []
             sequences: list[int] = []
