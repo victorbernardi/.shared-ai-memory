@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/skill_entry.schema.json",
   "version": "1.3.0",
-  "last_updated": "2026-07-28",
+  "last_updated": "2026-08-23",
   "ecosystem": "stout-inova",
   "skills": [
     {
@@ -1463,6 +1463,54 @@
       "author": "Victor",
       "notes": "Criada via stout-create-skill. Auditor APPROVED (overlaps=0). Validada e instalada nas plataformas Codex, Claude Code e CommandCode.",
       "promoted_at": "2026-08-08"
+    },
+    {
+      "name": "inova-bup-refresh",
+      "path": "skills/inova-bup-refresh",
+      "tier": 2,
+      "category": "orchestrator",
+      "role": "Refresh governado da Base Única de Pós-Venda e das dependências upstream de clientes",
+      "triggers": [
+        "refresh BUP",
+        "atualizar BUP",
+        "consolidar BUP",
+        "base única pós-venda",
+        "recência BUP"
+      ],
+      "dependencies": [
+        "inova-pipeline-01",
+        "inova-motor-faturamento",
+        "inova-motor-orcamentos"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-08-23",
+      "updated_at": "2026-08-23",
+      "author": "Victor",
+      "notes": "Portada para o master atual; preflight de recência e dependências fail-closed; auditor APPROVED."
+    },
+    {
+      "name": "inova-cevap-refresh",
+      "path": "skills/inova-cevap-refresh",
+      "tier": 2,
+      "category": "orchestrator",
+      "role": "Refresh governado do motor de ativação CEVAP dependente do BUP",
+      "triggers": [
+        "refresh CEVAP",
+        "atualizar CEVAP",
+        "consolidar CEVAP",
+        "ativação de clientes inativos",
+        "planilha CEVAP"
+      ],
+      "dependencies": [
+        "inova-bup-refresh"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "created_at": "2026-08-23",
+      "updated_at": "2026-08-23",
+      "author": "Victor",
+      "notes": "Portada para o checkout standalone motor-cevap; auditor APPROVED; dependência única: BUP."
     }
   ],
   "deprecated": [

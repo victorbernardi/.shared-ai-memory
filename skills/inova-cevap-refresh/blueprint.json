@@ -1,0 +1,16 @@
+{
+  "name": "inova-cevap-refresh",
+  "tier": 2,
+  "description": "Refresh governado do motor de ativação CEVAP dependente do BUP",
+  "target_platforms": [
+    "claude-code",
+    "antigravity",
+    "commandcode",
+    "codex"
+  ],
+  "structure": [
+    "SKILL.md",
+    "tests/",
+    "tests/test_cevap_skill_contract.py"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "inova-bup-refresh",
+  "tier": 2,
+  "description": "Refresh governado da Base Única de Pós-Venda e das dependências upstream de clientes",
+  "target_platforms": [
+    "claude-code",
+    "antigravity",
+    "commandcode",
+    "codex"
+  ],
+  "structure": [
+    "SKILL.md",
+    "tests/",
+    "tests/test_bup_skill_contract.py"
+  ]
+}
