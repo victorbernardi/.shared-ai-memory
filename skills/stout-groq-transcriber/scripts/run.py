@@ -7,14 +7,46 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-from groq import Groq
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        """Keep non-network tests importable without python-dotenv."""
 
-_MODULE_DIR = Path(__file__).resolve().parent
-if str(_MODULE_DIR) not in sys.path:
-    sys.path.insert(0, str(_MODULE_DIR))
+        return False
+
 
 try:
+    from groq import Groq
+except ImportError:
+    Groq = None
+
+_MODULE_DIR = Path(__file__).resolve().parent
+_SKILL_ROOT = _MODULE_DIR.parent
+if not __package__:
+    if str(_SKILL_ROOT) in sys.path:
+        sys.path.remove(str(_SKILL_ROOT))
+    sys.path.insert(0, str(_SKILL_ROOT))
+
+if __package__:
+    from .extract import (
+        DEFAULT_WHISPER_MODEL,
+        get_audio_metadata,
+        read_transcript,
+        transcribe_audio,
+    )
+    from .load import load_report, load_transcription
+    from .output_contract import build_output_plan, render_markdown, resolve_mode
+    from .transform import (
+        DEFAULT_CLEANUP_MODEL,
+        apply_corrections,
+        configured_model,
+        count_speakers,
+        cleanup_with_groq,
+        render_report,
+        structure_minutes,
+    )
+else:
     from scripts.extract import (
         DEFAULT_WHISPER_MODEL,
         get_audio_metadata,
@@ -24,19 +56,6 @@ try:
     from scripts.load import load_report, load_transcription
     from scripts.output_contract import build_output_plan, render_markdown, resolve_mode
     from scripts.transform import (
-        DEFAULT_CLEANUP_MODEL,
-        apply_corrections,
-        configured_model,
-        count_speakers,
-        cleanup_with_groq,
-        render_report,
-        structure_minutes,
-    )
-except ModuleNotFoundError:
-    from extract import DEFAULT_WHISPER_MODEL, get_audio_metadata, read_transcript, transcribe_audio
-    from load import load_report, load_transcription
-    from output_contract import build_output_plan, render_markdown, resolve_mode
-    from transform import (
         DEFAULT_CLEANUP_MODEL,
         apply_corrections,
         configured_model,
@@ -72,7 +91,7 @@ def run_transcription_pipeline(
     session_name_override: str | None = None,
     keep_source_copy: bool = False,
     cwd: Path | None = None,
-    client_factory=Groq,
+    client_factory=None,
 ) -> int:
     """Run ``extract -> transform -> load`` for one audio file."""
 
@@ -109,6 +128,14 @@ def run_transcription_pipeline(
     except OSError as exc:
         print(
             f"[ERRO] output directory cannot be created: {plan.final_path.parent} ({exc})",
+            file=sys.stderr,
+        )
+        return 1
+
+    client_factory = client_factory or Groq
+    if client_factory is None:
+        print(
+            "[ERRO] dependencia groq nao instalada; execute: python -m pip install 'groq>=1.5.0'",
             file=sys.stderr,
         )
         return 1
@@ -158,7 +185,7 @@ def run_report_pipeline(
     audio_path: str | Path,
     output_path: str | Path,
     *,
-    client_factory=Groq,
+    client_factory=None,
 ) -> int:
     """Run ``extract -> transform -> load`` for a formatted report."""
 
@@ -172,6 +199,13 @@ def run_report_pipeline(
         print("[ERRO] GROQ_API_KEY nao configurada")
         print("   Verificar em: ~/.shared-ai-memory/.env")
         return 1
+    client_factory = client_factory or Groq
+    if client_factory is None:
+        print(
+            "[ERRO] dependencia groq nao instalada; execute: python -m pip install 'groq>=1.5.0'",
+        )
+        return 1
+
     client = client_factory(api_key=api_key)
     model = configured_model("GROQ_CLEANUP_MODEL", DEFAULT_CLEANUP_MODEL)
     print("[ESTRUTURANDO] Meeting Minutes (participantes, topicos, decisoes, action items)...")
@@ -195,7 +229,7 @@ def run_report_pipeline(
     return 0
 
 
-def transcribe_main(argv=None, client_factory=Groq) -> int:
+def transcribe_main(argv=None, client_factory=None) -> int:
     args = parse_args(argv)
     return run_transcription_pipeline(
         args.input_file,
@@ -207,7 +241,7 @@ def transcribe_main(argv=None, client_factory=Groq) -> int:
     )
 
 
-def report_main(argv=None, client_factory=Groq) -> int:
+def report_main(argv=None, client_factory=None) -> int:
     args = parse_report_args(argv)
     if not Path(args.transcript_txt).is_file():
         print(f"[ERRO] Transcricao nao encontrada: {args.transcript_txt}")
