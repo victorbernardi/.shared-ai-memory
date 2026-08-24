@@ -252,7 +252,8 @@ def test_fake_smoke_initializes_git_and_verifies_mod_hook(tmp_path: Path) -> Non
     assert preflight.smoke.process.cleanup_verified is True
     assert preflight.smoke.process.drain_verified is True
     assert "--output-format" in preflight.command
-    assert "2" in preflight.command
+    max_turns_index = preflight.command.index("--max-turns")
+    assert preflight.command[max_turns_index + 1] == "4"
     # The worker mode is unconditional --yolo; the probe itself stays harmless
     # and separately scoped by its temporary workspace and blocking Mod hook.
     assert "--yolo" in preflight.command
@@ -413,6 +414,10 @@ def test_real_smoke_allows_model_startup_burst_but_stays_bounded(
     local.smoke_test(tmp_path, require_mod_hook=True)
 
     smoke_request = captured["request"]
+    assert smoke_request.max_turns == 4
+    assert "first and only tool call" in smoke_request.prompt
+    assert "Do not inspect the directory" in smoke_request.prompt
+    assert f"echo {CmdcLocal.MOD_HOOK_MARKER}" in smoke_request.prompt
     assert smoke_request.stall_timeout_seconds >= 90.0
     assert smoke_request.wall_timeout_seconds >= 120.0
 

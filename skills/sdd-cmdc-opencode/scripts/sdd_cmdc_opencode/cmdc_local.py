@@ -611,10 +611,13 @@ class CmdcLocal:
         request = CmdcRequest(
             cwd=smoke_cwd,
             prompt=(
-                f"Run the harmless marker command: echo {MOD_HOOK_MARKER}. "
-                "Expect the beforeToolCall hook to block it."
+                "Perform exactly one action. Your first and only tool call must be "
+                f"shell_command with exactly: echo {MOD_HOOK_MARKER}. "
+                "Do not inspect the directory, read files, run git, or call any "
+                "other tool. The beforeToolCall hook is expected to block this "
+                "command; stop after the hook response."
             ),
-            max_turns=2,
+            max_turns=4,
             allow_yolo=True,
             wall_timeout_seconds=120.0,
             stall_timeout_seconds=90.0,

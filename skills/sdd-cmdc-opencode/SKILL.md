@@ -332,10 +332,13 @@ conflicts that only emerge from implementation.
   `PROCESS_DRAIN_FAILED`, and `CMD_CODE_PROTOCOL_ERROR`.
 - Deterministic fake-launcher tests are separate from the installed-launcher
   smoke. Set `SDD_CMDC_REAL_SMOKE=1` only for the real gate; it requires a
-  temporary Git repository, bounded `--max-turns 2`, JSON output, a verified
-  Mod-hook marker, `cleanup_verified`, and `drain_verified`. A skipped real
-  gate is reported as unavailable operational evidence, not as success. A
-  failed hook verification or an unavailable smoke probe raises
+  temporary Git repository, bounded `--max-turns 4`, JSON output, a verified
+  Mod-hook marker, `cleanup_verified`, and `drain_verified`. The probe prompt
+  requires the marker `shell_command` as its first and only tool call and
+  forbids workspace inspection, so normal model startup does not consume the
+  entire bounded turn budget. A skipped real gate is reported as unavailable
+  operational evidence, not as success. A failed hook verification or an
+  unavailable smoke probe raises
   `MOD_HOOK_UNVERIFIED`; a smoke process that is not `EXITED` with return code
   `0`, no primary/secondary failures, verified cleanup and drain, and a valid
   session raises `SMOKE_FAILED`. Both paths include the stable
