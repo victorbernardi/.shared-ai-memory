@@ -27,7 +27,10 @@ def request(tmp_path: Path, **kwargs: object) -> CmdcRequest:
         "max_turns": 12,
         "allow_yolo": False,
         "wall_timeout_seconds": 5.0,
-        "stall_timeout_seconds": 1.0,
+        # A one-second stall budget is shorter than Windows process startup
+        # under the full-suite subprocess load; stall-specific tests override
+        # this explicitly with their tighter bound.
+        "stall_timeout_seconds": 3.0,
     }
     values.update(kwargs)
     return CmdcRequest(**values)  # type: ignore[arg-type]
