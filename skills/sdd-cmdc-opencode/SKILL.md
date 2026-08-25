@@ -330,6 +330,10 @@ conflicts that only emerge from implementation.
   `PROCESS_SPAWN_FAILED`, `WALL_TIMEOUT`, `STALLED`,
   `PROCESS_CLEANUP_UNVERIFIABLE`, `PROCESS_TREE_TERMINATION_FAILED`,
   `PROCESS_DRAIN_FAILED`, and `CMD_CODE_PROTOCOL_ERROR`.
+- On Windows, the canonical Run prompt states that `shell_command` executes
+  through `cmd.exe`; PowerShell commands must be invoked explicitly with
+  `powershell -NoProfile -Command "..."` (or an equivalent `pwsh` command),
+  while the source task brief remains byte-for-byte unchanged.
 - Deterministic fake-launcher tests are separate from the installed-launcher
   smoke. Set `SDD_CMDC_REAL_SMOKE=1` only for the real gate; it requires a
   temporary Git repository, bounded `--max-turns 4`, JSON output, a verified

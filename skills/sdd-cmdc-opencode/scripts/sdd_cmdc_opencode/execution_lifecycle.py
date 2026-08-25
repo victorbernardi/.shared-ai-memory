@@ -1589,12 +1589,19 @@ def _render_contract_prompt(contract: Any) -> str:
             "This Run does not require a task commit; do not create one solely to "
             "satisfy the Run."
         )
+    shell_context = ""
+    if sys.platform.startswith("win"):
+        shell_context = (
+            "\n\nWindows shell contract: shell_command executes through cmd.exe. "
+            "Do not send PowerShell cmdlets directly to cmd.exe. For PowerShell "
+            "syntax, invoke `powershell -NoProfile -Command \"...\"` explicitly."
+        )
     return (
         "Implement the structured task below inside the governed Run scope.\n\n"
         f"{brief.rstrip()}\n\n"
         f"Write your full report to {report_path}:\n"
         "The report must state the implementation result and exact validation evidence.\n"
-        f"{commit_policy}"
+        f"{commit_policy}{shell_context}"
     )
 
 

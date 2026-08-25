@@ -8,6 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
+import sdd_cmdc_opencode.execution_lifecycle as lifecycle_module
 from sdd_cmdc_opencode.cmdc_local import CmdcEvent, CmdcOutcome
 from sdd_cmdc_opencode.process_supervisor import (
     ProcessCallbackError,
@@ -149,6 +150,19 @@ def test_contract_prompt_states_the_commit_policy(
     prompt = _render_contract_prompt(contract)
 
     assert expected_instruction in prompt
+
+
+def test_windows_contract_prompt_declares_cmd_shell_and_powershell_invocation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    monkeypatch.setattr(lifecycle_module.sys, "platform", "win32")
+
+    prompt = _render_contract_prompt(record.contract)
+
+    assert "shell_command executes through cmd.exe" in prompt
+    assert "PowerShell" in prompt
+    assert "powershell -NoProfile -Command" in prompt
 
 
 def _process(
