@@ -147,7 +147,9 @@ def main() -> int:
         terminal(subtype="error", stop_reason="invalid_flags", result="missing json")
         return 2
 
-    if value(argv, "--max-turns") == "2":
+    # The isolated preflight probe uses the deliberately bounded four-turn
+    # budget; worker requests carry the contract's independent turn limit.
+    if value(argv, "--max-turns") == "4":
         if value(argv, "--mod"):
             emit(
                 {

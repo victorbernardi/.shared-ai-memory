@@ -24,10 +24,12 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from sdd_cmdc_opencode.process_supervisor import (  # noqa: E402
+    ProcessCallbackError,
     ProcessFailure,
     ProcessOutcome,
     ProcessRequest,
     ProcessStatus,
+    ProcessSupervisionError,
     run_process,
 )
 
@@ -414,15 +416,21 @@ def _run_process(
     timeout_seconds: int,
 ) -> ProcessResult:
     """Run a clean-host child through the shared process supervisor."""
-    outcome = run_process(
-        ProcessRequest(
-            command=tuple(command),
-            cwd=repo or Path.cwd(),
-            stdin_text=prompt,
-            wall_timeout_seconds=float(timeout_seconds),
-            env=_review_environment(),
+    try:
+        outcome = run_process(
+            ProcessRequest(
+                command=tuple(command),
+                cwd=repo or Path.cwd(),
+                stdin_text=prompt,
+                wall_timeout_seconds=float(timeout_seconds),
+                env=_review_environment(),
+            )
         )
-    )
+    except (ProcessCallbackError, ProcessSupervisionError) as error:
+        # Preserve the supervisor's drained streams and cleanup evidence for
+        # the normal review status classifier instead of losing them in the
+        # top-level unexpected-error path.
+        outcome = error.outcome
     timed_out = outcome.status in {
         ProcessStatus.WALL_TIMEOUT,
         ProcessStatus.STALLED,

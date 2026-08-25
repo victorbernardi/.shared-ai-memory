@@ -12,6 +12,8 @@ from pathlib import Path
 
 import pytest
 
+from sdd_cmdc_opencode.process_supervisor import ProcessCallbackError
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MODULE_PATH = REPO_ROOT / "skills" / "sdd-cmdc-opencode" / "scripts" / "cmdc-implementer.py"
@@ -48,6 +50,7 @@ def test_build_command_uses_fixed_model_and_edit_flags() -> None:
         "--no-skills",
         "--trust",
         "--skip-onboarding",
+        "--no-auto-update",
     ]
     # The launcher mode is unconditional: exactly one --yolo is always present.
     assert command.count("--yolo") == 1
@@ -834,6 +837,45 @@ def test_cmdc_process_stops_when_stream_and_workspace_stall(tmp_path: Path, monk
         )
     assert getattr(raised.value, "watchdog_reason") == "STALLED"
     assert getattr(raised.value, "watchdog_pid") == 5678
+
+
+def test_cmdc_process_preserves_supervisor_callback_outcome(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    process = MODULE.ProcessOutcome(
+        pid=5679,
+        returncode=1,
+        stdout="partial-output",
+        stderr="callback-warning",
+        status=MODULE.ProcessStatus.EXITED,
+        containment="windows-job",
+        cleanup_verified=True,
+        drain_verified=True,
+        primary_failure=MODULE.ProcessFailure(
+            "PROCESS_OUTPUT_CALLBACK_FAILED", "callback", "callback failed"
+        ),
+        secondary_failures=(),
+    )
+    supervisor_error = ProcessCallbackError(RuntimeError("callback failed"), process)
+
+    def raise_callback_error(*args, **kwargs):
+        raise supervisor_error
+
+    monkeypatch.setattr(MODULE, "run_process", raise_callback_error)
+
+    with pytest.raises(MODULE._ProcessLifecycleError) as raised:
+        MODULE._run_cmdc_process(
+            ["cmdc"],
+            "prompt",
+            tmp_path,
+            wall_timeout_seconds=60,
+            stall_timeout_seconds=30,
+            activity_state={"lock": MODULE.threading.Lock()},
+        )
+
+    assert raised.value.outcome is process
+    assert raised.value.outcome.stdout == "partial-output"
+    assert raised.value.outcome.drain_verified is True
 
 
 def test_git_success_without_commit_is_transaction_incomplete(

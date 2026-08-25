@@ -56,6 +56,12 @@ persisted with one Run Record under `contract.json`, append-only
 Implementer Report is the human-readable Markdown account and is not a
 substitute for Result evidence.
 
+Each event/checkpoint batch is append-only and durable: the writer records a
+hash-bound pending append intent before writing the JSONL payload and removes
+that intent only after the stream is flushed. A restart may truncate only a
+tail proven to belong to that intent; an unterminated tail without matching
+intent evidence is preserved and fails closed for operator inspection.
+
 The canonical entry points are:
 
 ```powershell
@@ -96,6 +102,9 @@ with a successful tool result, never from agent prose or a Markdown
 claim. The external plan and task-brief provenance remain tied to the recorded
 repository, branch, commit, paths, and SHA-256. There is no generic allow-dirty Recovery bypass: pre-existing changes
 are accepted only when they match the recorded baseline and remain untouched.
+An `INTERRUPTED` result created while streaming events is resumable only when
+the Run Record contains the same Session checkpoint and both cleanup and output
+drain are verified; an interruption without that evidence remains fail-closed.
 
 The legacy flat adapter remains available for compatibility and retains its
 legacy report-marker parsing only for old calls. New governed work must use
@@ -327,12 +336,22 @@ conflicts that only emerge from implementation.
   `PROCESS_SPAWN_FAILED`, `WALL_TIMEOUT`, `STALLED`,
   `PROCESS_CLEANUP_UNVERIFIABLE`, `PROCESS_TREE_TERMINATION_FAILED`,
   `PROCESS_DRAIN_FAILED`, and `CMD_CODE_PROTOCOL_ERROR`.
+- On Windows, the canonical Run prompt states that `shell_command` executes
+  through `cmd.exe`; PowerShell commands must be invoked explicitly with
+  `powershell -NoProfile -Command "..."` (or an equivalent `pwsh` command),
+  while the source task brief remains byte-for-byte unchanged.
 - Deterministic fake-launcher tests are separate from the installed-launcher
   smoke. Set `SDD_CMDC_REAL_SMOKE=1` only for the real gate; it requires a
-  temporary Git repository, bounded `--max-turns 2`, JSON output, a verified
-  Mod-hook marker, `cleanup_verified`, and `drain_verified`. A skipped real
-  gate is reported as unavailable operational evidence, not as success. A
-  failed smoke verification raises `MOD_HOOK_UNVERIFIED` with the stable
+  temporary Git repository, bounded `--max-turns 4`, JSON output, a verified
+  Mod-hook marker, `cleanup_verified`, and `drain_verified`. The probe prompt
+  requires the marker `shell_command` as its first and only tool call and
+  forbids workspace inspection, so normal model startup does not consume the
+  entire bounded turn budget. A skipped real gate is reported as unavailable
+  operational evidence, not as success. A failed hook verification or an
+  unavailable smoke probe raises
+  `MOD_HOOK_UNVERIFIED`; a smoke process that is not `EXITED` with return code
+  `0`, no primary/secondary failures, verified cleanup and drain, and a valid
+  session raises `SMOKE_FAILED`. Both paths include the stable
   marker sentence, the exact expected protocol shape (`tool_hook_blocked`
   with `hookOutput=SDD_CMDC_MOD_HOOK_HANDSHAKE`), bounded
   session/process/event evidence, and the remediation: verify the installed

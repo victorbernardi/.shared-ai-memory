@@ -273,12 +273,16 @@ def test_activity_clock_extends_stall_deadline_until_external_activity_stops(
 def test_callback_exceptions_are_not_swallowed_and_process_is_cleaned_up(
     tmp_path: Path,
 ) -> None:
-    from sdd_cmdc_opencode.process_supervisor import ProcessRequest, run_process
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessCallbackError,
+        ProcessRequest,
+        run_process,
+    )
 
     def fail_on_output(_event: object) -> None:
         raise RuntimeError("callback failed")
 
-    with pytest.raises(RuntimeError, match="callback failed"):
+    with pytest.raises(ProcessCallbackError, match="callback failed") as error:
         run_process(
             ProcessRequest(
                 command=fixture_command("--wait", "10"),
@@ -286,6 +290,114 @@ def test_callback_exceptions_are_not_swallowed_and_process_is_cleaned_up(
             ),
             on_output=fail_on_output,
         )
+
+    assert error.value.outcome.cleanup_verified is True
+    assert error.value.outcome.drain_verified is True
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "PROCESS_OUTPUT_CALLBACK_FAILED"
+
+
+def test_keyboard_interrupt_callback_preserves_interrupt_and_cleanup_evidence(
+    tmp_path: Path,
+) -> None:
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessCallbackError,
+        ProcessRequest,
+        ProcessStatus,
+        run_process,
+    )
+
+    def interrupt_on_output(_event: object) -> None:
+        raise KeyboardInterrupt("callback interrupted")
+
+    with pytest.raises(ProcessCallbackError, match="callback interrupted") as error:
+        run_process(
+            ProcessRequest(
+                command=fixture_command("--wait", "10"),
+                cwd=tmp_path,
+            ),
+            on_output=interrupt_on_output,
+        )
+
+    assert error.value.outcome.status is ProcessStatus.INTERRUPTED
+    assert error.value.outcome.cleanup_verified is True
+    assert error.value.outcome.drain_verified is True
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "INTERRUPTED"
+
+
+def test_callback_failure_reports_unverified_cleanup_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sdd_cmdc_opencode import process_supervisor as supervisor
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessCallbackError,
+        ProcessFailure,
+        ProcessRequest,
+        run_process,
+    )
+
+    cleanup_failure = ProcessFailure(
+        code="PROCESS_TREE_TERMINATION_FAILED",
+        phase="cleanup",
+        message="synthetic cleanup failure",
+    )
+    monkeypatch.setattr(
+        supervisor,
+        "_terminate_contained",
+        lambda _process, _pid, _containment, _job=None: (
+            False,
+            (cleanup_failure,),
+        ),
+    )
+
+    def fail_on_output(_event: object) -> None:
+        raise RuntimeError("callback failed")
+
+    with pytest.raises(ProcessCallbackError) as error:
+        run_process(
+            ProcessRequest(
+                command=fixture_command("--wait", "10"),
+                cwd=tmp_path,
+            ),
+            on_output=fail_on_output,
+        )
+
+    assert error.value.outcome.cleanup_verified is False
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "PROCESS_OUTPUT_CALLBACK_FAILED"
+    assert cleanup_failure in error.value.outcome.secondary_failures
+
+
+def test_reader_setup_failure_is_supervision_failure_with_unverified_drain(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sdd_cmdc_opencode import process_supervisor as supervisor
+    from sdd_cmdc_opencode.process_supervisor import (
+        ProcessRequest,
+        ProcessStatus,
+        ProcessSupervisionError,
+        run_process,
+    )
+
+    def fail_thread_start(_thread: object) -> None:
+        raise RuntimeError("reader setup failed")
+
+    monkeypatch.setattr(supervisor.threading.Thread, "start", fail_thread_start)
+
+    with pytest.raises(ProcessSupervisionError, match="reader setup failed") as error:
+        run_process(
+            ProcessRequest(
+                command=fixture_command("--wait", "10"),
+                cwd=tmp_path,
+            )
+        )
+
+    assert error.value.outcome.status is ProcessStatus.EXITED
+    assert error.value.outcome.cleanup_verified is True
+    assert error.value.outcome.drain_verified is False
+    assert error.value.outcome.primary_failure is not None
+    assert error.value.outcome.primary_failure.code == "PROCESS_SUPERVISION_FAILED"
 
 
 @pytest.mark.skipif(os.name == "nt", reason="native Windows Job coverage is Task 2")
@@ -341,7 +453,9 @@ def test_windows_job_terminates_child_and_grandchild_and_proves_cleanup(
         ProcessRequest(
             command=descendant_fixture_command(marker),
             cwd=tmp_path,
-            wall_timeout_seconds=1.0,
+            # Native Windows process/job startup can exceed one second when
+            # the complete skill suite is under subprocess load.
+            wall_timeout_seconds=2.0,
             stall_timeout_seconds=5,
         )
     )

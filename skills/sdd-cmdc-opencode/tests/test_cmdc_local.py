@@ -14,7 +14,7 @@ from sdd_cmdc_opencode.cmdc_local import (
     CmdcOutcome,
     CmdcRequest,
 )
-from sdd_cmdc_opencode.process_supervisor import ProcessOutcome, ProcessStatus
+from sdd_cmdc_opencode.process_supervisor import ProcessOutcome, ProcessStatus, StreamEvent
 
 
 FAKE = Path(__file__).parent / "helpers" / "fake_cmdc.py"
@@ -27,7 +27,10 @@ def request(tmp_path: Path, **kwargs: object) -> CmdcRequest:
         "max_turns": 12,
         "allow_yolo": False,
         "wall_timeout_seconds": 5.0,
-        "stall_timeout_seconds": 1.0,
+        # A one-second stall budget is shorter than Windows process startup
+        # under the full-suite subprocess load; stall-specific tests override
+        # this explicitly with their tighter bound.
+        "stall_timeout_seconds": 3.0,
     }
     values.update(kwargs)
     return CmdcRequest(**values)  # type: ignore[arg-type]
@@ -50,6 +53,7 @@ def test_direct_launcher_builds_stable_start_arguments(tmp_path: Path) -> None:
         "--no-skills",
         "--trust",
         "--skip-onboarding",
+        "--no-auto-update",
     )
     # Every generated command carries exactly one --yolo: CMDc writes are part
     # of the governed worker contract, so the default request cannot downgrade
@@ -136,6 +140,57 @@ def test_ndjson_success_preserves_events_and_normalizes_result(tmp_path: Path) -
     assert outcome.process.drain_verified is True
 
 
+def test_ndjson_events_are_forwarded_to_the_live_event_sink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: list[CmdcEvent] = []
+
+    def fake_run_process(process_request, *, on_output=None):
+        assert on_output is not None
+        event_line = (
+            '{"type":"event","event":{"type":"assistant_progress",'
+            '"sessionId":"session-123","turn":1}}\n'
+        )
+        result_line = (
+            '{"type":"result","subtype":"success","stopReason":"end_turn",'
+            '"sessionId":"session-123","result":"done"}\n'
+        )
+        on_output(
+            StreamEvent(
+                "stdout",
+                event_line,
+                0.1,
+            )
+        )
+        on_output(
+            StreamEvent(
+                "stdout",
+                result_line,
+                0.2,
+            )
+        )
+        return ProcessOutcome(
+            pid=123,
+            returncode=0,
+            stdout=event_line + result_line,
+            stderr="",
+            status=ProcessStatus.EXITED,
+            containment="test",
+            cleanup_verified=True,
+            drain_verified=True,
+            primary_failure=None,
+            secondary_failures=(),
+        )
+
+    monkeypatch.setattr("sdd_cmdc_opencode.cmdc_local.run_process", fake_run_process)
+
+    outcome = CmdcLocal(str(FAKE)).start(request(tmp_path, event_sink=seen.append))
+
+    assert outcome.process.primary_failure is None
+    assert [event.type for event in seen] == ["assistant_progress"]
+    assert seen[0].session_id == "session-123"
+
+
 @pytest.mark.parametrize(
     ("variant", "subtype", "stop_reason"),
     [("error", "error", "end_turn"), ("max_turns", "max_turns", "max_turns")],
@@ -200,7 +255,8 @@ def test_fake_smoke_initializes_git_and_verifies_mod_hook(tmp_path: Path) -> Non
     assert preflight.smoke.process.cleanup_verified is True
     assert preflight.smoke.process.drain_verified is True
     assert "--output-format" in preflight.command
-    assert "2" in preflight.command
+    max_turns_index = preflight.command.index("--max-turns")
+    assert preflight.command[max_turns_index + 1] == "4"
     # The worker mode is unconditional --yolo; the probe itself stays harmless
     # and separately scoped by its temporary workspace and blocking Mod hook.
     assert "--yolo" in preflight.command
@@ -220,6 +276,98 @@ def test_smoke_failure_reports_actionable_hook_evidence(
     assert "expected tool_hook_blocked" in str(error.value)
     assert "session_id=session-123" in str(error.value)
     assert "remediation" in str(error.value).lower()
+
+
+def test_smoke_rejects_hook_proof_when_process_cleanup_is_unverified(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    local = CmdcLocal(str(FAKE))
+    outcome = CmdcOutcome(
+        process=ProcessOutcome(
+            pid=1,
+            returncode=None,
+            stdout="",
+            stderr="",
+            status=ProcessStatus.WALL_TIMEOUT,
+            containment="test",
+            cleanup_verified=False,
+            drain_verified=False,
+            primary_failure=None,
+            secondary_failures=(),
+        ),
+        subtype="success",
+        stop_reason="end_turn",
+        session_id="session-123",
+        final_text="done",
+        events=(
+            CmdcEvent(
+                type="tool_hook_blocked",
+                tool="shell_command",
+                raw={
+                    "type": "event",
+                    "event": {
+                        "type": "tool_hook_blocked",
+                        "toolName": "shell_command",
+                        "hookOutput": CmdcLocal.MOD_HOOK_HANDSHAKE,
+                    },
+                },
+            ),
+        ),
+    )
+    monkeypatch.setattr(local, "start", lambda _request: outcome)
+
+    with pytest.raises(CmdcLocalError) as error:
+        local.smoke_test(tmp_path, require_mod_hook=True)
+
+    assert error.value.code == "SMOKE_FAILED"
+    assert "WALL_TIMEOUT" in str(error.value)
+    assert "cleanup_verified=False" in str(error.value)
+    assert "drain_verified=False" in str(error.value)
+
+
+def test_smoke_rejects_missing_session_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    local = CmdcLocal(str(FAKE))
+    outcome = CmdcOutcome(
+        process=ProcessOutcome(
+            pid=1,
+            returncode=0,
+            stdout="",
+            stderr="",
+            status=ProcessStatus.EXITED,
+            containment="test",
+            cleanup_verified=True,
+            drain_verified=True,
+            primary_failure=None,
+            secondary_failures=(),
+        ),
+        subtype="success",
+        stop_reason="end_turn",
+        session_id=None,
+        final_text="done",
+        events=(
+            CmdcEvent(
+                type="tool_hook_blocked",
+                tool="shell_command",
+                raw={
+                    "type": "event",
+                    "event": {
+                        "type": "tool_hook_blocked",
+                        "toolName": "shell_command",
+                        "hookOutput": CmdcLocal.MOD_HOOK_HANDSHAKE,
+                    },
+                },
+            ),
+        ),
+    )
+    monkeypatch.setattr(local, "start", lambda _request: outcome)
+
+    with pytest.raises(CmdcLocalError) as error:
+        local.smoke_test(tmp_path, require_mod_hook=True)
+
+    assert error.value.code == "SMOKE_FAILED"
+    assert "session_id=null" in str(error.value)
 
 
 def test_real_smoke_allows_model_startup_burst_but_stays_bounded(
@@ -269,6 +417,10 @@ def test_real_smoke_allows_model_startup_burst_but_stays_bounded(
     local.smoke_test(tmp_path, require_mod_hook=True)
 
     smoke_request = captured["request"]
+    assert smoke_request.max_turns == 4
+    assert "first and only tool call" in smoke_request.prompt
+    assert "Do not inspect the directory" in smoke_request.prompt
+    assert f"echo {CmdcLocal.MOD_HOOK_MARKER}" in smoke_request.prompt
     assert smoke_request.stall_timeout_seconds >= 90.0
     assert smoke_request.wall_timeout_seconds >= 120.0
 

@@ -19,6 +19,8 @@ from pathlib import Path
 
 import pytest
 
+from sdd_cmdc_opencode.process_supervisor import ProcessSupervisionError
+
 LAUNCHER = (
     Path(__file__).resolve().parents[1] / "scripts" / "review-session.py"
 )
@@ -489,6 +491,41 @@ def test_uncertain_cleanup_is_blocked_with_diagnosis(
     assert summary["status"] == "BLOCKED"
     assert summary["blocker_code"] == "ORPHANED_PROCESS"
     assert "not verified absent" in summary["message"]
+
+
+def test_supervisor_exception_preserves_review_process_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    process = REVIEW.ProcessOutcome(
+        pid=4321,
+        returncode=1,
+        stdout="partial-review-output",
+        stderr="supervisor-warning",
+        status=REVIEW.ProcessStatus.EXITED,
+        containment="windows-job",
+        cleanup_verified=True,
+        drain_verified=True,
+        primary_failure=REVIEW.ProcessFailure(
+            "PROCESS_SUPERVISION_FAILED", "supervision", "supervision failed"
+        ),
+        secondary_failures=(),
+    )
+    supervisor_error = ProcessSupervisionError(
+        RuntimeError("supervision failed"), process
+    )
+
+    def raise_supervisor_error(*args, **kwargs):
+        raise supervisor_error
+
+    monkeypatch.setattr(REVIEW, "run_process", raise_supervisor_error)
+
+    result = REVIEW._run_process(["codex"], "prompt", timeout_seconds=60)
+
+    assert result.stdout == "partial-review-output"
+    assert result.stderr == "supervisor-warning"
+    assert result.failure_code == "PROCESS_SUPERVISION_FAILED"
+    assert result.cleanup_failed is False
+    assert result.drain_verified is True
 
 
 @pytest.mark.skip(reason="tree containment is covered by process_supervisor native tests")

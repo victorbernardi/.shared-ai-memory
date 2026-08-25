@@ -3,14 +3,15 @@ from __future__ import annotations
 import subprocess
 from dataclasses import dataclass, replace
 import hashlib
-import json
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
+import sdd_cmdc_opencode.execution_lifecycle as lifecycle_module
 from sdd_cmdc_opencode.cmdc_local import CmdcEvent, CmdcOutcome
 from sdd_cmdc_opencode.process_supervisor import (
+    ProcessCallbackError,
     ProcessFailure,
     ProcessOutcome,
     ProcessStatus,
@@ -151,6 +152,19 @@ def test_contract_prompt_states_the_commit_policy(
     assert expected_instruction in prompt
 
 
+def test_windows_contract_prompt_declares_cmd_shell_and_powershell_invocation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    monkeypatch.setattr(lifecycle_module.sys, "platform", "win32")
+
+    prompt = _render_contract_prompt(record.contract)
+
+    assert "shell_command executes through cmd.exe" in prompt
+    assert "PowerShell" in prompt
+    assert "powershell -NoProfile -Command" in prompt
+
+
 def _process(
     *,
     failure: ProcessFailure | None = None,
@@ -183,6 +197,25 @@ class _FakeCmdc:
         self.resume_outcome: object | None = None
         self.resume_callback = None
 
+    def resolve_launcher(self) -> Path:
+        return Path("cmdc")
+
+    def smoke_test(self, *_args: object, **_kwargs: object) -> SimpleNamespace:
+        return SimpleNamespace(
+            mod_hook_verified=True,
+            smoke=SimpleNamespace(
+                session_id="session-123",
+                process=SimpleNamespace(
+                    status="EXITED",
+                    returncode=0,
+                    primary_failure=None,
+                    secondary_failures=(),
+                    cleanup_verified=True,
+                    drain_verified=True,
+                ),
+            ),
+        )
+
     def start(self, request: object) -> object:
         self.requests.append(request)
         return self.outcome
@@ -198,6 +231,7 @@ def _event(
     command: str | None,
     stdout: str = "",
     *,
+    session_id: str | None = None,
     exit_code: int | None = 0,
     event_type: str = "tool_result",
     tool: str | None = "shell_command",
@@ -206,6 +240,7 @@ def _event(
 ) -> CmdcEvent:
     return CmdcEvent(
         type=event_type,
+        session_id=session_id,
         turn_number=turn,
         tool=tool,
         command=command,
@@ -242,7 +277,20 @@ def test_preflight_uses_the_dedicated_mod_hook_probe(tmp_path: Path) -> None:
         ) -> SimpleNamespace:
             assert require_mod_hook is True
             self.smoke_mod_path = mod_path
-            return SimpleNamespace(mod_hook_verified=True)
+            return SimpleNamespace(
+                mod_hook_verified=True,
+                smoke=SimpleNamespace(
+                    session_id="session-123",
+                    process=SimpleNamespace(
+                        status="EXITED",
+                        returncode=0,
+                        primary_failure=None,
+                        secondary_failures=(),
+                        cleanup_verified=True,
+                        drain_verified=True,
+                    ),
+                ),
+            )
 
     cmdc = PreflightCmdc()
 
@@ -254,6 +302,58 @@ def test_preflight_uses_the_dedicated_mod_hook_probe(tmp_path: Path) -> None:
         / "sdd_cmdc_opencode"
         / "_mod_probe.ts"
     )
+
+
+def test_preflight_rejects_hook_proof_without_clean_smoke_evidence(
+    tmp_path: Path,
+) -> None:
+    record, repo, _ = _run_fixture(tmp_path)
+
+    class UncleanPreflightCmdc:
+        def resolve_launcher(self) -> Path:
+            return Path("cmdc")
+
+        def smoke_test(
+            self,
+            _cwd: Path,
+            *,
+            require_mod_hook: bool,
+            mod_path: Path,
+        ) -> SimpleNamespace:
+            assert require_mod_hook is True
+            assert mod_path.is_file()
+            return SimpleNamespace(
+                mod_hook_verified=True,
+                smoke=SimpleNamespace(
+                    session_id="session-123",
+                    process=SimpleNamespace(
+                        status="WALL_TIMEOUT",
+                        returncode=None,
+                        primary_failure=None,
+                        secondary_failures=(),
+                        cleanup_verified=False,
+                        drain_verified=False,
+                    ),
+                ),
+            )
+
+    with pytest.raises(LifecycleError) as error:
+        ExecutionLifecycle(record, UncleanPreflightCmdc())._preflight_cmdc(repo)
+
+    assert getattr(error.value, "code", None) == "SMOKE_FAILED"
+
+
+def test_preflight_rejects_backend_without_smoke_probe(tmp_path: Path) -> None:
+    record, repo, _ = _run_fixture(tmp_path)
+
+    class NoSmokeCmdc:
+        def resolve_launcher(self) -> Path:
+            return Path("cmdc")
+
+    with pytest.raises(LifecycleError) as error:
+        ExecutionLifecycle(record, NoSmokeCmdc())._preflight_cmdc(repo)
+
+    assert getattr(error.value, "code", None) == "MOD_HOOK_UNVERIFIED"
 
 
 def test_invalid_state_transition_is_fail_closed() -> None:
@@ -296,6 +396,201 @@ def test_start_reaches_complete_only_after_transaction_evidence(tmp_path: Path) 
     assert record.read_result() == result
     assert (record.run_dir / "events.jsonl").read_text(encoding="utf-8").strip()
     assert (record.run_dir / "checkpoints.jsonl").read_text(encoding="utf-8").strip()
+
+
+def test_lifecycle_wires_live_event_sink_before_cmdc_finishes(tmp_path: Path) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    event = _event("git status --short", turn=1)
+
+    class LiveEventCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            return self.outcome
+
+    outcome = CmdcOutcome(
+        process=_process(),
+        subtype="success",
+        stop_reason="completed",
+        session_id="session-123",
+        final_text="done",
+        events=(),
+    )
+
+    result = ExecutionLifecycle(record, LiveEventCmdc(outcome)).start()
+
+    assert result.status is RunStatus.BLOCKED
+    assert [
+        item["command"]
+        for item in record.read_events()
+        if item["type"] == "tool_result"
+    ] == ["git status --short"]
+
+
+def test_lifecycle_persists_live_event_when_cmdc_is_interrupted(tmp_path: Path) -> None:
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+    event = _event("write_file", session_id="session-123", turn=1)
+
+    class InterruptingCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            raise KeyboardInterrupt("simulated worker interruption")
+
+    result = ExecutionLifecycle(record, InterruptingCmdc(None)).start()
+
+    assert result.status is RunStatus.BLOCKED
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "INTERRUPTED"
+    assert result.session_id == "session-123"
+    assert result.cleanup_verified is False
+    assert record.read_result() == result
+    assert [
+        item["command"]
+        for item in record.read_events()
+        if item["type"] == "tool_result"
+    ] == ["write_file"]
+    session_checkpoints = [
+        item for item in record.read_checkpoints() if item.get("kind") == "session"
+    ]
+    assert session_checkpoints[-1]["session_id"] == "session-123"
+    assert session_checkpoints[-1]["state"] == "INTERRUPTED"
+
+    resume_cmdc = InterruptingCmdc(None)
+    interrupted = ExecutionLifecycle(record, resume_cmdc)
+    resume_cmdc.resume_outcome = CmdcOutcome(
+        process=_process(),
+        subtype="success",
+        stop_reason="completed",
+        session_id="session-123",
+        final_text="resume attempted",
+        events=(),
+    )
+    resumed = interrupted.resume()
+
+    assert resumed.primary_blocker is not None
+    assert resumed.primary_blocker.code == "RESUME_INVARIANT_FAILED"
+    assert resume_cmdc.resume_calls == []
+
+
+def test_lifecycle_persists_result_when_live_event_persistence_is_interrupted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record, _, _ = _run_fixture(tmp_path)
+    event = _event("write_file", session_id="session-123", turn=1)
+
+    def interrupted_append(*_args: object, **_kwargs: object) -> tuple[int, ...]:
+        raise KeyboardInterrupt("simulated event persistence interruption")
+
+    monkeypatch.setattr(
+        "sdd_cmdc_opencode.execution_lifecycle.append_event_records",
+        interrupted_append,
+    )
+
+    class InterruptingPersistenceCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            return self.outcome
+
+    result = ExecutionLifecycle(record, InterruptingPersistenceCmdc(None)).start()
+
+    assert result.status is RunStatus.BLOCKED
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "INTERRUPTED"
+    assert result.session_id == "session-123"
+    assert result.cleanup_verified is False
+    assert record.read_result() == result
+    assert record.read_checkpoints()
+
+
+def test_session_checkpoint_persistence_failure_remains_blocked(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+
+    original_append_checkpoint = record.append_checkpoint
+
+    def fail_session_checkpoint(value: dict[str, object]) -> int:
+        if value.get("kind") == "session":
+            raise OSError("session checkpoint unavailable")
+        return original_append_checkpoint(value)
+
+    monkeypatch.setattr(record, "append_checkpoint", fail_session_checkpoint)
+
+    class InterruptingCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(_event("write_file", session_id="session-123"))  # type: ignore[attr-defined]
+            raise KeyboardInterrupt("simulated worker interruption")
+
+    result = ExecutionLifecycle(record, InterruptingCmdc(None)).start()
+
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "INTERRUPTED"
+    codes = [item.code for item in result.secondary_blockers]
+    assert "CHECKPOINT_PERSISTENCE_FAILED" in codes
+    assert "SESSION_CHECKPOINT_UNVERIFIED" in codes
+    assert result.session_id == "session-123"
+
+
+def test_lifecycle_recovers_terminal_session_after_verified_callback_interrupt(
+    tmp_path: Path,
+) -> None:
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+    event = _event("write_file", turn=1)
+    process = ProcessOutcome(
+        pid=123,
+        returncode=-2,
+        stdout=(
+            '{"type":"result","subtype":"error",'
+            '"stopReason":"interrupted","sessionId":"session-123",'
+            '"result":""}\n'
+        ),
+        stderr="",
+        status=ProcessStatus.INTERRUPTED,
+        containment="test",
+        cleanup_verified=True,
+        drain_verified=True,
+        primary_failure=ProcessFailure(
+            "INTERRUPTED", "callback", "callback interrupted"
+        ),
+        secondary_failures=(),
+    )
+    callback_error = ProcessCallbackError(
+        KeyboardInterrupt("callback interrupted"), process
+    )
+
+    class InterruptingSupervisorCmdc(_FakeCmdc):
+        def start(self, request: object) -> object:
+            self.requests.append(request)
+            request.event_sink(event)  # type: ignore[attr-defined]
+            raise callback_error
+
+    cmdc = InterruptingSupervisorCmdc(None)
+    result = ExecutionLifecycle(record, cmdc).start()
+
+    assert result.status is RunStatus.BLOCKED
+    assert result.session_id == "session-123"
+    assert result.cleanup_verified is True
+    assert any(
+        checkpoint.get("session_id") == "session-123"
+        for checkpoint in record.read_checkpoints()
+    )
+
+    cmdc.resume_outcome = CmdcOutcome(
+        process=_process(),
+        subtype="success",
+        stop_reason="completed",
+        session_id="session-123",
+        final_text="resume attempted",
+        events=(),
+    )
+    resumed = ExecutionLifecycle(record, cmdc).resume()
+
+    assert resumed.primary_blocker is not None
+    assert resumed.primary_blocker.code == "INTERRUPTED"
+    assert [session for session, _ in cmdc.resume_calls] == ["session-123"]
 
 
 def test_post_contract_workspace_change_fails_closed_before_launcher(
@@ -438,6 +733,30 @@ def test_explicit_resume_uses_the_same_session_after_stall(tmp_path: Path) -> No
     assert request.scope_env["SDD_CMDC_SCOPE_RUN_OWNER"] == str(record.run_dir.resolve())
     assert "--continue" not in request.prompt
     assert len((record.run_dir / "events.jsonl").read_text(encoding="utf-8").splitlines()) >= 3
+
+
+def test_resume_rejects_result_session_mismatch_before_launcher(tmp_path: Path) -> None:
+    record, _, _ = _run_fixture(tmp_path, max_resumes=1)
+    stalled = CmdcOutcome(
+        process=_process(status=ProcessStatus.STALLED),
+        subtype="partial",
+        stop_reason="stalled",
+        session_id="session-123",
+        final_text="partial",
+        events=(_event("git status --short", turn=1),),
+    )
+    cmdc = _FakeCmdc(stalled)
+    ExecutionLifecycle(record, cmdc).start()
+
+    stored = record.read_result()
+    assert stored is not None
+    record.write_result(replace(stored, session_id="session-other"))
+
+    result = ExecutionLifecycle(record, cmdc).resume()
+
+    assert result.primary_blocker is not None
+    assert result.primary_blocker.code == "RESUME_INVARIANT_FAILED"
+    assert cmdc.resume_calls == []
 
 
 def test_resume_fails_before_launcher_without_an_owned_checkpoint(tmp_path: Path) -> None:

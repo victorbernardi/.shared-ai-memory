@@ -32,10 +32,12 @@ from sdd_cmdc_opencode.execution_lifecycle import (  # noqa: E402
     default_progress_deadline,
 )
 from sdd_cmdc_opencode.process_supervisor import (  # noqa: E402
+    ProcessCallbackError,
     ProcessFailure,
     ProcessOutcome,
     ProcessRequest,
     ProcessStatus,
+    ProcessSupervisionError,
     StreamEvent,
     run_process,
 )
@@ -126,7 +128,7 @@ def build_command(
         "json",
         "--yolo",
     ]
-    command.extend(("--no-skills", "--trust", "--skip-onboarding"))
+    command.extend(("--no-skills", "--trust", "--skip-onboarding", "--no-auto-update"))
     return command
 
 
@@ -965,16 +967,22 @@ def _run_cmdc_process(
         except OSError:
             pass
 
-    outcome = run_process(
-        ProcessRequest(
-            command=tuple(process_command),
-            cwd=cwd,
-            stdin_text=prompt_text,
-            wall_timeout_seconds=float(wall_timeout_seconds),
-            stall_timeout_seconds=float(stall_timeout_seconds),
-        ),
-        on_output=on_output,
-    )
+    try:
+        outcome = run_process(
+            ProcessRequest(
+                command=tuple(process_command),
+                cwd=cwd,
+                stdin_text=prompt_text,
+                wall_timeout_seconds=float(wall_timeout_seconds),
+                stall_timeout_seconds=float(stall_timeout_seconds),
+            ),
+            on_output=on_output,
+        )
+    except (ProcessCallbackError, ProcessSupervisionError) as error:
+        # The supervisor retains the complete process outcome on wrapper
+        # exceptions; translate it into the adapter's existing fail-closed
+        # taxonomy so checkpoints and diagnostics keep that evidence.
+        raise _ProcessLifecycleError(error.outcome) from error
     if outcome.status in {ProcessStatus.WALL_TIMEOUT, ProcessStatus.STALLED}:
         error = subprocess.TimeoutExpired(
             process_command,

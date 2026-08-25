@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -17,10 +17,10 @@ import tempfile
 import threading
 import unicodedata
 from types import MappingProxyType
-from typing import Any
 
 
 SCHEMA_VERSION = 1
+_PENDING_SCHEMA_VERSION = 1
 _COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 _SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
@@ -633,6 +633,9 @@ class RunRecord:
     def append_event(self, event: dict[str, object]) -> int:
         return self._append(self._run_dir / "events.jsonl", event, "event")
 
+    def append_events(self, events: Iterable[dict[str, object]]) -> tuple[int, ...]:
+        return self._append_many(self._run_dir / "events.jsonl", events, "event")
+
     def append_checkpoint(self, checkpoint: dict[str, object]) -> int:
         return self._append(self._run_dir / "checkpoints.jsonl", checkpoint, "checkpoint")
 
@@ -646,62 +649,221 @@ class RunRecord:
         checkpoints = self.read_checkpoints()
         return dict(checkpoints[-1]) if checkpoints else None
 
-    def _read_stream(self, path: Path, kind: str) -> tuple[dict[str, object], ...]:
-        if not path.is_file():
-            raise RunRecordError(f"{kind} stream is missing: {path}")
-        values: list[dict[str, object]] = []
-        expected_sequence = 1
+    @staticmethod
+    def _pending_path(path: Path) -> Path:
+        return path.with_name(f".{path.name}.pending")
+
+    def _load_pending_transaction(
+        self, path: Path, kind: str, raw: bytes
+    ) -> tuple[Path, int, bytes, bytes]:
+        pending_path = self._pending_path(path)
         try:
-            lines = path.read_text(encoding="utf-8").splitlines()
-        except OSError as error:
-            raise RunRecordError(f"could not read {kind} stream: {path}") from error
-        for line_number, line in enumerate(lines, start=1):
-            if not line.strip():
-                continue
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise RunRecordError(
+                f"could not load pending {kind} transaction: {pending_path}"
+            ) from error
+        if not isinstance(pending, dict):
+            raise RunRecordError(f"pending {kind} transaction is not an object")
+        if pending.get("schema_version") != _PENDING_SCHEMA_VERSION:
+            raise RunRecordError(f"pending {kind} transaction has an unknown schema")
+        if pending.get("kind") != kind:
+            raise RunRecordError(f"pending transaction kind does not match {kind}")
+        if pending.get("run_id") != self._contract.run_id:
+            raise RunRecordError(f"pending {kind} transaction has a foreign run_id")
+        if pending.get("contract_sha256") != self.contract_sha256:
+            raise RunRecordError(f"pending {kind} transaction has a foreign contract hash")
+        prefix_length = pending.get("prefix_length")
+        if isinstance(prefix_length, bool) or not isinstance(prefix_length, int) or prefix_length < 0:
+            raise RunRecordError(f"pending {kind} transaction has an invalid prefix length")
+        prefix_sha256 = pending.get("prefix_sha256")
+        if not isinstance(prefix_sha256, str) or not _SHA256_RE.fullmatch(prefix_sha256):
+            raise RunRecordError(f"pending {kind} transaction has an invalid prefix hash")
+        payload_text = pending.get("payload")
+        if not isinstance(payload_text, str) or not payload_text:
+            raise RunRecordError(f"pending {kind} transaction has no payload")
+        payload = payload_text.encode("utf-8")
+        if not payload.endswith(b"\n"):
+            raise RunRecordError(f"pending {kind} transaction payload is not line terminated")
+        payload_sha256 = pending.get("payload_sha256")
+        if payload_sha256 != hashlib.sha256(payload).hexdigest():
+            raise RunRecordError(f"pending {kind} transaction payload hash is invalid")
+        if len(raw) < prefix_length:
+            raise RunRecordError(f"{kind} stream is shorter than its pending transaction prefix")
+        prefix = raw[:prefix_length]
+        if hashlib.sha256(prefix).hexdigest() != prefix_sha256:
+            raise RunRecordError(f"{kind} stream changed before its pending transaction")
+        if prefix and not prefix.endswith(b"\n"):
+            raise RunRecordError(f"{kind} stream prefix is not line terminated")
+        expected_sequence = 1
+        for line in prefix.splitlines():
             try:
                 value = json.loads(line)
             except json.JSONDecodeError as error:
-                raise RunRecordError(
-                    f"invalid {kind} JSON at {path}:{line_number}"
-                ) from error
-            if not isinstance(value, dict):
-                raise RunRecordError(f"{kind} record must be a JSON object")
-            if value.get("run_id") != self._contract.run_id:
-                raise RunRecordError(f"{kind} record has foreign run_id")
-            if value.get("contract_sha256") != self.contract_sha256:
-                raise RunRecordError(f"{kind} record has foreign contract hash")
-            if value.get("sequence") != expected_sequence:
-                raise RunRecordError(f"{kind} sequence is not monotonic")
-            values.append(value)
+                raise RunRecordError(f"pending {kind} transaction has an invalid prefix") from error
+            if (
+                not isinstance(value, dict)
+                or value.get("run_id") != self._contract.run_id
+                or value.get("contract_sha256") != self.contract_sha256
+                or value.get("sequence") != expected_sequence
+            ):
+                raise RunRecordError(f"pending {kind} transaction prefix has foreign evidence")
             expected_sequence += 1
-        return tuple(values)
+        tail = raw[prefix_length:]
+        if len(tail) > len(payload) or payload[: len(tail)] != tail:
+            raise RunRecordError(f"{kind} stream tail does not match its pending transaction")
+        for line in payload.splitlines():
+            try:
+                value = json.loads(line)
+            except json.JSONDecodeError as error:
+                raise RunRecordError(f"pending {kind} transaction payload is invalid") from error
+            if (
+                not isinstance(value, dict)
+                or value.get("run_id") != self._contract.run_id
+                or value.get("contract_sha256") != self.contract_sha256
+                or value.get("sequence") != expected_sequence
+            ):
+                raise RunRecordError(f"pending {kind} transaction payload has foreign evidence")
+            expected_sequence += 1
+        return pending_path, prefix_length, payload, tail
+
+    @staticmethod
+    def _remove_pending_transaction(path: Path, kind: str) -> None:
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            return
+        except OSError as error:
+            raise RunRecordError(
+                f"could not clear pending {kind} transaction: {path}"
+            ) from error
+
+    def _repair_unterminated_tail(self, path: Path, kind: str) -> None:
+        """Repair a tail only when a durable append intent proves its origin."""
+
+        if not path.is_file():
+            raw = b""
+        else:
+            try:
+                raw = path.read_bytes()
+            except OSError as error:
+                raise RunRecordError(f"could not read {kind} stream: {path}") from error
+        pending_path = self._pending_path(path)
+        if pending_path.is_file():
+            pending_path, prefix_length, payload, tail = self._load_pending_transaction(
+                path, kind, raw
+            )
+            if len(tail) < len(payload):
+                if path.is_file():
+                    try:
+                        with path.open("r+b") as handle:
+                            handle.truncate(prefix_length)
+                            handle.flush()
+                            os.fsync(handle.fileno())
+                    except OSError as repair_error:
+                        raise RunRecordError(
+                            f"could not repair incomplete {kind} stream: {path}"
+                        ) from repair_error
+            self._remove_pending_transaction(pending_path, kind)
+            return
+        if not raw or raw.endswith(b"\n"):
+            return
+        raise RunRecordError(f"{kind} stream has an unverified unterminated tail: {path}")
+
+    def _read_stream(self, path: Path, kind: str) -> tuple[dict[str, object], ...]:
+        with self._lock:
+            self._repair_unterminated_tail(path, kind)
+            if not path.is_file():
+                raise RunRecordError(f"{kind} stream is missing: {path}")
+            values: list[dict[str, object]] = []
+            expected_sequence = 1
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except (OSError, UnicodeError) as error:
+                raise RunRecordError(f"could not read {kind} stream: {path}") from error
+            for line_number, line in enumerate(lines, start=1):
+                if not line.strip():
+                    continue
+                try:
+                    value = json.loads(line)
+                except json.JSONDecodeError as error:
+                    raise RunRecordError(
+                        f"invalid {kind} JSON at {path}:{line_number}"
+                    ) from error
+                if not isinstance(value, dict):
+                    raise RunRecordError(f"{kind} record must be a JSON object")
+                if value.get("run_id") != self._contract.run_id:
+                    raise RunRecordError(f"{kind} record has foreign run_id")
+                if value.get("contract_sha256") != self.contract_sha256:
+                    raise RunRecordError(f"{kind} record has foreign contract hash")
+                if value.get("sequence") != expected_sequence:
+                    raise RunRecordError(f"{kind} sequence is not monotonic")
+                values.append(value)
+                expected_sequence += 1
+            return tuple(values)
 
     def _append(self, path: Path, value: dict[str, object], kind: str) -> int:
-        if not isinstance(value, dict):
-            raise RunRecordError(f"{kind} must be a JSON object")
+        return self._append_many(path, (value,), kind)[0]
+
+    def _append_many(
+        self,
+        path: Path,
+        values: Iterable[dict[str, object]],
+        kind: str,
+    ) -> tuple[int, ...]:
+        pending = tuple(values)
+        if not pending:
+            return ()
         with self._lock:
+            self._repair_unterminated_tail(path, kind)
             next_sequence = _last_sequence(path) + 1
-            supplied_run = value.get("run_id")
-            if supplied_run is not None and supplied_run != self._contract.run_id:
-                raise RunRecordError(f"{kind} run_id does not belong to this Run")
-            supplied_hash = value.get("contract_sha256")
-            if supplied_hash is not None and supplied_hash != self.contract_sha256:
-                raise RunRecordError(f"{kind} contract hash does not belong to this Run")
-            supplied_sequence = value.get("sequence")
-            if supplied_sequence is not None and supplied_sequence != next_sequence:
-                raise RunRecordError(f"{kind} sequence is not monotonic")
-            record = dict(value)
-            record["sequence"] = next_sequence
-            record["run_id"] = self._contract.run_id
-            record["contract_sha256"] = self.contract_sha256
-            record["timestamp"] = record.get("timestamp") or _utc_timestamp()
-            payload = _canonical_json(record) + b"\n"
+            payloads: list[bytes] = []
+            sequences: list[int] = []
+            for value in pending:
+                if not isinstance(value, dict):
+                    raise RunRecordError(f"{kind} must be a JSON object")
+                supplied_run = value.get("run_id")
+                if supplied_run is not None and supplied_run != self._contract.run_id:
+                    raise RunRecordError(f"{kind} run_id does not belong to this Run")
+                supplied_hash = value.get("contract_sha256")
+                if supplied_hash is not None and supplied_hash != self.contract_sha256:
+                    raise RunRecordError(f"{kind} contract hash does not belong to this Run")
+                supplied_sequence = value.get("sequence")
+                if supplied_sequence is not None and supplied_sequence != next_sequence:
+                    raise RunRecordError(f"{kind} sequence is not monotonic")
+                record = dict(value)
+                record["sequence"] = next_sequence
+                record["run_id"] = self._contract.run_id
+                record["contract_sha256"] = self.contract_sha256
+                record["timestamp"] = record.get("timestamp") or _utc_timestamp()
+                payloads.append(_canonical_json(record) + b"\n")
+                sequences.append(next_sequence)
+                next_sequence += 1
             path.parent.mkdir(parents=True, exist_ok=True)
+            payload = b"".join(payloads)
+            raw_before = path.read_bytes() if path.is_file() else b""
+            pending_path = self._pending_path(path)
+            _atomic_write(
+                pending_path,
+                _pretty_json(
+                    {
+                        "schema_version": _PENDING_SCHEMA_VERSION,
+                        "kind": kind,
+                        "run_id": self._contract.run_id,
+                        "contract_sha256": self.contract_sha256,
+                        "prefix_length": len(raw_before),
+                        "prefix_sha256": _sha256_bytes(raw_before),
+                        "payload": payload.decode("utf-8"),
+                        "payload_sha256": _sha256_bytes(payload),
+                    }
+                ),
+            )
             with path.open("ab") as handle:
                 handle.write(payload)
                 handle.flush()
                 os.fsync(handle.fileno())
-            return next_sequence
+            self._remove_pending_transaction(pending_path, kind)
+            return tuple(sequences)
 
     def write_result(self, result: RunResult) -> None:
         if not isinstance(result, RunResult):

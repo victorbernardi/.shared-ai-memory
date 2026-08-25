@@ -5,22 +5,21 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Any
 
 from .process_supervisor import (
     ProcessFailure,
     ProcessOutcome,
     ProcessRequest,
+    StreamEvent,
     run_process,
 )
 
 
 MODEL_ID = "deepseek/deepseek-v4-flash"
-COMMAND_FLAGS = ("--no-skills", "--trust", "--skip-onboarding")
+COMMAND_FLAGS = ("--no-skills", "--trust", "--skip-onboarding", "--no-auto-update")
 MOD_HOOK_MARKER = "SDD_CMDC_MOD_HOOK_OK"
 MOD_HOOK_HANDSHAKE = "SDD_CMDC_MOD_HOOK_HANDSHAKE"
 SCOPE_ENV_NAMES = frozenset(
@@ -75,6 +74,7 @@ class CmdcRequest:
     mod_path: Path | None = None
     env: Mapping[str, str] | None = None
     scope_env: Mapping[str, str] | None = None
+    event_sink: Callable[[CmdcEvent], None] | None = None
 
 
 @dataclass(frozen=True)
@@ -173,6 +173,13 @@ def _text_value(value: object) -> str:
         return json.dumps(value, ensure_ascii=False, sort_keys=True)
     except (TypeError, ValueError):
         return str(value)
+
+
+def _bounded_diagnostic(value: object, limit: int = 128) -> str:
+    text = value if isinstance(value, str) else str(value)
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "..."
 
 
 class CmdcLocal:
@@ -363,6 +370,28 @@ class CmdcLocal:
             raw=raw,
         )
 
+    @classmethod
+    def _event_from_line(cls, line: str) -> CmdcEvent | None:
+        """Translate one complete stdout line without treating results as events."""
+
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        payload_type = payload.get("type")
+        if payload_type == "result":
+            return None
+        if payload_type == "event":
+            inner = payload.get("event")
+            if not isinstance(inner, dict):
+                return None
+            return cls._event_from_mapping(inner, payload)
+        if isinstance(payload_type, str):
+            return cls._event_from_mapping(payload, payload)
+        return None
+
     @staticmethod
     def _protocol_failure(message: str) -> ProcessFailure:
         return ProcessFailure(
@@ -455,16 +484,30 @@ class CmdcLocal:
         self, request: CmdcRequest, command: tuple[str, ...]
     ) -> CmdcOutcome:
         process_env = self._process_environment(request)
-        process = run_process(
-            ProcessRequest(
-                command=command,
-                cwd=request.cwd,
-                stdin_text=request.prompt,
-                wall_timeout_seconds=request.wall_timeout_seconds,
-                stall_timeout_seconds=request.stall_timeout_seconds,
-                env=process_env,
-            )
+        process_request = ProcessRequest(
+            command=command,
+            cwd=request.cwd,
+            stdin_text=request.prompt,
+            wall_timeout_seconds=request.wall_timeout_seconds,
+            stall_timeout_seconds=request.stall_timeout_seconds,
+            env=process_env,
         )
+        sink = request.event_sink
+        if sink is None:
+            process = run_process(process_request)
+        else:
+
+            def forward_output(output: StreamEvent) -> None:
+                if output.stream != "stdout":
+                    return
+                for line in output.text.splitlines():
+                    if not line.strip():
+                        continue
+                    event = self._event_from_line(line)
+                    if event is not None:
+                        sink(event)
+
+            process = run_process(process_request, on_output=forward_output)
         return self._translate(process)
 
     @staticmethod
@@ -568,10 +611,13 @@ class CmdcLocal:
         request = CmdcRequest(
             cwd=smoke_cwd,
             prompt=(
-                f"Run the harmless marker command: echo {MOD_HOOK_MARKER}. "
-                "Expect the beforeToolCall hook to block it."
+                "Perform exactly one action. Your first and only tool call must be "
+                f"shell_command with exactly: echo {MOD_HOOK_MARKER}. "
+                "Do not inspect the directory, read files, run git, or call any "
+                "other tool. The beforeToolCall hook is expected to block this "
+                "command; stop after the hook response."
             ),
-            max_turns=2,
+            max_turns=4,
             allow_yolo=True,
             wall_timeout_seconds=120.0,
             stall_timeout_seconds=90.0,
@@ -579,15 +625,54 @@ class CmdcLocal:
         )
         command = self.build_start_command(request)
         outcome = self.start(request)
+        process = outcome.process
+        process_status = _bounded_diagnostic(
+            getattr(process.status, "value", process.status)
+        )
+        primary_code = (
+            process.primary_failure.code
+            if process.primary_failure is not None
+            else "<none>"
+        )
+        secondary_codes = tuple(
+            failure.code for failure in process.secondary_failures
+        )
+        session_id = outcome.session_id
+        if (
+            process_status != "EXITED"
+            or process.returncode != 0
+            or process.primary_failure is not None
+            or secondary_codes
+            or not process.cleanup_verified
+            or not process.drain_verified
+            or not isinstance(session_id, str)
+            or not session_id.strip()
+        ):
+            bounded_secondary = ", ".join(
+                _bounded_diagnostic(code, 64) for code in secondary_codes[:8]
+            ) or "<none>"
+            raise CmdcLocalError(
+                "SMOKE_FAILED",
+                "smoke process did not complete cleanly; "
+                f"process_status={process_status}; returncode={process.returncode}; "
+                f"session_id={_bounded_diagnostic(session_id or 'null')}; "
+                f"primary_failure={_bounded_diagnostic(primary_code)}; "
+                f"secondary_failures={bounded_secondary}; "
+                f"cleanup_verified={process.cleanup_verified}; "
+                f"drain_verified={process.drain_verified}; remediation: verify the "
+                "installed Command Code launcher and rerun the isolated smoke probe.",
+            )
         hook_seen = self._hook_seen(outcome)
         if require_mod_hook and not hook_seen:
             # Fail closed with bounded, actionable evidence: the stable legacy
             # marker sentence, the exact expected protocol shape, the bounded
             # session/process/event facts, and the remediation. The full child
             # output, prompt, or arbitrary event payloads are never included.
-            session_id = outcome.session_id or "null"
-            status = getattr(outcome.process.status, "value", outcome.process.status)
-            observed_types = tuple(event.type for event in outcome.events)
+            session_id = _bounded_diagnostic(outcome.session_id or "null")
+            status = _bounded_diagnostic(
+                getattr(outcome.process.status, "value", outcome.process.status)
+            )
+            observed_types = tuple(_bounded_diagnostic(event.type, 64) for event in outcome.events)
             bounded_events = ", ".join(observed_types[:8]) or "<none>"
             raise CmdcLocalError(
                 "MOD_HOOK_UNVERIFIED",
