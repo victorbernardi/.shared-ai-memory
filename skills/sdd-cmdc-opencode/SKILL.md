@@ -56,6 +56,12 @@ persisted with one Run Record under `contract.json`, append-only
 Implementer Report is the human-readable Markdown account and is not a
 substitute for Result evidence.
 
+Each event/checkpoint batch is append-only and durable: the writer records a
+hash-bound pending append intent before writing the JSONL payload and removes
+that intent only after the stream is flushed. A restart may truncate only a
+tail proven to belong to that intent; an unterminated tail without matching
+intent evidence is preserved and fails closed for operator inspection.
+
 The canonical entry points are:
 
 ```powershell
