@@ -453,7 +453,9 @@ def test_windows_job_terminates_child_and_grandchild_and_proves_cleanup(
         ProcessRequest(
             command=descendant_fixture_command(marker),
             cwd=tmp_path,
-            wall_timeout_seconds=1.0,
+            # Native Windows process/job startup can exceed one second when
+            # the complete skill suite is under subprocess load.
+            wall_timeout_seconds=2.0,
             stall_timeout_seconds=5,
         )
     )
