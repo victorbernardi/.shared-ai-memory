@@ -197,7 +197,10 @@ def test_wall_timeout_preserves_emitted_output_and_cleanup_proof(
         ProcessRequest(
             command=fixture_command("--wait", "10"),
             cwd=tmp_path,
-            wall_timeout_seconds=1.0,
+            # Native Windows Job/bootstrap startup and forwarding can exceed
+            # one second under subprocess load; two seconds remains a strict
+            # timeout for this ten-second fixture while preserving its output.
+            wall_timeout_seconds=2.0,
             stall_timeout_seconds=5,
         )
     )
@@ -225,7 +228,9 @@ def test_stall_timeout_preserves_emitted_output_and_cleanup_proof(
             command=fixture_command("--wait", "10"),
             cwd=tmp_path,
             wall_timeout_seconds=5,
-            stall_timeout_seconds=1.0,
+            # Keep the stall budget above native Windows bootstrap startup so
+            # the fixture's flushed output reaches the supervisor first.
+            stall_timeout_seconds=2.0,
         )
     )
 
