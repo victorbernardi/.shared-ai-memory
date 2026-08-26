@@ -85,6 +85,10 @@ _MAVEN_PATTERN = re.compile(
     r"tests?\s+run\s*:\s*(?P<total>\d+).*?failures?\s*:\s*(?P<failed>\d+).*?errors?\s*:\s*(?P<errors>\d+)",
     re.I | re.S,
 )
+_NESTED_EXIT_CODE_MARKER = re.compile(r"\bexit\s+code\s*:", re.I)
+_NESTED_EXIT_CODE_VALUE = re.compile(
+    r"\bexit\s+code\s*:\s*(?P<code>-?\d+)\b", re.I
+)
 
 
 @dataclass(frozen=True)
@@ -117,6 +121,160 @@ def default_progress_deadline(max_turns: int) -> int:
     return min(10, max(1, (max_turns + 4) // 5))
 
 
+def _nested_event_mapping(event: CmdcEvent) -> Mapping[str, object]:
+    raw = event.raw if isinstance(event.raw, Mapping) else {}
+    nested = raw.get("event")
+    if isinstance(nested, Mapping):
+        return nested
+    return raw
+
+
+def _nested_string(value: object) -> str | None:
+    return value if isinstance(value, str) and value.strip() else None
+
+
+def _nested_mapping_string(mapping: Mapping[str, object], *keys: str) -> str | None:
+    for key in keys:
+        value = _nested_string(mapping.get(key))
+        if value is not None:
+            return value
+    return None
+
+
+def _nested_tool_call_metadata(
+    event: CmdcEvent,
+) -> tuple[tuple[str, str | None, str | None], ...]:
+    """Extract correlation metadata without interpreting tool output."""
+
+    payload = _nested_event_mapping(event)
+    metadata: list[tuple[str, str | None, str | None]] = []
+    top_id = _nested_mapping_string(payload, "toolCallId", "tool_call_id", "id")
+    top_tool = _nested_mapping_string(payload, "toolName", "tool_name", "tool")
+    top_input = payload.get("input")
+    top_command = (
+        _nested_mapping_string(top_input, "command")
+        if isinstance(top_input, Mapping)
+        else None
+    )
+    if top_id is not None:
+        metadata.append((top_id, top_tool, top_command))
+
+    content = payload.get("content")
+    if isinstance(content, list):
+        for item in content:
+            if not isinstance(item, Mapping):
+                continue
+            item_id = _nested_mapping_string(
+                item, "toolCallId", "tool_call_id", "id"
+            )
+            item_input = item.get("input")
+            item_command = (
+                _nested_mapping_string(item_input, "command")
+                if isinstance(item_input, Mapping)
+                else None
+            )
+            item_tool = _nested_mapping_string(
+                item, "toolName", "tool_name", "name", "tool"
+            )
+            if item_id is not None:
+                metadata.append((item_id, item_tool, item_command))
+    return tuple(metadata)
+
+
+def _nested_text_result(value: object) -> str | None:
+    """Return text only for the exact supported tool-result shape."""
+
+    if not isinstance(value, list) or not value:
+        return None
+    chunks: list[str] = []
+    for item in value:
+        if not isinstance(item, Mapping) or item.get("type") != "text":
+            return None
+        text = item.get("text")
+        if not isinstance(text, str):
+            return None
+        chunks.append(text)
+    return "\n".join(chunks)
+
+
+def _nested_exit_code(text: str) -> tuple[bool, int]:
+    """Parse the shell adapter's optional explicit exit marker."""
+
+    markers = tuple(_NESTED_EXIT_CODE_MARKER.finditer(text))
+    if not markers:
+        return True, 0
+    values = tuple(_NESTED_EXIT_CODE_VALUE.finditer(text))
+    if len(values) != len(markers):
+        return False, 0
+    codes = {int(match.group("code")) for match in values}
+    if len(codes) != 1:
+        return False, 0
+    return True, codes.pop()
+
+
+def _normalize_nested_tool_events(
+    events: Iterable[CmdcEvent],
+) -> tuple[CmdcEvent, ...]:
+    """Materialize conservative fields for real ``tool_completed`` events."""
+
+    event_list = tuple(events)
+    calls: dict[str, tuple[str | None, str | None]] = {}
+    for event in event_list:
+        if not isinstance(event, CmdcEvent):
+            continue
+        for call_id, tool, command in _nested_tool_call_metadata(event):
+            previous_tool, previous_command = calls.get(call_id, (None, None))
+            calls[call_id] = (
+                tool or previous_tool,
+                command or previous_command,
+            )
+
+    normalized: list[CmdcEvent] = []
+    for event in event_list:
+        if not isinstance(event, CmdcEvent):
+            normalized.append(event)  # type: ignore[arg-type]
+            continue
+        event_type = event.type.casefold().replace("-", "_")
+        if event_type != "tool_completed":
+            normalized.append(event)
+            continue
+
+        payload = _nested_event_mapping(event)
+        raw_tool = _nested_mapping_string(
+            payload, "toolName", "tool_name", "tool"
+        )
+        call_id = _nested_mapping_string(
+            payload, "toolCallId", "tool_call_id", "id"
+        )
+        call_tool, call_command = calls.get(call_id, (None, None))
+        tool = event.tool or raw_tool or call_tool
+        command = event.command or (
+            _nested_mapping_string(payload, "command") or call_command
+        )
+        result_text = _nested_text_result(payload.get("result"))
+        if tool is None or command is None or result_text is None:
+            normalized.append(event)
+            continue
+        valid_exit, nested_exit_code = _nested_exit_code(result_text)
+        if not valid_exit:
+            normalized.append(event)
+            continue
+        normalized.append(
+            replace(
+                event,
+                tool=tool,
+                command=command,
+                exit_code=(
+                    event.exit_code
+                    if event.exit_code is not None
+                    else nested_exit_code
+                ),
+                stdout=event.stdout or result_text,
+            )
+        )
+    return tuple(normalized)
+
+
 def normalize_test_evidence(events: Iterable[CmdcEvent]) -> tuple[TestEvidence, ...]:
     """Extract only conservative, zero-failure test evidence from Cmdc events.
 
@@ -126,7 +284,9 @@ def normalize_test_evidence(events: Iterable[CmdcEvent]) -> tuple[TestEvidence, 
     """
 
     normalized: list[TestEvidence] = []
-    for event_sequence, event in enumerate(events, start=1):
+    for event_sequence, event in enumerate(
+        _normalize_nested_tool_events(events), start=1
+    ):
         if not isinstance(event, CmdcEvent):
             continue
         if not _is_command_result(event) or event.exit_code != 0:
@@ -176,7 +336,7 @@ def evaluate_progress(
     not own a Contract policy value.
     """
 
-    event_list = tuple(events)
+    event_list = _normalize_nested_tool_events(events)
     if progress_deadline_turns is None:
         deadline = default_progress_deadline(max_turns)
     else:
@@ -1674,6 +1834,8 @@ def _is_command_result(event: CmdcEvent) -> bool:
     event_type = event.type.casefold().replace("-", "_")
     tool = (event.tool or "").casefold().replace("-", "_")
     return event_type in _RESULT_TYPES or (
+        event_type == "tool_completed" and tool in _SHELL_TOOLS
+    ) or (
         event_type in {"command", "exec", "shell", "shell_command"}
         and tool in _SHELL_TOOLS
     )
@@ -1759,9 +1921,37 @@ def _parse_test_summary(
 
 def _command_tokens(command: str) -> list[str]:
     try:
-        return shlex.split(command, posix=True)
+        tokens = shlex.split(command, posix=True)
     except ValueError:
-        return command.split()
+        tokens = command.split()
+    while len(tokens) >= 2 and _basename(tokens[0]) in {"set", "setlocal"}:
+        separator = next(
+            (index for index, token in enumerate(tokens[1:], start=1) if "&" in token),
+            None,
+        )
+        if separator is None:
+            break
+        tokens = tokens[separator + 1 :]
+        while tokens and tokens[0] in {"&", "&&"}:
+            tokens.pop(0)
+    if len(tokens) >= 2 and _basename(tokens[0]) == "uv" and tokens[1] == "run":
+        index = 2
+        value_options = {
+            "--directory",
+            "--editable",
+            "--extra",
+            "--from",
+            "--python",
+            "--with",
+            "--with-editable",
+        }
+        while index < len(tokens) and tokens[index].startswith("-"):
+            option = tokens[index].casefold()
+            index += 1
+            if option in value_options and index < len(tokens):
+                index += 1
+        tokens = tokens[index:]
+    return tokens
 
 
 def _basename(value: str) -> str:
