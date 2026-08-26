@@ -50,6 +50,17 @@ def test_review_skill_records_dispatch_and_terminal_metadata() -> None:
         assert field in content
 
 
+def test_review_skill_uses_luna_max_priority_as_the_default_route() -> None:
+    content = SKILL.read_text(encoding="utf-8")
+
+    assert 'model="gpt-5.6-luna"' in content
+    assert 'reasoning_effort="max"' in content
+    assert 'service_tier="priority"' in content
+    assert "without asking a blocking question" in content.lower()
+    assert "gpt-5.6-sol" not in content
+    assert "terra" not in content.lower()
+
+
 def test_review_skill_fails_closed_without_a_terminal_report() -> None:
     content = SKILL.read_text(encoding="utf-8").lower()
 

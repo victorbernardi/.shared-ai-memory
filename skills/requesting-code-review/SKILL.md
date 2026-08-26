@@ -41,21 +41,26 @@ HEAD_SHA=$(git rev-parse HEAD)
 git status --short --branch
 ```
 
-### 2. Confirm and preflight the reviewer route
+### 2. Select and preflight the reviewer route
 
-Before dispatching, check whether the user selected a model for this review in
-the current task. If not, ask one blocking question:
+Before dispatching, check whether the user selected a model, reasoning effort,
+or service tier for this review in the current task. If no review-specific
+selection exists, use this default route without asking a blocking question:
 
-> Devo disparar o subagent revisor com `gpt-5.6-sol` em `xhigh`? Se não, usarei Terra `medium`.
+- `model="gpt-5.6-luna"`
+- `reasoning_effort="max"`
+- `service_tier="priority"`
 
-Do not dispatch before the answer. A global `review_model`, a default model,
-or an earlier unrelated approval is not confirmation for this review. `/review`
-is a separate Codex feature and is not an implicit substitute for the spawned
-reviewer.
+An explicit selection in the current task overrides only the corresponding
+default; unspecified fields remain `gpt-5.6-luna`, `max`, and `priority`. A
+global `review_model`, a default model, or an earlier unrelated approval is not
+an explicit selection for this review. `/review` is a separate Codex feature
+and is not an implicit substitute for the spawned reviewer.
 
-- On confirmation, request `model="gpt-5.6-sol"` and
-  `reasoning_effort="xhigh"`.
-- On decline, use the configured subagent default and record the actual values.
+- With no override, request `model="gpt-5.6-luna"`,
+  `reasoning_effort="max"`, and `service_tier="priority"`.
+- With an explicit override, request the selected value and the defaults for
+  any unspecified fields; record the actual requested values.
 - If the runtime rejects the model or the requested `service_tier`, classify
   the dispatch as `SPAWN_FAILED`. Report the literal error and the available
   models/tiers when returned. Offer a concrete fallback and obtain permission
@@ -67,9 +72,10 @@ reviewer.
 ### 3. Dispatch one reviewer
 
 Dispatch a `general-purpose` subagent with the template in
-[`code-reviewer.md`](code-reviewer.md). Pass the confirmed model and reasoning
-effort directly to the spawn call when supported. Preserve the exact returned
-`agent_id`; it is the identity for every later poll.
+[`code-reviewer.md`](code-reviewer.md). Pass the selected model and reasoning
+effort directly to the spawn call when supported, along with the requested
+service tier. Preserve the exact returned `agent_id`; it is the identity for
+every later poll.
 
 Do not dispatch a second reviewer while the first agent is `QUEUED`, `RUNNING`,
 or `POLL_TIMEOUT`. A polling timeout is not a dispatch failure.
@@ -186,7 +192,7 @@ timeout, or an interrupted child always remains `REVIEW INCOMPLETE`.
 
 ```text
 BASE_SHA=... HEAD_SHA=...
-requested_model=gpt-5.6-sol reasoning_effort=xhigh service_tier=priority
+requested_model=gpt-5.6-luna reasoning_effort=max service_tier=priority
 spawn -> agent_id=019... state=QUEUED
 wait_agent(019..., 10000ms) -> timed_out=true state=POLL_TIMEOUT
 wait_agent(019..., 60000ms) -> completed=final-report state=READY
@@ -219,7 +225,8 @@ or approve implicitly.
 
 **Never:**
 
-- Dispatch before the model/tier confirmation gate is satisfied.
+- Dispatch without applying the explicit review defaults or an explicit user
+  override.
 - Treat an empty `wait_agent` timeout as terminal failure or approval.
 - Dispatch a duplicate while the original agent is non-terminal.
 - Interrupt solely because polling timed out.
