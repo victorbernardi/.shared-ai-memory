@@ -84,6 +84,52 @@ def event(
     )
 
 
+def nested_tool_completed(
+    *,
+    command: str,
+    result_text: str,
+    call_id: str = "call-nested-test",
+) -> None:
+    emit(
+        {
+            "type": "event",
+            "event": {
+                "type": "message_update",
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": call_id,
+                        "name": "shell_command",
+                        "input": {"command": command},
+                    }
+                ],
+            },
+        }
+    )
+    emit(
+        {
+            "type": "event",
+            "event": {
+                "type": "tool_queued",
+                "toolCallId": call_id,
+                "toolName": "shell_command",
+                "input": {"command": command},
+            },
+        }
+    )
+    emit(
+        {
+            "type": "event",
+            "event": {
+                "type": "tool_completed",
+                "toolCallId": call_id,
+                "toolName": "shell_command",
+                "result": [{"type": "text", "text": result_text}],
+            },
+        }
+    )
+
+
 def terminal(
     *,
     subtype: str = "success",
@@ -180,6 +226,23 @@ def main() -> int:
     if mode == "malformed":
         print("{not-json", flush=True)
         terminal()
+        return 0
+
+    if mode == "nested_tool_completed":
+        (cwd / "src").mkdir(exist_ok=True)
+        (cwd / "src" / "final.py").write_text("FINAL = True\n", encoding="utf-8")
+        (cwd / "report.md").write_text(
+            "# Implementer Report\n\n17 passed in 0.01s\n", encoding="utf-8"
+        )
+        commit_allowed(cwd, "src/final.py", "report.md")
+        nested_tool_completed(
+            command=(
+                "set PYTHONHOME=& uv run --offline --no-project --with pytest "
+                "python -m pytest -q tests"
+            ),
+            result_text="17 passed in 0.01s",
+        )
+        terminal(result="nested tool completed")
         return 0
 
     if mode == "no_progress":
@@ -530,6 +593,29 @@ def test_complete_run_transaction_uses_one_run_and_one_session(
     rendered = adapter.render_run_result(result, record)
     assert rendered.startswith("STATUS: COMPLETE\n")
     assert rendered.count("RUN_ID:") == 1
+
+
+def test_canonical_run_normalizes_nested_tool_completed_test_result(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record, _, launcher, log_path, _ = _make_fixture(
+        tmp_path, mode="nested_tool_completed", max_resumes=0
+    )
+
+    exit_code, result, _ = _run_cli_start(
+        record, launcher, log_path, "nested_tool_completed", monkeypatch
+    )
+
+    assert exit_code == 0
+    assert result.status is RunStatus.COMPLETE
+    assert result.test_evidence_valid is True
+    assert len(result.tests) == 1
+    assert result.tests[0].passed == 17
+    assert result.tests[0].failed == 0
+    assert result.tests[0].command == (
+        "set PYTHONHOME=& uv run --offline --no-project --with pytest "
+        "python -m pytest -q tests"
+    )
 
 
 @pytest.mark.parametrize(

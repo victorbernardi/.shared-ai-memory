@@ -251,6 +251,61 @@ def _event(
     )
 
 
+def _nested_tool_completed_events(
+    *,
+    tool_name: str,
+    command: str | None,
+    result: object,
+    call_id: str = "call-nested-test",
+) -> tuple[CmdcEvent, ...]:
+    input_value: dict[str, object] = {}
+    if command is not None:
+        input_value["command"] = command
+    return (
+        CmdcEvent(
+            type="message_update",
+            turn_number=1,
+            raw={
+                "event": {
+                    "type": "message_update",
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "id": call_id,
+                            "name": tool_name,
+                            "input": input_value,
+                        }
+                    ],
+                }
+            },
+        ),
+        CmdcEvent(
+            type="tool_queued",
+            turn_number=1,
+            raw={
+                "event": {
+                    "type": "tool_queued",
+                    "toolCallId": call_id,
+                    "toolName": tool_name,
+                    "input": input_value,
+                }
+            },
+        ),
+        CmdcEvent(
+            type="tool_completed",
+            turn_number=1,
+            raw={
+                "event": {
+                    "type": "tool_completed",
+                    "toolCallId": call_id,
+                    "toolName": tool_name,
+                    "result": result,
+                }
+            },
+        ),
+    )
+
+
 def test_execution_lifecycle_exposes_the_canonical_interface() -> None:
     lifecycle = ExecutionLifecycle(object(), object())
 
@@ -885,6 +940,78 @@ def test_evidence_requires_a_successful_recognized_test_event() -> None:
         assert evidence[0].failed == 0
         assert evidence[0].summary == stdout
         assert evidence[0].event_sequence == 1
+
+
+def test_nested_tool_completed_result_reconstructs_shell_test_evidence() -> None:
+    command = (
+        "set PYTHONHOME=& uv run --offline --no-project --with pytest "
+        "python -m pytest -q tests/test_a.py"
+    )
+    events = _nested_tool_completed_events(
+        tool_name="shell_command",
+        command=command,
+        result=[{"type": "text", "text": "17 passed in 6.21s"}],
+    )
+
+    evidence = normalize_test_evidence(events)
+
+    assert len(evidence) == 1
+    assert evidence[0].command == command
+    assert evidence[0].exit_code == 0
+    assert evidence[0].passed == 17
+    assert evidence[0].failed == 0
+    assert evidence[0].event_sequence == 3
+    assessment = evaluate_progress(events, max_turns=10)
+    assert assessment.first_progress is not None
+    assert assessment.first_progress.kind == "recognized_validation"
+    assert events[2].command is None
+    assert events[2].raw["event"]["result"] == [
+        {"type": "text", "text": "17 passed in 6.21s"}
+    ]
+
+
+@pytest.mark.parametrize(
+    ("tool_name", "command", "result"),
+    (
+        (
+            "shell_command",
+            "python -m pytest -q tests/test_a.py",
+            [{"type": "text", "text": "Exit code: 2\\n17 passed"}],
+        ),
+        (
+            "read_file",
+            "python -m pytest -q tests/test_a.py",
+            [{"type": "text", "text": "17 passed"}],
+        ),
+        (
+            "write_file",
+            "python -m pytest -q tests/test_a.py",
+            [{"type": "text", "text": "17 passed"}],
+        ),
+        (
+            "shell_command",
+            "python -m pytest -q tests/test_a.py",
+            {"type": "text", "text": "17 passed"},
+        ),
+        (
+            "shell_command",
+            "python -m pytest -q tests/test_a.py",
+            [{"type": "image", "data": "not-test-output"}],
+        ),
+    ),
+)
+def test_nested_tool_completed_rejects_failures_reads_writes_and_malformed_results(
+    tool_name: str,
+    command: str,
+    result: object,
+) -> None:
+    events = _nested_tool_completed_events(
+        tool_name=tool_name,
+        command=command,
+        result=result,
+    )
+
+    assert normalize_test_evidence(events) == ()
 
 
 def test_evidence_rejects_failures_and_assistant_prose() -> None:
