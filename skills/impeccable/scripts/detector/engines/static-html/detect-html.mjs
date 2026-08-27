@@ -44,6 +44,13 @@ import {
   collectStaticCssText,
 } from './css-cascade.mjs';
 
+// Comments are not active CSS. Keep their newlines and character offsets so
+// source-backed scanners retain stable locations while prose in comments cannot
+// masquerade as a declaration.
+function stripCssComments(content) {
+  return String(content || '').replace(/\/\*[\s\S]*?\*\//g, comment => comment.replace(/[^\n]/g, ' '));
+}
+
 function checkStaticPageTypography(document, window) {
   const findings = [];
   const fonts = new Set();
@@ -163,7 +170,7 @@ async function detectHtml(filePath, options = {}) {
     target: filePath,
   }, () => modules.parseDocument(html, { lowerCaseAttributeNames: false, lowerCaseTags: true }));
 
-  const cssText = collectStaticCssText(root, fileDir, profile, filePath, modules);
+  const cssText = stripCssComments(collectStaticCssText(root, fileDir, profile, filePath, modules));
   const document = new StaticDocument(root, modules);
   buildStaticStyleMap(root, document, cssText, modules, profile, filePath);
   const window = buildStaticWindow(document);
@@ -247,7 +254,7 @@ async function detectHtml(filePath, options = {}) {
       if (classAttr) classAttrParts.push(classAttr);
     }
     const patternCorpora = {
-      styleText: [cssText, ...styleAttrParts].join('\n'),
+      styleText: [cssText, ...styleAttrParts.map(stripCssComments)].join('\n'),
       classText: classAttrParts.join('\n'),
     };
     for (const f of runPageCheck('html-patterns', () => checkHtmlPatterns(html, patternCorpora).filter(item =>

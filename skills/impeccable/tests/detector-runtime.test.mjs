@@ -88,3 +88,14 @@ test('comment-only CSS does not produce a dark-glow finding in the regex fallbac
     [],
   );
 });
+
+test('the real CLI ignores comment-only CSS in static HTML mode', () => {
+  const result = spawnSync(process.execPath, [detectorScript, commentedGlowFixture], {
+    cwd: skillRoot,
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.error, undefined, result.error?.message);
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stderr, /\[dark-glow\]/);
+});
