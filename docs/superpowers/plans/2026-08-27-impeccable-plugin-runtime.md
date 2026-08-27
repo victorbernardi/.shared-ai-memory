@@ -131,14 +131,21 @@ Observed: `.agents` and the exact plugin cache both report version 4.1.2, resolv
 
 - [x] **Step 3: Run final repository checks**
 
-Run:
+Run the first-party repository checks (the published vendor payload is kept
+byte-for-byte so dependency contents are not silently rewritten):
 
 ```powershell
-git diff --check
+git diff --check -- . ':(exclude)skills/impeccable/scripts/node_modules/**'
 git status --short
 node --test skills/impeccable/tests/detector-runtime.test.mjs
 ```
 
-Expected: no whitespace errors, only scoped Impeccable changes, and the runtime regression test passes.
+Expected: no whitespace errors in first-party files, only scoped Impeccable
+changes, and the runtime regression test passes.
 
-Observed: `git diff --check` passed, no out-of-scope paths were found, and the final regression suite passed 3/3.
+Observed: the first-party diff check passes, no out-of-scope paths were found,
+and the regression suite passes 4/4. The unfiltered range check reports 18
+whitespace findings in 14 published dependency files under
+`skills/impeccable/scripts/node_modules/` (including trailing whitespace and
+blank lines at EOF); those vendor bytes are intentionally preserved rather
+than normalized.

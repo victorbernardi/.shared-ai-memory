@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { test } from 'node:test';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { detectText } from '../scripts/detector/engines/regex/detect-text.mjs';
 
 const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const detectorEntry = path.join(
@@ -18,6 +19,7 @@ const detectorEntry = path.join(
 );
 const detectorScript = path.join(skillRoot, 'scripts', 'detect.mjs');
 const fixture = path.join(import.meta.dirname, 'fixtures', 'static-runtime.html');
+const commentedGlowFixture = path.join(import.meta.dirname, 'fixtures', 'commented-glow.html');
 const staticRuntimePackages = ['htmlparser2', 'css-select', 'css-tree', 'domutils'];
 
 function assertPackagedResolutions(detectorPath, runtimeRoot) {
@@ -75,4 +77,14 @@ test('a copied skill payload keeps the static detector runtime self-contained', 
   } finally {
     rmSync(stagingRoot, { recursive: true, force: true });
   }
+});
+
+test('comment-only CSS does not produce a dark-glow finding in the regex fallback', () => {
+  const content = readFileSync(commentedGlowFixture, 'utf8');
+  const findings = detectText(content, commentedGlowFixture);
+
+  assert.deepEqual(
+    findings.filter(({ antipattern }) => antipattern === 'dark-glow'),
+    [],
+  );
 });

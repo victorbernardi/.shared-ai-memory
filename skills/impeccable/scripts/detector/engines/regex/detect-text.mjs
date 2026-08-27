@@ -1282,7 +1282,7 @@ function detectText(content, filePath, options = {}) {
   }
 
   // Page-level analyzers only run on full pages
-  if (shouldRunPageAnalyzers(content, filePath)) {
+  if (shouldRunPageAnalyzers(source, filePath)) {
     const analyzerIds = [
       'flat-type-hierarchy',
       'monotonous-spacing',
@@ -1298,7 +1298,7 @@ function detectText(content, filePath, options = {}) {
         phase: 'page-analyzer',
         ruleId: analyzerIds[i] || `analyzer-${i + 1}`,
         target: filePath,
-      }, () => analyzer(content, filePath)));
+      }, () => analyzer(source, filePath)));
     }
   }
 
