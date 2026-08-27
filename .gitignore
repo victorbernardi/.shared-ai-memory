@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
+
+# Impeccable's plugin payload must carry the static detector runtime.
+!skills/impeccable/scripts/node_modules/
+!skills/impeccable/scripts/node_modules/**

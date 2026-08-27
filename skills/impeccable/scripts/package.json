@@ -1,0 +1,12 @@
+{
+  "name": "impeccable-static-detector-runtime",
+  "private": true,
+  "type": "module",
+  "description": "Runtime dependencies packaged with the Impeccable static HTML detector.",
+  "dependencies": {
+    "css-select": "7.0.0",
+    "css-tree": "3.2.1",
+    "domutils": "4.0.2",
+    "htmlparser2": "12.0.0"
+  }
+}
