@@ -6,9 +6,17 @@ Use this template when dispatching a spec document reviewer subagent.
 
 **Dispatch after:** Spec document is written to docs/superpowers/specs/
 
+Default reviewer route: `model="gpt-5.6-luna"`,
+`reasoning_effort="max"`, and `service_tier="priority"`. An explicit
+per-review override may replace only the selected field; unspecified fields
+keep these defaults.
+
 ```
 Subagent (general-purpose):
   description: "Review spec document"
+  model: [MODEL — default: gpt-5.6-luna; explicit per-review override allowed]
+  reasoning_effort: [REASONING_EFFORT — default: max; explicit per-review override allowed]
+  service_tier: [SERVICE_TIER — default: priority; explicit per-review override allowed]
   prompt: |
     You are a spec document reviewer. Verify this spec is complete and ready for planning.
 

@@ -4,9 +4,17 @@ Use this template when dispatching a code reviewer subagent.
 
 **Purpose:** Review completed work against requirements and code quality standards before it cascades into more work.
 
+Default reviewer route: `model="gpt-5.6-luna"`,
+`reasoning_effort="max"`, and `service_tier="priority"`. Fill all three
+fields explicitly. An explicit per-review override may replace only the
+selected field; unspecified fields keep these defaults.
+
 ```
 Subagent (general-purpose):
   description: "Review code changes"
+  model: [MODEL — default: gpt-5.6-luna; explicit per-review override allowed]
+  reasoning_effort: [REASONING_EFFORT — default: max; explicit per-review override allowed]
+  service_tier: [SERVICE_TIER — default: priority; explicit per-review override allowed]
   prompt: |
     You are a Senior Code Reviewer with expertise in software architecture,
     design patterns, and best practices. Your job is to review completed work

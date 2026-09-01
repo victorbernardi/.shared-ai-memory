@@ -161,35 +161,39 @@ conflicts that only emerge from implementation.
 For this workspace, use these assignments for every subagent dispatch:
 
 - **Implementers and implementation fix rounds:** `model="gpt-5.6-terra"` with `reasoning_effort="medium"`.
-- **Task reviewers, scoped re-reviewers, and the final whole-branch reviewer:** `model="gpt-5.6-sol"` with `reasoning_effort="xhigh"`.
+- **Task reviewers, scoped re-reviewers, and the final whole-branch reviewer:** `model="gpt-5.6-luna"`, `reasoning_effort="max"`, and `service_tier="priority"`.
 
-Always pass both fields explicitly. Never allow an implementer to inherit the
-controller's model or reasoning effort. These assignments override the generic
-complexity guidance and the generic fix-loop escalation guidance below: even
-rounds 4–5 keep implementation on Terra medium, while every review stays on
-Sol xhigh. A different assignment requires an explicit human instruction.
+Always pass the role's fields explicitly. Never allow an implementer to inherit
+the controller's model or reasoning effort, and never let a reviewer inherit
+the controller's model, reasoning effort, or service tier. These assignments
+override the generic complexity guidance and the generic fix-loop escalation
+guidance below: even rounds 4–5 keep implementation on Terra medium, while
+every Codex-hosted review stays on Luna max priority. An explicit per-review
+selection overrides only the corresponding field; unspecified fields keep the
+route defaults above.
 
-Use the least powerful model that can handle each role to conserve cost and increase speed.
+Use the least powerful model that can handle each implementation role to
+conserve cost and increase speed. Reviewers use the fixed route above.
 
 **Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
 
 **Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
 
-**Architecture and design tasks**: use the most capable available model.
-The final whole-branch review is one of these — dispatch it on the most
-capable available model, not the session default.
+**Architecture and design tasks**: use the most capable available model. The
+final whole-branch review uses the fixed Luna max priority review route above,
+not the session default.
 
-**Review tasks**: choose the model with the same judgment, scaled to the
-diff's size, complexity, and risk. A small mechanical diff does not need the
-most capable model; a subtle concurrency change does. Scoped re-reviews of
-small fix diffs take a cheap-to-mid tier.
+**Review tasks**: use the fixed Luna max priority route above, regardless of
+diff size, complexity, or whether the review is scoped. This keeps task
+reviews, fix re-reviews, and the final review on the same declared default.
 
-**Fix-loop escalation (rounds 4-5)**: use a model at least one tier above
-the implementer that got stuck.
+**Fix-loop escalation (rounds 4-5)**: for implementation fix rounds, use a
+model at least one tier above the implementer that got stuck. It does not
+change the reviewer route.
 
-**Always specify the model explicitly when dispatching a subagent.** An
-omitted model inherits your session's model — often the most capable and
-most expensive — which silently defeats this section.
+**Always specify the model, reasoning effort, and service tier explicitly when
+dispatching a subagent.** An omitted field inherits the session's setting and
+silently defeats this section.
 
 **Turn count beats token price.** Wall-clock and context cost scale with how
 many turns a subagent takes, and the cheapest models routinely take 2-3× the
@@ -408,7 +412,7 @@ The final whole-branch review gets a package too: run
 branch started from, e.g. `git merge-base main HEAD`) and include the
 printed path in the final review dispatch, so the final reviewer reads
 one file instead of re-deriving the branch diff with git commands. Dispatch
-on the most capable available model (see Model Selection), using
+with the Luna max priority review defaults from Model Selection, using
 superpowers:requesting-code-review's
 [code-reviewer.md](../requesting-code-review/code-reviewer.md). Point it at
 the ledger's deferred-minor and parked lines so it can triage which must be
@@ -507,7 +511,7 @@ Re-reviewer: Missing progress reporting — ADDRESSED (src/recovery.js:41).
 ...
 
 [After all tasks]
-[Run review-package PLAN_FILE MERGE_BASE HEAD; dispatch final code-reviewer, most capable model]
+[Run review-package PLAN_FILE MERGE_BASE HEAD; dispatch final code-reviewer with Luna max priority defaults]
 Final reviewer: All requirements met. Deferred minors triaged: none block merge.
 
 [Delete this plan's workspace — the record now lives in git]

@@ -7,11 +7,17 @@ code quality.
 **Purpose:** Verify one task's implementation matches its requirements (nothing
 more, nothing less) and is well-built (clean, tested, maintainable)
 
+Default reviewer route: `model="gpt-5.6-luna"`,
+`reasoning_effort="max"`, and `service_tier="priority"`. Fill all three
+fields explicitly. An explicit per-review override may replace only the
+selected field; unspecified fields keep these defaults.
+
 ```
 Subagent (general-purpose):
   description: "Review Task N (spec + quality)"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
+  model: [MODEL — default: gpt-5.6-luna; explicit per-review override allowed]
+  reasoning_effort: [REASONING_EFFORT — default: max; explicit per-review override allowed]
+  service_tier: [SERVICE_TIER — default: priority; explicit per-review override allowed]
   prompt: |
     You are reviewing one task's implementation: first whether it matches its
     requirements, then whether it is well-built. This is a task-scoped gate,
@@ -166,7 +172,9 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection
+- `[MODEL]` — reviewer model; defaults to `gpt-5.6-luna`
+- `[REASONING_EFFORT]` — reviewer reasoning effort; defaults to `max`
+- `[SERVICE_TIER]` — reviewer service tier; defaults to `priority`
 - `[BRIEF_FILE]` — REQUIRED: the task brief file (`scripts/task-brief PLAN N`
   prints the path; same file the implementer worked from)
 - `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from

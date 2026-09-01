@@ -55,9 +55,25 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 - **Middle Man** — a class or function that mostly just delegates onward. → cut it, call the real target direct.
 - **Refused Bequest** — a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
 
+### Reviewer route defaults
+
+Both Codex-hosted review sub-agents use this route unless the current review
+explicitly selects a field:
+
+- `model="gpt-5.6-luna"`
+- `reasoning_effort="max"`
+- `service_tier="priority"`
+
+Pass all three fields directly on each `Agent` call. An explicit per-review
+override replaces only its selected field; unspecified fields stay on Luna,
+max, and priority. This route is independent of the controller's session
+defaults and any global `review_model`.
+
 ### 4. Spawn both sub-agents in parallel
 
-Send a single message with two `Agent` tool calls. Use the `general-purpose` subagent for both.
+Send a single message with two `Agent` tool calls. Use the
+`general-purpose` subagent for both, passing the reviewer route fields above
+on each call.
 
 **Standards sub-agent prompt** — include:
 

@@ -7,11 +7,17 @@ new breakage. It is not a fresh review — the full review already happened.
 **Purpose:** Verify each finding from the previous review was addressed, and
 that the fix itself broke nothing.
 
+Default reviewer route: `model="gpt-5.6-luna"`,
+`reasoning_effort="max"`, and `service_tier="priority"`. Fill all three
+fields explicitly. An explicit per-review override may replace only the
+selected field; unspecified fields keep these defaults.
+
 ```
 Subagent (general-purpose):
   description: "Re-review Task N fix round R"
-  model: [MODEL — REQUIRED: choose per SKILL.md Model Selection; an omitted
-         model silently inherits the session's most expensive one]
+  model: [MODEL — default: gpt-5.6-luna; explicit per-review override allowed]
+  reasoning_effort: [REASONING_EFFORT — default: max; explicit per-review override allowed]
+  service_tier: [SERVICE_TIER — default: priority; explicit per-review override allowed]
   prompt: |
     You are re-reviewing one task's fix round. A previous review produced
     findings; an implementer has attempted to fix them. Your job is to
@@ -92,8 +98,9 @@ Subagent (general-purpose):
 ```
 
 **Placeholders:**
-- `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection; scoped
-  re-reviews of small fix diffs take a cheap-to-mid tier
+- `[MODEL]` — reviewer model; defaults to `gpt-5.6-luna`
+- `[REASONING_EFFORT]` — reviewer reasoning effort; defaults to `max`
+- `[SERVICE_TIER]` — reviewer service tier; defaults to `priority`
 - `[BRIEF_FILE]` — the task brief file (same file the implementer worked from)
 - `[FINDINGS]` — the Critical/Important findings and spec gaps from the
   previous review, copied verbatim, one per bullet
