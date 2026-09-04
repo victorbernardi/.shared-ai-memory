@@ -1,0 +1,10 @@
+schema_version: 1
+projects:
+  - project_key: sample-project
+    related_projects: []
+    classification: active
+    memory_provider: unavailable
+    notes:
+      - synthetic example only
+      - registry is non-authoritative for lifecycle state
+
