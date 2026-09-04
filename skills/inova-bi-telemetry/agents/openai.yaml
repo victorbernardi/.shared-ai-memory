@@ -1,0 +1,4 @@
+interface:
+  display_name: "Atualizar telemetria JD ACS"
+  short_description: "Fluxo completo do relatório Power BI ao Supabase"
+  default_prompt: "Use $inova-bi-telemetry para atualizar o relatório de telemetria John Deere no local e no Supabase com modo daily."
