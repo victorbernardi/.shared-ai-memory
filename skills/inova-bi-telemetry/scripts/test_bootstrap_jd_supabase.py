@@ -1,8 +1,14 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
+import sys
+from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 import pytest
+
+_SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 import bootstrap_jd_supabase as bootstrap
 
