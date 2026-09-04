@@ -1,92 +1,61 @@
-﻿---
+---
 name: inova-bi-telemetry
-description: "Use quando precisar atualizar, rodar ou reprocessar o relatório jd-bi-acs-telemetry. Esta skill executa o pipeline completo via run.py com pré-flight operacional, validação de governança e conferência dos artefatos gerados. Triggers: atualizar telemetry, atualizar jd bi acs telemetry, rodar jd-bi-acs-telemetry, executar run.py telemetry."
-version: 1.0.0
-author: Victor
-category: engineering
-tier: 1
-tools:
-  - claude-code
-  - commandcode
-  - codex
-triggers:
-  - atualizar telemetry
-  - atualizar jd bi acs telemetry
-  - rodar jd-bi-acs-telemetry
-  - executar run.py telemetry
+description: Use when updating, rerunning, or reprocessing the jd-bi-acs-telemetry report via the standalone producer run.py, updating local parquet artifacts (snapshot and events), and publishing to Supabase with operational validation.
 ---
 
-# inova-bi-telemetry
+# Inova BI Telemetry
 
-## Objetivo
+Use o produtor standalone como o único caminho de execução da telemetria John Deere ACS:
+`C:\Projetos\Inova.maquinas\jd-bi-acs-telemetry`.
 
-Atualizar de forma íntegra o relatório `jd-bi-acs-telemetry`, executando o pipeline completo pelo entry point `run.py` e validando os sinais operacionais já produzidos pelo projeto.
+## Pré-requisitos e Credenciais
 
-## Inputs esperados
+- `PBI_REPORT_URL` no processo, no `.env` ou uma URL explícita em `--report-url`; o argumento pode substituir a configuração do projeto.
+- Perfil persistente externo e gerenciado definido por `PBI_USER_PROFILE_DIR`; nunca usar um perfil dentro do projeto, `state.json`, `storage_state` ou o checkout legado.
+- Ambiente Python: `C:\Projetos\Inova\.venv\Scripts\python.exe` ou `uv run --no-project python`; nunca `python` sem ambiente.
+- **Credenciais Supabase e Bootstrap Seguro:**
+  - Base URLs no processo ou `.env`: `SUPABASE_PUBLISHER_DB_BASE_URL` e `SUPABASE_READER_DB_BASE_URL`.
+  - Senhas no Windows Credential Manager sob os alvos `Inova-Supabase-Telemetry-Publisher` e `Inova-Supabase-Telemetry-Reader`.
+  - O wrapper `scripts/bootstrap_jd_supabase.py` valida e injeta os DSNs completos (`SUPABASE_PUBLISHER_DB_URL` e `SUPABASE_READER_DB_URL`) exclusivamente na memória do processo filho, sem persistir segredos em disco.
+- Configurações de geocoding e demais integrações disponíveis no processo ou no `.env`, quando exigidas pelo escopo. Não copie credenciais ou segredos para logs, Git ou documentação.
 
-- **URL do relatório Power BI**: argumento obrigatório `--report-url` exigido por `run.py`.
-- **Segredos locais do projeto**: `.env` com as chaves necessárias para geocoding e demais integrações do pipeline.
-- **Ambiente Python canônico**: `C:\Projetos\Inova\.venv` ou `uv run --no-project python`.
-- **Contexto do projeto**: `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\CONTEXT.md`.
+> [!NOTE]
+> **Autenticação Supabase:** A publicação no Supabase conecta diretamente ao Transaction Pooler PostgreSQL via DSN. Não utiliza tokens temporários OAuth nem expira por inatividade de sessão de usuário.
 
-<!-- @if platform=claude -->
-## Fluxo Detalhado
+Não procure Docker ou PostgreSQL local. Nenhum dos dois faz parte do refresh operacional.
 
-O projeto fica em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry`.
+## Fluxo Operacional
 
-1. **Pre-flight**:
-   - Configure o terminal Windows com `chcp 65001` e `PYTHONIOENCODING=utf-8`.
-   - Use sempre `uv run --no-project python` ou `C:\Projetos\Inova\.venv\Scripts\python.exe`.
-   - Verifique `C:\Projetos\Inova\shared\recency_status.md` antes da execução.
-   - Confirme que `--report-url` está disponível.
-   - Confirme que o `.env` do projeto existe e está legível.
+1. Entre no projeto standalone, configure `chcp 65001` e `PYTHONIOENCODING=utf-8`, e valide as fontes de configuração sem imprimir valores sensíveis. O bootstrap headed é feito uma vez com autorização; depois o Scheduler opera headless e unattended com o mesmo perfil.
+2. **Execução local sem publicação (Offline/Local-only):**
+   ```powershell
+   C:\Projetos\Inova\.venv\Scripts\python.exe run.py --headless
+   ```
+3. **Execução com publicação Supabase (via Bootstrap Seguro):**
+   ```powershell
+   $python = 'C:\Projetos\Inova\.venv\Scripts\python.exe'
+   $bootstrap = 'C:\Users\victor.bernardi\.agents\skills\inova-bi-telemetry\scripts\bootstrap_jd_supabase.py'
+   & $python $bootstrap -- $python run.py --headless --publish-supabase --update-mode daily
+   ```
+   *(Para execuções intermediárias adicionais no mesmo dia, utilize `--update-mode intraday`).*
+4. **Execução agendada (Scheduler):**
+   Use somente `run_jd_bi_acs_telemetry_task.bat` do mesmo diretório. Não acrescente `run_recency_report.bat`.
+5. **Validação dos Resultados:**
+   - Inspecione o último resumo em `data/logs/jd_bi_acs_telemetry_runs.jsonl`. Exija `status=SUCCESS` e um `supabase_status` compatível com o modo escolhido.
+   - Valide os 5 artefatos operacionais:
+     - `data/output/jd_bi_acs_telemetry_snapshot_v1.parquet`
+     - `data/output/jd_bi_acs_telemetry_events_v1.parquet`
+     - `data/logs/jd_bi_acs_telemetry_anomalies.jsonl`
+     - `data/logs/jd_bi_acs_telemetry_runs.jsonl`
+     - `data/pending_mesoregiao.jsonl`
 
-2. **Execução do pipeline completo**:
-   - Entre em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry`.
-   - Execute:
-     ```powershell
-     uv run --no-project python run.py --report-url "<REPORT_URL>"
-     ```
-   - Use `--headless` apenas quando a execução realmente exigir navegador sem interface:
-     ```powershell
-     uv run --no-project python run.py --report-url "<REPORT_URL>" --headless
-     ```
-   - O `run.py` orquestra internamente `extract`, `transform`, `load` e `enrich`, além do preflight de governança.
+`shared\recency_status.md` é um sinal de saída para observabilidade e consumidores, não um pre-flight.
 
-3. **Validação pós-execução**:
-   - Confirme o `status` retornado pela execução.
-   - Verifique o log `C:\Projetos\Inova\docs\run_logs\jd_bi_acs_telemetry_runs.jsonl`.
-   - Verifique o snapshot atual em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\output\jd_bi_acs_telemetry_snapshot_v1.parquet`.
-   - Verifique o histórico canônico em `C:\Projetos\Inova\shared\data\jd_bi_acs_telemetry_events_v1.parquet`.
-   - Verifique o log de anomalias em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\logs\jd_bi_acs_telemetry_anomalies.jsonl`.
-<!-- @endif -->
+## Comportamento em Caso de Falha e Limites
 
-<!-- @if platform=commandcode,codex -->
-## Fluxo
-
-1. Configure o terminal com `chcp 65001` e `PYTHONIOENCODING=utf-8`, e use `uv run --no-project python` ou `C:\Projetos\Inova\.venv\Scripts\python.exe`.
-2. Em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry`, execute `run.py` com `--report-url` obrigatório; use `--headless` só quando necessário.
-3. Valide `status`, `C:\Projetos\Inova\docs\run_logs\jd_bi_acs_telemetry_runs.jsonl`, o snapshot em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\output\`, o histórico em `C:\Projetos\Inova\shared\data\` e o anomaly log em `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\data\logs\`.
-<!-- @endif -->
-
-## Constraints
-
-- NUNCA rode estágios isolados se a tarefa for atualizar o relatório ponta a ponta; use sempre `run.py`.
-- NUNCA use `python` nu; use `uv run --no-project python` ou o executável explícito do venv canônico.
-- SEMPRE configure `PYTHONIOENCODING=utf-8` e `chcp 65001` no terminal Windows antes da execução.
-- SEMPRE verifique `shared/recency_status.md` antes de rodar.
-- NUNCA invente `post-flight`; a validação final deve usar apenas os logs e artefatos já produzidos pelo projeto.
-- Se o pipeline falhar, PARE e reporte a etapa que falhou com base na mensagem do `run.py` e no `run summary`.
-
-## Scripts
-
-- `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\run.py` - entry point do pipeline.
-- `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\extract.py` - extração do relatório Power BI.
-- `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\transform.py` - tipagem, normalização e deduplicação.
-- `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\load.py` - snapshot, histórico e anomaly log.
-- `C:\Projetos\Inova\projects\jd-bi-acs-telemetry\enrich.py` - enriquecimento geográfico.
-
-## Critérios de Conclusão
-
-A skill é concluída quando o `run.py` termina sem erro e os artefatos esperados ficam observáveis no `run summary`, no snapshot atual, no histórico canônico e no log de anomalias.
-
+- **Resiliência Local-First:** O pipeline local conclui e valida os arquivos Parquet locais antes de publicar no Supabase. Se houver falha de rede, banco ou DSN no Supabase, os Parquets locais permanecem 100% íntegros e preservados em `data/output/`.
+- Use sempre `run.py` ponta a ponta; não rode estágios isolados nem o executor do monorepo.
+- Pare em qualquer código diferente de zero do `run.py`.
+- Não ignore erros, crie marcadores, copie Parquets/JSONL ou altere o Scheduler sem autorização operacional separada.
+- Não aceite fallback para `data/browser_state/user_profile`; perfil ausente, vazio ou expirado bloqueia o Scheduler headless e unattended até novo bootstrap autorizado.
+- Não declare publicação produtiva com `supabase_status=NOT_REQUESTED`.
