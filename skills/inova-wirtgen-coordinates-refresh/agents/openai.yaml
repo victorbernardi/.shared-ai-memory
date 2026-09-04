@@ -1,0 +1,4 @@
+interface:
+  display_name: "Atualizar relatório Wirtgen"
+  short_description: "Fluxo completo do Machine Analyzer ao Supabase"
+  default_prompt: "Use $inova-wirtgen-coordinates-refresh para atualizar o relatório de coordenadas Wirtgen no local e no Supabase com modo daily."
