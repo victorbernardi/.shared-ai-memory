@@ -1,163 +1,109 @@
 ---
 name: delegate-to-agy
-description: Delegate an implementation task to Google Antigravity CLI (agy), then independently review its workspace changes, run relevant verification, and return review findings to the same AGY conversation when remediation is needed. Use when the user explicitly asks Codex to delegate work to AGY or invokes this skill; do not use for ordinary Codex subagents or review-only requests.
+description: >-
+  Delegate a coding task to the Google Antigravity CLI (`agy`) as a background implementer, then review
+  its diff and land it yourself. Use this whenever the user wants to hand implementation work to
+  Antigravity or agy - phrasings like "have Antigravity do X", "delegate this to agy", "run it through
+  agy", or "use Antigravity to implement/fix/refactor" - or wants to run a queue of coding tasks
+  through agy while staying the reviewer. Suitable for orchestrators like Codex, Command Code, and Claude Code.
+  DO NOT USE for tasks small enough to do inline, or when the user wants the code written directly without delegating.
+license: MIT
+compatibility: Requires the `agy` CLI installed and authenticated, Node.js (v18+), and git. The orchestrator must be able to run shell commands and read files. Cross-platform (Windows, macOS, Linux).
+metadata:
+  version: 0.5.0
 ---
 
-# Delegate to AGY
+# Antigravity Delegate (delegate-to-agy)
 
-Use AGY as an external implementation agent. Codex remains responsible for scope control, independent review, validation, and the final report.
+You are the **orchestrator** (e.g., Codex, Command Code, Claude Code). This skill lets you hand a bounded coding task to a separate **implementer** — the Google Antigravity CLI (`agy`) — then review what it produced and land it yourself. You write the brief and own the judgment; Antigravity does the typing in its own conversation; you verify and commit.
 
-## Preconditions and boundaries
+Nothing here is specific to one orchestrating agent. The loop needs only the ability to run a shell command and read a file, so any comparable agent can drive it.
 
-- Treat explicit use of this skill as authorization to send the scoped task and relevant workspace code to AGY. Do not send secrets, tokens, unrelated files, or environment-variable values.
-- For private repository content, record a disclosure authorization packet before
-  delegation: the trusted user turn, canonical repository, exact read paths or
-  content classes, write paths, and exclusions. Verify that a subagent's inherited
-  context actually contains that user authorization; a fixed turn count or a
-  coordinator relay alone is not proof at a host approval boundary.
-- When a Codex subagent will invoke AGY, ensure that worker directly inherits the
-  user's explicit external-delegation authorization as trusted input. Some host
-  approval surfaces do not treat coordinator-relayed text as equivalent user
-  authorization. If launch is rejected at that boundary, do not bypass it or
-  repeatedly resend the same relay; create a replacement only with explicit user
-  authorization for that topology and direct inheritance.
-- Preserve the user's existing changes. Never require a clean worktree, discard changes, create commits, push, install dependencies, or perform external or destructive actions unless the user separately authorized them.
-- Run only one write-capable agent in the target workspace at a time. Do not let AGY and another agent edit the same files concurrently.
-- Verify `agy` is available with `Get-Command agy` on Windows or `command -v agy` on POSIX, and record `agy --version`.
-- Before a write-capable delegation, resolve and record the canonical absolute repository root, `git status --short`, and the relevant diff. If the workspace is not under Git, restrict the task to named paths and use available scoped file comparisons; tell the user when reliable change attribution is not possible.
+## When NOT to use this
 
-## Delegate
+- The task is small enough to just do inline — delegation overhead is not worth it.
+- The `agy` CLI is not installed or not authenticated. Install it from Antigravity's CLI docs and run the first-launch setup.
+- You want to write the code yourself, or you only need Antigravity's opinion on code you wrote (a `--read-only` dispatch covers review without edits, but a plain review may not need delegation at all).
+- You are already inside an Antigravity CLI session (AGY should not delegate to itself).
 
-Build an outcome-focused prompt that includes:
+## Prerequisites (check once)
 
-- the requested implementation and acceptance criteria;
-- the canonical absolute workspace root and the canonical absolute paths AGY may read or write;
-- an instruction to stay inside that root and never search sibling directories, user-home folders, other drives, or guessed paths;
-- allowed files or directories and explicit out-of-scope areas;
-- the expected final output shape, including required files, directories, and
-  objective-specific structural or value invariants;
-- relevant repository instructions and existing user changes that must be preserved;
-- a prohibition on commits, pushes, destructive cleanup, unrelated refactors, and secret access;
-- a request to summarize changed files, validation attempted, and unresolved issues.
+1. `agy help` succeeds. If not, install the Antigravity CLI and complete first-launch setup.
+2. `agy models` succeeds. That proves the CLI can authenticate and list the available model labels.
+3. Node.js is installed (`node -v`).
+4. You are in (or will point `--cd` at) the target git repository.
 
-Invoke the initial implementation as a fresh headless conversation from the target workspace. Do not pass `--continue` or `--conversation` on this first run. For a write-capable task, set AGY to `accept-edits` mode so an authorized workspace edit does not end as a headless permission soft-denial. Prefer JSON output, a task-appropriate timeout with an explicit unit, and AGY's sandbox:
+In `--print` mode, Antigravity cannot prompt interactively for a write permission and may auto-deny it unless running with appropriate mode or flags. The relay detects that denial and reports failure in `result.json`.
 
-```text
-agy -p "<scoped prompt>" --model gemini-3.7-flash-high --mode accept-edits --output-format json --print-timeout <duration-with-unit> --sandbox
+## Choose the implementer model
+
+`agy` has a configured default model, so `--model` is optional. Use it when the human has a preferred Antigravity model label for the task (e.g. `--model "gemini-3.7-flash-high"`). Otherwise let Antigravity use its own current default rather than guessing.
+
+## The loop
+
+Run these five steps per task. Steps 1, 4, and 5 are your judgment; 2 and 3 are mechanical.
+
+### 1. Write the brief
+
+Antigravity sees only the text you send plus what it can inspect in the workspace — no chat history, no shared context. Everything the task needs goes in the brief: the goal, the current state, what to change, what to leave untouched, the project's **actual** gate commands, and a report contract. Tell Antigravity it will **not** commit (you will). Keep one task per brief. Full guidance and a template: [references/writing-the-brief.md](references/writing-the-brief.md).
+
+### 2. Dispatch
+
+Send the brief to Antigravity with the bundled helper. It wraps `agy --print`, captures the run, and writes a structured `result.json` — so your only job is "run a command, read a file." (`<skill-dir>` below is this skill's installed directory — the folder containing this `SKILL.md`.)
+
+```bash
+node "<skill-dir>/scripts/relay.mjs" --brief brief.txt --cd /path/to/repo
+# choose a model label:                 add --model "<label from agy models>"
+# reasoning effort (low, medium, high): add --effort high
+# read-only (plan mode — no edits):     add --read-only
+# enable Antigravity terminal sandbox:  add --sandbox
+# resume the most recent conversation:  add --resume-last  (delta brief only)
+# continue specific conversation:       add --conversation <id>
+# see all options:                      node .../relay.mjs --help
 ```
 
-The unattended wrapper and these direct invocation examples pin `gemini-3.7-flash-high` explicitly. AGY does not inherit the model selected for Codex; do not omit `--model` when invoking AGY outside the wrapper.
+The helper starts a fresh Antigravity project by default and passes `--add-dir <repo>` (the `--cd` path, absolute) so `agy` has an explicit workspace. It does **not** pass `--dangerously-skip-permissions` by default. Mechanics, flags, and the `result.json` shape: [references/dispatch-and-poll.md](references/dispatch-and-poll.md).
 
-Do not use `--dangerously-skip-permissions` unless the user explicitly authorizes that exact risk after being told it auto-approves AGY tool calls. Prefer scoped AGY permission rules when AGY must run specific commands. It is acceptable for Codex to run validation itself when headless AGY soft-denies a command.
+### 3. Wait for completion
 
-AGY headless execution depends on its cached authenticated profile outside the workspace and on Google network access. In the current Codex environment these are known to be unavailable inside the normal workspace sandbox, so do not perform a sandbox-first AGY attempt. Request narrowly scoped host approval for each exact AGY implementation or remediation invocation and run it once with AGY's own `--sandbox` still enabled. Do not request broad Codex filesystem/network access, approve arbitrary `agy -p` prompts, or interpret a denied host approval as failed AGY authentication.
+The helper blocks until Antigravity finishes:
 
-For unattended automation, read [references/automation.md](references/automation.md) and use [scripts/invoke-agy.ps1](scripts/invoke-agy.ps1) instead of invoking `agy` directly. Create `<workspace>/.agy/task.json` using the documented schema, then run the installed wrapper with only `-TaskFile <absolute-task-path>`. The wrapper derives the workspace from the task-file location, validates all paths, pins safe AGY flags, rejects main Git worktrees, and detects post-run scope drift. Git repositories must use a clean linked worktree; non-Git validation workspaces must be isolated directories named `agy-scratch-*`. A persistent Codex rule may allow the installed wrapper path; generate it with [scripts/install-rule.ps1](scripts/install-rule.ps1), but never allow a general `agy`, `agy -p`, `pwsh`, or `pwsh -Command` prefix. Codex rules load after Codex restarts.
+- **Codex / Command Code:** run the command in your shell tool. For longer tasks, set an adequate timeout or background it and poll `result.json`.
+- **Claude Code:** run the Bash call with `run_in_background: true`; you are notified on completion.
 
-Before the first real invocation, run the wrapper once with `-ValidateOnly`. Put
-every final destination needed by a valid result in the initial `write_paths`;
-the successful receipt cannot later authorize a broader directory or a moved
-output. When practical, complete AGY semantic review and likely remediation before
-materializing large ignored dependency or build trees. If validation requires
-those trees earlier, record that later wrapper remediation may be ineligible and
-prepare the bounded Codex capability handoff instead of deleting the environment.
+Do not trust progress trackers over reality: a run is finished when `result.json` is written and the process has exited. Read the working tree, not a status line. The implementer's full report is the `finalMessage` field in `result.json` (also printed in full on stdout between the report markers).
 
-The unattended prompt prohibits shell, Git, package-manager, test, and network
-commands inside AGY. Give AGY explicit read paths and let Codex run validation.
-Do not relax this boundary merely because AGY attempted an unapproved discovery
-command.
+### 4. Review — do not trust the self-report
 
-Require a JSON terminal status of `SUCCESS`. Capture the `conversation_id`, response, stderr notices, and any reported validation. A zero process exit alone is insufficient because permission soft-denials may still leave work incomplete.
+Antigravity's `result.json` includes its own final message and any gate claims. **Re-verify, don't accept:**
 
-If a host-authorized AGY run returns a non-`SUCCESS` terminal status:
+- **Re-run the project's gates yourself** (the test/lint/build commands from step 1).
+- **Read the diff** against the brief: did Antigravity do what was asked, nothing more and nothing less? `touchedFiles` in the result is your starting point.
+- **Run the relevant guard skills** on the diff if you have them installed.
+- For schema/migration changes, round-trip them; for removals, grep for dangling references.
 
-- Inspect the workspace before deciding what happened. AGY may have left partial changes even when its response claims otherwise.
-- Read the structured failure receipt. Retry only when `retryable` is `true`, the
-  category is `transient_unavailable`, and there are no workspace changes.
-  Permission denial, cancellation, timeout, invalid output, process failure, and
-  scope drift are deterministic stop conditions, not retry opportunities.
-- A permitted retry is at most one new conversation from the same absolute
-  workspace root with the full original task and path boundaries. Do not resume
-  the failed conversation; backend restarts or lost workspace context can make a
-  resumed agent search unrelated paths.
-- If there are changes, do not retry automatically. Review and validate the artifacts, but report that the AGY run itself failed. Independently verified artifacts may still be usable; never relabel the terminal run as successful.
-- Stop after that single fresh retry and report the infrastructure failure if it remains non-`SUCCESS`.
+Full checklist: [references/review-and-land.md](references/review-and-land.md).
 
-## Review and remediate
+### 5. Land it
 
-After AGY finishes:
+The implementer edits the working tree; **the orchestrator commits.** Only after the gates pass and the diff holds:
 
-1. Compare repository state with the recorded baseline and identify the actual scoped changes. Do not attribute pre-existing or concurrent user changes to AGY.
-2. Run an objective-specific semantic probe before expensive validation. When the
-   recorded baseline did not already satisfy the Definition of Done, require the
-   expected non-empty diff for a mutating task and verify the declared final
-   output shape or metric: for example required module directories, reduced
-   monolith size, unchanged selectors with resolved-value equivalence, or the
-   exact behavioral artifact. A valid receipt with an unexplained no-op or wrong
-   structure is a concrete finding, not completion.
-3. Inspect the implementation independently for correctness, regressions, scope drift, missing tests, and unsafe behavior. Do not accept AGY's summary as review evidence.
-4. Run the smallest relevant lint, typecheck, unit, integration, or build checks permitted by the repository. Start focused and expand only when risk warrants it.
-   A successful receipt proves task/output binding, not semantic acceptance. For
-   exact text bytes across platforms, prefer repository-owned EOL policy and
-   verify the immutable committed blob when that is the intended portability
-   boundary.
-5. If the implementation run completed with `SUCCESS` and material findings remain, send concrete findings back to the same conversation:
+- Commit the verified work yourself, with a clear message.
+- If it needs changes, send a delta brief with `--resume-last` (or `--conversation <id>`) and review again.
 
-```text
-agy -p "Address these Codex review findings without changing unrelated code: <findings>" --conversation <conversation_id> --model gemini-3.7-flash-high --mode accept-edits --output-format json --print-timeout <duration-with-unit> --sandbox
-```
+## Permission model
 
-6. If the implementation run did not complete with `SUCCESS`, follow its failure
-   receipt. Use a fresh conversation only for an authorized retryable transient
-   failure; otherwise stop or create a newly scoped task after resolving the
-   deterministic cause.
-7. Re-review the new diff and rerun affected checks. When no loop budget was
-   declared, default to at most two AGY remediation passes. If the user or owning
-   coordinator explicitly selected a higher economics-based hard cap, such as 10,
-   honor that ceiling. It is not a target: each pass must address a new concrete
-   finding or produce changed verification evidence. Stop early on repeated
-   no-progress failure, no net diff, deterministic infrastructure failure, scope
-   drift, new authority, or an operation AGY cannot perform with its permitted
-   tools.
+Antigravity owns its own permission policy. The relay does not bypass it by default. Use `--dangerously-skip-permissions` only when the human explicitly accepts that Antigravity may auto-approve tool permission requests. `--read-only` runs `agy` in plan mode (`--mode plan`), removing write and edit paths, and is mutually exclusive with `--dangerously-skip-permissions`. Use `--sandbox` when you want Antigravity's terminal sandbox enabled for the run.
 
-When AGY reports that the remaining work is outside its capability or permitted
-tool boundary, stop before the hard cap and hand the task back to Codex. Preserve
-the baseline, actual diff, completed acceptance criteria, remaining gap, failed or
-unavailable operation, validation evidence, receipt, conversation routing, and the
-smallest next action. Codex may finish only the already authorized scope and must
-independently review the combined result. Do not describe a valid capability
-handoff as an exhausted retry or synthesize AGY `SUCCESS`.
+If headless `--print` auto-denies a write, the relay reports `status: "failed"` and exits non-zero. The relay fingerprints the working tree before and after a `--read-only` run to report `readOnlyViolation` in `result.json`.
 
-Classify a capability handoff with one concise evidence-backed reason such as
-`runtime_materialized`, `runtime_only_finding`, `unsupported_operation`,
-`external_disclosure_denied`, or `new_authority_required`. The category explains
-why the executor changed; it does not expand Codex's authorized scope.
+## Authorization model
 
-Stop immediately if AGY changes files outside scope, overwrites user work, requests credentials, or requires new authority. Preserve evidence and ask the user how to proceed.
+Delegation is something the human opts into. Once they have ("run this queue", "proceed"), committing verified, gate-passing work is the agreed contract. Two limits on that mandate: **surface, don't absorb** (report Antigravity's design decisions, defensible-but-unasked turns, and non-blocking nitpicks rather than silently keeping them) and **stop for scope changes** (if correct completion needs going beyond the brief, ask — don't expand the mandate yourself). The full treatment is in [references/review-and-land.md](references/review-and-land.md).
 
-For unattended work, prefer this phase order when dependencies permit it:
+## References
 
-```text
-ValidateOnly -> AGY implementation -> semantic probe and review
--> AGY remediation -> runtime materialization -> focused checks -> broad gate
-```
-
-A sandbox or host-approval rejection before process creation, a wrapper
-validation-only rejection, and a receipt cache hit are not AGY invocations and do
-not consume the loop budget. Record them separately from product remediation.
-When a pre-process disclosure decision blocks AGY, record `invocations: 0`, the
-authorization boundary, and the bounded Codex handoff category. Do not describe
-the event as an AGY failure or retry the same relay.
-
-## Final report
-
-Report the AGY version and terminal status, failure category and retryability when
-applicable, conversation routing status, files changed, Codex review outcome,
-validation commands and results, remediation passes, capability handoff when one
-occurred and its category, per-invocation usage deltas from the receipt, and
-unresolved risks. Report pre-process decisions, validation-only runs, cache hits,
-and real invocations as separate counters; use an explicit zero for a blocked run
-that never created an AGY process.
-Distinguish AGY's conversation-cumulative counters from each invocation delta;
-report unavailable fields as unavailable. Keep raw conversation IDs out of public
-issues, trackers, and release evidence.
+- [references/writing-the-brief.md](references/writing-the-brief.md) — how to write a brief Antigravity can execute blind: structure, XML blocks, the report contract, and real gate commands.
+- [references/dispatch-and-poll.md](references/dispatch-and-poll.md) — `relay.mjs` flags, the `result.json` contract, backgrounding per orchestrator, and recovery when a run misbehaves.
+- [references/review-and-land.md](references/review-and-land.md) — the review checklist, the commit boundary, and the rework cycle via `--resume-last`.
+- [references/multi-task-queues.md](references/multi-task-queues.md) — running a sequential queue: carrying constraints forward, progress tracking, and the end-of-run coherence check.
